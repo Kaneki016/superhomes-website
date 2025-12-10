@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { useAuth } from '@/contexts/AuthContext'
@@ -99,8 +100,14 @@ export default function RegisterPage() {
                     <div className="glass p-8 rounded-2xl">
                         {/* Header */}
                         <div className="text-center mb-8">
-                            <div className="w-16 h-16 bg-gradient-primary rounded-xl flex items-center justify-center mx-auto mb-4">
-                                <span className="text-white font-bold text-2xl">SH</span>
+                            <div className="w-20 h-20 mx-auto mb-4">
+                                <Image
+                                    src="/logo-icon.svg"
+                                    alt="SuperHomes Logo"
+                                    width={80}
+                                    height={80}
+                                    className="w-full h-full"
+                                />
                             </div>
                             <h1 className="font-heading font-bold text-3xl text-gray-900 mb-2">Create Account</h1>
                             <p className="text-gray-600">Join SuperHomes today</p>

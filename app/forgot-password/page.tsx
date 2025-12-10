@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { supabase } from '@/lib/supabase'
@@ -80,10 +81,14 @@ export default function ForgotPasswordPage() {
                     <div className="glass p-8 rounded-2xl">
                         {/* Header */}
                         <div className="text-center mb-8">
-                            <div className="w-16 h-16 bg-gradient-primary rounded-xl flex items-center justify-center mx-auto mb-4">
-                                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                                </svg>
+                            <div className="w-20 h-20 mx-auto mb-4">
+                                <Image
+                                    src="/logo-icon.svg"
+                                    alt="SuperHomes Logo"
+                                    width={80}
+                                    height={80}
+                                    className="w-full h-full"
+                                />
                             </div>
                             <h1 className="font-heading font-bold text-3xl text-gray-900 mb-2">Forgot Password?</h1>
                             <p className="text-gray-600">No worries! Enter your email and we&apos;ll send you a reset link.</p>
