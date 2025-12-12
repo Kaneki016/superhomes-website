@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import PropertyCard from '@/components/PropertyCard'
+import PropertyDescription from '@/components/PropertyDescription'
 import { getPropertyById, getAgentById, getSimilarProperties } from '@/lib/database'
 import { getPropertyById as getMockPropertyById, getAgentById as getMockAgentById, mockProperties } from '@/lib/mockData'
 import { Property, Agent } from '@/lib/supabase'
@@ -212,7 +213,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                             {/* Description */}
                             <div className="mb-6">
                                 <h2 className="font-heading font-bold text-xl mb-3">Description</h2>
-                                <div className="text-gray-700 leading-relaxed whitespace-pre-wrap break-words">{property.description}</div>
+                                <PropertyDescription text={property.description} />
                             </div>
 
                             {/* Specifications */}
