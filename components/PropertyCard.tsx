@@ -1,6 +1,12 @@
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Property } from '@/lib/supabase'
 import { getAgentById } from '@/lib/mockData'
+import { useFavorites } from '@/contexts/FavoritesContext'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface PropertyCardProps {
     property: Property
@@ -8,6 +14,12 @@ interface PropertyCardProps {
 
 export default function PropertyCard({ property }: PropertyCardProps) {
     const agent = getAgentById(property.agent_id)
+    const { user } = useAuth()
+    const { isFavorite, toggleFavorite } = useFavorites()
+    const router = useRouter()
+    const [isToggling, setIsToggling] = useState(false)
+
+    const favorited = isFavorite(property.id)
 
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat('en-MY', {
@@ -15,6 +27,23 @@ export default function PropertyCard({ property }: PropertyCardProps) {
             currency: 'MYR',
             minimumFractionDigits: 0,
         }).format(price)
+    }
+
+    const handleFavoriteClick = async (e: React.MouseEvent) => {
+        e.preventDefault() // Prevent navigation to property page
+        e.stopPropagation()
+
+        if (!user) {
+            // Redirect to login if not authenticated
+            router.push('/login')
+            return
+        }
+
+        if (isToggling) return
+
+        setIsToggling(true)
+        await toggleFavorite(property.id)
+        setIsToggling(false)
     }
 
     return (
@@ -35,6 +64,31 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                             {property.property_type}
                         </span>
                     </div>
+
+                    {/* Favorite Heart Button */}
+                    <button
+                        onClick={handleFavoriteClick}
+                        disabled={isToggling}
+                        className={`absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${favorited
+                                ? 'bg-red-500 text-white shadow-lg scale-110'
+                                : 'glass text-gray-600 hover:bg-red-50 hover:text-red-500'
+                            } ${isToggling ? 'opacity-50 cursor-wait' : 'hover:scale-110'}`}
+                        aria-label={favorited ? 'Remove from favorites' : 'Add to favorites'}
+                    >
+                        <svg
+                            className="w-5 h-5"
+                            fill={favorited ? 'currentColor' : 'none'}
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                            />
+                        </svg>
+                    </button>
 
                     {/* SuperHomes Watermark */}
                     <div className="absolute bottom-4 right-4 opacity-50">

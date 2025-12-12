@@ -43,3 +43,11 @@ export interface User {
     user_type: 'buyer' | 'agent'
     created_at: string
 }
+
+export interface Favorite {
+    id: string
+    user_id: string
+    property_id: string
+    created_at: string
+}
+

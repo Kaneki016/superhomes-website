@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { FavoritesProvider } from '@/contexts/FavoritesContext'
 
 export const metadata: Metadata = {
     title: 'SuperHomes - Your Premium Property Marketplace',
@@ -17,7 +18,9 @@ export default function RootLayout({
         <html lang="en" suppressHydrationWarning>
             <body suppressHydrationWarning>
                 <AuthProvider>
-                    {children}
+                    <FavoritesProvider>
+                        {children}
+                    </FavoritesProvider>
                 </AuthProvider>
             </body>
         </html>

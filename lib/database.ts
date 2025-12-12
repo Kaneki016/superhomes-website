@@ -171,3 +171,32 @@ export const locations = [
     'Subang Jaya, Selangor',
     'Ampang, Kuala Lumpur',
 ]
+
+// Get user's favorite properties
+export async function getFavoriteProperties(userId: string): Promise<Property[]> {
+    // First get the favorite property IDs
+    const { data: favorites, error: favError } = await supabase
+        .from('favorites')
+        .select('property_id')
+        .eq('user_id', userId)
+
+    if (favError || !favorites || favorites.length === 0) {
+        return []
+    }
+
+    const propertyIds = favorites.map(f => f.property_id)
+
+    // Then fetch the actual properties
+    const { data: properties, error: propError } = await supabase
+        .from('properties')
+        .select('*')
+        .in('id', propertyIds)
+        .eq('status', 'active')
+
+    if (propError) {
+        console.error('Error fetching favorite properties:', propError)
+        return []
+    }
+
+    return properties || []
+}
