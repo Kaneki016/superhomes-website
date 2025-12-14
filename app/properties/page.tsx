@@ -1,16 +1,22 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import PropertyCard from '@/components/PropertyCard'
-import { getProperties } from '@/lib/database'
+import { getPropertiesPaginated } from '@/lib/database'
 import { Property } from '@/lib/supabase'
 import { mockProperties } from '@/lib/mockData'
 
+const PROPERTIES_PER_PAGE = 12
+
 export default function PropertiesPage() {
-    const [allProperties, setAllProperties] = useState<Property[]>([])
+    const [properties, setProperties] = useState<Property[]>([])
     const [loading, setLoading] = useState(true)
+    const [loadingMore, setLoadingMore] = useState(false)
+    const [currentPage, setCurrentPage] = useState(1)
+    const [totalCount, setTotalCount] = useState(0)
+    const [hasMore, setHasMore] = useState(false)
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
     const [sortBy, setSortBy] = useState('newest')
     const [filters, setFilters] = useState({
@@ -21,58 +27,80 @@ export default function PropertiesPage() {
         location: '',
     })
 
-    useEffect(() => {
-        async function loadProperties() {
-            try {
-                const dbProperties = await getProperties()
-                if (dbProperties.length > 0) {
-                    setAllProperties(dbProperties)
-                } else {
-                    setAllProperties(mockProperties)
-                }
-            } catch (error) {
-                console.error('Error loading properties:', error)
-                setAllProperties(mockProperties)
-            } finally {
-                setLoading(false)
+    const loadProperties = useCallback(async (page: number, resetList: boolean = false) => {
+        try {
+            if (page === 1 || resetList) {
+                setLoading(true)
+            } else {
+                setLoadingMore(true)
             }
+
+            const result = await getPropertiesPaginated(page, PROPERTIES_PER_PAGE, {
+                location: filters.location || undefined,
+                propertyType: filters.propertyType || undefined,
+                minPrice: filters.minPrice ? Number(filters.minPrice) : undefined,
+                maxPrice: filters.maxPrice ? Number(filters.maxPrice) : undefined,
+                bedrooms: filters.bedrooms ? Number(filters.bedrooms) : undefined,
+            })
+
+            if (result.totalCount > 0) {
+                if (page === 1 || resetList) {
+                    setProperties(result.properties)
+                } else {
+                    setProperties(prev => [...prev, ...result.properties])
+                }
+                setTotalCount(result.totalCount)
+                setHasMore(result.hasMore)
+                setCurrentPage(page)
+            } else if (page === 1) {
+                // Fallback to mock data if no properties in database
+                setProperties(mockProperties)
+                setTotalCount(mockProperties.length)
+                setHasMore(false)
+            }
+        } catch (error) {
+            console.error('Error loading properties:', error)
+            if (page === 1) {
+                setProperties(mockProperties)
+                setTotalCount(mockProperties.length)
+                setHasMore(false)
+            }
+        } finally {
+            setLoading(false)
+            setLoadingMore(false)
         }
-        loadProperties()
-    }, [])
+    }, [filters])
 
-    // Filter properties
-    let filteredProperties = [...allProperties]
+    // Initial load
+    useEffect(() => {
+        loadProperties(1, true)
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-    if (filters.propertyType) {
-        filteredProperties = filteredProperties.filter(p => p.property_type === filters.propertyType)
+    // Reload when filters change
+    const handleApplyFilters = () => {
+        setCurrentPage(1)
+        loadProperties(1, true)
     }
 
-    if (filters.minPrice) {
-        filteredProperties = filteredProperties.filter(p => p.price >= Number(filters.minPrice))
+    const handleResetFilters = () => {
+        setFilters({ propertyType: '', minPrice: '', maxPrice: '', bedrooms: '', location: '' })
+        setCurrentPage(1)
+        // Need to load after state updates
+        setTimeout(() => loadProperties(1, true), 0)
     }
 
-    if (filters.maxPrice) {
-        filteredProperties = filteredProperties.filter(p => p.price <= Number(filters.maxPrice))
+    const handleLoadMore = () => {
+        if (hasMore && !loadingMore) {
+            loadProperties(currentPage + 1)
+        }
     }
 
-    if (filters.bedrooms) {
-        filteredProperties = filteredProperties.filter(p => p.bedrooms >= Number(filters.bedrooms))
-    }
-
-    if (filters.location) {
-        filteredProperties = filteredProperties.filter(p =>
-            p.address.toLowerCase().includes(filters.location.toLowerCase())
-        )
-    }
-
-    // Sort properties
-    if (sortBy === 'price-low') {
-        filteredProperties.sort((a, b) => a.price - b.price)
-    } else if (sortBy === 'price-high') {
-        filteredProperties.sort((a, b) => b.price - a.price)
-    } else {
-        filteredProperties.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    }
+    // Sort properties client-side
+    const sortedProperties = [...properties].sort((a, b) => {
+        if (sortBy === 'price-low') return a.price - b.price
+        if (sortBy === 'price-high') return b.price - a.price
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    })
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -83,7 +111,7 @@ export default function PropertiesPage() {
                 <div className="mb-8">
                     <h1 className="font-heading font-bold text-4xl text-gray-900 mb-2">Browse Properties</h1>
                     <p className="text-gray-600">
-                        {loading ? 'Loading...' : `Showing ${filteredProperties.length} properties`}
+                        {loading ? 'Loading...' : `Showing ${properties.length} of ${totalCount} properties`}
                     </p>
                 </div>
 
@@ -118,6 +146,9 @@ export default function PropertiesPage() {
                                     <option value="Landed">Landed</option>
                                     <option value="Apartment">Apartment</option>
                                     <option value="Commercial">Commercial</option>
+                                    <option value="Terraced">Terraced House</option>
+                                    <option value="Semi-D">Semi-D</option>
+                                    <option value="Bungalow">Bungalow</option>
                                 </select>
                             </div>
 
@@ -159,13 +190,21 @@ export default function PropertiesPage() {
                                 </select>
                             </div>
 
-                            {/* Reset Button */}
-                            <button
-                                onClick={() => setFilters({ propertyType: '', minPrice: '', maxPrice: '', bedrooms: '', location: '' })}
-                                className="btn-secondary w-full"
-                            >
-                                Reset Filters
-                            </button>
+                            {/* Filter Buttons */}
+                            <div className="space-y-3">
+                                <button
+                                    onClick={handleApplyFilters}
+                                    className="btn-primary w-full"
+                                >
+                                    Apply Filters
+                                </button>
+                                <button
+                                    onClick={handleResetFilters}
+                                    className="btn-secondary w-full"
+                                >
+                                    Reset Filters
+                                </button>
+                            </div>
                         </div>
                     </aside>
 
@@ -210,17 +249,50 @@ export default function PropertiesPage() {
 
                         {/* Properties Grid/List */}
                         {loading ? (
-                            <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : 'flex flex-col gap-6'}>
+                            <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' : 'flex flex-col gap-6'}>
                                 {[1, 2, 3, 4, 5, 6].map((i) => (
                                     <div key={i} className="glass rounded-2xl h-80 animate-pulse bg-gray-200"></div>
                                 ))}
                             </div>
-                        ) : filteredProperties.length > 0 ? (
-                            <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : 'flex flex-col gap-6'}>
-                                {filteredProperties.map((property) => (
-                                    <PropertyCard key={property.id} property={property} />
-                                ))}
-                            </div>
+                        ) : sortedProperties.length > 0 ? (
+                            <>
+                                <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' : 'flex flex-col gap-6'}>
+                                    {sortedProperties.map((property) => (
+                                        <PropertyCard key={property.id} property={property} />
+                                    ))}
+                                </div>
+
+                                {/* Load More Button */}
+                                {hasMore && (
+                                    <div className="mt-10 text-center">
+                                        <button
+                                            onClick={handleLoadMore}
+                                            disabled={loadingMore}
+                                            className="btn-primary px-8 py-3 inline-flex items-center"
+                                        >
+                                            {loadingMore ? (
+                                                <>
+                                                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    </svg>
+                                                    Loading...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    Load More Properties
+                                                    <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                    </svg>
+                                                </>
+                                            )}
+                                        </button>
+                                        <p className="text-gray-500 text-sm mt-3">
+                                            {totalCount - properties.length} more properties to load
+                                        </p>
+                                    </div>
+                                )}
+                            </>
                         ) : (
                             <div className="text-center py-20">
                                 <svg className="w-24 h-24 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -229,7 +301,7 @@ export default function PropertiesPage() {
                                 <h3 className="font-heading font-semibold text-xl text-gray-900 mb-2">No properties found</h3>
                                 <p className="text-gray-600 mb-6">Try adjusting your filters to see more results</p>
                                 <button
-                                    onClick={() => setFilters({ propertyType: '', minPrice: '', maxPrice: '', bedrooms: '', location: '' })}
+                                    onClick={handleResetFilters}
                                     className="btn-primary"
                                 >
                                     Reset Filters

@@ -15,6 +15,85 @@ export async function getProperties(): Promise<Property[]> {
     return data || []
 }
 
+// Fetch properties with pagination
+export async function getPropertiesPaginated(
+    page: number = 1,
+    limit: number = 12,
+    filters?: {
+        location?: string
+        propertyType?: string
+        minPrice?: number
+        maxPrice?: number
+        bedrooms?: number
+    }
+): Promise<{
+    properties: Property[]
+    totalCount: number
+    hasMore: boolean
+}> {
+    const from = (page - 1) * limit
+    const to = from + limit - 1
+
+    // Build base query for count
+    let countQuery = supabase
+        .from('properties')
+        .select('*', { count: 'exact', head: true })
+
+    // Build base query for data
+    let dataQuery = supabase
+        .from('properties')
+        .select('*')
+
+    // Apply filters to both queries
+    if (filters?.location) {
+        countQuery = countQuery.ilike('address', `%${filters.location}%`)
+        dataQuery = dataQuery.ilike('address', `%${filters.location}%`)
+    }
+    if (filters?.propertyType) {
+        countQuery = countQuery.ilike('property_type', `%${filters.propertyType}%`)
+        dataQuery = dataQuery.ilike('property_type', `%${filters.propertyType}%`)
+    }
+    if (filters?.minPrice) {
+        countQuery = countQuery.gte('price', filters.minPrice)
+        dataQuery = dataQuery.gte('price', filters.minPrice)
+    }
+    if (filters?.maxPrice) {
+        countQuery = countQuery.lte('price', filters.maxPrice)
+        dataQuery = dataQuery.lte('price', filters.maxPrice)
+    }
+    if (filters?.bedrooms) {
+        countQuery = countQuery.gte('bedrooms', filters.bedrooms)
+        dataQuery = dataQuery.gte('bedrooms', filters.bedrooms)
+    }
+
+    // Get total count
+    const { count, error: countError } = await countQuery
+
+    if (countError) {
+        console.error('Error counting properties:', countError)
+        return { properties: [], totalCount: 0, hasMore: false }
+    }
+
+    // Get paginated data
+    const { data, error } = await dataQuery
+        .order('created_at', { ascending: false })
+        .range(from, to)
+
+    if (error) {
+        console.error('Error fetching properties:', error)
+        return { properties: [], totalCount: count || 0, hasMore: false }
+    }
+
+    const totalCount = count || 0
+    const hasMore = (page * limit) < totalCount
+
+    return {
+        properties: data || [],
+        totalCount,
+        hasMore
+    }
+}
+
 // Fetch a single property by ID
 export async function getPropertyById(id: string): Promise<Property | null> {
     const { data, error } = await supabase
