@@ -7,7 +7,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import PropertyCard from '@/components/PropertyCard'
 import PropertyDescription from '@/components/PropertyDescription'
-import { getPropertyById, getAgentById, getSimilarProperties } from '@/lib/database'
+import { getPropertyById, getAgentByAgentId, getSimilarProperties } from '@/lib/database'
 import { getPropertyById as getMockPropertyById, getAgentById as getMockAgentById, mockProperties } from '@/lib/mockData'
 import { Property, Agent } from '@/lib/supabase'
 
@@ -29,7 +29,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
 
                 if (propertyData) {
                     // Got from database
-                    agentData = await getAgentById(propertyData.agent_id)
+                    agentData = await getAgentByAgentId(propertyData.agent_id)
                     similar = await getSimilarProperties(id, propertyData.property_type)
                 } else {
                     // Fallback to mock data
