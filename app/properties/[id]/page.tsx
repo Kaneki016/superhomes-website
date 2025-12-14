@@ -115,13 +115,15 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
     }
 
     const handleWhatsApp = () => {
-        if (!agent) return
-        const message = encodeURIComponent(`Hi, I'm interested in ${property.title} listed at ${formatPrice(property.price)}`)
-        window.open(`https://wa.me/${agent.whatsapp.replace(/[^0-9]/g, '')}?text=${message}`, '_blank')
+        if (!agent || !agent.whatsapp_link) return
+        const message = encodeURIComponent(`Hi, I'm interested in ${property.property_name} listed at ${formatPrice(property.price)}`)
+        // Use the whatsapp_link directly and append our custom message
+        const baseUrl = agent.whatsapp_link.split('?')[0]
+        window.open(`${baseUrl}?text=${message}`, '_blank')
     }
 
     const handleCall = () => {
-        if (!agent) return
+        if (!agent || !agent.phone) return
         window.location.href = `tel:${agent.phone}`
     }
 
@@ -136,7 +138,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                     <span className="mx-2">/</span>
                     <Link href="/properties" className="hover:text-primary-600">Properties</Link>
                     <span className="mx-2">/</span>
-                    <span className="text-gray-900">{property.title}</span>
+                    <span className="text-gray-900">{property.property_name}</span>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -144,10 +146,10 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                     <div className="lg:col-span-2">
                         {/* Image Gallery */}
                         <div className="bg-gradient-to-br from-primary-100 to-accent-100 rounded-2xl h-96 mb-6 flex items-center justify-center relative overflow-hidden">
-                            {property.images && property.images.length > 0 ? (
+                            {(property.main_image_url || (property.images && property.images.length > 0)) ? (
                                 <img
-                                    src={property.images[0]}
-                                    alt={property.title}
+                                    src={property.main_image_url || property.images[0]}
+                                    alt={property.property_name}
                                     className="w-full h-full object-cover"
                                     onError={(e) => {
                                         // Hide image on error and show placeholder
@@ -173,12 +175,12 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                                     <span className="inline-block bg-primary-100 text-primary-600 px-3 py-1 rounded-full text-sm font-semibold mb-3">
                                         {property.property_type}
                                     </span>
-                                    <h1 className="font-heading font-bold text-3xl text-gray-900 mb-2">{property.title}</h1>
+                                    <h1 className="font-heading font-bold text-3xl text-gray-900 mb-2">{property.property_name}</h1>
                                     <div className="flex items-center text-gray-600">
                                         <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                         </svg>
-                                        <span>{property.location}</span>
+                                        <span>{property.address}</span>
                                     </div>
                                 </div>
                                 <div className="text-right">
@@ -201,8 +203,8 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                                     <p className="text-sm text-gray-600">Bathrooms</p>
                                 </div>
                                 <div className="text-center p-4 bg-gray-50 rounded-lg">
-                                    <p className="text-2xl font-bold text-gray-900">{property.built_up_size}</p>
-                                    <p className="text-sm text-gray-600">sqft</p>
+                                    <p className="text-2xl font-bold text-gray-900">{property.size}</p>
+                                    <p className="text-sm text-gray-600">Size</p>
                                 </div>
                                 <div className="text-center p-4 bg-gray-50 rounded-lg">
                                     <p className="text-lg font-bold text-gray-900">{property.tenure}</p>
@@ -213,7 +215,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                             {/* Description */}
                             <div className="mb-6">
                                 <h2 className="font-heading font-bold text-xl mb-3">Description</h2>
-                                <PropertyDescription text={property.description} />
+                                <PropertyDescription text={property.description || ''} />
                             </div>
 
                             {/* Specifications */}
@@ -230,26 +232,32 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                                             <span className="font-semibold text-gray-900">{property.furnishing}</span>
                                         </div>
                                     )}
-                                    {property.built_up_size > 0 && (
+                                    {property.size && (
                                         <div className="flex justify-between py-2 border-b border-gray-200">
                                             <span className="text-gray-600">Built-up Size</span>
-                                            <span className="font-semibold text-gray-900">{property.built_up_size.toLocaleString()} sqft</span>
+                                            <span className="font-semibold text-gray-900">{property.size}</span>
                                         </div>
                                     )}
-                                    {property.land_size && property.land_size > 0 && (
+                                    {property.price_per_sqft && (
                                         <div className="flex justify-between py-2 border-b border-gray-200">
-                                            <span className="text-gray-600">Land Size</span>
-                                            <span className="font-semibold text-gray-900">{property.land_size} acres</span>
+                                            <span className="text-gray-600">Price per sqft</span>
+                                            <span className="font-semibold text-gray-900">RM {property.price_per_sqft.toLocaleString()}</span>
                                         </div>
                                     )}
                                     <div className="flex justify-between py-2 border-b border-gray-200">
                                         <span className="text-gray-600">Tenure</span>
                                         <span className="font-semibold text-gray-900">{property.tenure}</span>
                                     </div>
-                                    {property.city && property.state && (
+                                    {property.built_year && (
                                         <div className="flex justify-between py-2 border-b border-gray-200">
-                                            <span className="text-gray-600">Location</span>
-                                            <span className="font-semibold text-gray-900">{property.city}, {property.state}</span>
+                                            <span className="text-gray-600">Built Year</span>
+                                            <span className="font-semibold text-gray-900">{property.built_year}</span>
+                                        </div>
+                                    )}
+                                    {property.listed_date && (
+                                        <div className="flex justify-between py-2 border-b border-gray-200">
+                                            <span className="text-gray-600">Listed Date</span>
+                                            <span className="font-semibold text-gray-900">{property.listed_date}</span>
                                         </div>
                                     )}
                                 </div>
@@ -291,7 +299,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                                                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                                 </svg>
-                                                <span>{agent.phone}</span>
+                                                <span>{agent.phone || 'Not available'}</span>
                                             </div>
                                         </div>
                                     </>

@@ -5,7 +5,6 @@ export async function getProperties(): Promise<Property[]> {
     const { data, error } = await supabase
         .from('properties')
         .select('*')
-        .eq('status', 'active')
         .order('created_at', { ascending: false })
 
     if (error) {
@@ -37,7 +36,6 @@ export async function getFeaturedProperties(): Promise<Property[]> {
     const { data, error } = await supabase
         .from('properties')
         .select('*')
-        .eq('status', 'active')
         .order('created_at', { ascending: false })
         .limit(6)
 
@@ -65,16 +63,33 @@ export async function getAgentById(id: string): Promise<Agent | null> {
     return data
 }
 
-// Fetch agent by user ID
-export async function getAgentByUserId(userId: string): Promise<Agent | null> {
+// NOTE: getAgentByUserId is deprecated - agents from PropertyGuru don't have user_id
+// If you need to link agents to users, you'll need a separate mapping table
+// export async function getAgentByUserId(userId: string): Promise<Agent | null> {
+//     const { data, error } = await supabase
+//         .from('agents')
+//         .select('*')
+//         .eq('user_id', userId)
+//         .single()
+//
+//     if (error) {
+//         console.error('Error fetching agent by user:', error)
+//         return null
+//     }
+//
+//     return data
+// }
+
+// Fetch agent by PropertyGuru agent_id
+export async function getAgentByAgentId(agentId: string): Promise<Agent | null> {
     const { data, error } = await supabase
         .from('agents')
         .select('*')
-        .eq('user_id', userId)
+        .eq('agent_id', agentId)
         .single()
 
     if (error) {
-        console.error('Error fetching agent by user:', error)
+        console.error('Error fetching agent by agent_id:', error)
         return null
     }
 
@@ -107,10 +122,9 @@ export async function searchProperties(filters: {
     let query = supabase
         .from('properties')
         .select('*')
-        .eq('status', 'active')
 
     if (filters.location) {
-        query = query.ilike('location', `%${filters.location}%`)
+        query = query.ilike('address', `%${filters.location}%`)
     }
 
     if (filters.propertyType) {
@@ -144,7 +158,6 @@ export async function getSimilarProperties(propertyId: string, propertyType: str
     const { data, error } = await supabase
         .from('properties')
         .select('*')
-        .eq('status', 'active')
         .eq('property_type', propertyType)
         .neq('id', propertyId)
         .limit(3)
@@ -191,7 +204,6 @@ export async function getFavoriteProperties(userId: string): Promise<Property[]>
         .from('properties')
         .select('*')
         .in('id', propertyIds)
-        .eq('status', 'active')
 
     if (propError) {
         console.error('Error fetching favorite properties:', propError)

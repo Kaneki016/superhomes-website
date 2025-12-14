@@ -5,40 +5,48 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-// Database Types
+// Database Types - Updated to match PropertyGuru scraping schema
 export interface Property {
     id: string
-    title: string
-    description: string
+    listing_id: string
+    listing_url: string
+    agent_id: string
+    property_name: string
+    address: string
     price: number
-    location: string
-    property_type: string // Changed to string for flexibility with scraped data
+    price_per_sqft: number | null
     bedrooms: number
     bathrooms: number
-    built_up_size: number
-    tenure: string // Changed to string for flexibility
-    furnishing: string | null // Can be null now
+    size: string // e.g., "1,400 sqft"
+    property_type: string // e.g., "2-storey Terraced House"
+    tenure: string // e.g., "Freehold"
+    built_year: string | null
+    listed_date: string | null
+    furnishing: string | null // "Unfurnished", "Partially Furnished", "Fully Furnished"
+    description: string | null
+    facilities: {
+        amenities: string[]
+        common_facilities: string[]
+    } | null
     images: string[]
-    status: 'active' | 'draft'
-    agent_id: string
+    image_count: number
+    main_image_url: string | null
+    source: string // e.g., "propertyguru"
+    scraped_at: string
     created_at: string
     updated_at: string
-    // New columns from Mudah.my scraping
-    listing_id?: string
-    original_url?: string
-    city?: string
-    state?: string
-    land_size?: number
 }
 
 export interface Agent {
     id: string
-    user_id: string
+    agent_id: string // PropertyGuru agent ID
     name: string
-    phone: string
-    whatsapp: string
-    profile_photo: string | null
-    credits_balance: number
+    phone: string | null
+    email: string | null
+    agency: string | null
+    photo_url: string | null
+    whatsapp_link: string | null
+    profile_url: string | null
     created_at: string
     updated_at: string
 }

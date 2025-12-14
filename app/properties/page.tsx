@@ -61,7 +61,7 @@ export default function PropertiesPage() {
 
     if (filters.location) {
         filteredProperties = filteredProperties.filter(p =>
-            p.location.toLowerCase().includes(filters.location.toLowerCase())
+            p.address.toLowerCase().includes(filters.location.toLowerCase())
         )
     }
 

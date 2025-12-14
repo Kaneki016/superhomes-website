@@ -52,10 +52,10 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                 {/* Image */}
                 <div className="relative h-64 bg-gradient-to-br from-primary-100 to-accent-100 overflow-hidden">
                     {/* Property Image or Placeholder */}
-                    {property.images && property.images.length > 0 ? (
+                    {(property.main_image_url || (property.images && property.images.length > 0)) ? (
                         <img
-                            src={property.images[0]}
-                            alt={property.title}
+                            src={property.main_image_url || property.images[0]}
+                            alt={property.property_name}
                             className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                             onError={(e) => {
                                 e.currentTarget.style.display = 'none';
@@ -120,7 +120,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
 
                     {/* Title */}
                     <h3 className="font-heading font-semibold text-lg text-gray-900 mb-2 line-clamp-2 group-hover:text-primary-600 transition-colors">
-                        {property.title}
+                        {property.property_name}
                     </h3>
 
                     {/* Location */}
@@ -129,7 +129,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                        <span className="text-sm">{property.location}</span>
+                        <span className="text-sm">{property.address}</span>
                     </div>
 
                     {/* Property Details */}
@@ -152,7 +152,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                             <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                             </svg>
-                            <span className="text-sm font-medium">{property.built_up_size} sqft</span>
+                            <span className="text-sm font-medium">{property.size}</span>
                         </div>
                     </div>
 
