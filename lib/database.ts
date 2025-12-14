@@ -111,6 +111,47 @@ export async function getAgents(): Promise<Agent[]> {
     return data || []
 }
 
+// Fetch agents with pagination
+export async function getAgentsPaginated(page: number = 1, limit: number = 12): Promise<{
+    agents: Agent[]
+    totalCount: number
+    hasMore: boolean
+}> {
+    const from = (page - 1) * limit
+    const to = from + limit - 1
+
+    // Get total count
+    const { count, error: countError } = await supabase
+        .from('agents')
+        .select('*', { count: 'exact', head: true })
+
+    if (countError) {
+        console.error('Error counting agents:', countError)
+        return { agents: [], totalCount: 0, hasMore: false }
+    }
+
+    // Get paginated agents
+    const { data, error } = await supabase
+        .from('agents')
+        .select('*')
+        .order('name', { ascending: true })
+        .range(from, to)
+
+    if (error) {
+        console.error('Error fetching agents:', error)
+        return { agents: [], totalCount: count || 0, hasMore: false }
+    }
+
+    const totalCount = count || 0
+    const hasMore = (page * limit) < totalCount
+
+    return {
+        agents: data || [],
+        totalCount,
+        hasMore
+    }
+}
+
 // Search properties with filters
 export async function searchProperties(filters: {
     location?: string
