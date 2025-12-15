@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import PropertyCard from '@/components/PropertyCard'
@@ -44,6 +44,19 @@ export default function PropertiesPage() {
         priceRange: { min: 0, max: 10000000 }
     })
     const [loadingFilters, setLoadingFilters] = useState(true)
+    const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+    const dropdownRef = useRef<HTMLDivElement>(null)
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setOpenDropdown(null)
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [])
 
     const loadProperties = useCallback(async (page: number, resetList: boolean = false) => {
         try {
@@ -209,7 +222,7 @@ export default function PropertiesPage() {
                     </div>
 
                     {/* Quick Filter Pills */}
-                    <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                    <div ref={dropdownRef} className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
                         {/* Filters Button */}
                         <button
                             onClick={() => setShowFilters(!showFilters)}
@@ -227,82 +240,100 @@ export default function PropertiesPage() {
                         </button>
 
                         {/* Property Type Pill */}
-                        <div className="relative group">
-                            <button className={`filter-pill ${filters.propertyType ? 'active' : ''}`}>
+                        <div className="relative">
+                            <button
+                                onClick={() => setOpenDropdown(openDropdown === 'propertyType' ? null : 'propertyType')}
+                                className={`filter-pill ${filters.propertyType ? 'active' : ''}`}
+                            >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                 </svg>
                                 <span>{filters.propertyType || 'All Residential'}</span>
-                                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === 'propertyType' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
-                            <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                                {propertyTypeOptions.map((type) => (
-                                    <button
-                                        key={type.value}
-                                        onClick={() => {
-                                            setFilters({ ...filters, propertyType: type.value })
-                                            loadProperties(1, true)
-                                        }}
-                                        className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${filters.propertyType === type.value ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
-                                    >
-                                        {type.label}
-                                    </button>
-                                ))}
-                            </div>
+                            {openDropdown === 'propertyType' && (
+                                <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 max-h-64 overflow-y-auto">
+                                    {propertyTypeOptions.map((type) => (
+                                        <button
+                                            key={type.value}
+                                            onClick={() => {
+                                                setFilters({ ...filters, propertyType: type.value })
+                                                setOpenDropdown(null)
+                                                loadProperties(1, true)
+                                            }}
+                                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${filters.propertyType === type.value ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
+                                        >
+                                            {type.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         {/* Price Pill */}
-                        <div className="relative group">
-                            <button className={`filter-pill ${filters.minPrice || filters.maxPrice ? 'active' : ''}`}>
+                        <div className="relative">
+                            <button
+                                onClick={() => setOpenDropdown(openDropdown === 'price' ? null : 'price')}
+                                className={`filter-pill ${filters.minPrice || filters.maxPrice ? 'active' : ''}`}
+                            >
                                 <span className="font-medium">RM</span>
                                 <span>Price</span>
-                                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === 'price' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
-                            <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                                {priceRanges.map((range, idx) => (
-                                    <button
-                                        key={idx}
-                                        onClick={() => {
-                                            setFilters({ ...filters, minPrice: range.min, maxPrice: range.max })
-                                            loadProperties(1, true)
-                                        }}
-                                        className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${filters.minPrice === range.min && filters.maxPrice === range.max ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
-                                    >
-                                        {range.label}
-                                    </button>
-                                ))}
-                            </div>
+                            {openDropdown === 'price' && (
+                                <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 max-h-64 overflow-y-auto">
+                                    {priceRanges.map((range, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => {
+                                                setFilters({ ...filters, minPrice: range.min, maxPrice: range.max })
+                                                setOpenDropdown(null)
+                                                loadProperties(1, true)
+                                            }}
+                                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${filters.minPrice === range.min && filters.maxPrice === range.max ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
+                                        >
+                                            {range.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         {/* Bedroom Pill */}
-                        <div className="relative group">
-                            <button className={`filter-pill ${filters.bedrooms ? 'active' : ''}`}>
+                        <div className="relative">
+                            <button
+                                onClick={() => setOpenDropdown(openDropdown === 'bedroom' ? null : 'bedroom')}
+                                className={`filter-pill ${filters.bedrooms ? 'active' : ''}`}
+                            >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                                 </svg>
                                 <span>{filters.bedrooms ? `${filters.bedrooms}+ Bed` : 'Bedroom'}</span>
-                                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === 'bedroom' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
-                            <div className="absolute top-full left-0 mt-2 w-32 bg-white rounded-xl shadow-lg border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                                {bedroomOptions.map((opt) => (
-                                    <button
-                                        key={opt.value}
-                                        onClick={() => {
-                                            setFilters({ ...filters, bedrooms: opt.value })
-                                            loadProperties(1, true)
-                                        }}
-                                        className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${filters.bedrooms === opt.value ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
-                                    >
-                                        {opt.label}
-                                    </button>
-                                ))}
-                            </div>
+                            {openDropdown === 'bedroom' && (
+                                <div className="absolute top-full left-0 mt-2 w-32 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                                    {bedroomOptions.map((opt) => (
+                                        <button
+                                            key={opt.value}
+                                            onClick={() => {
+                                                setFilters({ ...filters, bedrooms: opt.value })
+                                                setOpenDropdown(null)
+                                                loadProperties(1, true)
+                                            }}
+                                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${filters.bedrooms === opt.value ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
+                                        >
+                                            {opt.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         {/* Clear Filters */}
