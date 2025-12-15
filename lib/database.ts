@@ -332,3 +332,157 @@ export async function getFavoriteProperties(userId: string): Promise<Property[]>
 
     return properties || []
 }
+
+// Get distinct property types from the database
+export async function getDistinctPropertyTypes(): Promise<string[]> {
+    const { data, error } = await supabase
+        .from('properties')
+        .select('property_type')
+        .not('property_type', 'is', null)
+
+    if (error) {
+        console.error('Error fetching property types:', error)
+        return []
+    }
+
+    // Extract unique values
+    const types = data?.map(d => d.property_type).filter(Boolean) || []
+    const uniqueTypes = [...new Set(types)]
+    return uniqueTypes.sort()
+}
+
+// Get distinct locations (extracted from address) from the database
+export async function getDistinctLocations(): Promise<string[]> {
+    const { data, error } = await supabase
+        .from('properties')
+        .select('address')
+        .not('address', 'is', null)
+
+    if (error) {
+        console.error('Error fetching locations:', error)
+        return []
+    }
+
+    // Extract unique location parts from addresses
+    // Typically format is "Area, City, State" - we'll extract the main area/city
+    const locationSet = new Set<string>()
+
+    data?.forEach(d => {
+        if (d.address) {
+            // Split by comma and get meaningful parts
+            const parts = d.address.split(',').map((p: string) => p.trim())
+            // Add the first part (usually the area/neighborhood)
+            if (parts[0]) locationSet.add(parts[0])
+            // Add the second part (usually city) if exists
+            if (parts[1]) locationSet.add(parts[1])
+            // Add state if exists (usually last part)
+            if (parts.length > 2 && parts[parts.length - 1]) {
+                locationSet.add(parts[parts.length - 1])
+            }
+        }
+    })
+
+    return [...locationSet].sort()
+}
+
+// Get distinct bedroom counts from the database
+export async function getDistinctBedrooms(): Promise<number[]> {
+    const { data, error } = await supabase
+        .from('properties')
+        .select('bedrooms')
+        .not('bedrooms', 'is', null)
+
+    if (error) {
+        console.error('Error fetching bedrooms:', error)
+        return []
+    }
+
+    // Extract unique values
+    const bedrooms = data?.map(d => d.bedrooms).filter((b): b is number => b != null && b > 0) || []
+    const uniqueBedrooms = [...new Set(bedrooms)]
+    return uniqueBedrooms.sort((a, b) => a - b)
+}
+
+// Get price range (min and max) from the database
+export async function getPriceRange(): Promise<{ min: number; max: number }> {
+    const { data, error } = await supabase
+        .from('properties')
+        .select('price')
+        .not('price', 'is', null)
+        .order('price', { ascending: true })
+
+    if (error) {
+        console.error('Error fetching price range:', error)
+        return { min: 0, max: 10000000 }
+    }
+
+    if (!data || data.length === 0) {
+        return { min: 0, max: 10000000 }
+    }
+
+    const prices = data.map(d => d.price).filter((p): p is number => p != null && p > 0)
+    return {
+        min: Math.min(...prices),
+        max: Math.max(...prices)
+    }
+}
+
+// Get all filter options in one call (more efficient)
+export async function getFilterOptions(): Promise<{
+    propertyTypes: string[]
+    locations: string[]
+    bedrooms: number[]
+    priceRange: { min: number; max: number }
+}> {
+    // Fetch all properties once to extract all filter data
+    const { data, error } = await supabase
+        .from('properties')
+        .select('property_type, address, bedrooms, price')
+
+    if (error) {
+        console.error('Error fetching filter options:', error)
+        return {
+            propertyTypes: [],
+            locations: [],
+            bedrooms: [],
+            priceRange: { min: 0, max: 10000000 }
+        }
+    }
+
+    const propertyTypeSet = new Set<string>()
+    const locationSet = new Set<string>()
+    const bedroomSet = new Set<number>()
+    let minPrice = Infinity
+    let maxPrice = 0
+
+    data?.forEach(d => {
+        // Property type
+        if (d.property_type) propertyTypeSet.add(d.property_type)
+
+        // Location (extract from address)
+        if (d.address) {
+            const parts = d.address.split(',').map((p: string) => p.trim())
+            if (parts[0]) locationSet.add(parts[0])
+            if (parts[1]) locationSet.add(parts[1])
+        }
+
+        // Bedrooms
+        if (d.bedrooms != null && d.bedrooms > 0) bedroomSet.add(d.bedrooms)
+
+        // Price range
+        if (d.price != null && d.price > 0) {
+            if (d.price < minPrice) minPrice = d.price
+            if (d.price > maxPrice) maxPrice = d.price
+        }
+    })
+
+    return {
+        propertyTypes: [...propertyTypeSet].sort(),
+        locations: [...locationSet].sort(),
+        bedrooms: [...bedroomSet].sort((a, b) => a - b),
+        priceRange: {
+            min: minPrice === Infinity ? 0 : minPrice,
+            max: maxPrice === 0 ? 10000000 : maxPrice
+        }
+    }
+}

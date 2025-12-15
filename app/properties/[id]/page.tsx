@@ -7,6 +7,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import PropertyCard from '@/components/PropertyCard'
 import PropertyDescription from '@/components/PropertyDescription'
+import ImageGallery from '@/components/ImageGallery'
 import { getPropertyById, getAgentByAgentId, getSimilarProperties } from '@/lib/database'
 import { getPropertyById as getMockPropertyById, getAgentById as getMockAgentById, mockProperties } from '@/lib/mockData'
 import { Property, Agent } from '@/lib/supabase'
@@ -144,29 +145,8 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Main Content */}
                     <div className="lg:col-span-2">
-                        {/* Image Gallery */}
-                        <div className="bg-gradient-to-br from-primary-100 to-accent-100 rounded-2xl h-96 mb-6 flex items-center justify-center relative overflow-hidden">
-                            {(property.main_image_url || (property.images && property.images.length > 0)) ? (
-                                <img
-                                    src={property.main_image_url || property.images[0]}
-                                    alt={property.property_name}
-                                    className="w-full h-full object-cover"
-                                    onError={(e) => {
-                                        // Hide image on error and show placeholder
-                                        e.currentTarget.style.display = 'none';
-                                    }}
-                                />
-                            ) : (
-                                <svg className="w-32 h-32 text-primary-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                                </svg>
-                            )}
-                            <div className="absolute bottom-4 right-4">
-                                <span className="text-white text-sm font-semibold bg-black/30 px-3 py-1 rounded">
-                                    SuperHomes
-                                </span>
-                            </div>
-                        </div>
+                        {/* PropertyGuru-Style Image Gallery */}
+                        <ImageGallery images={property.images} propertyName={property.property_name} mainImage={property.main_image_url} />
 
                         {/* Property Info */}
                         <div className="glass p-8 rounded-2xl mb-6">
