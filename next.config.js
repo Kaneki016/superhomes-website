@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
-        domains: ['localhost'],
+        domains: ['localhost', 'my1-cdn.pgimgs.com', 'sg1-cdn.pgimgs.com', 'sg2-cdn.pgimgs.com'],
         remotePatterns: [
             {
                 protocol: 'https',
@@ -11,7 +11,17 @@ const nextConfig = {
                 protocol: 'https',
                 hostname: '**.pgimgs.com',
             },
+            {
+                protocol: 'https',
+                hostname: 'my1-cdn.pgimgs.com',
+            },
+            {
+                protocol: 'https',
+                hostname: 'sg1-cdn.pgimgs.com',
+            },
         ],
+        // Use unoptimized for external images on Netlify (no built-in image optimization)
+        unoptimized: true,
     },
 }
 
