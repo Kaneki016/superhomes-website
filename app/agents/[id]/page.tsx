@@ -118,16 +118,18 @@ export default function AgentDetailPage() {
         <div className="min-h-screen bg-gray-50">
             <Navbar />
 
-            {/* Breadcrumb */}
+            {/* Back Button */}
             <div className="bg-white border-b border-gray-100">
                 <div className="container-custom py-4">
-                    <nav className="flex items-center gap-2 text-sm">
-                        <Link href="/" className="text-gray-500 hover:text-gray-700">Home</Link>
-                        <span className="text-gray-400">/</span>
-                        <Link href="/agents" className="text-gray-500 hover:text-gray-700">Agents</Link>
-                        <span className="text-gray-400">/</span>
-                        <span className="text-gray-900 font-medium">{agent.name}</span>
-                    </nav>
+                    <button
+                        onClick={() => window.history.back()}
+                        className="inline-flex items-center gap-2 text-gray-600 hover:text-primary-600 transition-colors group"
+                    >
+                        <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        <span className="font-medium">Back</span>
+                    </button>
                 </div>
             </div>
 

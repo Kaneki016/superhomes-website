@@ -2,7 +2,7 @@
 
 import { use, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import PropertyCard from '@/components/PropertyCard'
@@ -133,14 +133,16 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
             <Navbar />
 
             <div className="container-custom py-8">
-                {/* Breadcrumb */}
-                <div className="mb-6 text-sm text-gray-600">
-                    <Link href="/" className="hover:text-primary-600">Home</Link>
-                    <span className="mx-2">/</span>
-                    <Link href="/properties" className="hover:text-primary-600">Properties</Link>
-                    <span className="mx-2">/</span>
-                    <span className="text-gray-900">{property.property_name}</span>
-                </div>
+                {/* Back Button */}
+                <button
+                    onClick={() => window.history.back()}
+                    className="mb-6 inline-flex items-center gap-2 text-gray-600 hover:text-primary-600 transition-colors group"
+                >
+                    <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    <span className="font-medium">Back</span>
+                </button>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Main Content */}
