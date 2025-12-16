@@ -29,10 +29,10 @@ export default function HomePage() {
     useEffect(() => {
         async function loadProperties() {
             try {
-                // Fetch Featured (4 newest) and Handpicked (16 from diverse agents) separately
+                // Fetch Featured (4 newest) and Handpicked (12 from diverse agents) separately
                 const [featured, diverse] = await Promise.all([
                     getFeaturedProperties(4),
-                    getDiverseProperties(16)
+                    getDiverseProperties(12)
                 ])
 
                 if (featured.length > 0) {
@@ -45,7 +45,7 @@ export default function HomePage() {
                     // Filter out any properties already in featured
                     const featuredIds = new Set(featured.map(p => p.id))
                     const uniqueHandpicked = diverse.filter(p => !featuredIds.has(p.id))
-                    setHandpickedProperties(uniqueHandpicked.slice(0, 16))
+                    setHandpickedProperties(uniqueHandpicked.slice(0, 12))
                 } else {
                     setHandpickedProperties(mockProperties.slice(4, 12))
                 }
@@ -73,57 +73,20 @@ export default function HomePage() {
         return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [])
 
-    // Number of items to show per slide in handpicked carousel
-    const itemsPerSlide = 4
-    const totalSlides = Math.ceil(handpickedProperties.length / itemsPerSlide)
+    // Carousel configuration
+    const totalSlides = Math.ceil(handpickedProperties.length / 4) // 4 properties per view
 
-    // Get current visible properties for carousel
-    const currentHandpickedProperties = handpickedProperties.slice(
-        handpickedIndex * itemsPerSlide,
-        (handpickedIndex + 1) * itemsPerSlide
-    )
-
-    // Auto-slide effect for handpicked carousel
-    const [isTransitioning, setIsTransitioning] = useState(false)
-
-    useEffect(() => {
-        if (totalSlides <= 1) return
-
-        const interval = setInterval(() => {
-            setIsTransitioning(true)
-            setTimeout(() => {
-                setHandpickedIndex((prev) => (prev + 1) % totalSlides)
-                setTimeout(() => setIsTransitioning(false), 50)
-            }, 300)
-        }, 4000) // Change slide every 4 seconds
-
-        return () => clearInterval(interval)
-    }, [totalSlides])
-
-    // Navigation functions for carousel with smooth transition
+    // Navigation functions - direct slide change with CSS transition
     const goToPrevSlide = () => {
-        setIsTransitioning(true)
-        setTimeout(() => {
-            setHandpickedIndex((prev) => (prev - 1 + totalSlides) % totalSlides)
-            setTimeout(() => setIsTransitioning(false), 50)
-        }, 300)
+        setHandpickedIndex((prev) => (prev - 1 + totalSlides) % totalSlides)
     }
 
     const goToNextSlide = () => {
-        setIsTransitioning(true)
-        setTimeout(() => {
-            setHandpickedIndex((prev) => (prev + 1) % totalSlides)
-            setTimeout(() => setIsTransitioning(false), 50)
-        }, 300)
+        setHandpickedIndex((prev) => (prev + 1) % totalSlides)
     }
 
     const goToSlide = (index: number) => {
-        if (index === handpickedIndex) return
-        setIsTransitioning(true)
-        setTimeout(() => {
-            setHandpickedIndex(index)
-            setTimeout(() => setIsTransitioning(false), 50)
-        }, 300)
+        setHandpickedIndex(index)
     }
 
     // Malaysian locations for explore section
@@ -546,46 +509,58 @@ export default function HomePage() {
                         </div>
                     ) : (
                         <>
-                            {/* Carousel Container with Side Arrows */}
+                            {/* Horizontal Scrolling Carousel Container */}
                             <div className="relative">
-                                {/* Left Arrow - Positioned on Left Side */}
+                                {/* Left Arrow */}
                                 {totalSlides > 1 && (
                                     <button
                                         onClick={goToPrevSlide}
-                                        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-6 z-10 w-12 h-12 rounded-full bg-white border border-gray-200 shadow-lg flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:border-primary-300 hover:text-primary-600 transition-all"
+                                        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 md:-translate-x-5 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white border border-gray-200 shadow-lg flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:border-primary-300 hover:text-primary-600 transition-all"
                                         aria-label="Previous properties"
                                     >
-                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                                         </svg>
                                     </button>
                                 )}
 
-                                {/* Properties Grid - 2 rows of 4 = 8 total */}
-                                <div
-                                    className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 transition-opacity duration-300 ease-in-out ${isTransitioning ? 'opacity-0' : 'opacity-100'
-                                        }`}
-                                >
-                                    {currentHandpickedProperties.map((property) => (
-                                        <PropertyCard key={property.id} property={property} />
-                                    ))}
+                                {/* Carousel Track - Horizontal Scroll with CSS Transform */}
+                                <div className="overflow-hidden">
+                                    <div
+                                        className="flex transition-transform duration-500 ease-out"
+                                        style={{ transform: `translateX(-${handpickedIndex * 100}%)` }}
+                                    >
+                                        {/* Each slide contains 4 properties */}
+                                        {Array.from({ length: totalSlides }).map((_, slideIndex) => (
+                                            <div
+                                                key={slideIndex}
+                                                className="w-full flex-shrink-0 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-1"
+                                            >
+                                                {handpickedProperties
+                                                    .slice(slideIndex * 4, slideIndex * 4 + 4)
+                                                    .map((property) => (
+                                                        <PropertyCard key={property.id} property={property} />
+                                                    ))}
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
 
-                                {/* Right Arrow - Positioned on Right Side */}
+                                {/* Right Arrow */}
                                 {totalSlides > 1 && (
                                     <button
                                         onClick={goToNextSlide}
-                                        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-6 z-10 w-12 h-12 rounded-full bg-white border border-gray-200 shadow-lg flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:border-primary-300 hover:text-primary-600 transition-all"
+                                        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 md:translate-x-5 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white border border-gray-200 shadow-lg flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:border-primary-300 hover:text-primary-600 transition-all"
                                         aria-label="Next properties"
                                     >
-                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                         </svg>
                                     </button>
                                 )}
                             </div>
 
-                            {/* Dot Navigation - Below the Grid */}
+                            {/* Dot Navigation */}
                             {totalSlides > 1 && (
                                 <div className="flex justify-center items-center gap-3 mt-8">
                                     {Array.from({ length: totalSlides }).map((_, index) => (
@@ -593,8 +568,8 @@ export default function HomePage() {
                                             key={index}
                                             onClick={() => goToSlide(index)}
                                             className={`h-3 rounded-full transition-all duration-300 ${index === handpickedIndex
-                                                ? 'bg-primary-600 w-10'
-                                                : 'bg-gray-300 hover:bg-gray-400 w-3'
+                                                    ? 'bg-primary-600 w-10'
+                                                    : 'bg-gray-300 hover:bg-gray-400 w-3'
                                                 }`}
                                             aria-label={`Go to slide ${index + 1}`}
                                         />
