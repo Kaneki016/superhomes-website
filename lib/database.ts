@@ -25,6 +25,7 @@ export async function getPropertiesPaginated(
         minPrice?: number
         maxPrice?: number
         bedrooms?: number
+        state?: string // Malaysian state filter
     }
 ): Promise<{
     properties: Property[]
@@ -46,8 +47,13 @@ export async function getPropertiesPaginated(
 
     // Apply filters to both queries
     if (filters?.location) {
+        // Simple search on address
         countQuery = countQuery.ilike('address', `%${filters.location}%`)
         dataQuery = dataQuery.ilike('address', `%${filters.location}%`)
+    }
+    if (filters?.state) {
+        countQuery = countQuery.ilike('state', `%${filters.state}%`)
+        dataQuery = dataQuery.ilike('state', `%${filters.state}%`)
     }
     if (filters?.propertyType) {
         countQuery = countQuery.ilike('property_type', `%${filters.propertyType}%`)
@@ -70,7 +76,7 @@ export async function getPropertiesPaginated(
     const { count, error: countError } = await countQuery
 
     if (countError) {
-        console.error('Error counting properties:', countError)
+        // Silently return empty if count fails
         return { properties: [], totalCount: 0, hasMore: false }
     }
 
@@ -94,6 +100,71 @@ export async function getPropertiesPaginated(
     }
 }
 
+// Fetch properties by a single agent ID with pagination
+export async function getPropertiesByAgentId(
+    agentId: string,
+    page: number = 1,
+    limit: number = 12
+): Promise<{
+    properties: Property[]
+    totalCount: number
+    hasMore: boolean
+}> {
+    const from = (page - 1) * limit
+    const to = from + limit - 1
+
+    // Get total count
+    const { count, error: countError } = await supabase
+        .from('properties')
+        .select('*', { count: 'exact', head: true })
+        .eq('agent_id', agentId)
+
+    if (countError) {
+        return { properties: [], totalCount: 0, hasMore: false }
+    }
+
+    // Get paginated data
+    const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('agent_id', agentId)
+        .order('created_at', { ascending: false })
+        .range(from, to)
+
+    if (error) {
+        return { properties: [], totalCount: count || 0, hasMore: false }
+    }
+
+    const totalCount = count || 0
+    const hasMore = (page * limit) < totalCount
+
+    return {
+        properties: data || [],
+        totalCount,
+        hasMore
+    }
+}
+
+// Fetch properties by multiple agent IDs
+export async function getPropertiesByAgentIds(agentIds: string[], limit: number = 12): Promise<Property[]> {
+    if (!agentIds || agentIds.length === 0) {
+        return []
+    }
+
+    const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .in('agent_id', agentIds)
+        .order('created_at', { ascending: false })
+        .limit(limit)
+
+    if (error) {
+        return []
+    }
+
+    return data || []
+}
+
 // Fetch a single property by ID
 export async function getPropertyById(id: string): Promise<Property | null> {
     const { data, error } = await supabase
@@ -103,11 +174,29 @@ export async function getPropertyById(id: string): Promise<Property | null> {
         .single()
 
     if (error) {
-        console.error('Error fetching property:', error)
+        // Silently return null - not found is expected, errors handled by fallback
         return null
     }
 
     return data
+}
+
+// Get distinct states from the database
+export async function getDistinctStates(): Promise<string[]> {
+    const { data, error } = await supabase
+        .from('properties')
+        .select('state')
+        .not('state', 'is', null)
+
+    if (error) {
+        console.error('Error fetching states:', error)
+        return []
+    }
+
+    // Extract unique values
+    const states = data?.map(d => d.state).filter(Boolean) || []
+    const uniqueStates = [...new Set(states)]
+    return uniqueStates.sort()
 }
 
 // Fetch featured properties (first 6)
@@ -168,7 +257,7 @@ export async function getAgentByAgentId(agentId: string): Promise<Agent | null> 
         .single()
 
     if (error) {
-        console.error('Error fetching agent by agent_id:', error)
+        // Silently return null - not found is expected
         return null
     }
 
@@ -184,6 +273,26 @@ export async function getAgents(): Promise<Agent[]> {
 
     if (error) {
         console.error('Error fetching agents:', error)
+        return []
+    }
+
+    return data || []
+}
+
+// Search agents by name or agency
+export async function searchAgents(query: string, limit: number = 5): Promise<Agent[]> {
+    if (!query || query.trim().length < 2) {
+        return []
+    }
+
+    const { data, error } = await supabase
+        .from('agents')
+        .select('*')
+        .or(`name.ilike.%${query}%,agency.ilike.%${query}%`)
+        .limit(limit)
+
+    if (error) {
+        // Silently return empty if search fails
         return []
     }
 

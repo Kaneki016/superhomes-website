@@ -265,15 +265,23 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                                 <h3 className="font-heading font-semibold text-lg mb-4">Contact Agent</h3>
                                 {agent ? (
                                     <>
-                                        <div className="flex items-center mb-4">
-                                            <div className="w-16 h-16 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold text-2xl mr-4">
-                                                {agent.name.charAt(0)}
+                                        <Link href={`/agents/${agent.agent_id}`} className="flex items-center mb-4 group">
+                                            <div className="w-16 h-16 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold text-2xl mr-4 group-hover:ring-2 group-hover:ring-primary-300 transition-all">
+                                                {agent.photo_url ? (
+                                                    <img
+                                                        src={agent.photo_url}
+                                                        alt={agent.name}
+                                                        className="w-full h-full rounded-full object-cover"
+                                                    />
+                                                ) : (
+                                                    agent.name.charAt(0)
+                                                )}
                                             </div>
                                             <div>
-                                                <p className="font-semibold text-gray-900 text-lg">{agent.name}</p>
-                                                <p className="text-sm text-gray-600">Property Agent</p>
+                                                <p className="font-semibold text-gray-900 text-lg group-hover:text-primary-600 transition-colors">{agent.name}</p>
+                                                <p className="text-sm text-gray-600">{agent.agency || 'Property Agent'}</p>
                                             </div>
-                                        </div>
+                                        </Link>
                                         <div className="space-y-2 text-sm text-gray-600">
                                             <div className="flex items-center">
                                                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -282,6 +290,15 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                                                 <span>{agent.phone || 'Not available'}</span>
                                             </div>
                                         </div>
+                                        <Link
+                                            href={`/agents/${agent.agent_id}`}
+                                            className="inline-flex items-center text-primary-600 hover:text-primary-700 text-sm font-medium mt-3"
+                                        >
+                                            View Agent Profile
+                                            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </Link>
                                     </>
                                 ) : (
                                     <p className="text-gray-600">Agent information not available</p>

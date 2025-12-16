@@ -13,6 +13,7 @@ export interface Property {
     agent_id: string
     property_name: string
     address: string
+    state?: string | null // Malaysian state extracted from address
     price: number
     price_per_sqft: number | null
     bedrooms: number

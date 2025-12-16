@@ -1,12 +1,15 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import PropertyCard from '@/components/PropertyCard'
 import Pagination from '@/components/Pagination'
-import { getPropertiesPaginated, getFilterOptions } from '@/lib/database'
-import { Property } from '@/lib/supabase'
+import FilterModal from '@/components/FilterModal'
+import { getPropertiesPaginated, getFilterOptions, searchAgents, getPropertiesByAgentIds } from '@/lib/database'
+import { Property, Agent } from '@/lib/supabase'
 import { mockProperties } from '@/lib/mockData'
 
 const PROPERTIES_PER_PAGE = 12
@@ -18,8 +21,49 @@ interface FilterOptions {
     priceRange: { min: number; max: number }
 }
 
+// Loading fallback for Suspense
+function PropertiesPageLoading() {
+    return (
+        <div className="min-h-screen bg-gray-50">
+            <Navbar />
+            <div className="sticky top-20 z-40 bg-white border-b border-gray-200 shadow-sm">
+                <div className="container-custom py-4">
+                    <div className="h-12 bg-gray-200 rounded-xl animate-pulse"></div>
+                </div>
+            </div>
+            <div className="container-custom py-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                        <div key={i} className="bg-white rounded-xl h-96 animate-pulse">
+                            <div className="h-56 bg-gray-200 rounded-t-xl"></div>
+                            <div className="p-4 space-y-3">
+                                <div className="h-6 bg-gray-200 rounded w-2/3"></div>
+                                <div className="h-4 bg-gray-200 rounded w-full"></div>
+                                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+            <Footer />
+        </div>
+    )
+}
+
+// Main page wrapper with Suspense
 export default function PropertiesPage() {
+    return (
+        <Suspense fallback={<PropertiesPageLoading />}>
+            <PropertiesPageContent />
+        </Suspense>
+    )
+}
+
+function PropertiesPageContent() {
+    const searchParams = useSearchParams()
     const [properties, setProperties] = useState<Property[]>([])
+    const [matchedAgents, setMatchedAgents] = useState<Agent[]>([])
+    const [agentProperties, setAgentProperties] = useState<Property[]>([])
     const [loading, setLoading] = useState(true)
     const [loadingMore, setLoadingMore] = useState(false)
     const [currentPage, setCurrentPage] = useState(1)
@@ -36,6 +80,7 @@ export default function PropertiesPage() {
         maxPrice: '',
         bedrooms: '',
         location: '',
+        state: '', // Malaysian state filter
     })
     const [filterOptions, setFilterOptions] = useState<FilterOptions>({
         propertyTypes: [],
@@ -45,7 +90,112 @@ export default function PropertiesPage() {
     })
     const [loadingFilters, setLoadingFilters] = useState(true)
     const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+    const [filterModalOpen, setFilterModalOpen] = useState(false)
     const dropdownRef = useRef<HTMLDivElement>(null)
+    const initialLoadDone = useRef(false)
+
+    const loadProperties = useCallback(async (page: number, resetList: boolean = false, overrideFilters?: typeof filters) => {
+        const activeFilters = overrideFilters || filters
+        const hasActiveFilters = activeFilters.location || activeFilters.state || activeFilters.propertyType ||
+            activeFilters.minPrice || activeFilters.maxPrice || activeFilters.bedrooms
+
+        try {
+            if (page === 1 || resetList) {
+                setLoading(true)
+            } else {
+                setLoadingMore(true)
+            }
+
+            const result = await getPropertiesPaginated(page, PROPERTIES_PER_PAGE, {
+                location: activeFilters.location || undefined,
+                state: activeFilters.state || undefined,
+                propertyType: activeFilters.propertyType || undefined,
+                minPrice: activeFilters.minPrice ? Number(activeFilters.minPrice) : undefined,
+                maxPrice: activeFilters.maxPrice ? Number(activeFilters.maxPrice) : undefined,
+                bedrooms: activeFilters.bedrooms ? Number(activeFilters.bedrooms) : undefined,
+            })
+
+            if (result.totalCount > 0) {
+                setProperties(result.properties)
+                setTotalCount(result.totalCount)
+                setHasMore(result.hasMore)
+                setCurrentPage(page)
+            } else if (page === 1 && !hasActiveFilters) {
+                // Only fallback to mock data if no filters AND database is empty
+                setProperties(mockProperties)
+                setTotalCount(mockProperties.length)
+                setHasMore(false)
+            } else {
+                // Search/filter returned no results - show empty
+                setProperties([])
+                setTotalCount(0)
+                setHasMore(false)
+            }
+        } catch (error) {
+            console.error('Error loading properties:', error)
+            if (page === 1 && !hasActiveFilters) {
+                setProperties(mockProperties)
+                setTotalCount(mockProperties.length)
+                setHasMore(false)
+            } else {
+                setProperties([])
+                setTotalCount(0)
+                setHasMore(false)
+            }
+        } finally {
+            setLoading(false)
+            setLoadingMore(false)
+        }
+    }, [filters])
+
+    // Initialize filters from URL params AND trigger load
+    useEffect(() => {
+        const stateParam = searchParams.get('state')
+        const locationParam = searchParams.get('location')
+        const searchParam = searchParams.get('search')
+
+        if (stateParam || locationParam || searchParam) {
+            setFilters(prev => ({
+                ...prev,
+                state: stateParam || '',
+                location: locationParam || searchParam || '',
+            }))
+            // Mark that we need to load after filter update
+            initialLoadDone.current = false
+
+            // Also search for agents if there's a search query
+            if (searchParam && searchParam.trim().length >= 2) {
+                searchAgents(searchParam).then(async (agents) => {
+                    setMatchedAgents(agents)
+                    // Fetch properties from matched agents
+                    if (agents.length > 0) {
+                        const agentIds = agents.map(a => a.agent_id)
+                        const props = await getPropertiesByAgentIds(agentIds, 12)
+                        setAgentProperties(props)
+                    } else {
+                        setAgentProperties([])
+                    }
+                })
+            } else {
+                setMatchedAgents([])
+                setAgentProperties([])
+            }
+        } else if (!initialLoadDone.current) {
+            // No URL params, just do initial load
+            loadProperties(1, true)
+            setMatchedAgents([])
+            setAgentProperties([])
+            initialLoadDone.current = true
+        }
+    }, [searchParams]) // Only depend on searchParams, not loadProperties
+
+    // Load when filters are updated from URL params
+    useEffect(() => {
+        if (!initialLoadDone.current && (filters.state || filters.location)) {
+            loadProperties(1, true)
+            initialLoadDone.current = true
+        }
+    }, [filters.state, filters.location]) // Don't include loadProperties here either
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -57,46 +207,6 @@ export default function PropertiesPage() {
         document.addEventListener('mousedown', handleClickOutside)
         return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [])
-
-    const loadProperties = useCallback(async (page: number, resetList: boolean = false) => {
-        try {
-            if (page === 1 || resetList) {
-                setLoading(true)
-            } else {
-                setLoadingMore(true)
-            }
-
-            const result = await getPropertiesPaginated(page, PROPERTIES_PER_PAGE, {
-                location: filters.location || undefined,
-                propertyType: filters.propertyType || undefined,
-                minPrice: filters.minPrice ? Number(filters.minPrice) : undefined,
-                maxPrice: filters.maxPrice ? Number(filters.maxPrice) : undefined,
-                bedrooms: filters.bedrooms ? Number(filters.bedrooms) : undefined,
-            })
-
-            if (result.totalCount > 0) {
-                setProperties(result.properties)
-                setTotalCount(result.totalCount)
-                setHasMore(result.hasMore)
-                setCurrentPage(page)
-            } else if (page === 1) {
-                // Fallback to mock data if no properties in database
-                setProperties(mockProperties)
-                setTotalCount(mockProperties.length)
-                setHasMore(false)
-            }
-        } catch (error) {
-            console.error('Error loading properties:', error)
-            if (page === 1) {
-                setProperties(mockProperties)
-                setTotalCount(mockProperties.length)
-                setHasMore(false)
-            }
-        } finally {
-            setLoading(false)
-            setLoadingMore(false)
-        }
-    }, [filters])
 
     // Load filter options from database
     useEffect(() => {
@@ -113,21 +223,26 @@ export default function PropertiesPage() {
         loadFilterOptions()
     }, [])
 
-    // Initial load
-    useEffect(() => {
-        loadProperties(1, true)
-    }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
     // Reload when filters change
     const handleApplyFilters = () => {
         setCurrentPage(1)
         loadProperties(1, true)
         setShowFilters(false)
+
+        // Search for agents if there's a location/search query
+        if (filters.location && filters.location.trim().length >= 2) {
+            searchAgents(filters.location).then(agents => {
+                setMatchedAgents(agents)
+            })
+        } else {
+            setMatchedAgents([])
+        }
     }
 
     const handleResetFilters = () => {
-        setFilters({ propertyType: '', minPrice: '', maxPrice: '', bedrooms: '', location: '' })
+        setFilters({ propertyType: '', minPrice: '', maxPrice: '', bedrooms: '', location: '', state: '' })
         setCurrentPage(1)
+        setMatchedAgents([])
         // Need to load after state updates
         setTimeout(() => loadProperties(1, true), 0)
     }
@@ -194,7 +309,7 @@ export default function PropertiesPage() {
             <Navbar />
 
             {/* Search Filters Bar - PropertyGuru Style */}
-            <div className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
+            <div className="sticky top-20 z-40 bg-white border-b border-gray-200 shadow-sm">
                 <div className="container-custom py-4">
                     {/* Search Input + Save Search */}
                     <div className="flex gap-4 mb-4">
@@ -222,10 +337,10 @@ export default function PropertiesPage() {
                     </div>
 
                     {/* Quick Filter Pills */}
-                    <div ref={dropdownRef} className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                    <div ref={dropdownRef} className="flex items-center gap-3 flex-wrap">
                         {/* Filters Button */}
                         <button
-                            onClick={() => setShowFilters(!showFilters)}
+                            onClick={() => setFilterModalOpen(true)}
                             className={`filter-pill ${activeFilterCount > 0 ? 'active' : ''}`}
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -437,22 +552,88 @@ export default function PropertiesPage() {
                     </div>
                 </div>
 
-                {/* Properties Grid */}
-                {loading ? (
-                    <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' : 'flex flex-col gap-6'}>
-                        {[1, 2, 3, 4, 5, 6].map((i) => (
-                            <div key={i} className="bg-white rounded-xl h-96 animate-pulse">
-                                <div className="h-56 bg-gray-200 rounded-t-xl"></div>
-                                <div className="p-4 space-y-3">
-                                    <div className="h-6 bg-gray-200 rounded w-2/3"></div>
-                                    <div className="h-4 bg-gray-200 rounded w-full"></div>
-                                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                                </div>
-                            </div>
-                        ))}
+                {/* Matched Agents Section */}
+                {matchedAgents.length > 0 && (
+                    <div className="mb-8">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg font-semibold text-gray-900">
+                                Matching Agents ({matchedAgents.length})
+                            </h2>
+                            <Link href="/agents" className="text-rose-500 text-sm font-medium hover:text-rose-600">
+                                View All Agents →
+                            </Link>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                            {matchedAgents.map((agent) => (
+                                <Link
+                                    key={agent.agent_id}
+                                    href={`/agents/${agent.agent_id}`}
+                                    className="bg-white rounded-xl p-4 border border-gray-200 hover:border-rose-300 hover:shadow-md transition-all group"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        {agent.photo_url ? (
+                                            <img
+                                                src={agent.photo_url}
+                                                alt={agent.name}
+                                                className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100 group-hover:ring-rose-200"
+                                            />
+                                        ) : (
+                                            <div className="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center text-rose-600 font-bold ring-2 ring-gray-100 group-hover:ring-rose-200">
+                                                {agent.name.charAt(0)}
+                                            </div>
+                                        )}
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="font-medium text-gray-900 truncate group-hover:text-rose-600">
+                                                {agent.name}
+                                            </h3>
+                                            {agent.agency && (
+                                                <p className="text-xs text-gray-500 truncate">
+                                                    {agent.agency}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
                     </div>
-                ) : sortedProperties.length > 0 ? (
+                )}
+
+                {/* Agent Properties Section - Shown when agents match */}
+                {!loading && agentProperties.length > 0 && matchedAgents.length > 0 && (
+                    <div className="mb-10">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-xl font-semibold text-gray-900">
+                                Properties by {matchedAgents.length === 1 ? matchedAgents[0].name : 'Matching Agents'} ({agentProperties.length})
+                            </h2>
+                            {matchedAgents.length === 1 && (
+                                <Link
+                                    href={`/agents/${matchedAgents[0].agent_id}`}
+                                    className="text-rose-500 text-sm font-medium hover:text-rose-600"
+                                >
+                                    View Agent Profile →
+                                </Link>
+                            )}
+                        </div>
+                        <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' : 'flex flex-col gap-6'}>
+                            {agentProperties.map((property) => (
+                                <PropertyCard key={property.id} property={property} />
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Regular Properties Section */}
+                {!loading && sortedProperties.length > 0 && !(matchedAgents.length > 0 && sortedProperties.length === 0) && (
                     <>
+                        {/* Section header for regular properties when agent properties are also shown */}
+                        {agentProperties.length > 0 && matchedAgents.length > 0 && (
+                            <div className="mb-4">
+                                <h2 className="text-xl font-semibold text-gray-900">
+                                    Other Properties Matching Your Search ({sortedProperties.length})
+                                </h2>
+                            </div>
+                        )}
                         <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' : 'flex flex-col gap-6'}>
                             {sortedProperties.map((property) => (
                                 <PropertyCard key={property.id} property={property} />
@@ -468,16 +649,40 @@ export default function PropertiesPage() {
                             />
                         )}
                     </>
-                ) : (
+                )}
+
+                {/* Loading State */}
+                {loading && (
+                    <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' : 'flex flex-col gap-6'}>
+                        {[1, 2, 3, 4, 5, 6].map((i) => (
+                            <div key={i} className="bg-white rounded-xl h-96 animate-pulse">
+                                <div className="h-56 bg-gray-200 rounded-t-xl"></div>
+                                <div className="p-4 space-y-3">
+                                    <div className="h-6 bg-gray-200 rounded w-2/3"></div>
+                                    <div className="h-4 bg-gray-200 rounded w-full"></div>
+                                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {/* No Results - Only shown when both property search and agent search return nothing */}
+                {!loading && sortedProperties.length === 0 && agentProperties.length === 0 && (
                     <div className="text-center py-20 bg-white rounded-2xl">
                         <div className="w-20 h-20 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
                             <svg className="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                             </svg>
                         </div>
-                        <h3 className="font-heading font-semibold text-xl text-gray-900 mb-2">No properties found</h3>
+                        <h3 className="font-heading font-semibold text-xl text-gray-900 mb-2">
+                            {filters.location ? `No results for "${filters.location}"` : 'No properties found'}
+                        </h3>
                         <p className="text-gray-500 mb-6 max-w-md mx-auto">
-                            We couldn&apos;t find any properties matching your criteria. Try adjusting your filters or search for a different location.
+                            {filters.location
+                                ? "We couldn't find any properties or agents matching your search. Try a different name or location."
+                                : "We couldn't find any properties matching your criteria. Try adjusting your filters."
+                            }
                         </p>
                         <button
                             onClick={handleResetFilters}
@@ -488,6 +693,18 @@ export default function PropertiesPage() {
                     </div>
                 )}
             </div>
+
+            {/* Filter Modal */}
+            <FilterModal
+                isOpen={filterModalOpen}
+                onClose={() => setFilterModalOpen(false)}
+                filters={filters}
+                onApply={(newFilters) => {
+                    setFilters(newFilters)
+                    loadProperties(1, true, newFilters)
+                }}
+                filterOptions={filterOptions}
+            />
 
             <Footer />
         </div>

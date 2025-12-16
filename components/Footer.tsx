@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function Footer() {
     return (
@@ -8,9 +9,13 @@ export default function Footer() {
                     {/* Company Info */}
                     <div className="col-span-1">
                         <div className="flex items-center space-x-2 mb-4">
-                            <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
-                                <span className="text-white font-bold text-xl">SH</span>
-                            </div>
+                            <Image
+                                src="/logo-icon.svg"
+                                alt="SuperHomes Logo"
+                                width={40}
+                                height={40}
+                                className="w-10 h-10"
+                            />
                             <span className="font-heading font-bold text-2xl">SuperHomes</span>
                         </div>
                         <p className="text-gray-400 text-sm">
@@ -96,7 +101,7 @@ export default function Footer() {
                 </div>
 
                 <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
-                    <p>&copy; 2024 SuperHomes. All rights reserved.</p>
+                    <p>&copy; 2025 SuperHomes. All rights reserved.</p>
                 </div>
             </div>
         </footer>
