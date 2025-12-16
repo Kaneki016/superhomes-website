@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
@@ -61,12 +61,15 @@ export default function PropertiesPage() {
 
 function PropertiesPageContent() {
     const searchParams = useSearchParams()
+    const router = useRouter()
     const [properties, setProperties] = useState<Property[]>([])
     const [matchedAgents, setMatchedAgents] = useState<Agent[]>([])
     const [agentProperties, setAgentProperties] = useState<Property[]>([])
     const [loading, setLoading] = useState(true)
     const [loadingMore, setLoadingMore] = useState(false)
-    const [currentPage, setCurrentPage] = useState(1)
+    // Get initial page from URL or default to 1
+    const initialPage = parseInt(searchParams.get('page') || '1', 10)
+    const [currentPage, setCurrentPage] = useState(initialPage)
     const [totalCount, setTotalCount] = useState(0)
     const [hasMore, setHasMore] = useState(false)
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
@@ -248,6 +251,16 @@ function PropertiesPageContent() {
     }
 
     const handlePageChange = (page: number) => {
+        // Update URL with the new page number while preserving other params
+        const params = new URLSearchParams(searchParams.toString())
+        if (page > 1) {
+            params.set('page', page.toString())
+        } else {
+            params.delete('page')
+        }
+        const queryString = params.toString()
+        router.push(`/properties${queryString ? `?${queryString}` : ''}`, { scroll: false })
+
         loadProperties(page, true)
         // Scroll to top of results
         window.scrollTo({ top: 0, behavior: 'smooth' })

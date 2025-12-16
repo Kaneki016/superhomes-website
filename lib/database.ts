@@ -199,13 +199,13 @@ export async function getDistinctStates(): Promise<string[]> {
     return uniqueStates.sort()
 }
 
-// Fetch featured properties (first 6)
-export async function getFeaturedProperties(): Promise<Property[]> {
+// Fetch featured properties with optional limit
+export async function getFeaturedProperties(limit: number = 8): Promise<Property[]> {
     const { data, error } = await supabase
         .from('properties')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(6)
+        .limit(limit)
 
     if (error) {
         console.error('Error fetching featured properties:', error)
@@ -213,6 +213,46 @@ export async function getFeaturedProperties(): Promise<Property[]> {
     }
 
     return data || []
+}
+
+// Fetch diverse properties (one per agent for variety)
+export async function getDiverseProperties(limit: number = 8): Promise<Property[]> {
+    // Fetch more properties than needed so we can pick unique agents
+    const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(limit * 5) // Fetch more to ensure variety
+
+    if (error) {
+        console.error('Error fetching diverse properties:', error)
+        return []
+    }
+
+    if (!data) return []
+
+    // Pick one property per unique agent
+    const seenAgents = new Set<string>()
+    const diverseProperties: Property[] = []
+
+    for (const property of data) {
+        const agentId = property.agent_id || 'unknown'
+        if (!seenAgents.has(agentId) && diverseProperties.length < limit) {
+            seenAgents.add(agentId)
+            diverseProperties.push(property)
+        }
+    }
+
+    // If we don't have enough unique agents, fill with remaining properties
+    if (diverseProperties.length < limit) {
+        for (const property of data) {
+            if (!diverseProperties.find(p => p.id === property.id) && diverseProperties.length < limit) {
+                diverseProperties.push(property)
+            }
+        }
+    }
+
+    return diverseProperties
 }
 
 // Fetch agent by ID

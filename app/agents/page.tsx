@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
@@ -57,9 +57,12 @@ export default function AgentsPage() {
 
 function AgentsPageContent() {
     const searchParams = useSearchParams()
+    const router = useRouter()
     const [agents, setAgents] = useState<Agent[]>([])
     const [loading, setLoading] = useState(true)
-    const [currentPage, setCurrentPage] = useState(1)
+    // Get initial page from URL or default to 1
+    const initialPage = parseInt(searchParams.get('page') || '1', 10)
+    const [currentPage, setCurrentPage] = useState(initialPage)
     const [totalCount, setTotalCount] = useState(0)
     // Initialize search query directly from URL params
     const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '')
@@ -68,7 +71,7 @@ function AgentsPageContent() {
     const [loadingProperties, setLoadingProperties] = useState(false)
 
     useEffect(() => {
-        loadAgents(1)
+        loadAgents(initialPage)
     }, [])
 
     // Search agents in database when query changes
@@ -153,6 +156,14 @@ function AgentsPageContent() {
     }
 
     const handlePageChange = (page: number) => {
+        // Update URL with the new page number
+        const params = new URLSearchParams()
+        if (page > 1) {
+            params.set('page', page.toString())
+        }
+        const queryString = params.toString()
+        router.push(`/agents${queryString ? `?${queryString}` : ''}`, { scroll: false })
+
         loadAgents(page)
         setSearchQuery('')
         // Scroll to top of results
@@ -332,11 +343,12 @@ function AgentsPageContent() {
                                         </div>
                                     </Link>
 
+
                                     {/* Action Buttons - Outside the Link */}
                                     <div className="px-5 pb-5 pt-4 flex gap-2">
-                                        {agent.whatsapp_link ? (
+                                        {agent.phone ? (
                                             <a
-                                                href={agent.whatsapp_link}
+                                                href={`https://wa.me/${agent.phone.replace(/[^0-9]/g, '')}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 onClick={(e) => e.stopPropagation()}

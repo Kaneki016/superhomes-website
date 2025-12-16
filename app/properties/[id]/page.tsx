@@ -116,11 +116,10 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
     }
 
     const handleWhatsApp = () => {
-        if (!agent || !agent.whatsapp_link) return
+        if (!agent || !agent.phone) return
+        const phoneNumber = agent.phone.replace(/[^0-9]/g, '')
         const message = encodeURIComponent(`Hi, I'm interested in ${property.property_name} listed at ${formatPrice(property.price)}`)
-        // Use the whatsapp_link directly and append our custom message
-        const baseUrl = agent.whatsapp_link.split('?')[0]
-        window.open(`${baseUrl}?text=${message}`, '_blank')
+        window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank')
     }
 
     const handleCall = () => {

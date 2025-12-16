@@ -5,13 +5,14 @@ import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import PropertyCard from '@/components/PropertyCard'
-import { getFeaturedProperties } from '@/lib/database'
+import { getFeaturedProperties, getDiverseProperties } from '@/lib/database'
 import { Property } from '@/lib/supabase'
 // Fallback to mock data if database is empty
 import { mockProperties } from '@/lib/mockData'
 
 export default function HomePage() {
-    const [properties, setProperties] = useState<Property[]>([])
+    const [featuredProperties, setFeaturedProperties] = useState<Property[]>([])
+    const [handpickedProperties, setHandpickedProperties] = useState<Property[]>([])
     const [loading, setLoading] = useState(true)
     const [activeTab, setActiveTab] = useState<'buy' | 'rent'>('buy')
     const [searchQuery, setSearchQuery] = useState('')
@@ -21,22 +22,37 @@ export default function HomePage() {
     const [showPropertyTypeDropdown, setShowPropertyTypeDropdown] = useState(false)
     const [showPriceDropdown, setShowPriceDropdown] = useState(false)
     const [showBedroomDropdown, setShowBedroomDropdown] = useState(false)
+    const [handpickedIndex, setHandpickedIndex] = useState(0)
 
     const filterRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         async function loadProperties() {
             try {
-                const dbProperties = await getFeaturedProperties()
-                // Use database properties if available, otherwise use mock data
-                if (dbProperties.length > 0) {
-                    setProperties(dbProperties)
+                // Fetch Featured (4 newest) and Handpicked (16 from diverse agents) separately
+                const [featured, diverse] = await Promise.all([
+                    getFeaturedProperties(4),
+                    getDiverseProperties(16)
+                ])
+
+                if (featured.length > 0) {
+                    setFeaturedProperties(featured)
                 } else {
-                    setProperties(mockProperties.slice(0, 8))
+                    setFeaturedProperties(mockProperties.slice(0, 4))
+                }
+
+                if (diverse.length > 0) {
+                    // Filter out any properties already in featured
+                    const featuredIds = new Set(featured.map(p => p.id))
+                    const uniqueHandpicked = diverse.filter(p => !featuredIds.has(p.id))
+                    setHandpickedProperties(uniqueHandpicked.slice(0, 16))
+                } else {
+                    setHandpickedProperties(mockProperties.slice(4, 12))
                 }
             } catch (error) {
                 console.error('Error loading properties:', error)
-                setProperties(mockProperties.slice(0, 8))
+                setFeaturedProperties(mockProperties.slice(0, 4))
+                setHandpickedProperties(mockProperties.slice(4, 12))
             } finally {
                 setLoading(false)
             }
@@ -57,8 +73,58 @@ export default function HomePage() {
         return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [])
 
-    const featuredProperties = properties.slice(0, 4)
-    const recentProperties = properties.slice(0, 4)
+    // Number of items to show per slide in handpicked carousel
+    const itemsPerSlide = 8
+    const totalSlides = Math.ceil(handpickedProperties.length / itemsPerSlide)
+
+    // Get current visible properties for carousel
+    const currentHandpickedProperties = handpickedProperties.slice(
+        handpickedIndex * itemsPerSlide,
+        (handpickedIndex + 1) * itemsPerSlide
+    )
+
+    // Auto-slide effect for handpicked carousel
+    const [isTransitioning, setIsTransitioning] = useState(false)
+
+    useEffect(() => {
+        if (totalSlides <= 1) return
+
+        const interval = setInterval(() => {
+            setIsTransitioning(true)
+            setTimeout(() => {
+                setHandpickedIndex((prev) => (prev + 1) % totalSlides)
+                setTimeout(() => setIsTransitioning(false), 50)
+            }, 300)
+        }, 4000) // Change slide every 4 seconds
+
+        return () => clearInterval(interval)
+    }, [totalSlides])
+
+    // Navigation functions for carousel with smooth transition
+    const goToPrevSlide = () => {
+        setIsTransitioning(true)
+        setTimeout(() => {
+            setHandpickedIndex((prev) => (prev - 1 + totalSlides) % totalSlides)
+            setTimeout(() => setIsTransitioning(false), 50)
+        }, 300)
+    }
+
+    const goToNextSlide = () => {
+        setIsTransitioning(true)
+        setTimeout(() => {
+            setHandpickedIndex((prev) => (prev + 1) % totalSlides)
+            setTimeout(() => setIsTransitioning(false), 50)
+        }, 300)
+    }
+
+    const goToSlide = (index: number) => {
+        if (index === handpickedIndex) return
+        setIsTransitioning(true)
+        setTimeout(() => {
+            setHandpickedIndex(index)
+            setTimeout(() => setIsTransitioning(false), 50)
+        }, 300)
+    }
 
     // Malaysian locations for explore section
     const locations = [
@@ -192,6 +258,7 @@ export default function HomePage() {
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                                         className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-rose-300 focus:ring-2 focus:ring-rose-100"
+                                        suppressHydrationWarning
                                     />
                                 </div>
                                 {/* Search Button */}
@@ -458,23 +525,83 @@ export default function HomePage() {
                 </div>
             </section>
 
-            {/* Handpicked For You - Grey Background */}
+            {/* Handpicked For You - Grey Background with Carousel */}
             <section className="py-12 md:py-16 bg-gray-50">
                 <div className="container-custom">
-                    <h2 className="font-heading font-bold text-2xl md:text-3xl text-gray-900 mb-8">Handpicked For You</h2>
+                    <div className="flex items-center justify-between mb-8">
+                        <h2 className="font-heading font-bold text-2xl md:text-3xl text-gray-900">Handpicked For You</h2>
+                        <Link href="/properties" className="text-primary-600 font-semibold hover:text-primary-700 hidden md:flex items-center gap-1">
+                            View All
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                        </Link>
+                    </div>
 
                     {loading ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {[1, 2, 3, 4].map((i) => (
+                            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                                 <div key={i} className="bg-gray-200 rounded-xl h-80 animate-pulse"></div>
                             ))}
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {recentProperties.map((property) => (
-                                <PropertyCard key={property.id} property={property} />
-                            ))}
-                        </div>
+                        <>
+                            {/* Carousel Container with Side Arrows */}
+                            <div className="relative">
+                                {/* Left Arrow - Positioned on Left Side */}
+                                {totalSlides > 1 && (
+                                    <button
+                                        onClick={goToPrevSlide}
+                                        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-6 z-10 w-12 h-12 rounded-full bg-white border border-gray-200 shadow-lg flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:border-primary-300 hover:text-primary-600 transition-all"
+                                        aria-label="Previous properties"
+                                    >
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                        </svg>
+                                    </button>
+                                )}
+
+                                {/* Properties Grid - 2 rows of 4 = 8 total */}
+                                <div
+                                    className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 transition-opacity duration-300 ease-in-out ${isTransitioning ? 'opacity-0' : 'opacity-100'
+                                        }`}
+                                >
+                                    {currentHandpickedProperties.map((property) => (
+                                        <PropertyCard key={property.id} property={property} />
+                                    ))}
+                                </div>
+
+                                {/* Right Arrow - Positioned on Right Side */}
+                                {totalSlides > 1 && (
+                                    <button
+                                        onClick={goToNextSlide}
+                                        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-6 z-10 w-12 h-12 rounded-full bg-white border border-gray-200 shadow-lg flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:border-primary-300 hover:text-primary-600 transition-all"
+                                        aria-label="Next properties"
+                                    >
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Dot Navigation - Below the Grid */}
+                            {totalSlides > 1 && (
+                                <div className="flex justify-center items-center gap-3 mt-8">
+                                    {Array.from({ length: totalSlides }).map((_, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => goToSlide(index)}
+                                            className={`h-3 rounded-full transition-all duration-300 ${index === handpickedIndex
+                                                    ? 'bg-primary-600 w-10'
+                                                    : 'bg-gray-300 hover:bg-gray-400 w-3'
+                                                }`}
+                                            aria-label={`Go to slide ${index + 1}`}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
             </section>

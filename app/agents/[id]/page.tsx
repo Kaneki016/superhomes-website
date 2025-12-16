@@ -185,9 +185,9 @@ export default function AgentDetailPage() {
                                             Call Agent
                                         </a>
                                     )}
-                                    {agent.whatsapp_link && (
+                                    {agent.phone && (
                                         <a
-                                            href={agent.whatsapp_link}
+                                            href={`https://wa.me/${agent.phone.replace(/[^0-9]/g, '')}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="inline-flex items-center gap-2 bg-green-500 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-green-600 transition-colors"

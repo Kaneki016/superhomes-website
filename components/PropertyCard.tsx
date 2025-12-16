@@ -83,11 +83,10 @@ export default function PropertyCard({ property }: PropertyCardProps) {
     const handleContactClick = (e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
-        // Could open a modal or navigate to contact
-        if (agent?.whatsapp_link) {
-            window.open(agent.whatsapp_link, '_blank')
-        } else if (agent?.phone) {
-            window.open(`tel:${agent.phone}`, '_blank')
+        // Open WhatsApp with agent's phone number
+        if (agent?.phone) {
+            const phoneNumber = agent.phone.replace(/[^0-9]/g, '')
+            window.open(`https://wa.me/${phoneNumber}`, '_blank')
         }
     }
 
