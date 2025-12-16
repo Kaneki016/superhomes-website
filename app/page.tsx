@@ -74,7 +74,7 @@ export default function HomePage() {
     }, [])
 
     // Number of items to show per slide in handpicked carousel
-    const itemsPerSlide = 8
+    const itemsPerSlide = 4
     const totalSlides = Math.ceil(handpickedProperties.length / itemsPerSlide)
 
     // Get current visible properties for carousel
@@ -540,7 +540,7 @@ export default function HomePage() {
 
                     {loading ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                            {[1, 2, 3, 4].map((i) => (
                                 <div key={i} className="bg-gray-200 rounded-xl h-80 animate-pulse"></div>
                             ))}
                         </div>
@@ -593,8 +593,8 @@ export default function HomePage() {
                                             key={index}
                                             onClick={() => goToSlide(index)}
                                             className={`h-3 rounded-full transition-all duration-300 ${index === handpickedIndex
-                                                    ? 'bg-primary-600 w-10'
-                                                    : 'bg-gray-300 hover:bg-gray-400 w-3'
+                                                ? 'bg-primary-600 w-10'
+                                                : 'bg-gray-300 hover:bg-gray-400 w-3'
                                                 }`}
                                             aria-label={`Go to slide ${index + 1}`}
                                         />
