@@ -10,13 +10,10 @@ import { supabase } from '@/lib/supabase'
 export default function ProfilePage() {
     const { user, profile, loading } = useAuth()
     const router = useRouter()
-    const [isEditing, setIsEditing] = useState(false)
     const [formData, setFormData] = useState({
         name: '',
         phone: '',
     })
-    const [saving, setSaving] = useState(false)
-    const [message, setMessage] = useState('')
 
     useEffect(() => {
         if (!loading && !user) {
@@ -33,35 +30,6 @@ export default function ProfilePage() {
         }
     }, [profile])
 
-    const handleSave = async () => {
-        if (!user) return
-        setSaving(true)
-        setMessage('')
-
-        try {
-            if (profile?.user_type === 'agent') {
-                const { error } = await supabase
-                    .from('agents')
-                    .update({
-                        name: formData.name,
-                        phone: formData.phone,
-                        whatsapp: formData.phone,
-                        updated_at: new Date().toISOString(),
-                    })
-                    .eq('user_id', user.id)
-
-                if (error) throw error
-            }
-
-            setMessage('Profile updated successfully!')
-            setIsEditing(false)
-        } catch (error) {
-            console.error('Error updating profile:', error)
-            setMessage('Failed to update profile')
-        } finally {
-            setSaving(false)
-        }
-    }
 
     if (loading) {
         return (
@@ -100,16 +68,6 @@ export default function ProfilePage() {
                             </div>
                         </div>
 
-                        {/* Success/Error Message */}
-                        {message && (
-                            <div className={`mb-6 p-4 rounded-lg text-sm ${message.includes('success')
-                                    ? 'bg-green-50 text-green-600 border border-green-200'
-                                    : 'bg-red-50 text-red-600 border border-red-200'
-                                }`}>
-                                {message}
-                            </div>
-                        )}
-
                         {/* Profile Info */}
                         <div className="space-y-6">
                             <div>
@@ -140,9 +98,8 @@ export default function ProfilePage() {
                                         <input
                                             type="text"
                                             value={formData.name}
-                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                            disabled={!isEditing}
-                                            className={`input-field ${!isEditing ? 'bg-gray-100' : ''}`}
+                                            disabled
+                                            className="input-field bg-gray-100 cursor-not-allowed"
                                             placeholder="Your full name"
                                         />
                                     </div>
@@ -152,52 +109,29 @@ export default function ProfilePage() {
                                         <input
                                             type="tel"
                                             value={formData.phone}
-                                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                            disabled={!isEditing}
-                                            className={`input-field ${!isEditing ? 'bg-gray-100' : ''}`}
+                                            disabled
+                                            className="input-field bg-gray-100 cursor-not-allowed"
                                             placeholder="+60 12-345 6789"
                                         />
+                                    </div>
+
+                                    {/* Info Message for Agents */}
+                                    <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                        <div className="flex items-start">
+                                            <svg className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <div className="text-sm text-blue-700">
+                                                <p className="font-medium mb-1">Agent Profile Information</p>
+                                                <p>Your agent profile is managed through PropertyGuru and cannot be edited directly here. To update your contact details or agency information, please contact our support team.</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </>
                             )}
                         </div>
 
-                        {/* Action Buttons */}
-                        {profile?.user_type === 'agent' && (
-                            <div className="mt-8 flex gap-4">
-                                {isEditing ? (
-                                    <>
-                                        <button
-                                            onClick={handleSave}
-                                            disabled={saving}
-                                            className="btn-primary flex items-center"
-                                        >
-                                            {saving ? (
-                                                <>
-                                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                                                    Saving...
-                                                </>
-                                            ) : (
-                                                'Save Changes'
-                                            )}
-                                        </button>
-                                        <button
-                                            onClick={() => setIsEditing(false)}
-                                            className="btn-secondary"
-                                        >
-                                            Cancel
-                                        </button>
-                                    </>
-                                ) : (
-                                    <button
-                                        onClick={() => setIsEditing(true)}
-                                        className="btn-secondary"
-                                    >
-                                        Edit Profile
-                                    </button>
-                                )}
-                            </div>
-                        )}
+                        {/* Removed Edit Button for Agents - profiles are read-only */}
 
                         {/* Account Info */}
                         <div className="mt-8 pt-8 border-t border-gray-200">

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { FavoritesProvider } from '@/contexts/FavoritesContext'
+import ScrollToTop from '@/components/ScrollToTop'
 
 export const metadata: Metadata = {
     title: 'SuperHomes - Your Premium Property Marketplace',
@@ -20,6 +21,7 @@ export default function RootLayout({
                 <AuthProvider>
                     <FavoritesProvider>
                         {children}
+                        <ScrollToTop />
                     </FavoritesProvider>
                 </AuthProvider>
             </body>

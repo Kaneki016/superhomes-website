@@ -7,6 +7,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Pagination from '@/components/Pagination'
 import PropertyCard from '@/components/PropertyCard'
+import { ListSkeleton } from '@/components/SkeletonLoader'
 import { getAgentsPaginated, getPropertiesByAgentIds, searchAgents } from '@/lib/database'
 import { mockAgents } from '@/lib/mockData'
 import { Agent, Property } from '@/lib/supabase'
@@ -25,21 +26,7 @@ function AgentsPageLoading() {
                 </div>
             </div>
             <div className="container-custom py-8">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                        <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden animate-pulse">
-                            <div className="p-6">
-                                <div className="flex items-start gap-4">
-                                    <div className="w-16 h-16 rounded-full bg-gray-200 flex-shrink-0"></div>
-                                    <div className="flex-1">
-                                        <div className="h-5 bg-gray-200 rounded w-3/4 mb-2"></div>
-                                        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                <ListSkeleton count={8} type="agent" />
             </div>
             <Footer />
         </div>
@@ -72,7 +59,8 @@ function AgentsPageContent() {
 
     useEffect(() => {
         loadAgents(initialPage)
-    }, [])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []) // Only run on mount - initialPage is intentionally omitted to prevent refetch on page change
 
     // Search agents in database when query changes
     useEffect(() => {
@@ -256,23 +244,7 @@ function AgentsPageContent() {
 
                 {/* Loading State */}
                 {loading ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                            <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden animate-pulse">
-                                <div className="p-6">
-                                    <div className="flex items-start gap-4">
-                                        <div className="w-16 h-16 rounded-full bg-gray-200 flex-shrink-0"></div>
-                                        <div className="flex-1">
-                                            <div className="h-5 bg-gray-200 rounded w-3/4 mb-2"></div>
-                                            <div className="h-4 bg-gray-200 rounded w-1/2 mb-1"></div>
-                                            <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-                                        </div>
-                                    </div>
-                                    <div className="mt-6 h-10 bg-gray-200 rounded-lg"></div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                    <ListSkeleton count={12} type="agent" />
                 ) : (
                     <>
                         {/* Agents Grid - PropertyGuru Style */}

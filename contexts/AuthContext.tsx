@@ -145,8 +145,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             async (event, session) => {
                 if (!mounted) return
 
-                console.log('Auth event:', event)
-
                 setSession(session)
                 setUser(session?.user ?? null)
 

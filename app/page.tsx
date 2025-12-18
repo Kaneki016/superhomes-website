@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import PropertyCard from '@/components/PropertyCard'
+import PropertyCardSkeleton from '@/components/PropertyCardSkeleton'
 import { getFeaturedProperties, getDiverseProperties } from '@/lib/database'
 import { Property } from '@/lib/supabase'
 // Fallback to mock data if database is empty
@@ -360,8 +361,11 @@ export default function HomePage() {
                             </div>
                         </div>
                     </div>
+
+
                 </div>
             </section>
+
 
             {/* "We'll See You Home" Section */}
             <section className="py-12 md:py-16">
@@ -469,11 +473,11 @@ export default function HomePage() {
                     {loading ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                             {[1, 2, 3, 4].map((i) => (
-                                <div key={i} className="bg-gray-100 rounded-xl h-80 animate-pulse"></div>
+                                <PropertyCardSkeleton key={i} />
                             ))}
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in">
                             {featuredProperties.map((property) => (
                                 <PropertyCard key={property.id} property={property} />
                             ))}
@@ -504,7 +508,7 @@ export default function HomePage() {
                     {loading ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                             {[1, 2, 3, 4].map((i) => (
-                                <div key={i} className="bg-gray-200 rounded-xl h-80 animate-pulse"></div>
+                                <PropertyCardSkeleton key={i} />
                             ))}
                         </div>
                     ) : (
@@ -568,8 +572,8 @@ export default function HomePage() {
                                             key={index}
                                             onClick={() => goToSlide(index)}
                                             className={`h-3 rounded-full transition-all duration-300 ${index === handpickedIndex
-                                                    ? 'bg-primary-600 w-10'
-                                                    : 'bg-gray-300 hover:bg-gray-400 w-3'
+                                                ? 'bg-primary-600 w-10'
+                                                : 'bg-gray-300 hover:bg-gray-400 w-3'
                                                 }`}
                                             aria-label={`Go to slide ${index + 1}`}
                                         />

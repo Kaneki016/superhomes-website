@@ -635,3 +635,107 @@ export async function getFilterOptions(): Promise<{
         }
     }
 }
+
+// ============================================
+// STATISTICS FUNCTIONS FOR DYNAMIC STATS
+// ============================================
+
+// Get total property count
+export async function getPropertyCount(): Promise<number> {
+    const { count, error } = await supabase
+        .from('properties')
+        .select('*', { count: 'exact', head: true })
+
+    if (error) {
+        console.error('Error counting properties:', error)
+        return 0
+    }
+
+    return count || 0
+}
+
+// Get total agent count
+export async function getAgentCount(): Promise<number> {
+    const { count, error } = await supabase
+        .from('agents')
+        .select('*', { count: 'exact', head: true })
+
+    if (error) {
+        console.error('Error counting agents:', error)
+        return 0
+    }
+
+    return count || 0
+}
+
+// Get unique cities count
+export async function getCitiesCount(): Promise<number> {
+    // Try to get city data first
+    const { data: cityData, error: cityError } = await supabase
+        .from('properties')
+        .select('city')
+        .not('city', 'is', null)
+
+    // If city column works and has data, use it
+    if (!cityError && cityData && cityData.length > 0) {
+        const cities = cityData.map(d => d.city).filter(Boolean)
+        const uniqueCities = new Set(cities)
+        return uniqueCities.size
+    }
+
+    // Fallback to state column if city doesn't exist or is empty
+    const { data: stateData, error: stateError } = await supabase
+        .from('properties')
+        .select('state')
+        .not('state', 'is', null)
+
+    if (stateError || !stateData) {
+        // Silently return 0 if both city and state fail
+        return 0
+    }
+
+    // Extract unique states
+    const states = stateData.map(d => d.state).filter(Boolean)
+    const uniqueStates = new Set(states)
+    return uniqueStates.size
+}
+
+// Get properties added in the last 30 days
+export async function getRecentActivityCount(): Promise<number> {
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+    const { count, error } = await supabase
+        .from('properties')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', thirtyDaysAgo.toISOString())
+
+    if (error) {
+        console.error('Error counting recent properties:', error)
+        return 0
+    }
+
+    return count || 0
+}
+
+// Get all stats in one call (more efficient)
+export async function getPlatformStats(): Promise<{
+    propertyCount: number
+    agentCount: number
+    citiesCount: number
+    recentListings: number
+}> {
+    const [propertyCount, agentCount, citiesCount, recentListings] = await Promise.all([
+        getPropertyCount(),
+        getAgentCount(),
+        getCitiesCount(),
+        getRecentActivityCount()
+    ])
+
+    return {
+        propertyCount,
+        agentCount,
+        citiesCount,
+        recentListings
+    }
+}

@@ -8,6 +8,7 @@ import { getAgentByAgentId } from '@/lib/database'
 import { Agent } from '@/lib/supabase'
 import { useFavorites } from '@/contexts/FavoritesContext'
 import { useAuth } from '@/contexts/AuthContext'
+import ImageLightbox from './ImageLightbox'
 
 interface PropertyCardProps {
     property: Property
@@ -21,6 +22,8 @@ export default function PropertyCard({ property }: PropertyCardProps) {
     const [isToggling, setIsToggling] = useState(false)
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
     const [imageError, setImageError] = useState(false)
+    const [imageLoaded, setImageLoaded] = useState(false)
+    const [lightboxOpen, setLightboxOpen] = useState(false)
 
     const favorited = isFavorite(property.id)
 
@@ -106,8 +109,14 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         }
     }
 
+    // Check if property is new (less than 7 days old)
+    const isNew = () => {
+        const daysDiff = Math.floor((new Date().getTime() - new Date(property.created_at).getTime()) / (1000 * 60 * 60 * 24))
+        return daysDiff <= 7
+    }
+
     return (
-        <div className="property-card-v2 group">
+        <div className="property-card-v2 group hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 active:scale-[0.98] touch-manipulation">
             {/* Agent Header */}
             {agent && (
                 <div className="property-card-header">
@@ -140,15 +149,29 @@ export default function PropertyCard({ property }: PropertyCardProps) {
 
             <Link href={`/properties/${property.id}`} className="block">
                 {/* Image Gallery */}
-                <div className="property-card-gallery">
+                <div
+                    className="property-card-gallery cursor-pointer"
+                    onClick={(e) => {
+                        if (images.length > 0) {
+                            e.preventDefault()
+                            setLightboxOpen(true)
+                        }
+                    }}
+                >
                     {/* Main Image */}
                     {images.length > 0 && !imageError ? (
-                        <img
-                            src={images[currentImageIndex]}
-                            alt={property.property_name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                            onError={() => setImageError(true)}
-                        />
+                        <>
+                            <img
+                                src={images[currentImageIndex]}
+                                alt={property.property_name}
+                                className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-500 ${!imageLoaded ? 'blur-md scale-110' : 'blur-0 scale-100'}`}
+                                onLoad={() => setImageLoaded(true)}
+                                onError={() => setImageError(true)}
+                            />
+                            {!imageLoaded && (
+                                <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+                            )}
+                        </>
                     ) : (
                         <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-100 to-primary-50">
                             <svg className="w-16 h-16 text-primary-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -228,8 +251,13 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                         </button>
                     </div>
 
-                    {/* Property Type Badge */}
+                    {/* Property Type & Status Badges */}
                     <div className="property-badge">
+                        {isNew() && (
+                            <span className="badge-pill bg-gradient-primary text-white shadow-md font-semibold">
+                                ✨ New
+                            </span>
+                        )}
                         {property.tenure && (
                             <span className="badge-pill">{property.tenure}</span>
                         )}
@@ -295,6 +323,14 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                     </div>
                 </div>
             </Link>
+
+            {/* Image Lightbox */}
+            <ImageLightbox
+                images={images}
+                initialIndex={currentImageIndex}
+                isOpen={lightboxOpen}
+                onClose={() => setLightboxOpen(false)}
+            />
         </div>
     )
 }

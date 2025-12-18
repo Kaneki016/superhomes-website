@@ -8,6 +8,9 @@ import Footer from '@/components/Footer'
 import PropertyCard from '@/components/PropertyCard'
 import Pagination from '@/components/Pagination'
 import FilterModal from '@/components/FilterModal'
+import FilterChips from '@/components/FilterChips'
+import { ListSkeleton } from '@/components/SkeletonLoader'
+import EmptyState from '@/components/EmptyState'
 import { getPropertiesPaginated, getFilterOptions, searchAgents, getPropertiesByAgentIds } from '@/lib/database'
 import { Property, Agent } from '@/lib/supabase'
 import { mockProperties } from '@/lib/mockData'
@@ -32,18 +35,7 @@ function PropertiesPageLoading() {
                 </div>
             </div>
             <div className="container-custom py-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {[1, 2, 3, 4, 5, 6].map((i) => (
-                        <div key={i} className="bg-white rounded-xl h-96 animate-pulse">
-                            <div className="h-56 bg-gray-200 rounded-t-xl"></div>
-                            <div className="p-4 space-y-3">
-                                <div className="h-6 bg-gray-200 rounded w-2/3"></div>
-                                <div className="h-4 bg-gray-200 rounded w-full"></div>
-                                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                <ListSkeleton count={6} type="property" />
             </div>
             <Footer />
         </div>
@@ -156,12 +148,50 @@ function PropertiesPageContent() {
         const stateParam = searchParams.get('state')
         const locationParam = searchParams.get('location')
         const searchParam = searchParams.get('search')
+        const typeParam = searchParams.get('type')
+        const priceParam = searchParams.get('price')
+        const bedroomsParam = searchParams.get('bedrooms')
+        const listingParam = searchParams.get('listing')
 
-        if (stateParam || locationParam || searchParam) {
+        const hasAnyParam = stateParam || locationParam || searchParam || typeParam || priceParam || bedroomsParam
+
+        if (hasAnyParam) {
+            // Parse price range (e.g., "500000-800000" or "2000000+")
+            let minPrice = ''
+            let maxPrice = ''
+            if (priceParam) {
+                if (priceParam.endsWith('+')) {
+                    minPrice = priceParam.slice(0, -1)
+                } else if (priceParam.includes('-')) {
+                    const [min, max] = priceParam.split('-')
+                    minPrice = min
+                    maxPrice = max
+                }
+            }
+
+            // Map property type values from home page to properties page format
+            const propertyTypeMap: { [key: string]: string } = {
+                'condo': 'Condominium',
+                'apartment': 'Apartment',
+                'terrace': 'Terrace House',
+                'semi-d': 'Semi-D',
+                'bungalow': 'Bungalow',
+                'townhouse': 'Townhouse',
+                'all': '',
+            }
+            const mappedPropertyType = typeParam ? (propertyTypeMap[typeParam] || typeParam) : ''
+
+            // Handle bedroom values (e.g., "5+" becomes "5")
+            const bedroomValue = bedroomsParam ? bedroomsParam.replace('+', '') : ''
+
             setFilters(prev => ({
                 ...prev,
                 state: stateParam || '',
                 location: locationParam || searchParam || '',
+                propertyType: mappedPropertyType,
+                minPrice: minPrice,
+                maxPrice: maxPrice,
+                bedrooms: bedroomValue,
             }))
             // Mark that we need to load after filter update
             initialLoadDone.current = false
@@ -190,15 +220,18 @@ function PropertiesPageContent() {
             setAgentProperties([])
             initialLoadDone.current = true
         }
-    }, [searchParams]) // Only depend on searchParams, not loadProperties
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchParams]) // loadProperties intentionally omitted to prevent infinite loops
 
     // Load when filters are updated from URL params
     useEffect(() => {
-        if (!initialLoadDone.current && (filters.state || filters.location)) {
+        const hasFilters = filters.state || filters.location || filters.propertyType || filters.minPrice || filters.maxPrice || filters.bedrooms
+        if (!initialLoadDone.current && hasFilters) {
             loadProperties(1, true)
             initialLoadDone.current = true
         }
-    }, [filters.state, filters.location]) // Don't include loadProperties here either
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filters.state, filters.location, filters.propertyType, filters.minPrice, filters.maxPrice, filters.bedrooms]) // loadProperties intentionally omitted
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -339,6 +372,7 @@ function PropertiesPageContent() {
                                 onChange={(e) => setFilters({ ...filters, location: e.target.value })}
                                 onKeyDown={(e) => e.key === 'Enter' && handleApplyFilters()}
                                 className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all"
+                                suppressHydrationWarning
                             />
                         </div>
                         <button className="flex items-center gap-2 px-5 py-3 border border-gray-200 rounded-xl bg-white hover:border-primary-400 hover:bg-primary-50 transition-colors">
@@ -387,9 +421,10 @@ function PropertiesPageContent() {
                                         <button
                                             key={type.value}
                                             onClick={() => {
-                                                setFilters({ ...filters, propertyType: type.value })
+                                                const newFilters = { ...filters, propertyType: type.value }
+                                                setFilters(newFilters)
                                                 setOpenDropdown(null)
-                                                loadProperties(1, true)
+                                                loadProperties(1, true, newFilters)
                                             }}
                                             className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${filters.propertyType === type.value ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
                                         >
@@ -418,9 +453,10 @@ function PropertiesPageContent() {
                                         <button
                                             key={idx}
                                             onClick={() => {
-                                                setFilters({ ...filters, minPrice: range.min, maxPrice: range.max })
+                                                const newFilters = { ...filters, minPrice: range.min, maxPrice: range.max }
+                                                setFilters(newFilters)
                                                 setOpenDropdown(null)
-                                                loadProperties(1, true)
+                                                loadProperties(1, true, newFilters)
                                             }}
                                             className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${filters.minPrice === range.min && filters.maxPrice === range.max ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
                                         >
@@ -451,9 +487,10 @@ function PropertiesPageContent() {
                                         <button
                                             key={opt.value}
                                             onClick={() => {
-                                                setFilters({ ...filters, bedrooms: opt.value })
+                                                const newFilters = { ...filters, bedrooms: opt.value }
+                                                setFilters(newFilters)
                                                 setOpenDropdown(null)
-                                                loadProperties(1, true)
+                                                loadProperties(1, true, newFilters)
                                             }}
                                             className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${filters.bedrooms === opt.value ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
                                         >
@@ -499,6 +536,37 @@ function PropertiesPageContent() {
                         </button>
                     </div>
                 </div>
+
+                {/* Active Filter Chips */}
+                <FilterChips
+                    filters={[
+                        filters.location ? { key: 'location', label: 'Location', value: filters.location } : null,
+                        filters.state ? { key: 'state', label: 'State', value: filters.state } : null,
+                        filters.propertyType ? { key: 'propertyType', label: 'Type', value: filters.propertyType } : null,
+                        filters.minPrice || filters.maxPrice ? {
+                            key: 'price',
+                            label: 'Price',
+                            value: filters.minPrice && filters.maxPrice
+                                ? `RM${(parseInt(filters.minPrice) / 1000)}k - RM${(parseInt(filters.maxPrice) / 1000)}k`
+                                : filters.minPrice
+                                    ? `Above RM${(parseInt(filters.minPrice) / 1000)}k`
+                                    : `Under RM${(parseInt(filters.maxPrice) / 1000)}k`
+                        } : null,
+                        filters.bedrooms ? { key: 'bedrooms', label: 'Bedrooms', value: `${filters.bedrooms}+` } : null,
+                    ].filter(Boolean) as { key: string; label: string; value: string }[]}
+                    onRemove={(key) => {
+                        const newFilters = { ...filters }
+                        if (key === 'price') {
+                            newFilters.minPrice = ''
+                            newFilters.maxPrice = ''
+                        } else {
+                            newFilters[key as keyof typeof filters] = ''
+                        }
+                        setFilters(newFilters)
+                        loadProperties(1, true, newFilters)
+                    }}
+                    onClearAll={handleResetFilters}
+                />
             </div>
 
             <div className="container-custom py-6">
@@ -554,7 +622,7 @@ function PropertiesPageContent() {
                                 onChange={(e) => setSortBy(e.target.value)}
                                 className="sort-dropdown appearance-none pr-8"
                             >
-                                <option value="newest">Recommended</option>
+                                <option value="newest">Newest</option>
                                 <option value="price-low">Price: Low to High</option>
                                 <option value="price-high">Price: High to Low</option>
                             </select>
@@ -666,18 +734,7 @@ function PropertiesPageContent() {
 
                 {/* Loading State */}
                 {loading && (
-                    <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' : 'flex flex-col gap-6'}>
-                        {[1, 2, 3, 4, 5, 6].map((i) => (
-                            <div key={i} className="bg-white rounded-xl h-96 animate-pulse">
-                                <div className="h-56 bg-gray-200 rounded-t-xl"></div>
-                                <div className="p-4 space-y-3">
-                                    <div className="h-6 bg-gray-200 rounded w-2/3"></div>
-                                    <div className="h-4 bg-gray-200 rounded w-full"></div>
-                                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                    <ListSkeleton count={12} type="property" />
                 )}
 
                 {/* No Results - Only shown when both property search and agent search return nothing */}

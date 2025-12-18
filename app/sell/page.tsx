@@ -1,11 +1,25 @@
 'use client'
 
-import { useState } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function SellPropertyPage() {
-    const [isLoggedIn] = useState(false)
+    const { user, profile, loading } = useAuth()
+    const isLoggedIn = !!user
+
+    // Show loading spinner while checking auth
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <Navbar />
+                <div className="flex items-center justify-center py-32">
+                    <div className="w-12 h-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+                <Footer />
+            </div>
+        )
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">

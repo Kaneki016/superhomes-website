@@ -199,6 +199,53 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                                 <PropertyDescription text={property.description || ''} />
                             </div>
 
+                            {/* Key Features & Facilities */}
+                            {property.facilities && (property.facilities.amenities?.length > 0 || property.facilities.common_facilities?.length > 0) && (
+                                <div className="mb-6 pb-6 border-b border-gray-200">
+                                    <h2 className="font-heading font-bold text-xl mb-4">Key Features & Facilities</h2>
+
+                                    {/* Amenities */}
+                                    {property.facilities.amenities && property.facilities.amenities.length > 0 && (
+                                        <div className="mb-4">
+                                            <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-3">Amenities</h3>
+                                            <div className="flex flex-wrap gap-2">
+                                                {property.facilities.amenities.map((amenity, index) => (
+                                                    <span
+                                                        key={index}
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-full text-sm font-medium"
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                        {amenity}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Common Facilities */}
+                                    {property.facilities.common_facilities && property.facilities.common_facilities.length > 0 && (
+                                        <div>
+                                            <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-3">Common Facilities</h3>
+                                            <div className="flex flex-wrap gap-2">
+                                                {property.facilities.common_facilities.map((facility, index) => (
+                                                    <span
+                                                        key={index}
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm font-medium"
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                                        </svg>
+                                                        {facility}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
                             {/* Specifications */}
                             <div>
                                 <h2 className="font-heading font-bold text-xl mb-3">Specifications</h2>

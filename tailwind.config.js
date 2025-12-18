@@ -42,6 +42,15 @@ module.exports = {
                 'gradient-primary': 'linear-gradient(135deg, #FF6B9D 0%, #C44569 100%)',
                 'gradient-accent': 'linear-gradient(135deg, #A8E6CF 0%, #6ee7b7 100%)',
             },
+            animation: {
+                'shimmer': 'shimmer 2s infinite linear',
+            },
+            keyframes: {
+                shimmer: {
+                    '0%': { backgroundPosition: '200% 0' },
+                    '100%': { backgroundPosition: '-200% 0' },
+                },
+            },
         },
     },
     plugins: [],

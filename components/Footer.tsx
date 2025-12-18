@@ -55,22 +55,22 @@ export default function Footer() {
                         <h3 className="font-heading font-semibold text-lg mb-4">Property Types</h3>
                         <ul className="space-y-2">
                             <li>
-                                <Link href="/properties?type=condo" className="text-gray-400 hover:text-white transition-colors">
+                                <Link href="/properties?propertyType=Condo" className="text-gray-400 hover:text-white transition-colors">
                                     Condominiums
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/properties?type=landed" className="text-gray-400 hover:text-white transition-colors">
+                                <Link href="/properties?propertyType=Landed" className="text-gray-400 hover:text-white transition-colors">
                                     Landed Properties
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/properties?type=apartment" className="text-gray-400 hover:text-white transition-colors">
+                                <Link href="/properties?propertyType=Apartment" className="text-gray-400 hover:text-white transition-colors">
                                     Apartments
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/properties?type=commercial" className="text-gray-400 hover:text-white transition-colors">
+                                <Link href="/properties?propertyType=Commercial" className="text-gray-400 hover:text-white transition-colors">
                                     Commercial
                                 </Link>
                             </li>
