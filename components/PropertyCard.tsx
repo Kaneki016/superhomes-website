@@ -8,7 +8,6 @@ import { getAgentByAgentId } from '@/lib/database'
 import { Agent } from '@/lib/supabase'
 import { useFavorites } from '@/contexts/FavoritesContext'
 import { useAuth } from '@/contexts/AuthContext'
-import ImageLightbox from './ImageLightbox'
 
 interface PropertyCardProps {
     property: Property
@@ -23,7 +22,6 @@ export default function PropertyCard({ property }: PropertyCardProps) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
     const [imageError, setImageError] = useState(false)
     const [imageLoaded, setImageLoaded] = useState(false)
-    const [lightboxOpen, setLightboxOpen] = useState(false)
 
     const favorited = isFavorite(property.id)
 
@@ -150,13 +148,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
             <Link href={`/properties/${property.id}`} className="block">
                 {/* Image Gallery */}
                 <div
-                    className="property-card-gallery cursor-pointer"
-                    onClick={(e) => {
-                        if (images.length > 0) {
-                            e.preventDefault()
-                            setLightboxOpen(true)
-                        }
-                    }}
+                    className="property-card-gallery"
                 >
                     {/* Main Image */}
                     {images.length > 0 && !imageError ? (
@@ -323,14 +315,6 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                     </div>
                 </div>
             </Link>
-
-            {/* Image Lightbox */}
-            <ImageLightbox
-                images={images}
-                initialIndex={currentImageIndex}
-                isOpen={lightboxOpen}
-                onClose={() => setLightboxOpen(false)}
-            />
         </div>
     )
 }
