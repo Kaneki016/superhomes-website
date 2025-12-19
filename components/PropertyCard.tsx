@@ -84,10 +84,27 @@ export default function PropertyCard({ property }: PropertyCardProps) {
     const handleContactClick = (e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
-        // Open WhatsApp with agent's phone number
+
+        // Open WhatsApp with agent's phone number and property details
         if (agent?.phone) {
             const phoneNumber = agent.phone.replace(/[^0-9]/g, '')
-            window.open(`https://wa.me/${phoneNumber}`, '_blank')
+
+            // Build comprehensive message with property details
+            const propertyDetails = [
+                `*${property.property_name}*`,
+                ``,
+                `Price: ${formatPrice(property.price)}`,
+                property.bedrooms > 0 ? `Bedrooms: ${property.bedrooms}` : null,
+                `Bathrooms: ${property.bathrooms}`,
+                `Size: ${property.size}`,
+                `Location: ${property.state || property.address}`,
+                `Type: ${property.property_type}`,
+                ``,
+                `View details: ${typeof window !== 'undefined' ? `${window.location.origin}/properties/${property.id}` : ''}`
+            ].filter(Boolean).join('\n')
+
+            const message = encodeURIComponent(propertyDetails)
+            window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank')
         }
     }
 

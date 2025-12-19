@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { User, Session } from '@supabase/supabase-js'
+import { Buyer, Agent } from '@/lib/supabase'
 
 interface UserProfile {
     id: string
@@ -10,7 +11,7 @@ interface UserProfile {
     user_type: 'buyer' | 'agent'
     name?: string
     phone?: string
-    whatsapp?: string
+    agent_id?: string // For agents: their PropertyGuru agent ID
 }
 
 interface AuthContextType {
@@ -19,7 +20,7 @@ interface AuthContextType {
     session: Session | null
     loading: boolean
     signIn: (email: string, password: string) => Promise<{ error: Error | null }>
-    signUp: (email: string, password: string, userData: { name: string; userType: 'buyer' | 'agent'; phone?: string }) => Promise<{ error: Error | null }>
+    signUp: (email: string, password: string, userData: { name: string; userType: 'buyer' | 'agent'; phone?: string; agency?: string }) => Promise<{ error: Error | null }>
     signOut: () => Promise<void>
     signInWithGoogle: () => Promise<{ error: Error | null }>
 }
@@ -35,76 +36,68 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Memoized fetch profile function with timeout
     const fetchProfile = useCallback(async (userId: string, userEmail: string) => {
         try {
-            // Add timeout to prevent hanging
-            const controller = new AbortController()
-            const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
-
-            const { data, error } = await supabase
-                .from('users')
+            // First check if user is a buyer
+            const { data: buyerData, error: buyerError } = await supabase
+                .from('buyers')
                 .select('*')
-                .eq('id', userId)
+                .eq('auth_id', userId)
                 .single()
 
-            clearTimeout(timeoutId)
-
-            if (error) {
-                // Profile doesn't exist - create a default one for OAuth users
-                if (error.code === 'PGRST116') {
-                    // No profile found, create one
-                    const { data: newProfile, error: insertError } = await supabase
-                        .from('users')
-                        .insert({
-                            id: userId,
-                            email: userEmail,
-                            user_type: 'buyer',
-                        })
-                        .select()
-                        .single()
-
-                    if (!insertError && newProfile) {
-                        setProfile(newProfile)
-                    } else {
-                        // If insert fails, just set a minimal profile from auth data
-                        setProfile({
-                            id: userId,
-                            email: userEmail,
-                            user_type: 'buyer',
-                        })
-                    }
-                } else {
-                    console.error('Error fetching profile:', error)
-                    // Set minimal profile from auth data
-                    setProfile({
-                        id: userId,
-                        email: userEmail,
-                        user_type: 'buyer',
-                    })
-                }
+            if (buyerData) {
+                setProfile({
+                    id: buyerData.id,
+                    email: buyerData.email,
+                    user_type: 'buyer',
+                    name: buyerData.name,
+                    phone: buyerData.phone,
+                })
                 return
             }
 
-            if (data) {
-                // If user is an agent, also fetch agent details
-                if (data.user_type === 'agent') {
-                    const { data: agentData } = await supabase
-                        .from('agents')
-                        .select('name, phone, whatsapp')
-                        .eq('user_id', userId)
-                        .single()
+            // If not a buyer, check if user is an agent
+            const { data: agentData, error: agentError } = await supabase
+                .from('agents')
+                .select('*')
+                .eq('auth_id', userId)
+                .single()
 
-                    setProfile({
-                        ...data,
-                        name: agentData?.name,
-                        phone: agentData?.phone,
-                        whatsapp: agentData?.whatsapp,
-                    })
-                } else {
-                    setProfile(data)
-                }
+            if (agentData) {
+                setProfile({
+                    id: agentData.id,
+                    email: agentData.email || userEmail,
+                    user_type: 'agent',
+                    name: agentData.name,
+                    phone: agentData.phone,
+                })
+                return
+            }
+
+            // If neither exists, create a buyer profile (OAuth case)
+            const { data: newBuyer, error: insertError } = await supabase
+                .from('buyers')
+                .insert({
+                    auth_id: userId,
+                    email: userEmail,
+                })
+                .select()
+                .single()
+
+            if (!insertError && newBuyer) {
+                setProfile({
+                    id: newBuyer.id,
+                    email: newBuyer.email,
+                    user_type: 'buyer',
+                })
+            } else {
+                // Fallback minimal profile
+                setProfile({
+                    id: userId,
+                    email: userEmail,
+                    user_type: 'buyer',
+                })
             }
         } catch (error) {
             console.error('Error fetching profile:', error)
-            // Set minimal profile on error
             setProfile({
                 id: userId,
                 email: userEmail,
@@ -182,10 +175,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const signUp = async (
         email: string,
         password: string,
-        userData: { name: string; userType: 'buyer' | 'agent'; phone?: string }
+        userData: { name: string; userType: 'buyer' | 'agent'; phone?: string; agency?: string }
     ) => {
         try {
-            // 1. Create auth user (trigger will auto-create profile in users table)
+            // 1. Create auth user
             const { data: authData, error: authError } = await supabase.auth.signUp({
                 email,
                 password,
@@ -198,44 +191,90 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             })
 
             if (authError) return { error: authError }
+            if (!authData.user) return { error: new Error('No user data returned') }
 
-            if (authData.user) {
-                // 2. Update user_type if agent (trigger creates as 'buyer' by default)
-                if (userData.userType === 'agent') {
-                    // Wait a moment for the trigger to complete
-                    await new Promise(resolve => setTimeout(resolve, 500))
+            // 2. Create profile based on user type
+            if (userData.userType === 'buyer') {
+                // Create buyer profile
+                const { error: buyerError } = await supabase
+                    .from('buyers')
+                    .insert({
+                        auth_id: authData.user.id,
+                        email: email,
+                        name: userData.name,
+                        phone: userData.phone,
+                    })
 
+                if (buyerError) {
+                    console.error('Buyer creation error:', buyerError)
+                    return { error: new Error('Failed to create buyer profile') }
+                }
+            } else if (userData.userType === 'agent') {
+                // Check if agent with this phone/email already exists (from scraping)
+                let existingAgent = null
+
+                // FIRST: Check by phone (most reliable for scraped agents)
+                if (userData.phone) {
+                    const { data } = await supabase
+                        .from('agents')
+                        .select('*')
+                        .eq('phone', userData.phone)
+                        .is('auth_id', null)
+                        .single()
+                    existingAgent = data
+                }
+
+                // FALLBACK: Check by email if phone didn't match
+                if (!existingAgent && email) {
+                    const { data } = await supabase
+                        .from('agents')
+                        .select('*')
+                        .eq('email', email)
+                        .is('auth_id', null)
+                        .single()
+                    existingAgent = data
+                }
+
+                if (existingAgent) {
+                    // Agent exists - claim the profile
                     const { error: updateError } = await supabase
-                        .from('users')
-                        .update({ user_type: 'agent' })
-                        .eq('id', authData.user.id)
+                        .from('agents')
+                        .update({
+                            auth_id: authData.user.id,
+                            email: email, // Add email to the scraped profile
+                            name: userData.name || existingAgent.name, // Keep existing name if not provided
+                            phone: userData.phone || existingAgent.phone,
+                            agency: userData.agency || existingAgent.agency,
+                        })
+                        .eq('id', existingAgent.id)
 
                     if (updateError) {
-                        console.error('User type update error:', updateError)
-                        // Don't fail registration, just log the error
+                        console.error('Agent profile claim error:', updateError)
+                        return { error: new Error('Failed to claim agent profile') }
                     }
+                } else {
+                    // Create new agent profile
+                    const { error: agentError } = await supabase
+                        .from('agents')
+                        .insert({
+                            auth_id: authData.user.id,
+                            agent_id: `agent_${authData.user.id.substring(0, 8)}`,
+                            email: email,
+                            name: userData.name,
+                            phone: userData.phone,
+                            agency: userData.agency,
+                        })
 
-                    // 3. Create agent profile
-                    if (userData.phone) {
-                        const { error: agentError } = await supabase
-                            .from('agents')
-                            .insert({
-                                user_id: authData.user.id,
-                                name: userData.name,
-                                phone: userData.phone,
-                                whatsapp: userData.phone,
-                            })
-
-                        if (agentError) {
-                            console.error('Agent creation error:', agentError)
-                            // Don't fail registration for agent profile error
-                        }
+                    if (agentError) {
+                        console.error('Agent creation error:', agentError)
+                        return { error: new Error('Failed to create agent profile') }
                     }
                 }
             }
 
             return { error: null }
         } catch (error) {
+            console.error('SignUp error:', error)
             return { error: error as Error }
         }
     }

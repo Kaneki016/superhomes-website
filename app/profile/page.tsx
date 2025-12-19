@@ -14,6 +14,8 @@ export default function ProfilePage() {
         name: '',
         phone: '',
     })
+    const [saving, setSaving] = useState(false)
+    const [saveMessage, setSaveMessage] = useState('')
 
     useEffect(() => {
         if (!loading && !user) {
@@ -30,6 +32,57 @@ export default function ProfilePage() {
         }
     }, [profile])
 
+    const handleSave = async () => {
+        if (!user || !profile) return
+
+        console.log('Starting save...', { userId: user.id, profileType: profile.user_type })
+
+        setSaving(true)
+        setSaveMessage('')
+
+        try {
+            if (profile.user_type === 'buyer') {
+                console.log('Attempting to update buyer profile...', {
+                    auth_id: user.id,
+                    name: formData.name,
+                    phone: formData.phone
+                })
+
+                // Update buyer profile
+                const { data, error } = await supabase
+                    .from('buyers')
+                    .update({
+                        name: formData.name || null,
+                        phone: formData.phone || null,
+                        updated_at: new Date().toISOString(),
+                    })
+                    .eq('auth_id', user.id)
+                    .select()
+
+                console.log('Update result:', { data, error })
+
+                if (error) {
+                    console.error('Error updating profile:', error)
+                    setSaveMessage(`Failed to update profile: ${error.message}`)
+                } else if (!data || data.length === 0) {
+                    console.error('No buyer record found for auth_id:', user.id)
+                    setSaveMessage('Profile not found. Please try logging out and back in.')
+                } else {
+                    console.log('Profile updated successfully!')
+                    setSaveMessage('Profile updated successfully!')
+                    // Refresh the page after a brief delay to show updated data
+                    setTimeout(() => {
+                        window.location.reload()
+                    }, 800)
+                }
+            }
+        } catch (error) {
+            console.error('Error:', error)
+            setSaveMessage('An error occurred. Please try again.')
+        } finally {
+            setSaving(false)
+        }
+    }
 
     if (loading) {
         return (
@@ -68,6 +121,13 @@ export default function ProfilePage() {
                             </div>
                         </div>
 
+                        {/* Save Message */}
+                        {saveMessage && (
+                            <div className={`mb-6 p-4 rounded-lg ${saveMessage.includes('success') ? 'bg-green-50 border border-green-200 text-green-700' : 'bg-red-50 border border-red-200 text-red-700'}`}>
+                                {saveMessage}
+                            </div>
+                        )}
+
                         {/* Profile Info */}
                         <div className="space-y-6">
                             <div>
@@ -91,7 +151,54 @@ export default function ProfilePage() {
                                 />
                             </div>
 
-                            {profile?.user_type === 'agent' && (
+                            {profile?.user_type === 'buyer' ? (
+                                <>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                                        <input
+                                            type="text"
+                                            value={formData.name}
+                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                            className="input-field"
+                                            placeholder="Enter your full name"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                                        <input
+                                            type="tel"
+                                            value={formData.phone}
+                                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                            className="input-field"
+                                            placeholder="+60 12-345 6789"
+                                        />
+                                    </div>
+
+                                    {/* Save Button */}
+                                    <div className="pt-4">
+                                        <button
+                                            onClick={handleSave}
+                                            disabled={saving}
+                                            className="btn-primary w-full sm:w-auto flex items-center justify-center"
+                                        >
+                                            {saving ? (
+                                                <>
+                                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                                    Saving...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                    Save Changes
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </>
+                            ) : (
                                 <>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
@@ -130,8 +237,6 @@ export default function ProfilePage() {
                                 </>
                             )}
                         </div>
-
-                        {/* Removed Edit Button for Agents - profiles are read-only */}
 
                         {/* Account Info */}
                         <div className="mt-8 pt-8 border-t border-gray-200">

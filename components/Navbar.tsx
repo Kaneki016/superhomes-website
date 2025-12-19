@@ -4,11 +4,13 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+import { useFavorites } from '@/contexts/FavoritesContext'
 
 export default function Navbar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [userMenuOpen, setUserMenuOpen] = useState(false)
     const { user, profile, loading, signOut } = useAuth()
+    const { favorites } = useFavorites()
 
     const handleSignOut = async () => {
         setUserMenuOpen(false)
@@ -103,13 +105,20 @@ export default function Navbar() {
 
                                         <Link
                                             href="/favorites"
-                                            className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50"
+                                            className="flex items-center justify-between px-4 py-2 text-gray-700 hover:bg-gray-50"
                                             onClick={() => setUserMenuOpen(false)}
                                         >
-                                            <svg className="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                            </svg>
-                                            Saved Properties
+                                            <div className="flex items-center">
+                                                <svg className="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                                </svg>
+                                                Saved Properties
+                                            </div>
+                                            {favorites.length > 0 && (
+                                                <span className="px-2 py-0.5 text-xs font-semibold bg-primary-100 text-primary-600 rounded-full">
+                                                    {favorites.length}
+                                                </span>
+                                            )}
                                         </Link>
 
                                         <div className="border-t border-gray-100 mt-2 pt-2">

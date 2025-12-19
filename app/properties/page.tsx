@@ -14,6 +14,7 @@ import EmptyState from '@/components/EmptyState'
 import { getPropertiesPaginated, getFilterOptions, searchAgents, getPropertiesByAgentIds } from '@/lib/database'
 import { Property, Agent } from '@/lib/supabase'
 import { mockProperties } from '@/lib/mockData'
+import { useAuth } from '@/contexts/AuthContext'
 
 const PROPERTIES_PER_PAGE = 12
 
@@ -54,6 +55,7 @@ export default function PropertiesPage() {
 function PropertiesPageContent() {
     const searchParams = useSearchParams()
     const router = useRouter()
+    const { user } = useAuth()
     const [properties, setProperties] = useState<Property[]>([])
     const [matchedAgents, setMatchedAgents] = useState<Agent[]>([])
     const [agentProperties, setAgentProperties] = useState<Property[]>([])
@@ -299,6 +301,18 @@ function PropertiesPageContent() {
         window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
+    const handleSaveSearch = () => {
+        if (!user) {
+            // Redirect to login page if user is not logged in
+            router.push('/login?message=' + encodeURIComponent('Please login to save your search and get notified of new matching properties.'))
+            return
+        }
+
+        // User is logged in - show success message (future: save to database)
+        alert('Search saved! We\'ll notify you when new properties match your criteria. You can view your saved searches in your profile.')
+        // TODO: Implement actual save to database/user preferences
+    }
+
     const totalPages = Math.ceil(totalCount / PROPERTIES_PER_PAGE)
 
     // Sort properties client-side
@@ -375,7 +389,10 @@ function PropertiesPageContent() {
                                 suppressHydrationWarning
                             />
                         </div>
-                        <button className="flex items-center gap-2 px-5 py-3 border border-gray-200 rounded-xl bg-white hover:border-primary-400 hover:bg-primary-50 transition-colors">
+                        <button
+                            onClick={handleSaveSearch}
+                            className="flex items-center gap-2 px-5 py-3 border border-gray-200 rounded-xl bg-white hover:border-primary-400 hover:bg-primary-50 transition-colors"
+                        >
                             <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                             </svg>

@@ -16,13 +16,13 @@ interface FavoritesContextType {
 const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined)
 
 export function FavoritesProvider({ children }: { children: ReactNode }) {
-    const { user } = useAuth()
+    const { user, profile } = useAuth()
     const [favorites, setFavorites] = useState<string[]>([])
     const [loading, setLoading] = useState(true)
 
     // Fetch user's favorites
     const fetchFavorites = useCallback(async () => {
-        if (!user) {
+        if (!user || !profile) {
             setFavorites([])
             setLoading(false)
             return
@@ -32,7 +32,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
             const { data, error } = await supabase
                 .from('favorites')
                 .select('property_id')
-                .eq('user_id', user.id)
+                .eq('buyer_id', profile.id) // Use profile.id (buyer database ID), not user.id (auth_id)
 
             if (error) {
                 console.error('Error fetching favorites:', error)
@@ -46,7 +46,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
         } finally {
             setLoading(false)
         }
-    }, [user])
+    }, [user, profile])
 
     // Fetch favorites when user changes
     useEffect(() => {
@@ -55,13 +55,13 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
     // Add a property to favorites
     const addFavorite = async (propertyId: string): Promise<boolean> => {
-        if (!user) return false
+        if (!user || !profile) return false
 
         try {
             const { error } = await supabase
                 .from('favorites')
                 .insert({
-                    user_id: user.id,
+                    buyer_id: profile.id, // Use profile.id (buyer database ID)
                     property_id: propertyId,
                 })
 
@@ -85,13 +85,13 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
     // Remove a property from favorites
     const removeFavorite = async (propertyId: string): Promise<boolean> => {
-        if (!user) return false
+        if (!user || !profile) return false
 
         try {
             const { error } = await supabase
                 .from('favorites')
                 .delete()
-                .eq('user_id', user.id)
+                .eq('buyer_id', profile.id) // Use profile.id (buyer database ID)
                 .eq('property_id', propertyId)
 
             if (error) {

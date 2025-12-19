@@ -8,8 +8,7 @@ import Footer from '@/components/Footer'
 import PropertyCard from '@/components/PropertyCard'
 import { useAuth } from '@/contexts/AuthContext'
 import { useFavorites } from '@/contexts/FavoritesContext'
-import { getFavoriteProperties } from '@/lib/database'
-import { Property } from '@/lib/supabase'
+import { supabase, Property } from '@/lib/supabase'
 
 export default function FavoritesPage() {
     const { user, loading: authLoading } = useAuth()
@@ -26,18 +25,43 @@ export default function FavoritesPage() {
     }, [user, authLoading, router])
 
     // Fetch favorite properties when favorites change
+    // Fetch favorite properties when favorites change
     useEffect(() => {
         const fetchProperties = async () => {
-            if (!user || favorites.length === 0) {
+            // Don't do anything if still loading auth or favorites
+            if (authLoading || favoritesLoading) {
+                return
+            }
+
+            // If no user, clear properties
+            if (!user) {
                 setProperties([])
                 setLoadingProperties(false)
                 return
             }
 
+            // If favorites context loaded but no favorites, show empty
+            if (favorites.length === 0) {
+                setProperties([])
+                setLoadingProperties(false)
+                return
+            }
+
+            // Fetch properties for the favorited IDs
             setLoadingProperties(true)
             try {
-                const favProperties = await getFavoriteProperties(user.id)
-                setProperties(favProperties)
+                const { data, error } = await supabase
+                    .from('properties')
+                    .select('*')
+                    .in('id', favorites)
+                    .order('created_at', { ascending: false })
+
+                if (error) {
+                    console.error('Error fetching favorite properties:', error)
+                    setProperties([])
+                } else {
+                    setProperties(data || [])
+                }
             } catch (error) {
                 console.error('Error fetching favorite properties:', error)
                 setProperties([])
@@ -46,10 +70,8 @@ export default function FavoritesPage() {
             }
         }
 
-        if (!favoritesLoading) {
-            fetchProperties()
-        }
-    }, [user, favorites, favoritesLoading])
+        fetchProperties()
+    }, [user, favorites, favoritesLoading, authLoading])
 
     // Show loading state
     if (authLoading || favoritesLoading) {

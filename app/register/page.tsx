@@ -14,6 +14,7 @@ export default function RegisterPage() {
         name: '',
         email: '',
         phone: '',
+        agency: '', // For agents
         password: '',
         confirmPassword: '',
     })
@@ -51,6 +52,7 @@ export default function RegisterPage() {
             name: formData.name,
             userType: userType,
             phone: formData.phone || undefined,
+            agency: formData.agency || undefined,
         })
 
         if (error) {
@@ -173,18 +175,31 @@ export default function RegisterPage() {
                             </div>
 
                             {userType === 'agent' && (
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Phone / WhatsApp</label>
-                                    <input
-                                        type="tel"
-                                        value={formData.phone}
-                                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                        placeholder="+60 12-345 6789"
-                                        className="input-field"
-                                        required
-                                        disabled={loading}
-                                    />
-                                </div>
+                                <>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Phone / WhatsApp</label>
+                                        <input
+                                            type="tel"
+                                            value={formData.phone}
+                                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                            placeholder="+60 12-345 6789"
+                                            className="input-field"
+                                            required
+                                            disabled={loading}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Agency (Optional)</label>
+                                        <input
+                                            type="text"
+                                            value={formData.agency}
+                                            onChange={(e) => setFormData({ ...formData, agency: e.target.value })}
+                                            placeholder="e.g., PropertyGuru, iProperty"
+                                            className="input-field"
+                                            disabled={loading}
+                                        />
+                                    </div>
+                                </>
                             )}
 
                             <div>

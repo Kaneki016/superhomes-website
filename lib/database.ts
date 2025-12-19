@@ -455,12 +455,12 @@ export const locations = [
 ]
 
 // Get user's favorite properties
-export async function getFavoriteProperties(userId: string): Promise<Property[]> {
+export async function getFavoriteProperties(buyerId: string): Promise<Property[]> {
     // First get the favorite property IDs
     const { data: favorites, error: favError } = await supabase
         .from('favorites')
         .select('property_id')
-        .eq('user_id', userId)
+        .eq('buyer_id', buyerId) // Changed from user_id to buyer_id
 
     if (favError || !favorites || favorites.length === 0) {
         return []

@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext'
 export default function LoginPage() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [rememberMe, setRememberMe] = useState(true) // Default to true (always remember)
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
     const router = useRouter()
@@ -98,7 +99,12 @@ export default function LoginPage() {
 
                             <div className="flex items-center justify-between">
                                 <label className="flex items-center">
-                                    <input type="checkbox" className="rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
+                                    <input
+                                        type="checkbox"
+                                        checked={rememberMe}
+                                        onChange={(e) => setRememberMe(e.target.checked)}
+                                        className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                    />
                                     <span className="ml-2 text-sm text-gray-600">Remember me</span>
                                 </label>
                                 <Link href="/forgot-password" className="text-sm text-primary-600 hover:text-primary-700">
@@ -146,6 +152,14 @@ export default function LoginPage() {
                             </svg>
                             Continue with Google
                         </button>
+
+                        {/* Agent Notice */}
+                        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <p className="text-xs text-blue-700 text-center">
+                                <strong>Are you a property agent?</strong><br />
+                                Please <Link href="/register" className="underline font-medium hover:text-blue-800">register here</Link> with your phone number to verify your agent profile.
+                            </p>
+                        </div>
 
                         {/* Register Link */}
                         <p className="mt-8 text-center text-sm text-gray-600">

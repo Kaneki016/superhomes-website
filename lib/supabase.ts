@@ -40,7 +40,8 @@ export interface Property {
 
 export interface Agent {
     id: string
-    agent_id: string // PropertyGuru agent ID
+    auth_id?: string | null // Supabase Auth ID - only set when agent registers/claims profile
+    agent_id: string // PropertyGuru agent ID or generated ID for new registrations
     name: string
     phone: string | null
     email: string | null
@@ -52,16 +53,19 @@ export interface Agent {
     updated_at: string
 }
 
-export interface User {
+export interface Buyer {
     id: string
+    auth_id: string // Supabase Auth ID
     email: string
-    user_type: 'buyer' | 'agent'
+    name?: string | null
+    phone?: string | null
     created_at: string
+    updated_at: string
 }
 
 export interface Favorite {
     id: string
-    user_id: string
+    buyer_id: string // References buyers table
     property_id: string
     created_at: string
 }
