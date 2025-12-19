@@ -166,7 +166,7 @@ export default function DashboardPage() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                             </svg>
                             <h3 className="font-semibold text-gray-900 mb-2">No Properties Yet</h3>
-                            <p className="text-gray-600 mb-6">Your property listings will appear here once they're added to the system.</p>
+                            <p className="text-gray-600 mb-6">Your property listings will appear here once they&apos;re added to the system.</p>
                         </div>
                     )}
                 </div>
@@ -176,3 +176,4 @@ export default function DashboardPage() {
         </div>
     )
 }
+
