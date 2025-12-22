@@ -33,7 +33,7 @@ export default function DashboardPage() {
 
             try {
                 const { data, error } = await supabase
-                    .from('properties')
+                    .from('dup_properties')
                     .select('*')
                     .eq('agent_id', profile.agent_id)
                     .order('created_at', { ascending: false })

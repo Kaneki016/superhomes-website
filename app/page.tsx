@@ -15,7 +15,7 @@ export default function HomePage() {
     const [featuredProperties, setFeaturedProperties] = useState<Property[]>([])
     const [handpickedProperties, setHandpickedProperties] = useState<Property[]>([])
     const [loading, setLoading] = useState(true)
-    const [activeTab, setActiveTab] = useState<'buy' | 'rent'>('buy')
+    // Buy/Rent toggle removed - listing type data not available yet
     const [searchQuery, setSearchQuery] = useState('')
     const [propertyType, setPropertyType] = useState('all')
     const [priceRange, setPriceRange] = useState('')
@@ -112,9 +112,7 @@ export default function HomePage() {
         if (bedrooms) {
             params.set('bedrooms', bedrooms)
         }
-        if (activeTab === 'rent') {
-            params.set('listing', 'rent')
-        }
+        // Listing type filter removed - data not available yet
         const queryString = params.toString()
         window.location.href = `/properties${queryString ? `?${queryString}` : ''}`
     }
@@ -183,29 +181,7 @@ export default function HomePage() {
 
                     {/* Search Container */}
                     <div className="max-w-4xl mx-auto">
-                        {/* Buy/Rent Tabs */}
-                        <div className="flex justify-center mb-4">
-                            <div className="inline-flex bg-white rounded-lg p-1 shadow-sm border border-gray-200">
-                                <button
-                                    onClick={() => setActiveTab('buy')}
-                                    className={`px-6 py-2 font-semibold text-sm rounded-md transition-all ${activeTab === 'buy'
-                                        ? 'bg-rose-500 text-white'
-                                        : 'text-gray-600 hover:text-gray-900'
-                                        }`}
-                                >
-                                    Buy
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('rent')}
-                                    className={`px-6 py-2 font-semibold text-sm rounded-md transition-all ${activeTab === 'rent'
-                                        ? 'bg-rose-500 text-white'
-                                        : 'text-gray-600 hover:text-gray-900'
-                                        }`}
-                                >
-                                    Rent
-                                </button>
-                            </div>
-                        </div>
+                        {/* Buy/Rent toggle removed - will be added when listing_type data is available */}
 
                         {/* Main Search Box */}
                         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6">
@@ -232,7 +208,7 @@ export default function HomePage() {
                                     onClick={handleSearch}
                                     className="bg-rose-500 hover:bg-rose-600 text-white px-8 py-4 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
                                 >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                     </svg>
                                     <span className="hidden md:inline">Search</span>

@@ -11,6 +11,7 @@ import FilterModal from '@/components/FilterModal'
 import FilterChips from '@/components/FilterChips'
 import { ListSkeleton } from '@/components/SkeletonLoader'
 import EmptyState from '@/components/EmptyState'
+import PropertyMap from '@/components/PropertyMap'
 import { getPropertiesPaginated, getFilterOptions, searchAgents, getPropertiesByAgentIds } from '@/lib/database'
 import { Property, Agent } from '@/lib/supabase'
 import { mockProperties } from '@/lib/mockData'
@@ -732,11 +733,45 @@ function PropertiesPageContent() {
                                 </h2>
                             </div>
                         )}
-                        <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' : 'flex flex-col gap-6'}>
-                            {sortedProperties.map((property) => (
-                                <PropertyCard key={property.id} property={property} />
-                            ))}
-                        </div>
+
+                        {/* Map View - Split Screen Layout */}
+                        {mapView ? (
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6" style={{ height: 'calc(100vh - 400px)', minHeight: '600px' }}>
+                                {/* Left: Property List (scrollable) */}
+                                <div className="overflow-y-auto pr-2" style={{ maxHeight: 'calc(100vh - 400px)' }}>
+                                    <div className="flex flex-col gap-6">
+                                        {sortedProperties.map((property) => (
+                                            <PropertyCard key={property.id} property={property} />
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Right: Map (sticky) */}
+                                <div className="hidden lg:block sticky top-24 h-full">
+                                    <PropertyMap
+                                        properties={sortedProperties}
+                                        className="border border-gray-200 shadow-sm"
+                                    />
+                                </div>
+
+                                {/* Mobile: Full-screen map below list */}
+                                <div className="lg:hidden col-span-1">
+                                    <div className="h-96">
+                                        <PropertyMap
+                                            properties={sortedProperties}
+                                            className="border border-gray-200 shadow-sm"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            /* Grid/List View */
+                            <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' : 'flex flex-col gap-6'}>
+                                {sortedProperties.map((property) => (
+                                    <PropertyCard key={property.id} property={property} />
+                                ))}
+                            </div>
+                        )}
 
                         {/* Pagination */}
                         {totalPages > 1 && (

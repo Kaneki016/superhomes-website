@@ -3,7 +3,7 @@ import { supabase, Property, Agent } from './supabase'
 // Fetch all active properties
 export async function getProperties(): Promise<Property[]> {
     const { data, error } = await supabase
-        .from('properties')
+        .from('dup_properties')
         .select('*')
         .order('created_at', { ascending: false })
 
@@ -37,12 +37,12 @@ export async function getPropertiesPaginated(
 
     // Build base query for count
     let countQuery = supabase
-        .from('properties')
+        .from('dup_properties')
         .select('*', { count: 'exact', head: true })
 
     // Build base query for data
     let dataQuery = supabase
-        .from('properties')
+        .from('dup_properties')
         .select('*')
 
     // Apply filters to both queries
@@ -80,8 +80,9 @@ export async function getPropertiesPaginated(
         return { properties: [], totalCount: 0, hasMore: false }
     }
 
-    // Get paginated data
+    // Get paginated data - sort by coordinates first (geocoded properties appear first), then by date
     const { data, error } = await dataQuery
+        .order('latitude', { ascending: false, nullsFirst: false }) // Properties with coordinates first
         .order('created_at', { ascending: false })
         .range(from, to)
 
@@ -115,7 +116,7 @@ export async function getPropertiesByAgentId(
 
     // Get total count
     const { count, error: countError } = await supabase
-        .from('properties')
+        .from('dup_properties')
         .select('*', { count: 'exact', head: true })
         .eq('agent_id', agentId)
 
@@ -125,7 +126,7 @@ export async function getPropertiesByAgentId(
 
     // Get paginated data
     const { data, error } = await supabase
-        .from('properties')
+        .from('dup_properties')
         .select('*')
         .eq('agent_id', agentId)
         .order('created_at', { ascending: false })
@@ -152,7 +153,7 @@ export async function getPropertiesByAgentIds(agentIds: string[], limit: number 
     }
 
     const { data, error } = await supabase
-        .from('properties')
+        .from('dup_properties')
         .select('*')
         .in('agent_id', agentIds)
         .order('created_at', { ascending: false })
@@ -168,7 +169,7 @@ export async function getPropertiesByAgentIds(agentIds: string[], limit: number 
 // Fetch a single property by ID
 export async function getPropertyById(id: string): Promise<Property | null> {
     const { data, error } = await supabase
-        .from('properties')
+        .from('dup_properties')
         .select('*')
         .eq('id', id)
         .single()
@@ -184,7 +185,7 @@ export async function getPropertyById(id: string): Promise<Property | null> {
 // Get distinct states from the database
 export async function getDistinctStates(): Promise<string[]> {
     const { data, error } = await supabase
-        .from('properties')
+        .from('dup_properties')
         .select('state')
         .not('state', 'is', null)
 
@@ -202,7 +203,7 @@ export async function getDistinctStates(): Promise<string[]> {
 // Fetch featured properties with optional limit
 export async function getFeaturedProperties(limit: number = 8): Promise<Property[]> {
     const { data, error } = await supabase
-        .from('properties')
+        .from('dup_properties')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(limit)
@@ -219,7 +220,7 @@ export async function getFeaturedProperties(limit: number = 8): Promise<Property
 export async function getDiverseProperties(limit: number = 8): Promise<Property[]> {
     // Fetch more properties than needed so we can pick unique agents
     const { data, error } = await supabase
-        .from('properties')
+        .from('dup_properties')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(limit * 5) // Fetch more to ensure variety
@@ -258,7 +259,7 @@ export async function getDiverseProperties(limit: number = 8): Promise<Property[
 // Fetch agent by ID
 export async function getAgentById(id: string): Promise<Agent | null> {
     const { data, error } = await supabase
-        .from('agents')
+        .from('dup_agents')
         .select('*')
         .eq('id', id)
         .single()
@@ -291,7 +292,7 @@ export async function getAgentById(id: string): Promise<Agent | null> {
 // Fetch agent by PropertyGuru agent_id
 export async function getAgentByAgentId(agentId: string): Promise<Agent | null> {
     const { data, error } = await supabase
-        .from('agents')
+        .from('dup_agents')
         .select('*')
         .eq('agent_id', agentId)
         .single()
@@ -307,7 +308,7 @@ export async function getAgentByAgentId(agentId: string): Promise<Agent | null> 
 // Fetch all agents
 export async function getAgents(): Promise<Agent[]> {
     const { data, error } = await supabase
-        .from('agents')
+        .from('dup_agents')
         .select('*')
         .order('name', { ascending: true })
 
@@ -326,7 +327,7 @@ export async function searchAgents(query: string, limit: number = 5): Promise<Ag
     }
 
     const { data, error } = await supabase
-        .from('agents')
+        .from('dup_agents')
         .select('*')
         .or(`name.ilike.%${query}%,agency.ilike.%${query}%`)
         .limit(limit)
@@ -350,7 +351,7 @@ export async function getAgentsPaginated(page: number = 1, limit: number = 12): 
 
     // Get total count
     const { count, error: countError } = await supabase
-        .from('agents')
+        .from('dup_agents')
         .select('*', { count: 'exact', head: true })
 
     if (countError) {
@@ -360,7 +361,7 @@ export async function getAgentsPaginated(page: number = 1, limit: number = 12): 
 
     // Get paginated agents
     const { data, error } = await supabase
-        .from('agents')
+        .from('dup_agents')
         .select('*')
         .order('name', { ascending: true })
         .range(from, to)
@@ -389,7 +390,7 @@ export async function searchProperties(filters: {
     bedrooms?: number
 }): Promise<Property[]> {
     let query = supabase
-        .from('properties')
+        .from('dup_properties')
         .select('*')
 
     if (filters.location) {
@@ -425,7 +426,7 @@ export async function searchProperties(filters: {
 // Get similar properties (same type, excluding current)
 export async function getSimilarProperties(propertyId: string, propertyType: string): Promise<Property[]> {
     const { data, error } = await supabase
-        .from('properties')
+        .from('dup_properties')
         .select('*')
         .eq('property_type', propertyType)
         .neq('id', propertyId)
@@ -470,7 +471,7 @@ export async function getFavoriteProperties(buyerId: string): Promise<Property[]
 
     // Then fetch the actual properties
     const { data: properties, error: propError } = await supabase
-        .from('properties')
+        .from('dup_properties')
         .select('*')
         .in('id', propertyIds)
 
@@ -485,7 +486,7 @@ export async function getFavoriteProperties(buyerId: string): Promise<Property[]
 // Get distinct property types from the database
 export async function getDistinctPropertyTypes(): Promise<string[]> {
     const { data, error } = await supabase
-        .from('properties')
+        .from('dup_properties')
         .select('property_type')
         .not('property_type', 'is', null)
 
@@ -503,7 +504,7 @@ export async function getDistinctPropertyTypes(): Promise<string[]> {
 // Get distinct locations (extracted from address) from the database
 export async function getDistinctLocations(): Promise<string[]> {
     const { data, error } = await supabase
-        .from('properties')
+        .from('dup_properties')
         .select('address')
         .not('address', 'is', null)
 
@@ -537,7 +538,7 @@ export async function getDistinctLocations(): Promise<string[]> {
 // Get distinct bedroom counts from the database
 export async function getDistinctBedrooms(): Promise<number[]> {
     const { data, error } = await supabase
-        .from('properties')
+        .from('dup_properties')
         .select('bedrooms')
         .not('bedrooms', 'is', null)
 
@@ -555,7 +556,7 @@ export async function getDistinctBedrooms(): Promise<number[]> {
 // Get price range (min and max) from the database
 export async function getPriceRange(): Promise<{ min: number; max: number }> {
     const { data, error } = await supabase
-        .from('properties')
+        .from('dup_properties')
         .select('price')
         .not('price', 'is', null)
         .order('price', { ascending: true })
@@ -585,7 +586,7 @@ export async function getFilterOptions(): Promise<{
 }> {
     // Fetch all properties once to extract all filter data
     const { data, error } = await supabase
-        .from('properties')
+        .from('dup_properties')
         .select('property_type, address, bedrooms, price')
 
     if (error) {
@@ -643,7 +644,7 @@ export async function getFilterOptions(): Promise<{
 // Get total property count
 export async function getPropertyCount(): Promise<number> {
     const { count, error } = await supabase
-        .from('properties')
+        .from('dup_properties')
         .select('*', { count: 'exact', head: true })
 
     if (error) {
@@ -657,7 +658,7 @@ export async function getPropertyCount(): Promise<number> {
 // Get total agent count
 export async function getAgentCount(): Promise<number> {
     const { count, error } = await supabase
-        .from('agents')
+        .from('dup_agents')
         .select('*', { count: 'exact', head: true })
 
     if (error) {
@@ -672,7 +673,7 @@ export async function getAgentCount(): Promise<number> {
 export async function getCitiesCount(): Promise<number> {
     // Try to get city data first
     const { data: cityData, error: cityError } = await supabase
-        .from('properties')
+        .from('dup_properties')
         .select('city')
         .not('city', 'is', null)
 
@@ -685,7 +686,7 @@ export async function getCitiesCount(): Promise<number> {
 
     // Fallback to state column if city doesn't exist or is empty
     const { data: stateData, error: stateError } = await supabase
-        .from('properties')
+        .from('dup_properties')
         .select('state')
         .not('state', 'is', null)
 
@@ -706,7 +707,7 @@ export async function getRecentActivityCount(): Promise<number> {
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
     const { count, error } = await supabase
-        .from('properties')
+        .from('dup_properties')
         .select('*', { count: 'exact', head: true })
         .gte('created_at', thirtyDaysAgo.toISOString())
 

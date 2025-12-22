@@ -27,6 +27,19 @@
 
   body {
     @apply bg-white text-gray-900 font-sans;
+    overflow-x: hidden;
+  }
+
+  /* Fix for SVG icons rendering at massive sizes */
+  svg {
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  /* Ensure SVGs respect their container sizes */
+  svg:not([width]):not([height]) {
+    width: 1em;
+    height: 1em;
   }
 
   h1,

@@ -56,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             // If not a buyer, check if user is an agent
             const { data: agentData, error: agentError } = await supabase
-                .from('agents')
+                .from('dup_agents')
                 .select('*')
                 .eq('auth_id', userId)
                 .single()
@@ -216,7 +216,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 // FIRST: Check by phone (most reliable for scraped agents)
                 if (userData.phone) {
                     const { data } = await supabase
-                        .from('agents')
+                        .from('dup_agents')
                         .select('*')
                         .eq('phone', userData.phone)
                         .is('auth_id', null)
@@ -227,7 +227,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 // FALLBACK: Check by email if phone didn't match
                 if (!existingAgent && email) {
                     const { data } = await supabase
-                        .from('agents')
+                        .from('dup_agents')
                         .select('*')
                         .eq('email', email)
                         .is('auth_id', null)
@@ -238,7 +238,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 if (existingAgent) {
                     // Agent exists - claim the profile
                     const { error: updateError } = await supabase
-                        .from('agents')
+                        .from('dup_agents')
                         .update({
                             auth_id: authData.user.id,
                             email: email, // Add email to the scraped profile
@@ -255,7 +255,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 } else {
                     // Create new agent profile
                     const { error: agentError } = await supabase
-                        .from('agents')
+                        .from('dup_agents')
                         .insert({
                             auth_id: authData.user.id,
                             agent_id: `agent_${authData.user.id.substring(0, 8)}`,

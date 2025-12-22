@@ -51,7 +51,7 @@ export default function FavoritesPage() {
             setLoadingProperties(true)
             try {
                 const { data, error } = await supabase
-                    .from('properties')
+                    .from('dup_properties')
                     .select('*')
                     .in('id', favorites)
                     .order('created_at', { ascending: false })

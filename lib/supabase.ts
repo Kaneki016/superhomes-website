@@ -32,6 +32,8 @@ export interface Property {
     images: string[]
     image_count: number
     main_image_url: string | null
+    latitude: number | null // For map display
+    longitude: number | null // For map display
     source: string // e.g., "propertyguru"
     scraped_at: string
     created_at: string
