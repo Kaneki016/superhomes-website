@@ -66,6 +66,8 @@ export const mockProperties: Property[] = [
         images: ['property1.jpg'],
         image_count: 1,
         main_image_url: null,
+        latitude: 3.1588, // KLCC area
+        longitude: 101.7114,
         source: 'mock',
         scraped_at: '2024-12-01T00:00:00Z',
         created_at: '2024-12-01',
@@ -94,6 +96,8 @@ export const mockProperties: Property[] = [
         images: ['property2.jpg'],
         image_count: 1,
         main_image_url: null,
+        latitude: 3.1704, // Damansara Heights
+        longitude: 101.6558,
         source: 'mock',
         scraped_at: '2024-12-02T00:00:00Z',
         created_at: '2024-12-02',
@@ -122,6 +126,8 @@ export const mockProperties: Property[] = [
         images: ['property3.jpg'],
         image_count: 1,
         main_image_url: null,
+        latitude: 3.1725, // Mont Kiara
+        longitude: 101.6506,
         source: 'mock',
         scraped_at: '2024-12-03T00:00:00Z',
         created_at: '2024-12-03',
@@ -150,6 +156,8 @@ export const mockProperties: Property[] = [
         images: ['property4.jpg'],
         image_count: 1,
         main_image_url: null,
+        latitude: 3.1319, // Bangsar
+        longitude: 101.6741,
         source: 'mock',
         scraped_at: '2024-12-04T00:00:00Z',
         created_at: '2024-12-04',
@@ -178,6 +186,8 @@ export const mockProperties: Property[] = [
         images: ['property5.jpg'],
         image_count: 1,
         main_image_url: null,
+        latitude: 3.0996, // Setia Alam
+        longitude: 101.4440,
         source: 'mock',
         scraped_at: '2024-12-05T00:00:00Z',
         created_at: '2024-12-05',
@@ -206,6 +216,8 @@ export const mockProperties: Property[] = [
         images: ['property6.jpg'],
         image_count: 1,
         main_image_url: null,
+        latitude: 3.1078, // Tropicana
+        longitude: 101.6166,
         source: 'mock',
         scraped_at: '2024-12-06T00:00:00Z',
         created_at: '2024-12-06',
