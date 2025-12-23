@@ -131,22 +131,16 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
         const propertyImage = property.main_image_url || property.images[0] || ''
 
         // Build a comprehensive message with property details
-        // Using WhatsApp markdown (*bold*) for better URL encoding compatibility
-        // Note: Only include ONE link - WhatsApp will fetch the OG preview from this URL
+        // Using WhatsApp markdown (*bold*) for better formatting
+        // IMPORTANT: Put the property URL FIRST so WhatsApp generates the OG preview
         const propertyDetails = [
-            `🏠 *${property.property_name}*`,
-            ``,
-            `💰 *Price:* ${formatPrice(property.price)}`,
-            property.bedrooms > 0 ? `🛏️ *Bedrooms:* ${property.bedrooms}` : null,
-            `🚿 *Bathrooms:* ${property.bathrooms}`,
-            `📐 *Size:* ${property.size}`,
-            `📍 *Location:* ${property.state || property.address}`,
-            `🏷️ *Type:* ${property.property_type}`,
-            ``,
-            `👉 View full details:`,
             propertyUrl,
             ``,
-            `I'm interested in this property. Can you provide more information?`
+            `Hi, I am interested in:`,
+            `*${property.property_name}*`,
+            `${property.bedrooms > 0 ? property.bedrooms + ' Beds / ' : ''}${formatPrice(property.price)}`,
+            ``,
+            `Can you provide more information?`
         ].filter(Boolean).join('\n')
 
         const message = encodeURIComponent(propertyDetails)
