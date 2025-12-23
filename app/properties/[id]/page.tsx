@@ -132,21 +132,19 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
 
         // Build a comprehensive message with property details
         // Using WhatsApp markdown (*bold*) for better URL encoding compatibility
+        // Note: Only include ONE link - WhatsApp will fetch the OG preview from this URL
         const propertyDetails = [
-            `*${property.property_name}*`,
+            `🏠 *${property.property_name}*`,
             ``,
-            `*Price:* ${formatPrice(property.price)}`,
-            property.bedrooms > 0 ? `*Bedrooms:* ${property.bedrooms}` : null,
-            `*Bathrooms:* ${property.bathrooms}`,
-            `*Size:* ${property.size}`,
-            `*Location:* ${property.state || property.address}`,
-            `*Type:* ${property.property_type}`,
+            `💰 *Price:* ${formatPrice(property.price)}`,
+            property.bedrooms > 0 ? `🛏️ *Bedrooms:* ${property.bedrooms}` : null,
+            `🚿 *Bathrooms:* ${property.bathrooms}`,
+            `📐 *Size:* ${property.size}`,
+            `📍 *Location:* ${property.state || property.address}`,
+            `🏷️ *Type:* ${property.property_type}`,
             ``,
-            `View full details:`,
+            `👉 View full details:`,
             propertyUrl,
-            ``,
-            propertyImage ? `Property Image:` : null,
-            propertyImage || null,
             ``,
             `I'm interested in this property. Can you provide more information?`
         ].filter(Boolean).join('\n')
