@@ -2,26 +2,44 @@
  * Geocode Properties Script
  * 
  * This script geocodes all properties in the dup_properties table that don't have coordinates yet.
- * Uses Nominatim (OpenStreetMap) geocoding service - FREE and no API key required.
+ * Uses a dual-strategy approach for maximum success rate:
+ * 1. Tries Nominatim (OpenStreetMap) first - FREE, no API key required
+ * 2. Falls back to Google Maps Geocoding API if Nominatim fails - Requires GOOGLE_MAPS_API_KEY
  * 
  * Usage:
- *   npx tsx scripts/geocode_properties.ts
+ *   npx tsx scripts/geocode_properties.ts              # Geocode properties with NULL coordinates
+ *   npx tsx scripts/geocode_properties.ts --retry-failed # Retry properties marked as failed (-99)
  * 
  * Features:
  * - Rate limiting (1 request per second to respect Nominatim's usage policy)
+ * - Automatic fallback to Google Maps API for better accuracy
  * - Error handling and retry logic
- * - Progress tracking
- * - Skips already geocoded properties
+ * - Progress tracking with service source indication
+ * - Can retry previously failed properties with --retry-failed flag
  */
 
 import { config } from 'dotenv'
 import { createClient } from '@supabase/supabase-js'
+import { readFileSync } from 'fs'
+import { join } from 'path'
 
 // Load environment variables from .env.local
 config({ path: '.env.local' })
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+let googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY
+
+// Fallback: Try reading from file if env variable not found
+if (!googleMapsApiKey) {
+    try {
+        const keyPath = join(__dirname, 'google_api_key.txt')
+        googleMapsApiKey = readFileSync(keyPath, 'utf-8').trim()
+        console.log('📝 Loaded Google Maps API key from google_api_key.txt')
+    } catch {
+        // File doesn't exist or can't be read
+    }
+}
 
 if (!supabaseUrl || !supabaseAnonKey) {
     console.error('❌ Error: Missing Supabase credentials in .env.local')
@@ -30,6 +48,13 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+// Check if Google Maps API is available
+if (googleMapsApiKey) {
+    console.log('✅ Google Maps API key detected - will use as fallback for failed geocoding')
+} else {
+    console.log('⚠️  No Google Maps API key - using Nominatim only')
+}
 
 interface Property {
     id: string
@@ -41,7 +66,7 @@ interface Property {
 }
 
 // Nominatim geocoding (free, no API key needed)
-async function geocodeAddress(address: string, state: string | null): Promise<{ lat: number; lng: number } | null> {
+async function geocodeWithNominatim(address: string, state: string | null): Promise<{ lat: number; lng: number } | null> {
     try {
         // Build search query: prioritize Malaysian addresses
         const searchQuery = state
@@ -58,7 +83,6 @@ async function geocodeAddress(address: string, state: string | null): Promise<{ 
         })
 
         if (!response.ok) {
-            console.error(`Geocoding failed for "${searchQuery}": ${response.status}`)
             return null
         }
 
@@ -71,12 +95,74 @@ async function geocodeAddress(address: string, state: string | null): Promise<{ 
             }
         }
 
-        console.warn(`No results found for: ${searchQuery}`)
         return null
     } catch (error) {
-        console.error(`Error geocoding address "${address}":`, error)
+        console.error(`Nominatim error:`, error)
         return null
     }
+}
+
+// Google Maps Geocoding API (paid but very accurate)
+async function geocodeWithGoogleMaps(address: string, state: string | null): Promise<{ lat: number; lng: number } | null> {
+    if (!googleMapsApiKey) {
+        return null
+    }
+
+    try {
+        const searchQuery = state
+            ? `${address}, ${state}, Malaysia`
+            : `${address}, Malaysia`
+
+        const encodedAddress = encodeURIComponent(searchQuery)
+        const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}&region=my&key=${googleMapsApiKey}`
+
+        const response = await fetch(url)
+
+        if (!response.ok) {
+            return null
+        }
+
+        const data = await response.json()
+
+        if (data.status === 'OK' && data.results && data.results.length > 0) {
+            const location = data.results[0].geometry.location
+            return {
+                lat: location.lat,
+                lng: location.lng
+            }
+        }
+
+        return null
+    } catch (error) {
+        console.error(`Google Maps API error:`, error)
+        return null
+    }
+}
+
+// Main geocoding function with fallback strategy
+async function geocodeAddress(address: string, state: string | null): Promise<{ lat: number; lng: number; source: string } | null> {
+    // Try Nominatim first (free)
+    console.log(`   🔍 Trying Nominatim...`)
+    const nominatimResult = await geocodeWithNominatim(address, state)
+
+    if (nominatimResult) {
+        return { ...nominatimResult, source: 'Nominatim' }
+    }
+
+    // If Nominatim fails and Google Maps API is available, try it
+    if (googleMapsApiKey) {
+        console.log(`   🔍 Nominatim failed, trying Google Maps API...`)
+        const googleResult = await geocodeWithGoogleMaps(address, state)
+
+        if (googleResult) {
+            return { ...googleResult, source: 'Google Maps' }
+        }
+    }
+
+    // Both failed
+    const searchQuery = state ? `${address}, ${state}, Malaysia` : `${address}, Malaysia`
+    console.warn(`   ⚠️  No results from any service for: ${searchQuery}`)
+    return null
 }
 
 // Sleep function for rate limiting
@@ -87,12 +173,26 @@ function sleep(ms: number) {
 async function main() {
     console.log('🗺️  Starting property geocoding...\n')
 
-    // Fetch all properties without valid coordinates (NULL only, skip failed ones marked -999)
-    const { data: properties, error } = await supabase
+    // Check if we should retry failed properties
+    const retryFailed = process.argv.includes('--retry-failed')
+
+    let query = supabase
         .from('dup_properties')
         .select('id, property_name, address, state, latitude, longitude')
-        .is('latitude', null)
-        .order('created_at', { ascending: true })
+
+    if (retryFailed) {
+        // Retry properties marked as failed (-99)
+        console.log('🔄 Mode: Retrying previously failed properties (latitude = -99)\n')
+        query = query.eq('latitude', -99)
+    } else {
+        // Default: Only geocode properties with NULL coordinates
+        console.log('📍 Mode: Geocoding new properties (latitude = NULL)\n')
+        console.log('💡 Tip: Use --retry-failed flag to retry properties with -99 coordinates\n')
+        query = query.is('latitude', null)
+    }
+
+    // Fetch properties
+    const { data: properties, error } = await query.order('created_at', { ascending: true })
 
     if (error) {
         console.error('❌ Error fetching properties:', error)
@@ -135,7 +235,7 @@ async function main() {
                 failedCount++
                 failed.push(property.property_name)
             } else {
-                console.log(`   ✅ Success: ${coords.lat}, ${coords.lng}`)
+                console.log(`   ✅ Success [${coords.source}]: ${coords.lat}, ${coords.lng}`)
                 successCount++
             }
         } else {

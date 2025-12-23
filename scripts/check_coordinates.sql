@@ -7,18 +7,18 @@ SELECT
     longitude,
     CASE 
         WHEN latitude IS NULL THEN 'No coordinates'
-        WHEN latitude = -999 THEN 'Failed geocoding'
+        WHEN latitude = -99 THEN 'Failed geocoding'
         ELSE 'Valid coordinates'
     END as status
 FROM dup_properties
-WHERE latitude IS NOT NULL AND latitude != -999
+WHERE latitude IS NOT NULL AND latitude != -99
 LIMIT 10;
 
 -- Count properties by coordinate status
 SELECT 
     CASE 
         WHEN latitude IS NULL THEN 'No coordinates'
-        WHEN latitude = -999 THEN 'Failed geocoding'
+        WHEN latitude = -99 THEN 'Failed geocoding'
         ELSE 'Valid coordinates'
     END as status,
     COUNT(*) as count

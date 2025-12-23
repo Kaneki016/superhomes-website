@@ -21,9 +21,33 @@ description: Future features to implement for SuperHomes
 
 ---
 
+## 🏫 Nearby Amenities Enrichment (AI-Powered)
+**Status**: Pending  
+**Priority**: Medium  
+
+### Requirements:
+1. Enrich property data with proximity information (schools, transit, malls within 5km)
+2. Use OpenStreetMap/Overpass API (free) or Google Places API (paid but accurate)
+3. Calculate distances using Haversine formula from property coordinates
+4. Use AI (Gemini/OpenAI) to generate natural language summaries
+5. Add "Nearby Amenities" section to property detail pages
+
+### Implementation Options:
+- **Google Places API**: ~RM50-200/month, most accurate
+- **OpenStreetMap + Overpass**: Free, decent coverage in Malaysia
+- **Hybrid**: OSM for data + AI for summaries (recommended)
+
+### Notes:
+- Requires valid latitude/longitude coordinates (geocoding already done)
+- Consider caching results to reduce API calls
+- Types to query: `school`, `transit_station`, `shopping_mall`, `hospital`
+
+---
+
 ## Other Future Ideas:
 - [ ] Advanced search with more filters
 - [ ] Property comparison feature
 - [ ] Virtual tour integration
 - [ ] Mortgage calculator
 - [ ] Saved searches with email alerts
+

@@ -20,9 +20,11 @@ export default function HomePage() {
     const [propertyType, setPropertyType] = useState('all')
     const [priceRange, setPriceRange] = useState('')
     const [bedrooms, setBedrooms] = useState('')
+    const [selectedState, setSelectedState] = useState('')
     const [showPropertyTypeDropdown, setShowPropertyTypeDropdown] = useState(false)
     const [showPriceDropdown, setShowPriceDropdown] = useState(false)
     const [showBedroomDropdown, setShowBedroomDropdown] = useState(false)
+    const [showStateDropdown, setShowStateDropdown] = useState(false)
     const [handpickedIndex, setHandpickedIndex] = useState(0)
 
     const filterRef = useRef<HTMLDivElement>(null)
@@ -61,6 +63,23 @@ export default function HomePage() {
         loadProperties()
     }, [])
 
+    // Load preferred state from localStorage on mount
+    useEffect(() => {
+        const savedState = localStorage.getItem('superhomes_preferred_state')
+        if (savedState) {
+            setSelectedState(savedState)
+        }
+    }, [])
+
+    // Save state selection to localStorage
+    useEffect(() => {
+        if (selectedState) {
+            localStorage.setItem('superhomes_preferred_state', selectedState)
+        } else {
+            localStorage.removeItem('superhomes_preferred_state')
+        }
+    }, [selectedState])
+
     // Close dropdowns when clicking outside
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -68,6 +87,7 @@ export default function HomePage() {
                 setShowPropertyTypeDropdown(false)
                 setShowPriceDropdown(false)
                 setShowBedroomDropdown(false)
+                setShowStateDropdown(false)
             }
         }
         document.addEventListener('mousedown', handleClickOutside)
@@ -112,6 +132,9 @@ export default function HomePage() {
         if (bedrooms) {
             params.set('bedrooms', bedrooms)
         }
+        if (selectedState) {
+            params.set('state', selectedState)
+        }
         // Listing type filter removed - data not available yet
         const queryString = params.toString()
         window.location.href = `/properties${queryString ? `?${queryString}` : ''}`
@@ -149,11 +172,32 @@ export default function HomePage() {
         { value: '5+', label: '5+ Bedrooms' },
     ]
 
+    // Malaysian states options (same as locations array but with empty option)
+    const stateOptions = [
+        { value: '', label: 'Any Location' },
+        { value: 'Kuala Lumpur', label: 'Kuala Lumpur' },
+        { value: 'Selangor', label: 'Selangor' },
+        { value: 'Penang', label: 'Penang' },
+        { value: 'Johor', label: 'Johor' },
+        { value: 'Kedah', label: 'Kedah' },
+        { value: 'Kelantan', label: 'Kelantan' },
+        { value: 'Melaka', label: 'Melaka' },
+        { value: 'Negeri Sembilan', label: 'Negeri Sembilan' },
+        { value: 'Pahang', label: 'Pahang' },
+        { value: 'Perak', label: 'Perak' },
+        { value: 'Perlis', label: 'Perlis' },
+        { value: 'Putrajaya', label: 'Putrajaya' },
+        { value: 'Sabah', label: 'Sabah' },
+        { value: 'Sarawak', label: 'Sarawak' },
+        { value: 'Terengganu', label: 'Terengganu' },
+    ]
+
     // Close dropdowns when clicking outside
     const closeAllDropdowns = () => {
         setShowPropertyTypeDropdown(false)
         setShowPriceDropdown(false)
         setShowBedroomDropdown(false)
+        setShowStateDropdown(false)
     }
 
     return (
@@ -198,7 +242,7 @@ export default function HomePage() {
                                         placeholder="Search by location, property name, or keyword..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                                         className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-rose-300 focus:ring-2 focus:ring-rose-100"
                                         suppressHydrationWarning
                                     />
@@ -331,6 +375,48 @@ export default function HomePage() {
                                                         }`}
                                                 >
                                                     {option.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* State/Location Dropdown */}
+                                <div className="relative">
+                                    <button
+                                        onClick={() => {
+                                            setShowStateDropdown(!showStateDropdown)
+                                            setShowPropertyTypeDropdown(false)
+                                            setShowPriceDropdown(false)
+                                            setShowBedroomDropdown(false)
+                                        }}
+                                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedState
+                                            ? 'bg-pink-500 text-white'
+                                            : 'bg-gray-100 text-gray-700 hover:bg-pink-50 hover:text-pink-700'
+                                            }`}
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                        {stateOptions.find(s => s.value === selectedState)?.label || 'Location'}
+                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </button>
+                                    {showStateDropdown && (
+                                        <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-[9999] max-h-64 overflow-y-auto">
+                                            {stateOptions.map((state) => (
+                                                <button
+                                                    key={state.value}
+                                                    onClick={() => {
+                                                        setSelectedState(state.value)
+                                                        setShowStateDropdown(false)
+                                                    }}
+                                                    className={`w-full text-left px-4 py-2 text-sm hover:bg-pink-50 transition-colors ${selectedState === state.value ? 'text-pink-600 font-medium bg-pink-50' : 'text-gray-700'
+                                                        }`}
+                                                >
+                                                    {state.label}
                                                 </button>
                                             ))}
                                         </div>

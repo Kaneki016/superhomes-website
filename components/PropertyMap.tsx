@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { renderToString } from 'react-dom/server'
 import { Property } from '@/lib/supabase'
 import PropertyMarkerPopup from './PropertyMarkerPopup'
@@ -15,6 +15,7 @@ export default function PropertyMap({ properties, onMarkerClick, className = '' 
     const mapRef = useRef<HTMLDivElement>(null)
     const mapInstanceRef = useRef<any>(null)
     const markersRef = useRef<any[]>([])
+    const [noValidCoordinates, setNoValidCoordinates] = useState(false)
 
     useEffect(() => {
         // Only run on client side
@@ -49,7 +50,7 @@ export default function PropertyMap({ properties, onMarkerClick, className = '' 
             markersRef.current.forEach(marker => marker.remove())
             markersRef.current = []
 
-            // Filter properties with valid coordinates (exclude -999 failed markers)
+            // Filter properties with valid coordinates (exclude -99 failed markers)
             const validProperties = properties.filter(p =>
                 p.latitude != null &&
                 p.longitude != null &&
@@ -60,9 +61,11 @@ export default function PropertyMap({ properties, onMarkerClick, className = '' 
             )
 
             if (validProperties.length === 0) {
-                console.warn('No properties with valid coordinates to display on map')
+                setNoValidCoordinates(true)
                 return
             }
+
+            setNoValidCoordinates(false)
 
             // Add markers for each property
             const bounds: [number, number][] = []
@@ -142,10 +145,31 @@ export default function PropertyMap({ properties, onMarkerClick, className = '' 
 
     return (
         <>
+            {/* Empty State Overlay */}
+            {noValidCoordinates && (
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-50/90 rounded-lg">
+                    <div className="text-center p-8 max-w-md">
+                        <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg className="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">No Map Data Available</h3>
+                        <p className="text-gray-600 text-sm">
+                            The properties in your current view don&apos;t have location coordinates yet.
+                            Try switching to the grid view to browse these listings.
+                        </p>
+                    </div>
+                </div>
+            )}
+
             <div
                 ref={mapRef}
                 className={`w-full h-full rounded-lg ${className}`}
                 style={{ minHeight: '500px' }}
+                role="application"
+                aria-label="Property locations map"
             />
 
             {/* Custom styles for markers */}
@@ -201,3 +225,4 @@ export default function PropertyMap({ properties, onMarkerClick, className = '' 
         </>
     )
 }
+

@@ -127,19 +127,28 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
         // Get the full property URL
         const propertyUrl = typeof window !== 'undefined' ? window.location.href : ''
 
+        // Get the property image URL
+        const propertyImage = property.main_image_url || property.images[0] || ''
+
         // Build a comprehensive message with property details
-        // Using WhatsApp markdown (*bold*) and simple text instead of emojis for better compatibility
+        // Using WhatsApp markdown (*bold*) for better URL encoding compatibility
         const propertyDetails = [
             `*${property.property_name}*`,
             ``,
-            `Price: ${formatPrice(property.price)}`,
-            property.bedrooms > 0 ? `Bedrooms: ${property.bedrooms}` : null,
-            `Bathrooms: ${property.bathrooms}`,
-            `Size: ${property.size}`,
-            `Location: ${property.state || property.address}`,
-            `Type: ${property.property_type}`,
+            `*Price:* ${formatPrice(property.price)}`,
+            property.bedrooms > 0 ? `*Bedrooms:* ${property.bedrooms}` : null,
+            `*Bathrooms:* ${property.bathrooms}`,
+            `*Size:* ${property.size}`,
+            `*Location:* ${property.state || property.address}`,
+            `*Type:* ${property.property_type}`,
             ``,
-            `View details: ${propertyUrl}`
+            `View full details:`,
+            propertyUrl,
+            ``,
+            propertyImage ? `Property Image:` : null,
+            propertyImage || null,
+            ``,
+            `I'm interested in this property. Can you provide more information?`
         ].filter(Boolean).join('\n')
 
         const message = encodeURIComponent(propertyDetails)
