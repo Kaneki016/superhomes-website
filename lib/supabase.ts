@@ -17,6 +17,7 @@ export interface Property {
     price: number
     price_per_sqft: number | null
     bedrooms: number
+    bedrooms_num?: number | null // Correctly parsed integer bedroom count
     bathrooms: number
     size: string // e.g., "1,400 sqft"
     property_type: string // e.g., "2-storey Terraced House"

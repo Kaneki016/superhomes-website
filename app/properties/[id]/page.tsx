@@ -36,7 +36,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                 if (propertyData) {
                     // Got from database
                     agentData = await getAgentByAgentId(propertyData.agent_id)
-                    similar = await getSimilarProperties(id, propertyData.property_type)
+                    similar = await getSimilarProperties(id, propertyData.property_type, propertyData.state)
                 } else {
                     // Fallback to mock data
                     const mockProperty = getMockPropertyById(id)
@@ -138,7 +138,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
             ``,
             `Hi, I am interested in:`,
             `*${property.property_name}*`,
-            `${property.bedrooms > 0 ? property.bedrooms + ' Beds / ' : ''}${formatPrice(property.price)}`,
+            `${(property.bedrooms_num || property.bedrooms) > 0 ? (property.bedrooms_num || property.bedrooms) + ' Beds / ' : ''}${formatPrice(property.price)}`,
             ``,
             `Can you provide more information?`
         ].filter(Boolean).join('\n')
@@ -246,9 +246,9 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
 
                                 {/* Property Details Grid */}
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 pb-6 border-b border-gray-200">
-                                    {property.bedrooms > 0 && (
+                                    {(property.bedrooms_num || property.bedrooms) > 0 && (
                                         <div className="text-center p-4 bg-gray-50 rounded-lg">
-                                            <p className="text-2xl font-bold text-gray-900">{property.bedrooms}</p>
+                                            <p className="text-2xl font-bold text-gray-900">{property.bedrooms_num || property.bedrooms}</p>
                                             <p className="text-sm text-gray-600">Bedrooms</p>
                                         </div>
                                     )}
@@ -339,22 +339,52 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                                                 <span className="font-semibold text-gray-900">{property.size}</span>
                                             </div>
                                         )}
-                                        {property.price_per_sqft && (
-                                            <div className="flex justify-between py-2 border-b border-gray-200">
-                                                <span className="text-gray-600">Price per sqft</span>
-                                                <span className="font-semibold text-gray-900">RM {property.price_per_sqft.toLocaleString()}</span>
-                                            </div>
-                                        )}
+                                        {/* Calculate and validate PSF */}
+                                        {(() => {
+                                            // Try to calculate PSF from price and size
+                                            let psf = property.price_per_sqft
+                                            if (!psf && property.size && property.price) {
+                                                // Parse size like "1,400 sqft" or "3,570 sq. ft."
+                                                const sizeMatch = property.size.match(/[\d,]+/)
+                                                if (sizeMatch) {
+                                                    const sizeNum = parseFloat(sizeMatch[0].replace(/,/g, ''))
+                                                    if (sizeNum > 0) {
+                                                        psf = Math.round(property.price / sizeNum)
+                                                    }
+                                                }
+                                            }
+                                            // Only show if PSF is reasonable (RM 10 - RM 5000 per sqft)
+                                            if (psf && psf >= 10 && psf <= 5000) {
+                                                return (
+                                                    <div className="flex justify-between py-2 border-b border-gray-200">
+                                                        <span className="text-gray-600">Price per sqft</span>
+                                                        <span className="font-semibold text-gray-900">RM {psf.toLocaleString()}</span>
+                                                    </div>
+                                                )
+                                            }
+                                            return null
+                                        })()}
                                         <div className="flex justify-between py-2 border-b border-gray-200">
                                             <span className="text-gray-600">Tenure</span>
                                             <span className="font-semibold text-gray-900">{property.tenure}</span>
                                         </div>
-                                        {property.built_year && (
-                                            <div className="flex justify-between py-2 border-b border-gray-200">
-                                                <span className="text-gray-600">Built Year</span>
-                                                <span className="font-semibold text-gray-900">{property.built_year}</span>
-                                            </div>
-                                        )}
+                                        {/* Validate built_year is a sensible year (4-digit, between 1900 and current year + 5) */}
+                                        {(() => {
+                                            if (!property.built_year) return null
+                                            const yearStr = property.built_year.toString().trim()
+                                            const yearNum = parseInt(yearStr, 10)
+                                            const currentYear = new Date().getFullYear()
+                                            // Only show if it looks like a valid 4-digit year
+                                            if (yearStr.length === 4 && yearNum >= 1900 && yearNum <= currentYear + 5) {
+                                                return (
+                                                    <div className="flex justify-between py-2 border-b border-gray-200">
+                                                        <span className="text-gray-600">Built Year</span>
+                                                        <span className="font-semibold text-gray-900">{yearStr}</span>
+                                                    </div>
+                                                )
+                                            }
+                                            return null
+                                        })()}
                                         {property.listed_date && (
                                             <div className="flex justify-between py-2 border-b border-gray-200">
                                                 <span className="text-gray-600">Listed Date</span>
@@ -366,7 +396,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
 
                                 {/* Location Map */}
                                 {property.latitude && property.longitude && property.latitude !== -99 && (
-                                    <div className="mb-6">
+                                    <div className="mb-6 mt-6">
                                         <h2 className="font-heading font-bold text-xl mb-3">Location</h2>
                                         <SinglePropertyMap
                                             latitude={property.latitude}

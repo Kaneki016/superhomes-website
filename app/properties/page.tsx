@@ -12,7 +12,7 @@ import FilterChips from '@/components/FilterChips'
 import { ListSkeleton } from '@/components/SkeletonLoader'
 import EmptyState from '@/components/EmptyState'
 import PropertyMap from '@/components/PropertyMap'
-import { getPropertiesPaginated, getFilterOptions, searchAgents, getPropertiesByAgentIds } from '@/lib/database'
+import { getPropertiesPaginated, getFilterOptions, searchAgents, getPropertiesByAgentIds, getDistinctStates } from '@/lib/database'
 import { Property, Agent } from '@/lib/supabase'
 import { mockProperties } from '@/lib/mockData'
 import { useAuth } from '@/contexts/AuthContext'
@@ -89,6 +89,7 @@ function PropertiesPageContent() {
     const [loadingFilters, setLoadingFilters] = useState(true)
     const [openDropdown, setOpenDropdown] = useState<string | null>(null)
     const [filterModalOpen, setFilterModalOpen] = useState(false)
+    const [stateOptions, setStateOptions] = useState<string[]>([])
     const dropdownRef = useRef<HTMLDivElement>(null)
     const initialLoadDone = useRef(false)
 
@@ -251,8 +252,12 @@ function PropertiesPageContent() {
     useEffect(() => {
         async function loadFilterOptions() {
             try {
-                const options = await getFilterOptions()
+                const [options, states] = await Promise.all([
+                    getFilterOptions(),
+                    getDistinctStates()
+                ])
                 setFilterOptions(options)
+                setStateOptions(states)
             } catch (error) {
                 console.error('Error loading filter options:', error)
             } finally {
@@ -355,7 +360,7 @@ function PropertiesPageContent() {
     // Bedroom options based on actual data
     const bedroomOptions = [
         { label: 'Any', value: '' },
-        ...filterOptions.bedrooms.map(bed => ({ label: `${bed}+`, value: String(bed) }))
+        ...filterOptions.bedrooms.map(bed => ({ label: String(bed), value: String(bed) }))
     ]
 
     const activeFilterCount = [
@@ -494,7 +499,7 @@ function PropertiesPageContent() {
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                                 </svg>
-                                <span>{filters.bedrooms ? `${filters.bedrooms}+ Bed` : 'Bedroom'}</span>
+                                <span>{filters.bedrooms || 'Bedroom'}</span>
                                 <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === 'bedroom' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                 </svg>
@@ -513,6 +518,52 @@ function PropertiesPageContent() {
                                             className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${filters.bedrooms === opt.value ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
                                         >
                                             {opt.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* State Pill */}
+                        <div className="relative">
+                            <button
+                                onClick={() => setOpenDropdown(openDropdown === 'state' ? null : 'state')}
+                                className={`filter-pill ${filters.state ? 'active' : ''}`}
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span>{filters.state || 'State'}</span>
+                                <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === 'state' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            {openDropdown === 'state' && (
+                                <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 max-h-64 overflow-y-auto">
+                                    <button
+                                        onClick={() => {
+                                            const newFilters = { ...filters, state: '' }
+                                            setFilters(newFilters)
+                                            setOpenDropdown(null)
+                                            loadProperties(1, true, newFilters)
+                                        }}
+                                        className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${!filters.state ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
+                                    >
+                                        All States
+                                    </button>
+                                    {stateOptions.map((state) => (
+                                        <button
+                                            key={state}
+                                            onClick={() => {
+                                                const newFilters = { ...filters, state: state }
+                                                setFilters(newFilters)
+                                                setOpenDropdown(null)
+                                                loadProperties(1, true, newFilters)
+                                            }}
+                                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${filters.state === state ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
+                                        >
+                                            {state}
                                         </button>
                                     ))}
                                 </div>
@@ -556,35 +607,37 @@ function PropertiesPageContent() {
                 </div>
 
                 {/* Active Filter Chips */}
-                <FilterChips
-                    filters={[
-                        filters.location ? { key: 'location', label: 'Location', value: filters.location } : null,
-                        filters.state ? { key: 'state', label: 'State', value: filters.state } : null,
-                        filters.propertyType ? { key: 'propertyType', label: 'Type', value: filters.propertyType } : null,
-                        filters.minPrice || filters.maxPrice ? {
-                            key: 'price',
-                            label: 'Price',
-                            value: filters.minPrice && filters.maxPrice
-                                ? `RM${(parseInt(filters.minPrice) / 1000)}k - RM${(parseInt(filters.maxPrice) / 1000)}k`
-                                : filters.minPrice
-                                    ? `Above RM${(parseInt(filters.minPrice) / 1000)}k`
-                                    : `Under RM${(parseInt(filters.maxPrice) / 1000)}k`
-                        } : null,
-                        filters.bedrooms ? { key: 'bedrooms', label: 'Bedrooms', value: `${filters.bedrooms}+` } : null,
-                    ].filter(Boolean) as { key: string; label: string; value: string }[]}
-                    onRemove={(key) => {
-                        const newFilters = { ...filters }
-                        if (key === 'price') {
-                            newFilters.minPrice = ''
-                            newFilters.maxPrice = ''
-                        } else {
-                            newFilters[key as keyof typeof filters] = ''
-                        }
-                        setFilters(newFilters)
-                        loadProperties(1, true, newFilters)
-                    }}
-                    onClearAll={handleResetFilters}
-                />
+                <div className="container-custom">
+                    <FilterChips
+                        filters={[
+                            filters.location ? { key: 'location', label: 'Location', value: filters.location } : null,
+                            filters.state ? { key: 'state', label: 'State', value: filters.state } : null,
+                            filters.propertyType ? { key: 'propertyType', label: 'Type', value: filters.propertyType } : null,
+                            filters.minPrice || filters.maxPrice ? {
+                                key: 'price',
+                                label: 'Price',
+                                value: filters.minPrice && filters.maxPrice
+                                    ? `RM${(parseInt(filters.minPrice) / 1000)}k - RM${(parseInt(filters.maxPrice) / 1000)}k`
+                                    : filters.minPrice
+                                        ? `Above RM${(parseInt(filters.minPrice) / 1000)}k`
+                                        : `Under RM${(parseInt(filters.maxPrice) / 1000)}k`
+                            } : null,
+                            filters.bedrooms ? { key: 'bedrooms', label: 'Bedrooms', value: `${filters.bedrooms}+` } : null,
+                        ].filter(Boolean) as { key: string; label: string; value: string }[]}
+                        onRemove={(key) => {
+                            const newFilters = { ...filters }
+                            if (key === 'price') {
+                                newFilters.minPrice = ''
+                                newFilters.maxPrice = ''
+                            } else {
+                                newFilters[key as keyof typeof filters] = ''
+                            }
+                            setFilters(newFilters)
+                            loadProperties(1, true, newFilters)
+                        }}
+                        onClearAll={handleResetFilters}
+                    />
+                </div>
             </div>
 
             <div className="container-custom py-6">

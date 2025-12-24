@@ -68,8 +68,8 @@ export async function getPropertiesPaginated(
         dataQuery = dataQuery.lte('price', filters.maxPrice)
     }
     if (filters?.bedrooms) {
-        countQuery = countQuery.gte('bedrooms', filters.bedrooms)
-        dataQuery = dataQuery.gte('bedrooms', filters.bedrooms)
+        countQuery = countQuery.eq('bedrooms_num', filters.bedrooms)
+        dataQuery = dataQuery.eq('bedrooms_num', filters.bedrooms)
     }
 
     // Get total count
@@ -182,22 +182,44 @@ export async function getPropertyById(id: string): Promise<Property | null> {
     return data
 }
 
-// Get distinct states from the database
-export async function getDistinctStates(): Promise<string[]> {
-    const { data, error } = await supabase
-        .from('dup_properties')
-        .select('state')
-        .not('state', 'is', null)
+// All Malaysian states and federal territories
+const MALAYSIAN_STATES = [
+    'Johor',
+    'Kedah',
+    'Kelantan',
+    'Kuala Lumpur',
+    'Labuan',
+    'Melaka',
+    'Negeri Sembilan',
+    'Pahang',
+    'Penang',
+    'Perak',
+    'Perlis',
+    'Putrajaya',
+    'Sabah',
+    'Sarawak',
+    'Selangor',
+    'Terengganu'
+]
 
-    if (error) {
-        console.error('Error fetching states:', error)
-        return []
+// Get distinct states from the database
+// Uses static list of Malaysian states and checks which have properties
+export async function getDistinctStates(): Promise<string[]> {
+    // Check which states have at least one property
+    const statesWithData: string[] = []
+
+    for (const state of MALAYSIAN_STATES) {
+        const { count, error } = await supabase
+            .from('dup_properties')
+            .select('id', { count: 'exact', head: true })
+            .ilike('state', `%${state}%`)
+
+        if (!error && count && count > 0) {
+            statesWithData.push(state)
+        }
     }
 
-    // Extract unique values
-    const states = data?.map(d => d.state).filter(Boolean) || []
-    const uniqueStates = [...new Set(states)]
-    return uniqueStates.sort()
+    return statesWithData.sort()
 }
 
 // Fetch featured properties with optional limit
@@ -410,7 +432,7 @@ export async function searchProperties(filters: {
     }
 
     if (filters.bedrooms) {
-        query = query.gte('bedrooms', filters.bedrooms)
+        query = query.eq('bedrooms_num', filters.bedrooms)
     }
 
     const { data, error } = await query.order('created_at', { ascending: false })
@@ -423,8 +445,56 @@ export async function searchProperties(filters: {
     return data || []
 }
 
-// Get similar properties (same type, excluding current)
-export async function getSimilarProperties(propertyId: string, propertyType: string): Promise<Property[]> {
+// Get similar properties (prioritize same state, then same type, excluding current)
+export async function getSimilarProperties(propertyId: string, propertyType: string, state?: string | null): Promise<Property[]> {
+    // First, try to get properties from the same state AND same type
+    if (state) {
+        const { data: sameStateAndType, error: error1 } = await supabase
+            .from('dup_properties')
+            .select('*')
+            .eq('property_type', propertyType)
+            .ilike('state', `%${state}%`)
+            .neq('id', propertyId)
+            .limit(3)
+
+        if (!error1 && sameStateAndType && sameStateAndType.length >= 3) {
+            return sameStateAndType
+        }
+
+        // If not enough, try same state (any type)
+        const { data: sameState, error: error2 } = await supabase
+            .from('dup_properties')
+            .select('*')
+            .ilike('state', `%${state}%`)
+            .neq('id', propertyId)
+            .limit(3)
+
+        if (!error2 && sameState && sameState.length >= 3) {
+            return sameState
+        }
+
+        // Combine what we have from same state with same type elsewhere
+        const existingIds = new Set((sameState || []).map(p => p.id))
+        const needed = 3 - (sameState?.length || 0)
+
+        if (needed > 0) {
+            const { data: sameType, error: error3 } = await supabase
+                .from('dup_properties')
+                .select('*')
+                .eq('property_type', propertyType)
+                .neq('id', propertyId)
+                .limit(needed + 5) // Get extras in case of overlap
+
+            if (!error3 && sameType) {
+                const additional = sameType.filter(p => !existingIds.has(p.id)).slice(0, needed)
+                return [...(sameState || []), ...additional].slice(0, 3)
+            }
+        }
+
+        return sameState || []
+    }
+
+    // Fallback: just match by property type
     const { data, error } = await supabase
         .from('dup_properties')
         .select('*')
@@ -539,8 +609,8 @@ export async function getDistinctLocations(): Promise<string[]> {
 export async function getDistinctBedrooms(): Promise<number[]> {
     const { data, error } = await supabase
         .from('dup_properties')
-        .select('bedrooms')
-        .not('bedrooms', 'is', null)
+        .select('bedrooms_num')
+        .not('bedrooms_num', 'is', null)
 
     if (error) {
         console.error('Error fetching bedrooms:', error)
@@ -548,7 +618,7 @@ export async function getDistinctBedrooms(): Promise<number[]> {
     }
 
     // Extract unique values
-    const bedrooms = data?.map(d => d.bedrooms).filter((b): b is number => b != null && b > 0) || []
+    const bedrooms = data?.map(d => d.bedrooms_num).filter((b): b is number => b != null && b > 0 && b <= 10) || []
     const uniqueBedrooms = [...new Set(bedrooms)]
     return uniqueBedrooms.sort((a, b) => a - b)
 }
@@ -587,7 +657,7 @@ export async function getFilterOptions(): Promise<{
     // Fetch all properties once to extract all filter data
     const { data, error } = await supabase
         .from('dup_properties')
-        .select('property_type, address, bedrooms, price')
+        .select('property_type, address, bedrooms_num, price')
 
     if (error) {
         console.error('Error fetching filter options:', error)
@@ -616,8 +686,8 @@ export async function getFilterOptions(): Promise<{
             if (parts[1]) locationSet.add(parts[1])
         }
 
-        // Bedrooms
-        if (d.bedrooms != null && d.bedrooms > 0) bedroomSet.add(d.bedrooms)
+        // Bedrooms (use bedrooms_num, filter to reasonable values)
+        if (d.bedrooms_num != null && d.bedrooms_num > 0 && d.bedrooms_num <= 10) bedroomSet.add(d.bedrooms_num)
 
         // Price range
         if (d.price != null && d.price > 0) {

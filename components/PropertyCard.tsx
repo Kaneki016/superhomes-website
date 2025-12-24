@@ -98,7 +98,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                 `*${property.property_name}*`,
                 ``,
                 `*Price:* ${formatPrice(property.price)}`,
-                property.bedrooms > 0 ? `*Bedrooms:* ${property.bedrooms}` : null,
+                (property.bedrooms_num || property.bedrooms) > 0 ? `*Bedrooms:* ${property.bedrooms_num || property.bedrooms}` : null,
                 `*Bathrooms:* ${property.bathrooms}`,
                 `*Size:* ${property.size}`,
                 `*Location:* ${property.state || property.address}`,
@@ -145,8 +145,8 @@ export default function PropertyCard({ property }: PropertyCardProps) {
             {/* Agent Header */}
             {agent && (
                 <div className="property-card-header">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className="property-card-avatar">
+                    <Link href={`/agents/${agent.agent_id}`} className="flex items-center gap-3 flex-1 min-w-0 group">
+                        <div className="property-card-avatar group-hover:ring-2 group-hover:ring-primary-300 transition-all">
                             {agent.photo_url ? (
                                 <img
                                     src={agent.photo_url}
@@ -161,8 +161,8 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                                 <span className="text-white font-semibold text-sm">{agent.name.charAt(0)}</span>
                             )}
                         </div>
-                        <span className="text-sm font-medium text-gray-900 truncate">{agent.name}</span>
-                    </div>
+                        <span className="text-sm font-medium text-gray-900 truncate group-hover:text-primary-600 transition-colors">{agent.name}</span>
+                    </Link>
                     <button
                         onClick={handleContactClick}
                         className="contact-btn"
@@ -301,12 +301,12 @@ export default function PropertyCard({ property }: PropertyCardProps) {
 
                     {/* Feature Icons */}
                     <div className="property-features">
-                        {property.bedrooms > 0 && (
+                        {(property.bedrooms_num || property.bedrooms) > 0 && (
                             <div className="feature-item">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                                 </svg>
-                                <span>{property.bedrooms}</span>
+                                <span>{property.bedrooms_num || property.bedrooms}</span>
                             </div>
                         )}
                         <div className="feature-item">
