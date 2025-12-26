@@ -152,37 +152,16 @@ export default function AgentDetailPage() {
                                 {agent.name}
                             </h1>
                             {agent.agency && (
-                                <p className="text-gray-400 text-lg mb-1">
+                                <p className="text-gray-400 text-lg mb-4">
                                     {agent.agency}
-                                </p>
-                            )}
-                            {agent.agent_id && (
-                                <p className="text-gray-500 text-sm mb-4">
-                                    REN{agent.agent_id}
                                 </p>
                             )}
 
                             {/* Agent Bio/Description placeholder */}
-                            <p className="text-gray-300 text-sm leading-relaxed mb-6 max-w-2xl">
+                            <p className="text-gray-300 text-sm leading-relaxed max-w-2xl">
                                 Professional property agent with expertise in residential and commercial properties.
                                 Dedicated to helping clients find their perfect property with personalized service and market insights.
                             </p>
-
-                            {/* Quick Action Links */}
-                            <div className="flex flex-wrap gap-4 text-sm">
-                                <Link href="/sell" className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors">
-                                    <span className="text-lg">🏠</span>
-                                    <span className="underline">I want to Sell</span>
-                                </Link>
-                                <Link href="/properties" className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors">
-                                    <span className="text-lg">🏡</span>
-                                    <span className="underline">I want to Buy</span>
-                                </Link>
-                                <a href="/register" className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors">
-                                    <span className="text-lg">🤝</span>
-                                    <span className="underline">I want to Join</span>
-                                </a>
-                            </div>
                         </div>
 
                         {/* Action Buttons - Right Side */}
