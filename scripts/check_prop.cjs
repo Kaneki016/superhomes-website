@@ -1,0 +1,18 @@
+const { createClient } = require('@supabase/supabase-js')
+require('dotenv').config({ path: '.env.local' })
+const s = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+
+s.from('dup_properties')
+    .select('property_name, address, state, latitude, longitude, listing_url')
+    .eq('id', 'b538e004-a6e9-42f9-a39b-72512c14fa78')
+    .single()
+    .then(({ data }) => {
+        console.log('Property:', data.property_name)
+        console.log('Address:', data.address)
+        console.log('State:', data.state)
+        console.log('Latitude:', data.latitude)
+        console.log('Longitude:', data.longitude)
+        console.log('')
+        console.log('PropertyGuru URL:')
+        console.log(data.listing_url)
+    })

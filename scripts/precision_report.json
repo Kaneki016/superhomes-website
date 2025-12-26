@@ -1,0 +1,482 @@
+{
+  "summary": {
+    "total": 1000,
+    "high": 611,
+    "medium": 330,
+    "low": 59
+  },
+  "lowPrecision": [
+    {
+      "id": "98c4ef6d-4000-4657-a186-5f9e14b65e37",
+      "name": "Pulau Pinang",
+      "address": "Jelutong, Penang",
+      "state": "Penang",
+      "lat": 5.3926288,
+      "lon": 100.305287
+    },
+    {
+      "id": "ad581b7d-00d6-4892-a832-f09a8c44f7f0",
+      "name": "The Promenade",
+      "address": "Bayan Baru, Penang",
+      "state": "Penang",
+      "lat": 5.324949,
+      "lon": 100.281809
+    },
+    {
+      "id": "9ab33926-d20c-40d4-ae63-82bbb8901dcb",
+      "name": "Terrace house at Sri Petaling",
+      "address": "Sri Petaling, Kuala Lumpur",
+      "state": "Kuala Lumpur",
+      "lat": 3.1319197,
+      "lon": 101.6840589
+    },
+    {
+      "id": "34084575-c049-4522-bc16-5644e8059400",
+      "name": "【New Double Storey 26x70 Extraland 20ft】 Last Corner Unit In Sepang Near Klia",
+      "address": "Sepang, Selangor",
+      "state": "Selangor",
+      "lat": 1.6,
+      "lon": 101.4566299
+    },
+    {
+      "id": "3b99d56b-6041-4869-b4a8-cab12cbccea7",
+      "name": "Kuala Kubu Baru Selangor Glamping Camp dan Kebun Durian Untuk Di Jual",
+      "address": "Kuala Kubu Baharu, Selangor",
+      "state": "Selangor",
+      "lat": 3.8,
+      "lon": 101.4254509
+    },
+    {
+      "id": "4c93461b-74ed-4c08-a527-3756d66ccc09",
+      "name": "Taman Bukit Mantin, Phase 2, N.S.D.K",
+      "address": "Mantin, Negeri Sembilan",
+      "state": "Negeri Sembilan",
+      "lat": 2.825719,
+      "lon": 101.893793
+    },
+    {
+      "id": "b37c0a30-be75-4097-a46e-1777f2b55b20",
+      "name": "One Tanjong Condominium",
+      "address": "Tanjung Bungah, Penang",
+      "state": "Penang",
+      "lat": 5.466426,
+      "lon": 100.293705
+    },
+    {
+      "id": "2b832406-deda-4931-89eb-4c448d4fddf2",
+      "name": "Sungai Dua",
+      "address": "Sungai Dua, Penang",
+      "state": "Penang",
+      "lat": 5.3130725,
+      "lon": 100.2768388
+    },
+    {
+      "id": "58d74c93-250b-4f90-a375-50a3dfb8a8f6",
+      "name": "Garden Homes",
+      "address": "Seremban, Negeri Sembilan",
+      "state": "Negeri Sembilan",
+      "lat": 2.723099,
+      "lon": 101.9400601
+    },
+    {
+      "id": "2b5c669f-73d4-482c-8f76-4912db3f6c43",
+      "name": "Tanjung Bungah",
+      "address": "Tanjung Bungah, Penang",
+      "state": "Penang",
+      "lat": 5.467688,
+      "lon": 100.2880581
+    },
+    {
+      "id": "a90460bd-79d1-4c00-bcb0-af1fa79e6a3c",
+      "name": "The Promenade",
+      "address": "Bayan Baru, Penang",
+      "state": "Penang",
+      "lat": 5.3248811,
+      "lon": 100.285231
+    },
+    {
+      "id": "b118c8da-75c6-49be-a779-aea95317bdd7",
+      "name": "Savio @ Riana Dutamas",
+      "address": "Dutamas, Kuala Lumpur",
+      "state": "Kuala Lumpur",
+      "lat": 3.1851555,
+      "lon": 101.6674239
+    },
+    {
+      "id": "933319e4-3c68-4b9c-9f79-0141b9883b94",
+      "name": "R&F Princess Cove Phase 2-Seine Region",
+      "address": "Johor Bahru, Johor",
+      "state": "Johor",
+      "lat": 1.4581986,
+      "lon": 103.7649059
+    },
+    {
+      "id": "8cb7b4bf-208f-4971-864a-38abc3aee46c",
+      "name": "Taman Maju, Jasin Melaka",
+      "address": "Jasin, Melaka",
+      "state": "Melaka",
+      "lat": 2.3058097,
+      "lon": 102.422339
+    },
+    {
+      "id": "94a92ddd-ec35-447c-afc7-9e4ad945d3e2",
+      "name": "Taman Anjung Gapam, Ayer Keroh Melaka",
+      "address": "Ayer Keroh, Melaka",
+      "state": "Melaka",
+      "lat": 2.255986,
+      "lon": 102.2915442
+    },
+    {
+      "id": "89a1631b-bec6-4256-8ab8-3d4ac85d0d94",
+      "name": "Taman Bachang Baru, Melaka",
+      "address": "Melaka City, Melaka",
+      "state": "Melaka",
+      "lat": 2.1942647,
+      "lon": 102.2486651
+    },
+    {
+      "id": "6ef06536-fd53-4b25-a280-6a3ec8f3a204",
+      "name": "Single Storey Taman Alai Perdana, Alai, near Ujong Pasir Melaka",
+      "address": "Melaka City, Melaka",
+      "state": "Melaka",
+      "lat": 2.1942647,
+      "lon": 102.2486651
+    },
+    {
+      "id": "88fe8df9-4c6a-47fb-8e23-af58e49c4e02",
+      "name": "Bungalow Taman Tanjung Minyak Perdana, Melaka",
+      "address": "Melaka City, Melaka",
+      "state": "Melaka",
+      "lat": 2.1942647,
+      "lon": 102.2486651
+    },
+    {
+      "id": "350b21ea-ca1d-4255-b8cc-e98ef823e0f6",
+      "name": "Taman Impian Putra",
+      "address": "Kajang, Selangor",
+      "state": "Selangor",
+      "lat": 2.9221098,
+      "lon": 101.7329167
+    },
+    {
+      "id": "a86301c2-ad38-4b77-bb47-a4bda86ea11a",
+      "name": "FREEHOLD [ Only 450k !! ] 0% Down Payment 3Room 2 Bath Free 2 Carpark Free Legal Fee Petaling Jaya",
+      "address": "Petaling Jaya, Selangor",
+      "state": "Selangor",
+      "lat": 3.0988792,
+      "lon": 101.6454202
+    },
+    {
+      "id": "61d4be25-fdc5-4836-938f-1f31dd708ecf",
+      "name": "Ujong Pasir, Melaka",
+      "address": "Ujong Pasir, Melaka",
+      "state": "Melaka",
+      "lat": 2.1903717,
+      "lon": 102.2712859
+    },
+    {
+      "id": "bf1728f3-9c84-494a-8975-f63ed6818070",
+      "name": "Semi D Bukit Changgang Bagan Lalang | Sg Pelek | Sepang Semi-D Setingkat | Freehold | Rezab M",
+      "address": "Sepang, Selangor",
+      "state": "Selangor",
+      "lat": 2.8008619,
+      "lon": 101.7094012
+    },
+    {
+      "id": "8f05701b-4095-4cbb-ac24-796696c71926",
+      "name": "MIDVALLEY FREEHOLD MONTHLY RM1300[FULLY FURNSHING][BIT LAYOUT][BEST FOR OWNSTAY]",
+      "address": "Mid Valley City, Kuala Lumpur",
+      "state": "Kuala Lumpur",
+      "lat": 3.1176552,
+      "lon": 101.6773741
+    },
+    {
+      "id": "11d17bad-60a6-4a4a-8ae8-e66e8174ff9f",
+      "name": "Full KLCC View/ UM/ MVally@ High ROI% up to RM3K!! MRT LRT New Condo@ EXTRA Cashback Fully Furnished",
+      "address": "Kuala Lumpur, Kuala Lumpur",
+      "state": "Kuala Lumpur",
+      "lat": 3.1516964,
+      "lon": 101.6942371
+    },
+    {
+      "id": "024413d4-3078-4a26-936c-339518d221f9",
+      "name": "CHEERYWOOD",
+      "address": "Semenyih, Selangor",
+      "state": "Selangor",
+      "lat": 2.906215,
+      "lon": 101.837111
+    },
+    {
+      "id": "b235f030-6282-4517-9b65-2263bf893e8c",
+      "name": "TAMAN ANJUNG GAPAM",
+      "address": "Jasin, Melaka",
+      "state": "Melaka",
+      "lat": 2.287917,
+      "lon": 102.362314
+    },
+    {
+      "id": "42f77f44-5dbb-432b-af7e-0b4a6c6b80a2",
+      "name": "8Scape Residence @ Sutera",
+      "address": "Johor Bahru, Johor",
+      "state": "Johor",
+      "lat": 1.4581986,
+      "lon": 103.7649059
+    },
+    {
+      "id": "2f49d543-4a3f-4877-a7f8-33145ada5873",
+      "name": "[SUPER CHEAP] Midvalley KL - LRT & MRT LINK 2-3 Rooms Monthly RM1.2k",
+      "address": "Mid Valley City, Kuala Lumpur",
+      "state": "Kuala Lumpur",
+      "lat": 3.1176552,
+      "lon": 101.6773741
+    },
+    {
+      "id": "32f71865-bbd9-44f2-aafa-5c425b826e72",
+      "name": "Marriott Residence @ Gurney",
+      "address": "Gurney Drive, Penang",
+      "state": "Penang",
+      "lat": 5.4403769,
+      "lon": 100.3082836
+    },
+    {
+      "id": "c816c3d2-8e20-47a9-88c7-55ab67a14bf3",
+      "name": "Marriott Residence @ Gurney",
+      "address": "Gurney Drive, Penang",
+      "state": "Penang",
+      "lat": 5.4403769,
+      "lon": 100.3082836
+    },
+    {
+      "id": "a6a4ada4-de20-42c1-8077-9d1adbb44f50",
+      "name": "Ayera Residences",
+      "address": "Masai, Johor",
+      "state": "Johor",
+      "lat": 1.485162,
+      "lon": 103.843838
+    },
+    {
+      "id": "790ee017-757e-494d-bbe5-77e9b62c949b",
+      "name": "Bandar Dato Onn",
+      "address": "Johor Bahru, Johor",
+      "state": "Johor",
+      "lat": 1.5,
+      "lon": 103.7727969
+    },
+    {
+      "id": "b70c923b-bd53-4a0d-89f5-a5c2e3fccb00",
+      "name": "RM 250K 2R1B Beside Xiamen University + Shopping Mall @ Below Market 100K + Ready Tenant - KL",
+      "address": "Kl Sentral, Kuala Lumpur",
+      "state": "Kuala Lumpur",
+      "lat": 3.9,
+      "lon": 101.6968667
+    },
+    {
+      "id": "b6b8397c-ab8a-4460-8c8e-d735a533e1e4",
+      "name": "RM350K Sungai Besi Fully Furnished Near LRT",
+      "address": "Sungai Besi, Kuala Lumpur",
+      "state": "Kuala Lumpur",
+      "lat": 3.0638284,
+      "lon": 101.7084087
+    },
+    {
+      "id": "64407dac-0a52-49e4-bf99-a9cb6b9e6e7e",
+      "name": "KOTASAS EVERGREEN 2 KUANTAN PAHANG",
+      "address": "Kuantan, Pahang",
+      "state": "Pahang",
+      "lat": 3.7985637,
+      "lon": 103.32199
+    },
+    {
+      "id": "7a0eac34-64fc-4420-8501-01db908e8120",
+      "name": "Marriott Residence @ Gurney",
+      "address": "Gurney Drive, Penang",
+      "state": "Penang",
+      "lat": 5.431918,
+      "lon": 100.317679
+    },
+    {
+      "id": "a930c90b-a1e1-4e91-a9aa-04f36fbacc80",
+      "name": "Taman Puncak Bertam, Cheng Melaka",
+      "address": "Cheng, Melaka",
+      "state": "Melaka",
+      "lat": 2.2701088,
+      "lon": 102.2170901
+    },
+    {
+      "id": "900cf8d7-d978-4430-a069-23e92c45ecd0",
+      "name": "Taman Sutera, Alor Gajah Melaka",
+      "address": "Alor Gajah, Melaka",
+      "state": "Melaka",
+      "lat": 2.3834528,
+      "lon": 102.2107805
+    },
+    {
+      "id": "2646e9cf-7ecd-4c82-839f-35b3e353c425",
+      "name": "TAMAN KLEBANG PUTRA",
+      "address": "Ipoh, Perak",
+      "state": "Perak",
+      "lat": 4.5986817,
+      "lon": 101.0900236
+    },
+    {
+      "id": "292cf187-ddb1-4f50-8b5b-0c582e93ee0e",
+      "name": "Taman Sri Pulai Perdana 1",
+      "address": "Skudai, Johor",
+      "state": "Johor",
+      "lat": 1.5369721,
+      "lon": 103.662103
+    },
+    {
+      "id": "7c99bb94-3daa-44e5-b2b0-23e281e3925e",
+      "name": "Villa Wangsamas",
+      "address": "Wangsa Maju, Kuala Lumpur",
+      "state": "Kuala Lumpur",
+      "lat": 3.2057782,
+      "lon": 101.7318615
+    },
+    {
+      "id": "4f51641a-e0c9-426c-a2f9-51dcc3995cde",
+      "name": "Danga Sutera Danga Sutera Dangas Suteras",
+      "address": "Skudai, Johor",
+      "state": "Johor",
+      "lat": 1.5369721,
+      "lon": 103.662103
+    },
+    {
+      "id": "b0f28233-671c-4373-b8fd-07e77a38f97e",
+      "name": "Taman Ozana Impian, Ayer Keroh Melaka",
+      "address": "Ayer Keroh, Melaka",
+      "state": "Melaka",
+      "lat": 2.255986,
+      "lon": 102.2915442
+    },
+    {
+      "id": "a75a30f2-9334-4e32-a231-5364ca49a804",
+      "name": "Acacia Seri Tanjung Pinang",
+      "address": "Tanjung Tokong, Penang",
+      "state": "Penang",
+      "lat": 5.4509926,
+      "lon": 100.3056236
+    },
+    {
+      "id": "b6e9615f-a196-4bc3-bb85-9e578af5edfe",
+      "name": "Greenhill Residence",
+      "address": null,
+      "state": null,
+      "lat": 4.5693754,
+      "lon": 102.2656823
+    },
+    {
+      "id": "44ab7905-9323-4252-a08b-502642488b36",
+      "name": "E Residence @ Telipok",
+      "address": null,
+      "state": null,
+      "lat": 4.5693754,
+      "lon": 102.2656823
+    },
+    {
+      "id": "4b7f6d8f-14c5-43ff-b7bc-98169cff756a",
+      "name": "Se.Duduk D'Kajang by EcoWorld",
+      "address": null,
+      "state": null,
+      "lat": 4.5693754,
+      "lon": 102.2656823
+    },
+    {
+      "id": "4efd66cf-fc9c-444c-8ae2-488f7842e766",
+      "name": "Greenwoods Senna @ Salak Perdana",
+      "address": null,
+      "state": null,
+      "lat": 4.5693754,
+      "lon": 102.2656823
+    },
+    {
+      "id": "c42ecc88-2ca4-4e71-a90d-7930cd774e6b",
+      "name": "Daya 1 Residences (D1R), TD Central",
+      "address": null,
+      "state": null,
+      "lat": 4.5693754,
+      "lon": 102.2656823
+    },
+    {
+      "id": "729136fe-4fcd-48b6-ab27-16d7c03740fc",
+      "name": "Taman Bukit Dahlia",
+      "address": "Pasir Gudang, Johor",
+      "state": "Johor",
+      "lat": 1.4953437,
+      "lon": 103.9207048
+    },
+    {
+      "id": "b070fc02-26b3-416f-a768-5edfed70a447",
+      "name": "[NEW 22X70 LINK HOUSE] CYBERJAYA",
+      "address": "Cyberjaya, Selangor",
+      "state": "Selangor",
+      "lat": 2.9338908,
+      "lon": 101.6455587
+    },
+    {
+      "id": "2eaa3d60-6aa1-438b-8563-704cba977110",
+      "name": "Rumah Berkembar Setingkat di Kulim",
+      "address": "Kulim, Kedah",
+      "state": "Kedah",
+      "lat": 5.3707128,
+      "lon": 100.6172071
+    },
+    {
+      "id": "fbe89b63-c848-4510-a86f-185445fcf44d",
+      "name": "TAMANTERATAI IDAMAN",
+      "address": "Batu Kawan, Penang",
+      "state": "Penang",
+      "lat": 5.2625962,
+      "lon": 100.4304555
+    },
+    {
+      "id": "a8c1141b-80f3-4560-bc42-c170d31362a8",
+      "name": "Zenia, Desa ParkCity",
+      "address": "Desa Parkcity, Kuala Lumpur",
+      "state": "Kuala Lumpur",
+      "lat": 3.1863832,
+      "lon": 101.6318156
+    },
+    {
+      "id": "2afbcf59-b13b-4933-9bd9-6f44d2e21ee5",
+      "name": "TAMAN LEMBAH PERMAI",
+      "address": "Seberang Perai, Penang",
+      "state": "Penang",
+      "lat": 5.3538818,
+      "lon": 100.4572371
+    },
+    {
+      "id": "fc7d3f5c-bc7a-4dba-a18a-35f378e4dda7",
+      "name": "Villa Wangsamas",
+      "address": "Wangsa Maju, Kuala Lumpur",
+      "state": "Kuala Lumpur",
+      "lat": 3.2057782,
+      "lon": 101.7318615
+    },
+    {
+      "id": "c07efcae-21c3-42c4-a9c2-ea3eb741129b",
+      "name": "Ria Bangsar South",
+      "address": null,
+      "state": null,
+      "lat": 4.5693754,
+      "lon": 102.2656823
+    },
+    {
+      "id": "9a454622-6c6b-429f-91a7-8ef6de83c14e",
+      "name": "BON KIARA",
+      "address": null,
+      "state": null,
+      "lat": 4.5693754,
+      "lon": 102.2656823
+    },
+    {
+      "id": "2aa2495b-69f8-4279-8f4a-04be3f04a648",
+      "name": "Ipoh garden south single storey semi-d house for sale",
+      "address": "Ipoh, Perak",
+      "state": "Perak",
+      "lat": 4.5986817,
+      "lon": 101.0900236
+    }
+  ]
+}

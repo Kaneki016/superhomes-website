@@ -1,0 +1,26 @@
+GEOCODING MISMATCHES REPORT
+Total: 4
+
+1. Taman Scientex Kulai 2
+   ID: 3ac6f411-b1ac-4c99-bee2-5900cedc1e28
+   Address: Scientex Impian kulai, Bandar Kulai, Kulai, Johor
+   State: Johor
+   Coords: (4.2105, 101.9758)
+
+2. Sunway Citrine Lakehomes
+   ID: 059ce1aa-e423-454f-becb-31744e65b9f2
+   Address: Residensi Tasik Citrine, Jalan Medini Selatan, Sunway City Iskandar Puteri, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+   Coords: (3.8, 103.6388125)
+
+3. The WaterEdge (Pinggiran Air)
+   ID: 5e75dde4-2dce-434f-88d5-ceb1c2e7fc0c
+   Address: Jalan Persiaran Senibong, Permas Jaya, Johor
+   State: Johor
+   Coords: (3.8, 103.830654)
+
+4. Austin Residence, Taman Mount Austin, 81100 Johor Bahru
+   ID: 0ff00161-402b-41fd-ad5d-963a316d788a
+   Address: Jalan Mutiara Emas10, Taman Mount Austin, Taman Mount Austin, Tebrau, Johor
+   State: Johor
+   Coords: (4.2105, 101.9758)

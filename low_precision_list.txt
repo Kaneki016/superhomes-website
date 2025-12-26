@@ -1,0 +1,299 @@
+LOW PRECISION ADDRESSES - 59 PROPERTIES
+==========================================
+These addresses are too vague for exact geocoding:
+
+1. Pulau Pinang
+   Address: Jelutong, Penang
+   State: Penang
+   ID: 98c4ef6d-4000-4657-a186-5f9e14b65e37
+
+2. The Promenade
+   Address: Bayan Baru, Penang
+   State: Penang
+   ID: ad581b7d-00d6-4892-a832-f09a8c44f7f0
+
+3. Terrace house at Sri Petaling
+   Address: Sri Petaling, Kuala Lumpur
+   State: Kuala Lumpur
+   ID: 9ab33926-d20c-40d4-ae63-82bbb8901dcb
+
+4. 【New Double Storey 26x70 Extraland 20ft】 Last Corner Unit In Sepang Near Klia
+   Address: Sepang, Selangor
+   State: Selangor
+   ID: 34084575-c049-4522-bc16-5644e8059400
+
+5. Kuala Kubu Baru Selangor Glamping Camp dan Kebun Durian Untuk Di Jual
+   Address: Kuala Kubu Baharu, Selangor
+   State: Selangor
+   ID: 3b99d56b-6041-4869-b4a8-cab12cbccea7
+
+6. Taman Bukit Mantin, Phase 2, N.S.D.K
+   Address: Mantin, Negeri Sembilan
+   State: Negeri Sembilan
+   ID: 4c93461b-74ed-4c08-a527-3756d66ccc09
+
+7. One Tanjong Condominium
+   Address: Tanjung Bungah, Penang
+   State: Penang
+   ID: b37c0a30-be75-4097-a46e-1777f2b55b20
+
+8. Sungai Dua
+   Address: Sungai Dua, Penang
+   State: Penang
+   ID: 2b832406-deda-4931-89eb-4c448d4fddf2
+
+9. Garden Homes
+   Address: Seremban, Negeri Sembilan
+   State: Negeri Sembilan
+   ID: 58d74c93-250b-4f90-a375-50a3dfb8a8f6
+
+10. Tanjung Bungah
+   Address: Tanjung Bungah, Penang
+   State: Penang
+   ID: 2b5c669f-73d4-482c-8f76-4912db3f6c43
+
+11. The Promenade
+   Address: Bayan Baru, Penang
+   State: Penang
+   ID: a90460bd-79d1-4c00-bcb0-af1fa79e6a3c
+
+12. Savio @ Riana Dutamas
+   Address: Dutamas, Kuala Lumpur
+   State: Kuala Lumpur
+   ID: b118c8da-75c6-49be-a779-aea95317bdd7
+
+13. R&F Princess Cove Phase 2-Seine Region
+   Address: Johor Bahru, Johor
+   State: Johor
+   ID: 933319e4-3c68-4b9c-9f79-0141b9883b94
+
+14. Taman Maju, Jasin Melaka
+   Address: Jasin, Melaka
+   State: Melaka
+   ID: 8cb7b4bf-208f-4971-864a-38abc3aee46c
+
+15. Taman Anjung Gapam, Ayer Keroh Melaka
+   Address: Ayer Keroh, Melaka
+   State: Melaka
+   ID: 94a92ddd-ec35-447c-afc7-9e4ad945d3e2
+
+16. Taman Bachang Baru, Melaka
+   Address: Melaka City, Melaka
+   State: Melaka
+   ID: 89a1631b-bec6-4256-8ab8-3d4ac85d0d94
+
+17. Single Storey Taman Alai Perdana, Alai, near Ujong Pasir Melaka
+   Address: Melaka City, Melaka
+   State: Melaka
+   ID: 6ef06536-fd53-4b25-a280-6a3ec8f3a204
+
+18. Bungalow Taman Tanjung Minyak Perdana, Melaka
+   Address: Melaka City, Melaka
+   State: Melaka
+   ID: 88fe8df9-4c6a-47fb-8e23-af58e49c4e02
+
+19. Taman Impian Putra
+   Address: Kajang, Selangor
+   State: Selangor
+   ID: 350b21ea-ca1d-4255-b8cc-e98ef823e0f6
+
+20. FREEHOLD [ Only 450k !! ] 0% Down Payment 3Room 2 Bath Free 2 Carpark Free Legal Fee Petaling Jaya
+   Address: Petaling Jaya, Selangor
+   State: Selangor
+   ID: a86301c2-ad38-4b77-bb47-a4bda86ea11a
+
+21. Ujong Pasir, Melaka
+   Address: Ujong Pasir, Melaka
+   State: Melaka
+   ID: 61d4be25-fdc5-4836-938f-1f31dd708ecf
+
+22. Semi D Bukit Changgang Bagan Lalang | Sg Pelek | Sepang Semi-D Setingkat | Freehold | Rezab M
+   Address: Sepang, Selangor
+   State: Selangor
+   ID: bf1728f3-9c84-494a-8975-f63ed6818070
+
+23. MIDVALLEY FREEHOLD MONTHLY RM1300[FULLY FURNSHING][BIT LAYOUT][BEST FOR OWNSTAY]
+   Address: Mid Valley City, Kuala Lumpur
+   State: Kuala Lumpur
+   ID: 8f05701b-4095-4cbb-ac24-796696c71926
+
+24. Full KLCC View/ UM/ MVally@ High ROI% up to RM3K!! MRT LRT New Condo@ EXTRA Cashback Fully Furnished
+   Address: Kuala Lumpur, Kuala Lumpur
+   State: Kuala Lumpur
+   ID: 11d17bad-60a6-4a4a-8ae8-e66e8174ff9f
+
+25. CHEERYWOOD
+   Address: Semenyih, Selangor
+   State: Selangor
+   ID: 024413d4-3078-4a26-936c-339518d221f9
+
+26. TAMAN ANJUNG GAPAM
+   Address: Jasin, Melaka
+   State: Melaka
+   ID: b235f030-6282-4517-9b65-2263bf893e8c
+
+27. 8Scape Residence @ Sutera
+   Address: Johor Bahru, Johor
+   State: Johor
+   ID: 42f77f44-5dbb-432b-af7e-0b4a6c6b80a2
+
+28. [SUPER CHEAP] Midvalley KL - LRT & MRT LINK 2-3 Rooms Monthly RM1.2k
+   Address: Mid Valley City, Kuala Lumpur
+   State: Kuala Lumpur
+   ID: 2f49d543-4a3f-4877-a7f8-33145ada5873
+
+29. Marriott Residence @ Gurney
+   Address: Gurney Drive, Penang
+   State: Penang
+   ID: 32f71865-bbd9-44f2-aafa-5c425b826e72
+
+30. Marriott Residence @ Gurney
+   Address: Gurney Drive, Penang
+   State: Penang
+   ID: c816c3d2-8e20-47a9-88c7-55ab67a14bf3
+
+31. Ayera Residences
+   Address: Masai, Johor
+   State: Johor
+   ID: a6a4ada4-de20-42c1-8077-9d1adbb44f50
+
+32. Bandar Dato Onn
+   Address: Johor Bahru, Johor
+   State: Johor
+   ID: 790ee017-757e-494d-bbe5-77e9b62c949b
+
+33. RM 250K 2R1B Beside Xiamen University + Shopping Mall @ Below Market 100K + Ready Tenant - KL
+   Address: Kl Sentral, Kuala Lumpur
+   State: Kuala Lumpur
+   ID: b70c923b-bd53-4a0d-89f5-a5c2e3fccb00
+
+34. RM350K Sungai Besi Fully Furnished Near LRT
+   Address: Sungai Besi, Kuala Lumpur
+   State: Kuala Lumpur
+   ID: b6b8397c-ab8a-4460-8c8e-d735a533e1e4
+
+35. KOTASAS EVERGREEN 2 KUANTAN PAHANG
+   Address: Kuantan, Pahang
+   State: Pahang
+   ID: 64407dac-0a52-49e4-bf99-a9cb6b9e6e7e
+
+36. Marriott Residence @ Gurney
+   Address: Gurney Drive, Penang
+   State: Penang
+   ID: 7a0eac34-64fc-4420-8501-01db908e8120
+
+37. Taman Puncak Bertam, Cheng Melaka
+   Address: Cheng, Melaka
+   State: Melaka
+   ID: a930c90b-a1e1-4e91-a9aa-04f36fbacc80
+
+38. Taman Sutera, Alor Gajah Melaka
+   Address: Alor Gajah, Melaka
+   State: Melaka
+   ID: 900cf8d7-d978-4430-a069-23e92c45ecd0
+
+39. TAMAN KLEBANG PUTRA
+   Address: Ipoh, Perak
+   State: Perak
+   ID: 2646e9cf-7ecd-4c82-839f-35b3e353c425
+
+40. Taman Sri Pulai Perdana 1
+   Address: Skudai, Johor
+   State: Johor
+   ID: 292cf187-ddb1-4f50-8b5b-0c582e93ee0e
+
+41. Villa Wangsamas
+   Address: Wangsa Maju, Kuala Lumpur
+   State: Kuala Lumpur
+   ID: 7c99bb94-3daa-44e5-b2b0-23e281e3925e
+
+42. Danga Sutera Danga Sutera Dangas Suteras
+   Address: Skudai, Johor
+   State: Johor
+   ID: 4f51641a-e0c9-426c-a2f9-51dcc3995cde
+
+43. Taman Ozana Impian, Ayer Keroh Melaka
+   Address: Ayer Keroh, Melaka
+   State: Melaka
+   ID: b0f28233-671c-4373-b8fd-07e77a38f97e
+
+44. Acacia Seri Tanjung Pinang
+   Address: Tanjung Tokong, Penang
+   State: Penang
+   ID: a75a30f2-9334-4e32-a231-5364ca49a804
+
+45. Greenhill Residence
+   Address: N/A
+   State: N/A
+   ID: b6e9615f-a196-4bc3-bb85-9e578af5edfe
+
+46. E Residence @ Telipok
+   Address: N/A
+   State: N/A
+   ID: 44ab7905-9323-4252-a08b-502642488b36
+
+47. Se.Duduk D'Kajang by EcoWorld
+   Address: N/A
+   State: N/A
+   ID: 4b7f6d8f-14c5-43ff-b7bc-98169cff756a
+
+48. Greenwoods Senna @ Salak Perdana
+   Address: N/A
+   State: N/A
+   ID: 4efd66cf-fc9c-444c-8ae2-488f7842e766
+
+49. Daya 1 Residences (D1R), TD Central
+   Address: N/A
+   State: N/A
+   ID: c42ecc88-2ca4-4e71-a90d-7930cd774e6b
+
+50. Taman Bukit Dahlia
+   Address: Pasir Gudang, Johor
+   State: Johor
+   ID: 729136fe-4fcd-48b6-ab27-16d7c03740fc
+
+51. [NEW 22X70 LINK HOUSE] CYBERJAYA
+   Address: Cyberjaya, Selangor
+   State: Selangor
+   ID: b070fc02-26b3-416f-a768-5edfed70a447
+
+52. Rumah Berkembar Setingkat di Kulim
+   Address: Kulim, Kedah
+   State: Kedah
+   ID: 2eaa3d60-6aa1-438b-8563-704cba977110
+
+53. TAMANTERATAI IDAMAN
+   Address: Batu Kawan, Penang
+   State: Penang
+   ID: fbe89b63-c848-4510-a86f-185445fcf44d
+
+54. Zenia, Desa ParkCity
+   Address: Desa Parkcity, Kuala Lumpur
+   State: Kuala Lumpur
+   ID: a8c1141b-80f3-4560-bc42-c170d31362a8
+
+55. TAMAN LEMBAH PERMAI
+   Address: Seberang Perai, Penang
+   State: Penang
+   ID: 2afbcf59-b13b-4933-9bd9-6f44d2e21ee5
+
+56. Villa Wangsamas
+   Address: Wangsa Maju, Kuala Lumpur
+   State: Kuala Lumpur
+   ID: fc7d3f5c-bc7a-4dba-a18a-35f378e4dda7
+
+57. Ria Bangsar South
+   Address: N/A
+   State: N/A
+   ID: c07efcae-21c3-42c4-a9c2-ea3eb741129b
+
+58. BON KIARA
+   Address: N/A
+   State: N/A
+   ID: 9a454622-6c6b-429f-91a7-8ef6de83c14e
+
+59. Ipoh garden south single storey semi-d house for sale
+   Address: Ipoh, Perak
+   State: Perak
+   ID: 2aa2495b-69f8-4279-8f4a-04be3f04a648
+

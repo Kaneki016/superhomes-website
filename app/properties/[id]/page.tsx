@@ -15,6 +15,7 @@ import { getPropertyById as getMockPropertyById, getAgentById as getMockAgentByI
 import { Property, Agent } from '@/lib/supabase'
 import { useFavorites } from '@/contexts/FavoritesContext'
 import ShareButton from '@/components/ShareButton'
+import NearbyAmenities from '@/components/NearbyAmenities'
 
 export default function PropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params)
@@ -408,6 +409,14 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                                             📍 {property.address}
                                         </p>
                                     </div>
+                                )}
+
+                                {/* Nearby Amenities */}
+                                {property.latitude && property.longitude && property.latitude !== -99 && (
+                                    <NearbyAmenities
+                                        latitude={property.latitude}
+                                        longitude={property.longitude}
+                                    />
                                 )}
                             </div>
 

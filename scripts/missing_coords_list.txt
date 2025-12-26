@@ -1,0 +1,2 @@
+=== PROPERTIES MISSING COORDINATES ===
+Total missing: null

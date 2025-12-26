@@ -1,0 +1,5005 @@
+FAILED GEOCODING REPORT
+Generated: 26/12/2025, 4:18:58 pm
+Total failed: 1000 properties
+
+============================================================
+
+1. Section 5, Seksyen 5, Sect 5 2-storey house Petaling Jaya
+   ID: 8a44ba3f-8012-4048-8f33-63671d71a411
+   Address: Section 5, Sekysen 5, Jalan 5, Sect 5, Seksyen 5, Petaling Jaya, Selangor
+   State: Selangor
+
+2. Taman Malim Jaya, Bachang Melaka
+   ID: 1d021ff2-a5c2-4c6a-96bf-4e0df655b5b7
+   Address: Taman Malim Jaya, Bachang, Melaka
+   State: Melaka
+
+3. Star Residences One
+   ID: a028c798-53ad-4aa0-a3f5-7c9638909c95
+   Address: Jalan Yap Kwan Seng, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+4. Residential Land at Taman Makmur
+   ID: 8ed9465f-9d2e-4e7d-904f-babaee16df7e
+   Address: Jalan Taman Makmur, Taman Makmur, Merlimau, Melaka
+   State: Melaka
+
+5. D'Inspire Residence (Inspira Bestari)
+   ID: 46aca62a-a08c-490c-8081-fd4fa43dd028
+   Address: Jalan Bestari 12/2 Jalan Bestari 2/4, Taman Nusa Bestari, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+6. Iskandar Residences
+   ID: 5ace634e-9da0-4237-9e17-b41aabd6f24d
+   Address: Nusajaya Highway Persiaran Medini Utara 3, Medini, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+7. Telok Panglima Garang
+   ID: edf0e045-0f07-40b6-8feb-3b9e80923482
+   Address: Jalan Punai, Telok Panglima Garang, Selangor
+   State: Selangor
+
+8. M City
+   ID: b9509c35-1c3b-4646-86c0-5ad0e2283dbf
+   Address: Jalan Ampang, Kampung Berembang, Ampang, Kuala Lumpur
+   State: Kuala Lumpur
+
+9. Bungalow at Seksyen 6
+   ID: 904255cf-3db9-4189-af51-d0515e8b3102
+   Address: Section 6, Sect 6, Jalan 6 PJ, Seksyen 6, Petaling Jaya, Selangor
+   State: Selangor
+
+10. Taman Seri Janggus
+   ID: 68b5316b-5db6-42cb-8f49-929cb792f539
+   Address: Jalan Seri Janggus Jalan Seri Janggus, Taman Seri Janggus, Bukit Mertajam, Penang
+   State: Penang
+
+11. Green Haven
+   ID: ec2d431e-70f4-4206-85ff-582f4e54964b
+   Address: Jalan Kota Jalan Mersawa 16, Masai, Johor
+   State: Johor
+
+12. Residensi PV18
+   ID: 61c26376-7fe7-4401-a296-b32a8776d252
+   Address: Jalan Langkawi Jalan Langkawi, Taman Setapak, Setapak, Kuala Lumpur
+   State: Kuala Lumpur
+
+13. Eco Botanic Eco Botanic Ecos Botanics
+   ID: f1e4659e-9214-49c2-bfb3-594364ddd345
+   Address: Davenham, Eco Botanic, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+14. Eco Botanic Ecos Botanics
+   ID: 043aa5be-d135-4197-98e5-7febbcbf88e2
+   Address: Corner Lot Cluster House, Eco Botanic, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+15. D'Summit Residences
+   ID: 12003298-470c-4139-abee-706debbdff39
+   Address: Jalan Kempas Lama Jln Kempas Utama 2/1, Kempas, Johor Bahru, Johor
+   State: Johor
+
+16. Eco Botanic Eco Botanic Ecos Botanics
+   ID: 3beb017f-1d21-4360-b671-569295c13c2e
+   Address: Eco Botanic, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+17. 9Ine (Residensi Sembilan)
+   ID: 84c45b47-828f-4697-b61c-878091fc0cc1
+   Address: Jalan Suria Residen 1/1 Off Jalan Kemacahaya, Cheras, Selangor
+   State: Selangor
+
+18. Flat Jentayu
+   ID: 7bdc59f8-7969-4cf5-bbb9-2e9804aa460c
+   Address: B-1, 09, Lorong Jentayu 1, Taman Jentayu, Simpang Ampat, Penang
+   State: Penang
+
+19. Horizon Hill Horizon Hill Horizons Hills
+   ID: b663b82c-5f81-4627-987f-36ddb1dc000c
+   Address: The Gateway, Horizon Hills, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+20. Damansara Aliff Damansaras Aliffs
+   ID: d28125b8-a17c-4062-a36d-1947fa9a9742
+   Address: Aliff Puteri @ Taman Damansara Aliff, Taman Damansara Aliff, Tampoi, Johor
+   State: Johor
+
+21. SEMI D DOUBLE STOREY TAMAN SAUJANA EMAS
+   ID: 61add22c-c1ba-41d2-bdc2-de22770b3a30
+   Address: Taman Suajana Emas, Kajang, Selangor
+   State: Selangor
+
+22. LakePark Residence @ KL North
+   ID: a0576801-fc6d-4342-b634-71289d22a1a1
+   Address: LakePark Residence Jalan 2/3a, Batu Caves, Kuala Lumpur
+   State: Kuala Lumpur
+
+23. Residensi Sutera 7
+   ID: e6119994-7e2f-4b4f-9d4a-24e387d2e235
+   Address: Lot 507, Taman Sutera, Bukit Angkat, Sg. Chua, Taman Sutera, Kajang, Selangor
+   State: Selangor
+
+24. Sunway Lagoon View Resort Condominium
+   ID: f36f0f5d-9f05-4f12-a53f-e0410c956aae
+   Address: - Jalan Kolej, Bandar Sunway, Sunway, Selangor
+   State: Selangor
+
+25. Sakura Residence
+   ID: 193b0ea9-f6c0-42bc-a638-5efa6ab196cd
+   Address: Medini Zone F, Mukim Pulai, Iskandar Puteri, Johor Bahru, Johor
+   State: Johor
+
+26. Concerto North Kiara
+   ID: 57848e6c-3d7a-45c3-8491-61c205170312
+   Address: Lot PT 25954 Jalan Dutamas Melati, Dutamas, Kuala Lumpur
+   State: Kuala Lumpur
+
+27. Twin Galaxy (Dwi Galaksi)
+   ID: 048a9ff7-86f3-4608-9d6a-cb9a37322589
+   Address: - Jalan Dato Abdullah Tahir, Taman Abad, Johor Bahru, Johor
+   State: Johor
+
+28. Summer Place
+   ID: 11b40656-0c52-422c-b4a6-3749c91c62a3
+   Address: 1 Lebuh Sungai Pinang 8, Jelutong, Penang
+   State: Penang
+
+29. Shamelin Star
+   ID: bb3bc969-46be-4109-9e2a-00e99f1a3c9e
+   Address: Shamelin Star Jalan 4/91, Taman Shamelin Perkasa, Cheras, Kuala Lumpur
+   State: Kuala Lumpur
+
+30. Monet Springtime @ Monet Residences Sunsuria City
+   ID: 0bf91619-41b6-4484-9c8f-e5100c93bc14
+   Address: Persiaran Sunsuria, Dengkil, Selangor
+   State: Selangor
+
+31. Tropicana Aman - Freesia Residences
+   ID: 55df5d04-9545-41fb-b734-76d59d0f02b5
+   Address: TROPICANA AMAN PROPERTY GALLERY No. 2, Persiaran Aman Perdana 3, Bandar Tropicana Aman, Telok Panglima Garang, Selangor
+   State: Selangor
+
+32. Shamelin Star
+   ID: fb8f31eb-b294-416c-8bef-60f7e6de6772
+   Address: Shamelin Star Jalan 4/91, Taman Shamelin Perkasa, Cheras, Kuala Lumpur
+   State: Kuala Lumpur
+
+33. Andaman @ Quayside
+   ID: e9de205d-ca1c-4e5c-8a99-cea8acb43b05
+   Address: Off Jalan Seri Tanjung Pinang, Seri Tanjung Pinang, Tanjung Tokong, Penang
+   State: Penang
+
+34. The Andes Condo Villa @ Bukit Jalil
+   ID: 8ed5f6c8-ebb2-46b2-b2a4-ada61168d975
+   Address: Jalan Mas 2 Jalan Mas 1, Bukit Jalil, Kuala Lumpur
+   State: Kuala Lumpur
+
+35. Azalea Court
+   ID: 07ddfc07-258a-40a4-ac1f-fe647521e88f
+   Address: - Persiaran Lembah Hijau 4, Bandar Tasik Puteri, Rawang, Selangor
+   State: Selangor
+
+36. Jalan Desa Sentosa Taman Desa
+   ID: 06a97cf7-720f-4f38-a5af-d9226b6d8879
+   Address: Jalan Desa Sentosa, Taman Danau Desa, Taman Desa, Kuala Lumpur
+   State: Kuala Lumpur
+
+37. Pangsapuri Tanah Emas (Golden Sands)
+   ID: 54fa3636-998c-4cf9-8cac-a89266f3105d
+   Address: Jalan Mahmoodiah 101, Jalan Mahmoodiah, Kampung Bahru, Johor Bahru, Johor
+   State: Johor
+
+38. One Menerung
+   ID: 20c15293-3fa5-49ca-9a89-e3a4d4122ee1
+   Address: - Jalan Menerung, Bukit Bandaraya, Bangsar, Kuala Lumpur
+   State: Kuala Lumpur
+
+39. The Treez Jalil Residen
+   ID: bd7cbb40-b5f2-41fc-b636-7ae1f859d77c
+   Address: Jalan 13/155c Jalan 13/155C, Bukit Jalil, Kuala Lumpur
+   State: Kuala Lumpur
+
+40. Taman Puchong Tekali
+   ID: fda9e52a-7fb5-4b78-bba5-5e7d9c989794
+   Address: Taman Puchong Tekali, TAMAN PUCHONG UTAMA, Puchong, Selangor
+   State: Selangor
+
+41. Nadayu62
+   ID: f8a80111-c7f8-4b8a-bb78-b38dcd5b63b3
+   Address: Persiaran Nadayu 1 Off Jalan Melawati 4, Ulu Kelang, Selangor
+   State: Selangor
+
+42. PARC Regency (Residensi Masai)
+   ID: 808c4861-e963-47e2-a67a-f25b887a6cd0
+   Address: Jalan Masai Jaya, Jalan Masai Jaya 2, Taman Molek, Johor Bahru, Johor
+   State: Johor
+
+43. Bukit Robson Condominium
+   ID: 23374572-e4ea-4937-86f8-14b0ca1dd3cd
+   Address: - Persiaran Syed Putra 5, Taman Persiaran Desa, Seputeh, Kuala Lumpur
+   State: Kuala Lumpur
+
+44. Jalan 19/13b, Seksyen 19, 46300 Petaling Jaya, Selangor
+   ID: 7f04c9fa-1306-41e1-85c5-1b98a2a56192
+   Address: Jalan 19/13b, Seksyen 19,, SS2, Petaling Jaya, Selangor
+   State: Selangor
+
+45. Setia SKY Residences
+   ID: 6964cb00-28ae-4a2f-b49b-8c0770f2da9d
+   Address: Jalan Raja Muda Abdul Aziz, Off Jalan Tun Razak, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+46. M Centura
+   ID: 6b2c7431-08b3-4dc2-9738-1e2571554c3a
+   Address: No 25 Jalan Sentul Pasar, Sentul, Kuala Lumpur
+   State: Kuala Lumpur
+
+47. Meldrum Heights (Residensi Meldrum)
+   ID: 066ea9c4-2cc5-4863-8fb7-ed7c4c0d0922
+   Address: Jalan Bukit Meldrum, Tanjung Puteri, Johor Bahru, Johor Bahru, Johor
+   State: Johor
+
+48. 1A Stonor
+   ID: bfed2977-e902-4813-afb4-8c2cb5492b1e
+   Address: 1A Jalan Stonor, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+49. Hedgeford 10 Residences
+   ID: 73e9c32c-3f5d-46e4-9ecf-77d2bd338702
+   Address: Jalan Maju Ria 1, Setapak, Kuala Lumpur
+   State: Kuala Lumpur
+
+50. Jalan Gelang Land
+   ID: 94bb74ac-6623-42bd-b8b6-dde0b678ef0c
+   Address: Pudu, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+51. Jalan San Peng
+   ID: e00fe0a9-e251-4616-a380-fb8611f05d09
+   Address: 22 Jalan San Peng, Pudu, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+52. Jalan Gelang
+   ID: 53e6744f-faee-4756-9f31-eb1e16fc2040
+   Address: Pudu, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+53. Greenpark
+   ID: 598e97ce-6ac0-4bac-b03e-ecb978894b55
+   Address: - Jalan Awan Pintal, Taman Yarl, Jalan Klang Lama (Old Klang Road), Kuala Lumpur
+   State: Kuala Lumpur
+
+54. Jalan San Peng @ Pudu
+   ID: 5764ecb1-438e-480e-a813-d9c8b8c01622
+   Address: Jalan Gelang, Pudu, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+55. Suria @ North Kiara
+   ID: e43a8c9b-96a4-4581-8f16-dd21012b72b5
+   Address: Suria @ North Kiara Jalan 30/38a, Segambut, Kuala Lumpur
+   State: Kuala Lumpur
+
+56. SKS Pavillion Residences
+   ID: 2b5cb189-ee91-4e47-99d2-634c83a1afb0
+   Address: Jalan Storey Jalan Storey, Kim Teng Park, Johor Bahru, Johor
+   State: Johor
+
+57. Rimbayu Perennia
+   ID: acc2684c-79d9-4048-a619-d779e079012c
+   Address: Jalan Flora 3B/5, Bandar Rimbayu, Kota Kemuning, Shah Alam, Selangor
+   State: Selangor
+
+58. Skysuites @ Meldrum Hills
+   ID: 16a22e0b-9135-4815-924d-a2a6afd94465
+   Address: Jalan Bukit Meldrum, Jalan Bukit Meldrum, Off Jalan Tanjung Puteri,, Johor Bahru, Johor
+   State: Johor
+
+59. Tiara Mutiara / The Crown
+   ID: b895fc66-8fcd-4a26-8e5d-a5c7185b7333
+   Address: Jalan Puchong Jalan Puchong, Taman Kuchai, Jalan Klang Lama (Old Klang Road), Kuala Lumpur
+   State: Kuala Lumpur
+
+60. Vista Komanwel A
+   ID: c0d8cd3e-7020-4c89-bad4-d41da789ca7d
+   Address: - Off Jalan Barat, Bandar Bukit Jalil, Bukit Jalil, Kuala Lumpur
+   State: Kuala Lumpur
+
+61. Titiwangsa Sentral
+   ID: f48f160c-8138-4f6b-93eb-e7f6d46ddfeb
+   Address: - Jalan Chemor, Titiwangsa, Kuala Lumpur
+   State: Kuala Lumpur
+
+62. 2-storey Terrace House at Taman Tiara East
+   ID: 4540b058-b137-4312-ab99-26a42d42fb98
+   Address: Jalan TE 3, Taman Tiara East, Semenyih, Selangor
+   State: Selangor
+
+63. The Hamstead, Desa Tun Razak
+   ID: f7048096-7c79-4184-8802-397d19fda457
+   Address: 11 Jalan 9/118B, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+64. The Capers @ Sentul East
+   ID: 1a100168-bc55-43c6-80eb-32cbfd839fb4
+   Address: Lorong Timur, Bandar Baru Sentul, Sentul, Kuala Lumpur
+   State: Kuala Lumpur
+
+65. Residency V
+   ID: e9da4b74-bb51-4984-94da-6d23b4c3e05a
+   Address: Jalan Sepadu 5 Jalan Sepadu 5, Taman United, Jalan Klang Lama (Old Klang Road), Kuala Lumpur
+   State: Kuala Lumpur
+
+66. Falim Jalan Beriksa Air Itam
+   ID: 6c9c122b-943a-4a3e-bd23-a9698d42c148
+   Address: Jalan Beriksa 1, Farlim, Ayer Itam, Penang
+   State: Penang
+
+67. Hedgeford 10 Residences
+   ID: 5c15d75f-dbda-441d-83b0-88f15543661e
+   Address: Jalan Maju Ria 1, Setapak, Kuala Lumpur
+   State: Kuala Lumpur
+
+68. JP Perdana JP Perdana JPs Perdanas
+   ID: eff405b3-ff2f-4cda-9d6d-c46b4da42119
+   Address: 017.778.5073 Jalan Jaya Putra 5 (LA Garden), Bandar Jaya Putra, Johor Bahru, Johor
+   State: Johor
+
+69. Bukit Bendera Air Itam
+   ID: 29acd2c2-1cea-43be-8649-dcde0611cf07
+   Address: Tingkat Lintang, Bukit Bendera, Ayer Itam, Penang
+   State: Penang
+
+70. KL Traders Square
+   ID: b28c3ee0-5b59-42ce-94d2-ed7b565db1d1
+   Address: 289 Jalan Gombak Batu 4, Setapak, Kuala Lumpur
+   State: Kuala Lumpur
+
+71. Ascenda Residence @ Skyarena
+   ID: c6bfed50-2f4a-49af-b644-8fb61a183198
+   Address: Jalan Ayer Jerneh, Off Jalan Genting Kelang, Setapak, Kuala Lumpur
+   State: Kuala Lumpur
+
+72. Kaleidoscope (Residensi Setiawangsa)
+   ID: 900e0a80-ec41-4c6e-a632-b670d273a4cb
+   Address: Off Jalan 1/56, Setiawangsa 54200 Kuala Lumpur, Setiawangsa, Kuala Lumpur
+   State: Kuala Lumpur
+
+73. Lintang Besi Greenlane
+   ID: b05a4e14-5057-4117-b8c0-aba939e15f5d
+   Address: Lintang Besi, Jelutong, Penang
+   State: Penang
+
+74. Apartment Desa Ria
+   ID: 90922fdc-3a60-4895-a9d1-0022e4a05a3f
+   Address: - Jalan Persiaran Impian, Taman Impian Ehsan, Balakong, Selangor
+   State: Selangor
+
+75. D'Pristine
+   ID: a9f20d8f-8637-47b8-a383-997608b16379
+   Address: - Lebuh Medini Utara, Medini, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+76. Sri Suajaya Condominium
+   ID: b3b84bb4-7acb-41e5-a865-84c645c37f97
+   Address: - Jalan Kampung Bandar Dalam, Sentul, Kuala Lumpur
+   State: Kuala Lumpur
+
+77. The Zen
+   ID: bc5599a3-6750-4f0f-a838-23fb40486fb2
+   Address: Persiaran Bayan Mutiara 3, Gelugor, Penang
+   State: Penang
+
+78. 2 Storey Terraced House @ Taman Putra Prima, Puchong
+   ID: a8f49a06-0067-456a-819d-aef7eef3c4e6
+   Address: Jalan PP 5, Taman Putra Prima, Puchong, Selangor
+   State: Selangor
+
+79. Setapak Green
+   ID: 226e63be-01df-4408-a27e-80c533bf910e
+   Address: - Jalan Semarak Api off Jalan Gombak, Setapak, Kuala Lumpur
+   State: Kuala Lumpur
+
+80. Bukit Gambier New 3 Storey Bungalow
+   ID: 29db3f27-800a-4400-a709-3c8379062ff5
+   Address: Bukit Gambier, Gelugor, Penang
+   State: Penang
+
+81. Beverly 2
+   ID: 51a62d09-dca4-4758-b143-c112533f5e3e
+   Address: - Plaza Medan Putra, Jalan Putra Medan 6, Kepong, Kuala Lumpur
+   State: Kuala Lumpur
+
+82. The Light Collection III
+   ID: a3c31fe4-30ba-44cf-a78f-6bcecf985927
+   Address: Jalan Pantai Sinaran, Gelugor, Penang
+   State: Penang
+
+83. Montena
+   ID: a7f8e8ea-ee65-4ab9-93f9-687764cc59dd
+   Address: - No.1A, Jalan Damai Purnama, Alam Damai, Alam Damai, Cheras, Kuala Lumpur
+   State: Kuala Lumpur
+
+84. Eco Botanic Eco Botanic Ecos Botanics
+   ID: ff207dc2-bb6d-4a81-9170-10374e1426fc
+   Address: Eco Botanic @ Iskandar Puteri (Davenham), Eco Botanic, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+85. Paragon 3
+   ID: 5746b642-0cbd-4c44-a09a-b217d14186d6
+   Address: - Persiaran Lestari, Bandar Putra Permai, Seri Kembangan, Selangor
+   State: Selangor
+
+86. Cypress Villa @ Sungai Ara
+   ID: 932ae7da-cdd7-485c-b37e-25109764ab23
+   Address: Lengkok Kenari 1, Desaria, Sungai Ara, Penang
+   State: Penang
+
+87. Bukit OUG Condominiums
+   ID: edd329c0-25ef-4e00-866d-820f5d7dc692
+   Address: 2 Jalan 3/155A, Bukit Jalil, Kuala Lumpur
+   State: Kuala Lumpur
+
+88. Tuju Residences . Retail
+   ID: dcbcdfbf-693f-478a-b0b9-75f5d4305240
+   Address: Persiaran Arfah, Off Jalan Kuching, Mukim Batu, Jalan Kuching, Kuala Lumpur
+   State: Kuala Lumpur
+
+89. Endah Promenade
+   ID: 3cee872d-3f05-44f6-85e6-8c0b22f4c4f3
+   Address: Jalan 1/149e Jalan 1/149E, Taman Sri Endah, Sri Petaling, Kuala Lumpur
+   State: Kuala Lumpur
+
+90. Tuju Residences . Retail
+   ID: 523ba6f2-43ee-41a0-8ec8-6c7daecfc502
+   Address: Persiaran Arfah, Off Jalan Kuching, Mukim Batu, Jalan Kuching, Kuala Lumpur
+   State: Kuala Lumpur
+
+91. Nusa Heights (Nusa Puncak)
+   ID: 2c99f498-a4bd-493a-8f1f-0f0133a8b51b
+   Address: - Jalan Gelang Patah, Taman Nusa Perintis, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+92. 2-storey Terrace House at Usj 6
+   ID: 4fd936e4-16fe-49b9-9fcd-3c6d8bd6d63d
+   Address: USJ6, USJ 6, USJ3, USJ 3, USJ2, USJ 2, USJ1, USJ 1, USJ4, USJ 4, USJ9, USJ 9, USJ12, USJ 12, USJ13, USJ 13, USJ14, USJ 14, USJ, Usj 6, Subang Jaya, Selangor
+   State: Selangor
+
+93. Taman Sri Putra
+   ID: 5b38765c-d9c4-470f-94e1-3ddf3c313e2e
+   Address: Jln SPM 3, Sungai Buloh, Selangor
+   State: Selangor
+
+94. Optimus Medini
+   ID: 405db0e1-8126-41ff-af8d-ad09461aee7c
+   Address: Persiaran Medini Utara 1, Medini, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+95. Nara Gamuda Gardens
+   ID: 0ca28c35-cb36-4429-afdb-ec7a4dbe21f9
+   Address: Jalan Sg. Serai, Kg. Sungai Serai, Rawang, Selangor
+   State: Selangor
+
+96. Aspira Parkhome Aspiras Parkhomes
+   ID: 6522ff03-cb02-43c8-a600-baca19230b24
+   Address: Gerbang Nusajaya, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+97. Le Yuan Residence
+   ID: c8a193cf-761c-481b-8331-e4c021b5928d
+   Address: Jalan 6/127a Jalan Selesaria, Jalan Klang Lama (Old Klang Road), Kuala Lumpur
+   State: Kuala Lumpur
+
+98. Nusa Idaman Nusas Idamans
+   ID: 7d12d6fd-e271-4d69-9673-29d744cf50fb
+   Address: Taman Nusa Idaman, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+99. M Arisa
+   ID: be757efa-df46-4aed-afce-3f34688ec800
+   Address: 25 Jalan Sentul Pasar, Sentul, Kuala Lumpur
+   State: Kuala Lumpur
+
+100. Irama BK8
+   ID: 974c4498-a085-4bd2-8b47-b777f50c1592
+   Address: Jalan BK 8, Bandar Kinrara Seksyen 8, Bandar Kinrara, Selangor
+   State: Selangor
+
+101. Parkfield Residences
+   ID: f727b816-5c7e-4313-85f4-19ef25e3279e
+   Address: Jalan Tropicana Heights 2/5, Semenyih, Selangor
+   State: Selangor
+
+102. Aman Puri Apartment
+   ID: a9000421-c388-4969-bf6c-4c16dc33cc71
+   Address: Jalan Aman, Jalan Aman, Desa Aman Puri, Kepong, Kuala Lumpur
+   State: Kuala Lumpur
+
+103. Residency V
+   ID: c9a56047-e9bc-4611-ab09-63070eaa1e36
+   Address: Jalan Sepadu 5 Jalan Sepadu 5, Taman United, Jalan Klang Lama (Old Klang Road), Kuala Lumpur
+   State: Kuala Lumpur
+
+104. Eco Botanic
+   ID: fa03fd2c-c361-4fc1-8bad-be5e10143125
+   Address: No 25, 27, 29 Jalan Eko Botani 3/5, Taman Eko Botani, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+105. Sunway Aspera
+   ID: 93c2ebdc-a0c0-43cf-8fce-65c942a607a7
+   Address: 11 Lintang Sungai Batu 2, Telok Kumbar, Penang
+   State: Penang
+
+106. Impiana
+   ID: 7a8341d3-d08c-49fd-bd83-66b2203cd7df
+   Address: Persiaran Ledang Heights, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+107. Fortune Perdana
+   ID: dd13b7ed-687f-4f7d-b67b-b0db9d7201a2
+   Address: Metropolitan Park Jalan Metro Perdana 1, Taman Usahawan, Kepong, Kuala Lumpur
+   State: Kuala Lumpur
+
+108. Lexa Residence @ The Quartz WM
+   ID: 5a0c0e0d-5a40-4d41-a1a1-7fbe087d59f3
+   Address: - Jalan 34/26 Jalan 34/26, Wangsa Maju, Kuala Lumpur
+   State: Kuala Lumpur
+
+109. KL Traders Square
+   ID: e25bba76-2eb1-41f5-a80b-e99c3cf1aee3
+   Address: 289 Jalan Gombak Batu 4, Setapak, Kuala Lumpur
+   State: Kuala Lumpur
+
+110. Desa Green
+   ID: 8f360c46-1fb1-4382-8c0c-0f4cde40b146
+   Address: Jalan Desa Bakti, Off Taman Desa, Taman Desa, Kuala Lumpur
+   State: Kuala Lumpur
+
+111. Medan Klebang Mewah
+   ID: 5df9b4c7-8c8e-495e-9460-d238dfa3015e
+   Address: Medan Klebang Mewah, Chemor, Perak
+   State: Perak
+
+112. Nusantara Prima Gelang Patah Nusantaras Primas Gelangs Patahs
+   ID: a9bb5904-ca81-467c-9722-58886343e065
+   Address: Taman Gp Prima, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+113. Residensi Bayu Damai
+   ID: 3dd7a90b-c42f-404d-9c3d-1e29ab97856f
+   Address: Jalan Fung Yei Ting, Mile 3, Jalan Tuaran, Dah Yeh Villa, Kota Kinabalu, Sabah
+   State: Sabah
+
+114. The Capers @ Sentul East
+   ID: 3ecabc3f-37bd-4564-b8fd-aa5a4f8676be
+   Address: Lorong Timur, Bandar Baru Sentul, Sentul, Kuala Lumpur
+   State: Kuala Lumpur
+
+115. Skyridge Garden
+   ID: 6625aaab-fc84-4845-a682-cdd6601f0391
+   Address: Persiaran Halia 3, Mount Erskine, Taman Evergreen, Tanjung Tokong, Penang
+   State: Penang
+
+116. SWNK Houze @ BBCC
+   ID: e8492e6d-69fd-4715-98e8-8a4efcb83383
+   Address: Jalan Hang Tuah, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+117. Amara
+   ID: 0978d7f9-21b4-4e92-a91b-deb60036829c
+   Address: Jalan Raintree Utama Off Jalan Station, Batu Caves, Selangor
+   State: Selangor
+
+118. Tuan 2egacy
+   ID: be906015-1262-4ac6-abc5-ba788c762b31
+   Address: Lot 60328 Jalan 1/42, Off Jalan Kuching, Segambut, Kuala Lumpur
+   State: Kuala Lumpur
+
+119. Suria @ North Kiara
+   ID: f0f69d6e-0cb1-4431-9ff6-f10c0709d1fa
+   Address: Suria @ North Kiara Jalan 30/38a, Segambut, Kuala Lumpur
+   State: Kuala Lumpur
+
+120. Seri Riana Residence
+   ID: d213ba91-1631-4184-99f8-344eb5654a01
+   Address: Jln Wangsa Delima 7 Jln Wangsa Delima 7 Off Jalan Wangsa Perdana 1, Wangsa Maju, Kuala Lumpur
+   State: Kuala Lumpur
+
+121. Robin @ Rimbayu
+   ID: 528d3b41-736b-40d9-86bc-af90db4698a8
+   Address: No. 1, Jalan Flora 3, Bandar Rimbayu, Telok Panglima Garang, Selangor
+   State: Selangor
+
+122. Terrace house at Bandar Rimbayu
+   ID: a6408752-1f48-41c3-884e-bf70e5dd0ec4
+   Address: Jalan Flora, Bandar Rimbayu, Tanjong Duabelas, Selangor
+   State: Selangor
+
+123. 3-storey Terraced House at Tropicana Indah
+   ID: d1ace420-fc07-4d1f-bd85-a5b6550d4ba9
+   Address: Tropicana Indah, Kota Damansara, Selangor
+   State: Selangor
+
+124. Semi-Detached House at Sunway Montana
+   ID: b95433b0-7493-4f09-a35b-c4a09e12e0ae
+   Address: Sunway Montana, Setapak, Kuala Lumpur
+   State: Kuala Lumpur
+
+125. Suite Enesta
+   ID: 962c7ebd-ba80-45b1-9a70-77456083ab27
+   Address: - Jalan 1/32, Off Jalan Kepong Intersection of Jalan Kepong & Pintasan Segambut, Jinjang, Kuala Lumpur
+   State: Kuala Lumpur
+
+126. Taman Pulai Jaya
+   ID: 8d7716eb-448e-4343-8874-066f977a2d4b
+   Address: Persisir Pulai Jaya Utara 2, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+127. Spring Avenue (Kuchai Damai)
+   ID: d93c1e81-478e-4913-b13c-ebcb5112c743
+   Address: Jalan 8/116b Jalan 9/116B, Kuchai Lama, Kuala Lumpur
+   State: Kuala Lumpur
+
+128. Shamelin Star
+   ID: 6aee6776-de6d-4366-a1db-ba05d7a8d28e
+   Address: Shamelin Star Jalan 4/91, Taman Shamelin Perkasa, Cheras, Kuala Lumpur
+   State: Kuala Lumpur
+
+129. Sentrio Pandan
+   ID: 22ee5684-6723-454e-9676-74f3aee405a5
+   Address: Jalan 1/76c Jalan 3/76D, Desa Pandan, Ampang, Kuala Lumpur
+   State: Kuala Lumpur
+
+130. Twin Arkz
+   ID: 1b4b66c6-f5c5-4db3-9b70-092388959a5e
+   Address: Bukit Jalil Highway Jalan Jalil Perkasa 1, Bukit Jalil, Kuala Lumpur
+   State: Kuala Lumpur
+
+131. The Capers @ Sentul East
+   ID: eb7c1056-86c8-4e23-bd42-969eea96c8b5
+   Address: Lorong Timur, Bandar Baru Sentul, Sentul, Kuala Lumpur
+   State: Kuala Lumpur
+
+132. Desa Green
+   ID: 1bba8a31-c7f3-4c16-892f-3a2db4db3afe
+   Address: Jalan Desa Bakti, Off Taman Desa, Taman Desa, Kuala Lumpur
+   State: Kuala Lumpur
+
+133. One Maxim
+   ID: 689fd4b8-5d6f-43e7-91a2-cc0d4fdac2bd
+   Address: One Maxim Jalan Sentul Pasar, Sentul, Kuala Lumpur
+   State: Kuala Lumpur
+
+134. The Ritz-Carlton Residences
+   ID: 6bd86d8a-5f0f-4800-83aa-6205615fde50
+   Address: Jalan Sultan Ismail, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+135. Casa Prima Condominium
+   ID: 50f78ef8-61b9-41b7-98c3-de5c602a9d9a
+   Address: - Metro Prima, Metro Prima, Kepong, Kuala Lumpur
+   State: Kuala Lumpur
+
+136. Casa Prima Condominium
+   ID: 5e053731-ab54-4fda-80af-c9bc41836215
+   Address: - Metro Prima, Metro Prima, Kepong, Kuala Lumpur
+   State: Kuala Lumpur
+
+137. Taman Impian Indah
+   ID: 80e8e967-5b54-491d-96e3-efaa8e4d07b4
+   Address: - Taman Impian Indah, Taman Impian Indah, Balakong, Selangor
+   State: Selangor
+
+138. Zan Pavillion
+   ID: 35f76885-2bd6-4567-841a-f24fed05a7e9
+   Address: 26B Jalan Changkat Sungai Ara 10,, Sungai Ara, Penang
+   State: Penang
+
+139. M Centura
+   ID: d20671aa-caa8-407c-b57e-da5b8abe2089
+   Address: No 25 Jalan Sentul Pasar, Sentul, Kuala Lumpur
+   State: Kuala Lumpur
+
+140. Damansara Foresta
+   ID: e28bde37-cac3-4cc5-9996-92060f240339
+   Address: Persiaran Meranti, Off Persiaran Perdana, Bandar Sri Damansara, Selangor
+   State: Selangor
+
+141. Taman Cheras Permata 2
+   ID: 944d47fa-a22e-4f99-b0f3-012a90c92c37
+   Address: Taman Cuepacs, Batu 9 Cheras, Taman Cheras Permata 2, Cheras, Selangor
+   State: Selangor
+
+142. Bukit OUG Condominiums
+   ID: d1d89571-cca5-435e-84d2-7124c2f335da
+   Address: 2 Jalan 3/155A, Bukit Jalil, Kuala Lumpur
+   State: Kuala Lumpur
+
+143. Kinrara Mas
+   ID: 81687a76-30dc-4cba-b155-9180ed39a228
+   Address: Jalan Mas 1, Bukit Jalil, Kuala Lumpur
+   State: Kuala Lumpur
+
+144. The Andes Condo Villa @ Bukit Jalil
+   ID: 8b8faa22-405d-4e4a-b59c-21134c2f963d
+   Address: Jalan Mas 2 Jalan Mas 1, Bukit Jalil, Kuala Lumpur
+   State: Kuala Lumpur
+
+145. Platinum Lake PV 20
+   ID: 02535693-8c57-40c6-91b2-527077573c90
+   Address: No. 5 Jalan Usahawan Jalan Usahawan 2 off Jalan Genting Kelang, Setapak, Kuala Lumpur
+   State: Kuala Lumpur
+
+146. Duta Ria
+   ID: 91dd53c2-c7d1-45b6-a35f-266d9c8c5041
+   Address: Jalan Dutamas Raya, Dutamas, Kuala Lumpur
+   State: Kuala Lumpur
+
+147. Eastwood Terrace
+   ID: f21999b9-72da-42d3-aba7-2721afe5f24a
+   Address: Lorong Kekwa, Kampung Sungai Kayu Ara, Petaling Jaya, Selangor
+   State: Selangor
+
+148. Taman Pulai Mutiara
+   ID: 413a95d0-7211-4444-b340-e2c4cd3ba309
+   Address: Jalan Pulai Mutiara, Taman Pulai Mutiara, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+149. The Zen
+   ID: 1aa05cd0-6049-42b0-9bb9-d06c632a5fe5
+   Address: Persiaran Bayan Mutiara 3, Gelugor, Penang
+   State: Penang
+
+150. D' Island
+   ID: 7d292bb4-37b9-4faf-813b-968189208a58
+   Address: Jalan Barat, Puchong, Selangor
+   State: Selangor
+
+151. Eastwood Terrace
+   ID: 064d7685-2027-443f-b6af-14410bd2bc8a
+   Address: Lorong Kekwa, Kampung Sungai Kayu Ara, Petaling Jaya, Selangor
+   State: Selangor
+
+152. Damansara Foresta
+   ID: 16c834c1-f06d-4a6d-a9cf-518f05860377
+   Address: Persiaran Meranti, Off Persiaran Perdana, Bandar Sri Damansara, Selangor
+   State: Selangor
+
+153. Batu Gajah Perdana Single Storey House
+   ID: 18d79225-0b13-4bdb-bcfb-6c49bcb3e553
+   Address: Taman Batu Gajah Perdana, Batu Gajah, Perak
+   State: Perak
+
+154. Batu Gajah Perdana Double Storey Corner House
+   ID: e653d381-28a6-4351-9d0d-45eb7ac59ecf
+   Address: Taman Batu Gajah Perdana, Batu Gajah, Perak
+   State: Perak
+
+155. Bercham Tropicana Double Storey Semi D
+   ID: 00be3867-61ca-498b-8dcd-9730c1c19ae1
+   Address: Taman Bercham Tropicana, Ipoh, Perak
+   State: Perak
+
+156. Boulevard Condominium (BLVD)
+   ID: 441a5034-01fc-458c-b72c-8855f398b6ca
+   Address: - Lebuhraya Thean Teik, Ayer Itam, Penang
+   State: Penang
+
+157. The Clovers
+   ID: 48ff95a4-fbfa-4413-808b-d46c5e628244
+   Address: 12836 Jalan Merbah, Taman Sri Bayan, Bayan Lepas, Penang
+   State: Penang
+
+158. Aurora Resort Villas
+   ID: 3f02856c-d9ae-4250-b810-dcefe89e28d8
+   Address: Aurora Sentral, Puteri Harbour, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+159. Aspira ParkHomes
+   ID: 57909913-2a80-4e6f-89bc-2be1b32f76ab
+   Address: Gerbang Nusajaya, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+160. U Garden Resort Condominium
+   ID: 3c4eb92d-08cd-4755-90cf-d69496ff2c5e
+   Address: 50A No. 50A, Persiaran Minden 1, 11700 Gelugor, Penang, Gelugor, Penang
+   State: Penang
+
+161. Taman Mutiara Mas
+   ID: ac93cad2-776f-4607-9502-bc247af42179
+   Address: Taman Mutiara Mas, Skudai, Johor
+   State: Johor
+
+162. 1-storey Terraced House at Taman Senai Utama
+   ID: 522cf775-9144-4361-9a04-3f03b4dee297
+   Address: 100 taman aman bunga dahlia 9, Taman Senai Utama, Kulai, Johor
+   State: Johor
+
+163. Molek Regency
+   ID: e2e3eb4a-eecf-4b74-b540-a1d173c2f44e
+   Address: Molek Regency Jln Molek 3/20, Taman Molek, Johor Bahru, Johor
+   State: Johor
+
+164. Damansara Endah
+   ID: 36d5e914-a8cc-475d-8e29-844326f0d8fb
+   Address: Jalan Damansara Permai, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+165. PARC Regency (Residensi Masai)
+   ID: 0369979d-05f4-4d1c-855c-bc5b91fb83a0
+   Address: Jalan Masai Jaya, Jalan Masai Jaya 2, Taman Molek, Johor Bahru, Johor
+   State: Johor
+
+166. Pangsapuri Sri Nervillia
+   ID: 019c6622-df8a-4ec0-9f5d-1a806a1f8fb1
+   Address: - Jalan Anggerik Nervillia 31/166, Kota Kemuning, Shah Alam, Selangor
+   State: Selangor
+
+167. Bukit Indah
+   ID: 1510c441-1d41-46f2-b596-7b18b4348fd4
+   Address: Jalan Indah 19, Bukit Indah, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+168. H2O Residences
+   ID: 3e7c04b4-9589-4184-9985-a5f95ef1f47f
+   Address: Jalan PJU 1a/3 Jalan PJU 1a/3, Ara Damansara, Selangor
+   State: Selangor
+
+169. Semi D,Villas,Bungalow,Mansion Lake,The Club Township near KL,18km to TRX
+   ID: da9238e6-ff25-4da3-a5a4-d9132cac804b
+   Address: The Mines City Resort, Desa Petaling, Kuala Lumpur
+   State: Kuala Lumpur
+
+170. Pangsapuri Permata
+   ID: b8bf0bb1-9315-4f28-ba01-7346ab8e0038
+   Address: Jalan Intan 14, Taman Cheras Permata 2, 43200 Cher, Taman Cheras Permata 2, Cheras, Selangor
+   State: Selangor
+
+171. Kings Bay @ Country Garden Danga Bay
+   ID: ed8886a7-0b86-45cf-bbeb-30d2bfe9176c
+   Address: Jalan Skudai Off Country Garden Danga Bay, Johor Bahru, Johor
+   State: Johor
+
+172. The Zizz @ Damansara North
+   ID: 20a15114-ddb4-4f40-8935-35768b28c892
+   Address: Jalan PJU 10/1A Jalan PJU 10/1A, Damansara Damai, Selangor
+   State: Selangor
+
+173. Setia Eco Templer
+   ID: 95123247-1580-4fdf-8777-f87cd58ec7ae
+   Address: Essex Garden, Jalan SET 1/3A, Setia Eco Templer, Rawang, Selangor
+   State: Selangor
+
+174. Sunway Avila Residences
+   ID: 3ab10f0e-6595-4355-a8c8-bec7c5225dee
+   Address: Jalan Seri Wangsa 1, Seksyen 1 Wangsa Maju, Wangsa Maju, Kuala Lumpur
+   State: Kuala Lumpur
+
+175. Koi Tropika
+   ID: cb07baa3-3ed5-4eaa-bf76-a03d25ed97f9
+   Address: - Jalan Puchong Batu 13 1/2, Taman Industri Pusat Bandar Puchong, Puchong, Selangor
+   State: Selangor
+
+176. Bay Laurel @ Country Garden Danga Bay
+   ID: 8450854f-50d1-456b-9184-164720011759
+   Address: Jalan Skudai Jalan Skudai Off Country Garden Danga Bay, Johor Bahru, Johor
+   State: Johor
+
+177. Sunway Avila Residences
+   ID: cbbe9ebc-8fd1-4c89-8b12-5cd3636e630c
+   Address: Jalan Seri Wangsa 1, Seksyen 1 Wangsa Maju, Wangsa Maju, Kuala Lumpur
+   State: Kuala Lumpur
+
+178. The Sky Executive Suites
+   ID: b1b15424-0e72-4d64-b2e6-19413d865523
+   Address: Jalan Indah 15, Jalan Indah 15, Bukit Indah, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+179. The Sky Executive Suites
+   ID: 6e83fe55-3c63-4c9e-973d-9930e5505dba
+   Address: Jalan Indah 15, Jalan Indah 15, Bukit Indah, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+180. D' Tinggian Suasana
+   ID: 3dce59f9-90db-4dd6-b662-d5d52626a73d
+   Address: - Bandar Tun Hussein Onn, Cheras, Kuala Lumpur
+   State: Kuala Lumpur
+
+181. Pandan Utama Shop Apartment
+   ID: 9faf4632-89a4-4e82-ab53-62158f5eee8d
+   Address: Lrg Pandan Pertama 3 Pandan Utama, Ampang, Selangor
+   State: Selangor
+
+182. D'Rich Executive Suites
+   ID: 173a052c-8442-4b9d-9946-2988d856ca26
+   Address: Jln Duta 6, Taman Nusa Duta, Tambak Johor, Johor Bahru, Johor
+   State: Johor
+
+183. D'Rich Executive Suites
+   ID: f9bee390-9d7e-4306-8b08-89b1bb059d69
+   Address: Jalan Bestari 8/2 Jalan Duta 6, Taman Nusa Bestari, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+184. Dahlia
+   ID: d8d96c89-f472-47e2-bfd0-80cd91cc63e2
+   Address: Jalan S2 G5 Jalan S2 G5, Seremban, Negeri Sembilan
+   State: Negeri Sembilan
+
+185. Flat Bandar Selesa Jaya @ Jalan Silat Gayong
+   ID: b4f0ca37-4273-4add-91be-753b52e48090
+   Address: Bandar Selesa Jaya, Jalan Silat Gayong 14, Skudai, Taman Selesa Jaya, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+186. Sunway Citrine Residences
+   ID: 555a2944-cb5e-4b02-b070-9353237efacf
+   Address: Persiaran Medini 3, Medini, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+187. The Astaka @ 1 Bukit Senyum
+   ID: 84748aa5-5aee-4ade-b81a-bc085a91b475
+   Address: 1 1 Bukit Senyum, Jalan Terbau, Johor Bahru, Johor
+   State: Johor
+
+188. 2-storey Terrace House at Taman Seri Orkid
+   ID: 4ce2b3cc-c88b-4c7b-8972-362f04054375
+   Address: Taman Seri Orkid, Skudai, Johor
+   State: Johor
+
+189. Sunway Citrine Lakehomes Double Storey Terrance House
+   ID: 36b556cc-bd36-4e47-8e4e-25c38db07741
+   Address: Sunway City Iskandar Puteri, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+190. Sky View
+   ID: 46130d13-22f1-4a70-962d-1afd3d7ab989
+   Address: Jalan Persiaran Indah Utama, Bukit Indah, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+191. Horizon Residence (Dwi Mutiara)
+   ID: e31a2e7c-61b7-4b5e-abf5-f50e94e32487
+   Address: - Jalan Lingkungan Indah Utama, Bukit Indah, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+192. Sky View
+   ID: f23c9167-7432-4f77-b406-520b7fea3315
+   Address: 0 Jalan Persiaran Indah Utama, Bukit Indah, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+193. Cerulean Bay @ Forest City
+   ID: 09a88ec4-f54b-4f59-b5a0-2f7e6755b4e4
+   Address: Jalan Forest City 5, Gelang Patah, Johor
+   State: Johor
+
+194. Banyan Tree Signatures
+   ID: e9e90261-adb9-47a1-8313-e90b9ff89974
+   Address: Jalan Conlay, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+195. Sky Loft Premium Suites
+   ID: 9be8000f-7741-4587-ab61-a43b6e22cbd9
+   Address: Jalan Indah 15/2, Bukit Indah, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+196. Sri Putramas
+   ID: 0df4a2e0-1fc2-46d2-ae5e-880ecfd05f72
+   Address: No. 1, Jalan Putramas 1, Off Jalan Kuching, Jalan Kuching, Kuala Lumpur
+   State: Kuala Lumpur
+
+197. M Centura
+   ID: c8d7ecea-58be-41fe-98ba-2328f88b23af
+   Address: No 25 Jalan Sentul Pasar, Sentul, Kuala Lumpur
+   State: Kuala Lumpur
+
+198. Ampersand
+   ID: 37f58261-dba6-4bc0-bdfa-50cf5d9640cc
+   Address: - Jalan Kia Peng, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+199. Ujana Executive Apartment
+   ID: cb232cf0-bb69-42c3-851e-48c9b64bea1a
+   Address: Off Persiaran Ledang Jalan Persiaran Ledang Height, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+200. Lanai Kiara
+   ID: 9e616b06-ee31-4245-91b1-5be27cd160fc
+   Address: 1 No.1 Jalan Kiara 3, Mont Kiara,, Mont Kiara, Kuala Lumpur
+   State: Kuala Lumpur
+
+201. The Rise Collection 2
+   ID: 0453165a-36e1-4551-a6ec-8f0e7991986f
+   Address: The Rise Collection 2, George Town, Penang
+   State: Penang
+
+202. 22 Jan 26 Bank Lelong 3 Storey Terrace House @ Majestic Rawang
+   ID: e9d19710-eda3-49c2-9626-988c40edf951
+   Address: Jalan Majestic 2, Taman Rawang Jaya, Rawang, Selangor
+   State: Selangor
+
+203. Damansara Foresta
+   ID: 8a3ede6e-de93-428a-acd0-4e183d017dfe
+   Address: Persiaran Meranti, Off Persiaran Perdana, Bandar Sri Damansara, Selangor
+   State: Selangor
+
+204. Damai 88
+   ID: 4c75faca-166a-4a52-bb25-2ab97658a035
+   Address: - Jalan Damai Off, Jalan Ampang, Ampang, Kuala Lumpur
+   State: Kuala Lumpur
+
+205. Lavinia Apartments
+   ID: 575e36db-58cc-4c55-82cd-e98752df6386
+   Address: 11 No. 11, Jalan Bukit Kecil, Taman Sri Nibong, 11900, Sungai Nibong, Bayan Lepas, Penang
+   State: Penang
+
+206. Nusa Duta
+   ID: d73b3c27-3642-4b46-93f0-c1f9344c1fc3
+   Address: Jalan Duta Utama, Taman Nusa Bestari, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+207. 1-storey Terraced House at Taman Wangsa Permai
+   ID: 7809e318-ef20-4e54-b0a3-6246625632a1
+   Address: Desa Jaya,Taman Ehsan,Bukit Desa,Indah Perdana,Ehsan Jaya,kip,Sri Ehsan,Usaha Jaya,Wangsa Aman,Wangsa Permai, Taman Wangsa Permai, Kepong, Selangor
+   State: Selangor
+
+208. Marinox Sky Villas
+   ID: dccf6293-84fc-4c6c-b127-eda53f1c3461
+   Address: Jalan Tanjung Tokong Jalan Desiran Tanjung 4, Tanjung Tokong, Penang
+   State: Penang
+
+209. Pangsapuri Damai
+   ID: a285dc82-59db-4c05-a691-7dcd486968d0
+   Address: Jalan Tokoh 25/28 Jalan Tokoh 25/28, Taman Sri Muda, Shah Alam, Selangor
+   State: Selangor
+
+210. Taman Aman Perdana
+   ID: 52aa295a-78b7-46d3-8cb6-5ddc0e3fc5e7
+   Address: Jalan Aman Perdana, Kapar, Selangor
+   State: Selangor
+
+211. Bukit Jambul Indah Apartment
+   ID: 577fd056-d487-4a17-ac0a-897bcafb419b
+   Address: Lebuh Bukit Jambul, Bukit Jambul Indah, Gelugor, Penang
+   State: Penang
+
+212. K Residence @ KLCC
+   ID: 4759b64d-7433-45fa-9826-5699eb350f0a
+   Address: K Residence Jalan Mayang Off Jalan Ampang, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+213. Riana Green Condominium
+   ID: 4c0a17cf-01dc-441b-9938-28a55cb5c26f
+   Address: - Jalan Tropicana Utara, Tropicana, Selangor
+   State: Selangor
+
+214. Langat Jaya Condominium
+   ID: bffe57f2-f7a8-4334-99db-6ada2f18de1f
+   Address: - Jalan Datuk Alias, Kampung Melaka, Cheras, Selangor
+   State: Selangor
+
+215. Desa Bayan Apartment
+   ID: 604c63a8-5813-4208-9128-8846b5043d10
+   Address: - Jalan Merbah, Taman Sri Bayan, Taman Sri Bayan, Bayan Lepas, Penang
+   State: Penang
+
+216. Orion Residence Bukit Bintang
+   ID: 9b19a70f-a2ba-4e8c-a430-074bbcf91d34
+   Address: Jln Gading, Bukit Bintang, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+217. Taman Saujana Emas
+   ID: 8d1a024c-4333-4dbb-b0b7-ebd732d03b1e
+   Address: Taman Saujana Emas, Kajang, Selangor
+   State: Selangor
+
+218. The Connaught One
+   ID: ab1faa3e-5116-453d-9fa2-8ded0af90b8c
+   Address: Taman Len Seng, Taman Connaught, Cheras, Kuala Lumpur
+   State: Kuala Lumpur
+
+219. Kuchai Sentral
+   ID: 6ebcb152-97a0-4540-92e7-bd4298bbc988
+   Address: Jalan Kuchai Maju 9, Taman Kuchai Jaya, Kuchai Lama, Kuala Lumpur
+   State: Kuala Lumpur
+
+220. Aman Suria
+   ID: e9a71a7b-8f74-4383-aeaa-fac9158b882a
+   Address: Lorong PJU 1/46D, Aman Suria Damansara, Aman Suria, Petaling Jaya, Selangor
+   State: Selangor
+
+221. Pangsapuri Seri Baiduri
+   ID: 6d9458db-4516-482b-8d2a-e35d119309ff
+   Address: Jalan Baiduri 3, Perling, Johor
+   State: Johor
+
+222. Semi-Detached House at Bandar Seri Botani
+   ID: a40eef2f-f53d-4645-97f1-f903e68fe35a
+   Address: Bandar Seri Botani, Simpang Pulai, Perak
+   State: Perak
+
+223. Taman Bestari Indah
+   ID: c00b828f-037a-47fd-bcbc-8660d9798537
+   Address: Jalan Bestari 11/xx, Taman Bestari Indah, Ulu Tiram, Johor
+   State: Johor
+
+224. Encorp Marina
+   ID: 7732236c-c790-400e-9a6e-4d1a4fae0d64
+   Address: Encorp Marina Persiaran Puteri Selatan, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+225. Tiara Desaru Seaview Residence
+   ID: 3e4571be-73ac-49f3-8e62-faf94560ed88
+   Address: Jalan Tanjung Lompat, Pengerang, Johor
+   State: Johor
+
+226. Scientex Utama Scientexs Utamas Scientex Utama Scientexs Utamas
+   ID: db96a9b7-95ac-4c35-9768-a29b85e22dea
+   Address: Jalan Scientex Utama, Taman Scientex Senai, Senai, Johor
+   State: Johor
+
+227. Seri Semarak (Asia Heights)
+   ID: 0482e483-a98f-432b-9a92-c2a8d75412c8
+   Address: Lorong Semarak Api 3, Ayer Itam, Penang
+   State: Penang
+
+228. Bungalow at Leisure Farm
+   ID: d4f76087-bd31-4aa7-badf-aa71bd4e6213
+   Address: Leisure Farm, Leisure Farm, Gelang Patah, Johor
+   State: Johor
+
+229. D'Pristine
+   ID: 1f00e848-a625-40b2-837b-64443c43d2bb
+   Address: - Lebuh Medini Utara, Medini, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+230. Mutiara Bestari
+   ID: 0721304f-947f-4ac9-bbb1-ca5127c9f002
+   Address: Jln Mutiara Bestari 7, Skudai, Johor
+   State: Johor
+
+231. BUKIT INDAH BANDAR NUSAJAYA
+   ID: 1f2479dd-42e8-4ff3-9199-4adb55776f1a
+   Address: Jalan Indah, Bukit Indah, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+232. LEA By The Hills
+   ID: 4e0d4b46-834b-4fe6-9de7-00545ee183d2
+   Address: Persiaran Nadayu 1 Off Jalan Melawati 4, Ulu Kelang, Selangor
+   State: Selangor
+
+233. Avantro Residences
+   ID: 2a381916-7862-4f0d-b12b-a0103a122d6e
+   Address: Jalan BK 5A/2D, Bandar Kinrara Seksyen 1, Bandar Kinrara, Selangor
+   State: Selangor
+
+234. The Woodlands Cluster Homes @ Horizon Hills
+   ID: 5de66139-30f9-4e17-a68a-f7cbfdf9bbaa
+   Address: No 1 Jalan Eka, Horizon Hills, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+235. PineTree Marina Resort
+   ID: 30f082c1-c726-450a-b653-605ce9bef98f
+   Address: Jalan Persiaran Tanjung, Puteri Harbour, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+236. KL48
+   ID: 598e7b08-689f-425f-9443-71c546aeaf47
+   Address: Jalan Satu, Lebuhraya Sungai Besi, Chan Sow Lin, Sungai Besi, Kuala Lumpur
+   State: Kuala Lumpur
+
+237. ANYA at Shorea Park
+   ID: b4e77cf0-9a9a-440b-9f21-bb467a13a5b8
+   Address: Jalan Meranti Permai, Puchong, Selangor
+   State: Selangor
+
+238. Ren Residences
+   ID: 0cda712c-1b81-4871-bdec-122b7b1c5d7c
+   Address: Jalan Jalil Impian 2, Bukit Jalil, Kuala Lumpur
+   State: Kuala Lumpur
+
+239. Arte Solaris @ Mont Kiara
+   ID: 352550fe-53ed-4a34-b157-c4b01d0d32ba
+   Address: Jalan Duta Kiara, Solaris Mont Kiara, Mont Kiara, Kuala Lumpur
+   State: Kuala Lumpur
+
+240. Taman Universiti Taman Universiti Taman Universiti Taman Universiti Tamans Universitis
+   ID: 094aeca7-f451-4e93-bcb7-c5ab2e29a90c
+   Address: Jalan Kejayaan, Taman Universiti, Skudai, Johor
+   State: Johor
+
+241. Main Road Frontage Vacant Land
+   ID: e2608ad4-1904-48d2-8ded-cbda6509bab3
+   Address: Jalan Padang Tembak, Taman Padang Tembak, Ayer Itam, Penang
+   State: Penang
+
+242. Pinnacle Bukit Gambier
+   ID: 048e529c-f74d-4c93-8044-a093091cc800
+   Address: Jalan Bukit Gambier, Bukit Gambier, Gelugor, Penang
+   State: Penang
+
+243. Estuari Gardens
+   ID: dfa28106-cc66-447a-a435-ec57f3d5ae57
+   Address: Persiaran Dato Bentara Luar, Gelang Patah, Nusajaya, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+244. Arahsia Residences Tropicana Aman
+   ID: e42fd5db-42ec-4d40-b69a-f75304508645
+   Address: Jalan Bukit Komandol, Bandar Saujana Putra, Tanjong Duabelas, Selangor
+   State: Selangor
+
+245. Arahsia Residences Tropicana Aman
+   ID: 3a5c029a-9d49-4ae4-9d87-ab5b2dae472d
+   Address: Jalan Bukit Komandol, Bandar Saujana Putra, Tanjong Duabelas, Selangor
+   State: Selangor
+
+246. Arahsia Residences Tropicana Aman
+   ID: 7e0f8493-b31b-4a5e-bb75-e4a50d327455
+   Address: Jalan Bukit Komandol, Bandar Saujana Putra, Tanjong Duabelas, Selangor
+   State: Selangor
+
+247. Boulevard Serviced Apartment
+   ID: 053b4a0c-f7f3-4476-95a2-398aee545ff9
+   Address: Jalan Matang 3, Jalan Kuching, Kuala Lumpur
+   State: Kuala Lumpur
+
+248. The Astaka @ 1 Bukit Senyum
+   ID: d66f867c-3f3a-463b-bffa-f77833752603
+   Address: 1 1 Bukit Senyum, Jalan Terbau, Johor Bahru, Johor
+   State: Johor
+
+249. Marc Residence
+   ID: 784b944c-90c1-43f2-ac62-960bc11ddd82
+   Address: - No. 3 Jalan Pinang, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+250. Taman Damansara Aliff Tamans Damansaras Aliffs
+   ID: dbc4d3f8-04c5-4885-ab89-02c4336862ca
+   Address: Taman Damansara Aliff, Tampoi, Johor
+   State: Johor
+
+251. Taman Pulai Indah Tamans Pulais Indahs
+   ID: 08cd9fed-a9e8-43ad-b589-b4484fdcb4ce
+   Address: Jalan PI 6/X , Taman Pulai Indah Kangkar Pulai, Kangkar Pulai, Skudai, Johor
+   State: Johor
+
+252. Ujana Executive Apartment
+   ID: 26a82ce0-9088-4539-90ac-dc05f0f8835d
+   Address: Off Persiaran Ledang Jalan Persiaran Ledang Height, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+253. The Sandringham 42'x80' @ Eco Botanic
+   ID: 29c5ce15-683b-4f29-a2e1-ce58526f6e81
+   Address: Jalan Eko Botani 3/5, Taman Eko Botani, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+254. Taman Pulai Mutiara 2 @ Skudai
+   ID: 1f02ba5c-bc46-4683-beef-175ae78dac09
+   Address: Jalan Pulai Mutiara 11/x, Taman Pulai Mutiara 2, Skudai, Johor
+   State: Johor
+
+255. Midori Green (Pangsapuri Hijauan)
+   ID: a39d6e85-1def-4ade-aea2-a8707fecae92
+   Address: Midori Green Jalan Mutiara Emas 8, Taman Mount Austin, Tebrau, Johor
+   State: Johor
+
+256. Scenaria @ North Kiara Hills
+   ID: 1af3fd9d-dbf9-43c2-a7e0-8f09cf530dc6
+   Address: Jalan 6/38a Jalan 6/38a, Off Jalan Segambut, Segambut, Kuala Lumpur
+   State: Kuala Lumpur
+
+257. Scenaria @ North Kiara Hills
+   ID: 317de294-766c-4e83-aed9-779967077bd7
+   Address: Jalan 6/38a Jalan 6/38a, Off Jalan Segambut, Segambut, Kuala Lumpur
+   State: Kuala Lumpur
+
+258. Molek Regency
+   ID: 122a3d18-10fa-4bfe-899a-4b7599e36381
+   Address: Molek Regency Jln Molek 3/20, Taman Molek, Johor Bahru, Johor
+   State: Johor
+
+259. Taman Bunga Raya
+   ID: fc205a49-c839-4504-8fb3-0cf05094b90e
+   Address: Lorong Malinja %, Taman Bunga Raya, Setapak, Kuala Lumpur
+   State: Kuala Lumpur
+
+260. Palma Sands @ Gamuda COVE
+   ID: 5962cbe8-a7f6-4a09-b7b4-ee90855a9881
+   Address: Persiaran Cove Sentral, Bandar Gamuda Cove, Dengkil, Selangor
+   State: Selangor
+
+261. Taman Pulai Indah
+   ID: e4b99f07-4a5c-496a-a84e-1e91c2c9ff59
+   Address: Off Persiaran Pulai Indah, Johor Bahru, Johor
+   State: Johor
+
+262. 8th & Stellar
+   ID: 23f19b15-722c-442c-83d3-31b37437f151
+   Address: 1 Jalan Naga Emas, Bandar Baru Sri Petaling, Sri Petaling, Kuala Lumpur
+   State: Kuala Lumpur
+
+263. Nadayu63
+   ID: f66ddf32-3688-43bf-8a30-b3c29b83fcd1
+   Address: Persiaran Nadayu 1 Persiaran Nadayu 1 Off Jalan Melawati 4, Ulu Kelang, Selangor
+   State: Selangor
+
+264. Evergreen Heights
+   ID: 7568687a-c20b-4f23-9c5b-85e5e3110532
+   Address: Taman Evergreen Heights, Batu Pahat, Johor
+   State: Johor
+
+265. Bukit Mewah Bukit Mewah Bukits Mewahs
+   ID: ef5d460f-de9d-4ad5-abaf-bae0b14a2de2
+   Address: Taman Bukit Mewah, Tampoi, Johor
+   State: Johor
+
+266. Scott Towers @ Larkin JB
+   ID: 78bc4e55-bd13-4221-865d-f440257c883a
+   Address: Jalan Tani Jalan Tani Off Jalan Datin Halimah, Kampung Aman, Johor Bahru, Johor
+   State: Johor
+
+267. Flat Mahkota Cheras (L1 L2 L3 L4 L5)
+   ID: fe3a2dad-213c-4748-b75c-d83170309765
+   Address: Jalan Penghulu Persiaran Mahkota Cheras 1, Bandar Mahkota Cheras, Cheras, Selangor
+   State: Selangor
+
+268. Eco Majestic Cluster Semi D
+   ID: 5bc6a7f8-c6bc-4627-88cc-81843c0a33df
+   Address: Jalan Eco Majestic 2/1, Tenderfield, Stoneridge, Ecohill, Merrydale, Cradleton, Eco Majestic, Semenyih, Selangor
+   State: Selangor
+
+269. Eco Majestic Endlot
+   ID: e62a4faf-53aa-419d-bc28-8ccde6e8c99a
+   Address: Jalan Eco Majestic 1/2, Cradleton, Merrydale, Eco Majestic, Semenyih, Selangor
+   State: Selangor
+
+270. Valencia Residence
+   ID: a61f969c-54bb-4e97-9f1e-ad4e2b9a179e
+   Address: Valencia Jalan Bukit Belah, Teluk Kumbar, Penang
+   State: Penang
+
+271. Residential Land - Bandar Bukit Mahkota @ Kajang
+   ID: e5ecfb6e-10d3-483c-a769-7ec9d6fd5f92
+   Address: Jalan BM 9/1, Bandar Bukit Mahkota, Bangi, Selangor
+   State: Selangor
+
+272. Eco Majestic Stoneridge
+   ID: b77de114-4b7b-40f3-a283-ea253b5814c3
+   Address: Jalan Eco Majestic 6/3, Stoneridge, Tenderfield, Eco Majestic, Semenyih, Selangor
+   State: Selangor
+
+273. Sunway Aspera
+   ID: 6b507dd2-ac30-4cfc-8842-58dd1700aa9b
+   Address: 11 Lintang Sungai Batu 2, Telok Kumbar, Penang
+   State: Penang
+
+274. Binjai Residency
+   ID: d7b2fe37-06a8-4a6e-91ff-d91544deacd6
+   Address: Lorong Binjai, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+275. Taman Nusa Perintis 2
+   ID: 3ed47745-e7d3-40f9-8dda-e30385626edd
+   Address: 7 Jalan Nusa Perintis 7/4, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+276. Eco Nest
+   ID: 52d7c7a9-e549-47d8-89b1-c538e8f6ebc4
+   Address: Jalan Eko Botani, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+277. Ken Rimba Legian Residences
+   ID: eef90fb3-cf4a-491d-94f2-0abfbc3947ad
+   Address: Rimba Jaya, Shah Alam, Selangor
+   State: Selangor
+
+278. Cerrado Residence @ Southville City
+   ID: 223b065c-372c-4951-a1b0-235d8a5b6a1f
+   Address: Southville City Off Lebuhraya Utara Selatan, Bangi, Selangor
+   State: Selangor
+
+279. Iris Residence
+   ID: 61f3ad56-e6fa-4954-9a85-c00f1982663b
+   Address: Iris Residence Jalan SL 15/1a, Admiral Park,, Bandar Sungai Long, Selangor
+   State: Selangor
+
+280. TERES 1.5 TINGKAT PRESINT 7, SPRINGVALES KOTASAS
+   ID: 17bdc2dd-3eec-4433-8168-a4d6cfe5b936
+   Address: PRESINT 7 SPRINGVALES, Kotasas, Kuantan, Pahang
+   State: Pahang
+
+281. Bukit Gita Bayu
+   ID: 2732fdfb-846d-459c-8ea4-087a312a45a3
+   Address: bukit gita bayu, Seri Kembangan, Selangor
+   State: Selangor
+
+282. Mas Kipark Damansara
+   ID: fa15a18a-e7b6-4bf1-adc5-c5c8fe7300de
+   Address: - Kipark Damansara, Taman Wangsa Permai, Kepong, Selangor
+   State: Selangor
+
+283. FULL Loan Teres BARU 20x72.5 FULLY Extend FREE SPA MOT Jln Kebun Shah Alam dkt Kemuning Rimbayu
+   ID: 455e7d33-d527-493e-a461-ad9b1c197eb5
+   Address: Kampung Lombong, Kota Kemuning, Shah Alam, Selangor
+   State: Selangor
+
+284. Iskandar Residences
+   ID: e1ee9e54-2140-4c65-b42f-00cb666a78a3
+   Address: Nusajaya Highway Persiaran Medini Utara 3, Medini, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+285. Iskandar Residences
+   ID: 6356aa45-6f91-4b54-8320-26f2669e02c9
+   Address: Nusajaya Highway Persiaran Medini Utara 3, Medini, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+286. Laman Glenmarie
+   ID: b1b614c1-312c-4c3d-9dfa-822a67be4514
+   Address: Section U1 Jalan Novelis U1/87A, Shah Alam, Selangor
+   State: Selangor
+
+287. Teres Semambu Baru Kuantan
+   ID: 05d85648-6eaf-45cb-ba56-651d821fa747
+   Address: Semambu Baru, Perkampungan Semambu Baru, Kuantan, Pahang
+   State: Pahang
+
+288. Taman Impian Sutera
+   ID: 917864ef-5c00-446b-9e5a-11fbc6cd6824
+   Address: 33 Jln Tanjung Tenteram 30/21, Shah Alam, Selangor
+   State: Selangor
+
+289. SEMI-D SERI MAHKOTA AMAN KUANTAN
+   ID: 0f3f0318-bfaf-4930-af96-4e51efa82190
+   Address: SERI MAHKOTA AMAN, Taman Seri Mahkota Aman, Kuantan, Pahang
+   State: Pahang
+
+290. Riana Green Condominium
+   ID: ce00b52f-2527-48cd-8f2b-49406e1304e5
+   Address: - Jalan Tropicana Utara, Tropicana, Selangor
+   State: Selangor
+
+291. Senai Taman Senai Jaya Renovated 2 Storey Low Cost Terrace Endlot
+   ID: 028a2b37-62ff-49d6-883a-fb8ce824b034
+   Address: Jalan Senai Jaya 1/x, Taman Senai Jaya, Senai, Johor
+   State: Johor
+
+292. SEMI-D MAJESTIC HEIGHTS PELINDUNG, KUANTAN
+   ID: 48af45de-72c4-4106-9b1e-3f6151070247
+   Address: JALAN TENGKU MUHAMMAD, Bukit Pelindung, Kuantan, Pahang
+   State: Pahang
+
+293. Star Residences Two
+   ID: 2054c913-5363-4f1a-91d0-f010cbb03ce9
+   Address: Jalan Yap Kwan Seng, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+294. Avilla Apartments
+   ID: 729ed2f2-f32d-48a7-bd90-b89981279cbf
+   Address: - Jalan Bangau 11, Bandar Kinrara, Selangor
+   State: Selangor
+
+295. CORNERLOT TERES TMN ASPEN KUANTAN JAYA
+   ID: 856b8452-f5fe-4ade-bb06-69a60c3e024c
+   Address: KEMPADANG SEJAHTERA, Taman Kempadang Makmur, Kuantan, Pahang
+   State: Pahang
+
+296. Kaleidoscope (Residensi Setiawangsa)
+   ID: fb6d7784-7b9c-4601-bcb3-d2c2af3cf218
+   Address: Off Jalan 1/56, Setiawangsa 54200 Kuala Lumpur, Setiawangsa, Kuala Lumpur
+   State: Kuala Lumpur
+
+297. (CHEAPEST IN MERRYDALE) ECO MAJESTIC
+   ID: bb991120-8c0e-4419-9b46-013345e4056f
+   Address: (CHEAPEST IN MERRYDALE) ECO MAJESTIC, Eco Majestic, Semenyih, Selangor
+   State: Selangor
+
+298. Four Seasons Place
+   ID: 7ed4e240-16a3-4e01-9e55-d5bcbecdeaac
+   Address: 0 Jalan Ampang, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+299. Sri Hartamas
+   ID: 0591542f-2361-484e-94fc-007fe4f4b321
+   Address: Sri Hartamas, Taman Sri Hartamas, Sri Hartamas, Kuala Lumpur
+   State: Kuala Lumpur
+
+300. i-Santorini
+   ID: 6268e616-fac1-4948-88de-da145442cf8f
+   Address: i-Santorini Jalan Desiran Tanjung, Tanjung Tokong, Penang
+   State: Penang
+
+301. i-Santorini
+   ID: 2b50a342-7990-4142-b919-d91f9165b5a9
+   Address: i-Santorini Jalan Desiran Tanjung, Tanjung Tokong, Penang
+   State: Penang
+
+302. Seri Pristana
+   ID: 75981bf3-6d3a-431c-aee1-5c7cb07083f1
+   Address: Jalan SP, Sungai Buloh, Selangor
+   State: Selangor
+
+303. i-Santorini
+   ID: 9796d6d5-a271-4384-b2b4-d5ceb9f91f42
+   Address: i-Santorini Jalan Desiran Tanjung, Tanjung Tokong, Penang
+   State: Penang
+
+304. Desaminium Flora
+   ID: f692d566-b8d3-4d5d-845e-94f91a02077f
+   Address: - Jalan Rimba, Seri Kembangan, Selangor
+   State: Selangor
+
+305. Sejati Lakeside 2
+   ID: 642a6c0e-1dd2-4dc8-bc57-95c59ed591a4
+   Address: Paramount Property Gallery @ Sejati Lakeside 2 No 1 & 3, Jalan SL2/9 Sejati Lakeside 2, Cyber 10, Cyberjaya, Selangor
+   State: Selangor
+
+306. KSL Residence @ Daya
+   ID: eddaad3a-0c2a-4d4e-858b-6013c062795f
+   Address: Jalan Delima 3/1 Jalan Daya, Johor Bahru, Johor
+   State: Johor
+
+307. Permatang Sanctuary @ Sanctuary Villa
+   ID: b1470a51-825a-41a5-85ba-adaf5acee5dd
+   Address: Taman Santuari, Taman Santuari, Bukit Mertajam, Penang
+   State: Penang
+
+308. One Imperial
+   ID: 0758b5f8-29a1-4c03-a53c-e7672dcebdb1
+   Address: Jalan Paya Terubong Lintang Sungai Ara, Sungai Ara, Penang
+   State: Penang
+
+309. Royal Strand @ Country Garden Danga Bay
+   ID: 5b60ee58-fc2f-4135-ab85-214382f25a62
+   Address: Jalan Skudai Off Country Garden Danga Bay, Danga Bay, Johor Bahru, Johor
+   State: Johor
+
+310. USJ 22
+   ID: 2cdfc290-5b9c-4fdc-9a46-1f129da52046
+   Address: USJ 16, USJ 17, USJ 18, USJ 20, USJ 22, USJ 18, USJ 17, USJ 16, USJ 11, USJ 5 , USJ 6, USJ 9, USJ 3, USJ 3a, USJ 3c, USJ 3d, USJ 4, USJ 12, USJ 13, USJ 14, USJ 15, Usj 22, Subang Jaya, Selangor
+   State: Selangor
+
+311. The Veo
+   ID: 915d95af-20ff-45cb-8eef-b31f7855be41
+   Address: Jalan Melati Kuarza 2, Setapak, Kuala Lumpur
+   State: Kuala Lumpur
+
+312. Greenlane Triple Storey Terrace
+   ID: 720fa932-549a-4d7b-a625-3823b5812d20
+   Address: Solok Gangsa, Island Glades, Jelutong, Penang
+   State: Penang
+
+313. Bay Point @ Country Garden Danga Bay
+   ID: 5df0a7fb-99a7-42e1-b8eb-5e8de16c7973
+   Address: Jalan Skudai Off Country Garden Danga Bay, Johor Bahru, Johor
+   State: Johor
+
+314. Taman Pandan Apartment
+   ID: a1f7821a-295c-4457-bf8f-1cf42eba7115
+   Address: Taman Pandan, Lorong Bunga Rampai 5, Taman Pandan, Butterworth, Penang
+   State: Penang
+
+315. The Horizon Residence
+   ID: 01faeb06-5005-4590-908b-1ae33aa1d0b8
+   Address: Off Jalan Tun Razak, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+316. Kenanga Apartment
+   ID: ff30bbe4-8a0f-4d3b-ac7d-8c67fad362d6
+   Address: Persiaran Bunga Raya Persiaran Taman Bunga Raya, Bukit Beruntung, Serendah, Selangor
+   State: Selangor
+
+317. taman jeram perdana
+   ID: 28590018-189b-4d8a-bc57-44dc1cdad687
+   Address: Solok Paya Rumput, Masjid Tanah, Melaka
+   State: Melaka
+
+318. Taman Cantek, Taman Cantik Raja Uda Permatang Pauh Butterworth 1.5 Storey Terrace for Sale
+   ID: e2df2905-fcd4-4cb5-997b-601515f160f2
+   Address: Taman Cantek, Butterworth, Penang
+   State: Penang
+
+319. The Horizon Residence
+   ID: a440895a-601c-459d-b188-a2f0209e8ec3
+   Address: Off Jalan Tun Razak, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+320. 8 Gurney (The Shore Condominium)
+   ID: 60897340-b048-41e8-808d-bb0ed5a3eafb
+   Address: 5 5 Pesiaran Gurney, Gurney Drive, Penang
+   State: Penang
+
+321. Triuni Residences
+   ID: 380fb385-76fd-41a9-9f41-b17a467ab65e
+   Address: Lorong Batu Uban 1, Taman Century, Gelugor, Penang
+   State: Penang
+
+322. Leisure Farm
+   ID: d93379bf-6c91-45ba-85c3-9b958eabf6e1
+   Address: Jalan Tanjung Kupang, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+323. Facing Open Corner Lot 2 Storey Saujana Putra 8
+   ID: 3066d7df-1b19-4815-8f8e-669c4db13dbc
+   Address: Bandar Saujana Putra, Tanjong Duabelas, Selangor
+   State: Selangor
+
+324. Horizon Hills
+   ID: 6468516f-3c22-4830-929d-8b45d014e003
+   Address: Jalan Persiaran Timur, Horizon Hills, Iskandar Puteri (Nusajaya), Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+325. Desa Jati
+   ID: 2d98e7a8-6f57-460e-bd9b-95abced68273
+   Address: - Jalan Jati, Desa Jati, Nilai, Negeri Sembilan
+   State: Negeri Sembilan
+
+326. Amansiara
+   ID: 1897a086-0a8a-43f7-9ee4-558232d558dd
+   Address: Jalan Amansiara 3, Batu Caves, Selangor
+   State: Selangor
+
+327. Rini Hills 2
+   ID: 4dca9593-2507-4a76-bf90-a3d428cbb550
+   Address: Skudai, Rini Hills 2, Skudai, Johor
+   State: Johor
+
+328. Pavilion Residences
+   ID: 44e84b3f-85f3-40a1-a3d4-d8e94937de32
+   Address: 77 Jalan Bukit Bintang, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+329. 3 Residen @ Melawati
+   ID: 721be85a-e963-49fa-9d6f-995788a44bc5
+   Address: Jalan 6/4, Desa Melawati, Setapak, Kuala Lumpur
+   State: Kuala Lumpur
+
+330. 2 Storey Terrace @ Lintang Pekaka
+   ID: 720b4b28-46f7-46c8-9d5b-3f080b08cd0f
+   Address: Lintang Pekaka, Gelugor, Penang
+   State: Penang
+
+331. Kuchai Sentral
+   ID: d94847b6-affb-4b8a-8592-9d6359a33b67
+   Address: Jalan Kuchai Maju 9, Taman Kuchai Jaya, Kuchai Lama, Kuala Lumpur
+   State: Kuala Lumpur
+
+332. Sierra Pinang Town house balik pulau
+   ID: 84f91a01-a1a7-499d-81ab-97b0a7ef1dd0
+   Address: Lorong Puncak Pinang 3, Balik Pulau, Penang
+   State: Penang
+
+333. Tree Sparina
+   ID: 07b59139-b01b-4d47-97d0-f870e147352b
+   Address: Ideal Vision Park Jalan Sungai Tiram 11, Taman Tunas Damai, Bayan Lepas, Penang
+   State: Penang
+
+334. Double Storey Semi Detached @ Berjaya Pulau Tikus
+   ID: 7dee9e72-c3d9-4210-9b2f-c326e9945890
+   Address: Taman Gottlieb, Pulau Tikus, Penang
+   State: Penang
+
+335. Desa Mawar
+   ID: ac5cb3e6-4d72-4484-85f4-f4882cabd77d
+   Address: - Lintang Kampung Melayu 2, Bandar Baru Air Itam, Ayer Itam, Penang
+   State: Penang
+
+336. Desa Rahmat (Graceland Villa)
+   ID: c08f6769-d0b5-4433-affe-7ce7bbdd0b55
+   Address: - Pesiaran Bukit Jambul 1, Bukit Jambul, Penang
+   State: Penang
+
+337. Single Storey Terrace @ Reservoir Garden
+   ID: a7676d77-f6b6-448e-8afc-f3285e03751b
+   Address: Reservoir Garden, Ayer Itam, Penang
+   State: Penang
+
+338. Nusa Sentral Nusas Sentrals
+   ID: a324481a-37f2-4d4d-a9fa-a2da640cba0b
+   Address: Nusa Sentral, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+339. Taman Lembah TTDI 7, Taman Lembah TTDI, Ampang [Auction Date 8th Jan 26]
+   ID: 1032533c-58da-44d5-a10a-8a41695eb24a
+   Address: Taman Lembah TTDI 7, The Valley TTDI, Ampang, Selangor
+   State: Selangor
+
+340. Taman Klebang Utama
+   ID: 4d1f8b33-6dfe-483b-a883-cbb3b2ce267a
+   Address: Jalan KU 2, Taman Klebang Utama, Klebang, Melaka
+   State: Melaka
+
+341. Sky Gardens Residences
+   ID: ebae5c53-e04e-499e-bbff-84e230041af4
+   Address: - Jalan Setia Tropika 1/21, Tampoi, Johor
+   State: Johor
+
+342. Fiera Vista
+   ID: 6588ccbc-0957-4c35-8401-ae89e583f937
+   Address: Jalan Tun Dr Awang, Medan Rajawali, Off Jalan Tun Dr Awang, Bayan Lepas, Penang
+   State: Penang
+
+343. Horizon Hills
+   ID: 81bd6198-2b6d-4ce9-a237-04ad273f44a7
+   Address: Jalan Persiaran Timur, Horizon Hills, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+344. Nusa Sentral
+   ID: 92973321-5d40-450c-b04b-0d697bd9dbeb
+   Address: 12 JIn Sentral, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+345. Taman Nusa Indah
+   ID: df988e76-4e5b-4080-9bd4-4e1e739c1bca
+   Address: Taman Nusa Indah, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+346. nusa indah nusas indahs bukit indah bukits indahs nusa indaman nusas indamans
+   ID: 0e6c35ac-b1aa-4b00-a9ea-49ad5d0ea952
+   Address: jalan ceria, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+347. Waterway Peaks
+   ID: 9db3aed8-df53-46d6-8114-6c6387f42556
+   Address: Lagun Senibong,Jalan Senibong 2, Teluk Senibong, Masai, Johor
+   State: Johor
+
+348. Single Storey Semi Detached @ Jalan Bintang Tanjung Bungah
+   ID: 108610f7-715a-4bdb-a46e-ff8efaa80436
+   Address: Jalan Bintang, Tanjung Bungah, Penang
+   State: Penang
+
+349. Enau Court
+   ID: 35ba3726-9c16-453e-b798-ca8d5bbdbf82
+   Address: - No.8, Lorong Enau off Jalan Ampang, Ampang, Kuala Lumpur
+   State: Kuala Lumpur
+
+350. Eco Grandeur
+   ID: 117a95c4-8db8-4ee2-b55b-15b6463fa971
+   Address: Persiaran Mokhtar Dahari, Eco Grandeur, Shah Alam, Selangor
+   State: Selangor
+
+351. Happy Garden
+   ID: aa9d9167-541b-4bda-8690-4d83b2c301ee
+   Address: Jalan Riang 6, Jalan Klang Lama (Old Klang Road), Kuala Lumpur
+   State: Kuala Lumpur
+
+352. Hijauan Hills @ Simpang Ampat
+   ID: 914cf57f-79f5-453c-8d44-41ba8468ada4
+   Address: Hijauan Hills, Simpang Ampat, Penang
+   State: Penang
+
+353. Agile Bukit Bintang
+   ID: a25ad49c-6b5e-40aa-823e-9048c2a24796
+   Address: Jalan Bukit Bintang, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+354. Aetas Seputeh
+   ID: bf0d0401-404e-46b4-a03c-90d9eb3e3ae3
+   Address: Persiaran Syed Putra 2, Taman Persiaran Desa, Seputeh, Kuala Lumpur
+   State: Kuala Lumpur
+
+355. Santai @ Eco Spring
+   ID: 6e47ac43-8931-46cc-805c-effd64c78eea
+   Address: Jalan Ekoflora Utama, Tebrau, Johor
+   State: Johor
+
+356. Bungalow at Bandar Sri Sendayan
+   ID: 1511e5de-01bb-4a74-986c-9bce756bed50
+   Address: Taman Ara Sendayan, Bandar Sri Sendayan, N9, Taman Ara Sendayan, Bandar Sri Sendayan, Negeri Sembilan
+   State: Negeri Sembilan
+
+357. Sendayan Bungalow 7800sqftSwimming Pool Fit FOR Retirement Only RM620k
+   ID: 6126994b-2087-46e5-b834-027ecb2b9af4
+   Address: Near Seremban//Kajang//Cheras//PJ//KL Corner Lot, Seremban, Negeri Sembilan
+   State: Negeri Sembilan
+
+358. 100% Full Loan【Monthly RM1600】Can Get 2-Storey Area Sepang
+   ID: ea2ecf6e-2412-46f5-8ee5-501700c9dc7d
+   Address: Freehold Double Storey 24x80, Bandar Baru Salak Tinggi, Sepang, Selangor
+   State: Selangor
+
+359. 【Bungalow 7000sqft】 Owner Urgent Sales Only RM635K IN Sendayan
+   ID: 7e90864f-04d2-401b-a86c-16fd0c9bbd60
+   Address: 2024 Mex 2 Highway Siap/Near By KL/Shah Alam 30min, Seremban, Negeri Sembilan
+   State: Negeri Sembilan
+
+360. Orion Residence Bukit Bintang
+   ID: 86d4c81d-0aed-4067-b002-19847bdda050
+   Address: Jln Gading, Bukit Bintang, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+361. Putrajaya Corner Lot Urgent Sale【Extra Land 33Kaki】RM392k
+   ID: 882c09b5-1e8c-4797-8cad-4c2f9469ae07
+   Address: Double Storey/Corner Lot/Dengkil/Sendayan/Klang/S2, Putrajaya, Putrajaya
+   State: Putrajaya
+
+362. 【25% Extra Rebate For LPPSA】SEMI-D 40x85 RM398k Putrajaya
+   ID: c4c6f993-db14-423d-807b-895738dcc2d7
+   Address: Near Seremban//Kajang//Cheras//PJ//KL Corner Lot, Putrajaya, Putrajaya
+   State: Putrajaya
+
+363. RV2 Residence (Riverville Residences 2)
+   ID: 15b24373-a640-443f-a718-6d0c22390a68
+   Address: Off, Old Klang Rd, Taman Sri Sentosa, Jalan Klang Lama (Old Klang Road), Kuala Lumpur
+   State: Kuala Lumpur
+
+364. Putrajaya Corner Lot Urgent Sale【Extra Land 33Kaki】RM392k
+   ID: 899503a7-1b72-452a-a2b7-f0795efe469a
+   Address: Double Storey/Corner Lot/Seremban/Kajang/Sepang/KL, Putrajaya, Putrajaya
+   State: Putrajaya
+
+365. Prima Saujana
+   ID: b6a69521-696b-4955-99e1-4042e52b42e0
+   Address: - Jalan Wangsa 2/6, Taman Wangsa Permai, Kepong, Selangor
+   State: Selangor
+
+366. Nilai Corner Lot 40x80 Full Loan RM382k
+   ID: 2e69a2b2-60e0-416d-a2e5-0dcc7877a868
+   Address: Double Storey/Corner Lot/Seremban/Kajang/Sepang/KL, Nilai, Negeri Sembilan
+   State: Negeri Sembilan
+
+367. Taman Sri Kulai Baru 2 @ Jalan Serunai 2 Storey Low Cost 100% Loan Cash Back~
+   ID: c06b2948-d9a7-4020-9932-8107bddb0e68
+   Address: Jalan serunai, Taman Sri Kulai Baru 2, Kulai, Johor
+   State: Johor
+
+368. 【10Min To KLIA】24X80 Freehold 2-Storey 100%Full Loan
+   ID: 4b12f73c-b45f-4ab3-9e70-05bdc7f43f11
+   Address: Double Storey/Corner Lot/Cyberjaya/Bangi/Cheras/PJ, Sepang, Selangor
+   State: Selangor
+
+369. Vogue Suites One
+   ID: 49095b4a-eea7-4fee-b46e-d6d51daba1ca
+   Address: Jalan Bangsar, KL Eco City, Kuala Lumpur
+   State: Kuala Lumpur
+
+370. Tribeca
+   ID: dd9d4c1e-b4fa-482c-906c-5337f5f887fe
+   Address: Jalan Imbi Jalan Imbi, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+371. Rawang Gamuda Garden Semi D
+   ID: f8895e26-65d3-4704-8a08-86e22ecb9cb5
+   Address: Bandar Gamuda Gardens, Rawang, Selangor
+   State: Selangor
+
+372. Illaria
+   ID: 74bfcd77-5b5f-4934-a9e7-b3f546741428
+   Address: Jalan DM 2/3, Danau Mentari, Bandar Gamuda Gardens, Rawang, Selangor
+   State: Selangor
+
+373. The Tamarind
+   ID: 73a0b639-349a-4bf6-9e7f-6451cfee17d3
+   Address: Jalan Seri Tg Pinang, Tanjung Tokong, Penang
+   State: Penang
+
+374. Bukit Gita Bayu
+   ID: 6ce93cc9-25f6-440c-8105-984e8587ee2c
+   Address: bukit gita bayu, Seri Kembangan, Selangor
+   State: Selangor
+
+375. Bestari Heights Cluster House Corner Unit
+   ID: 5e82cd2f-5720-401a-8b08-bf27951d8df7
+   Address: Jalan Bestari Heights 7, Taman Nusa Bestari, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+376. Taman Sri Garing
+   ID: b8423edd-c379-4118-9f60-6de98e2a3222
+   Address: Jalan SG3, Taman Sri Rawang, Rawang, Selangor
+   State: Selangor
+
+377. Eco Botanic Eco Botanic Ecos Botanics
+   ID: 4a328e66-23e8-4089-bbdb-0eae6f88d735
+   Address: Persiaran Eko Botanic 2, Eco Botanic, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+378. U Garden Resort Condominium
+   ID: f9c0117a-ab94-4503-825d-9a054611db27
+   Address: 50A No. 50A, Persiaran Minden 1, 11700 Gelugor, Penang, Gelugor, Penang
+   State: Penang
+
+379. Beringin Avenue
+   ID: d1583a07-7070-41c2-a432-055932aba244
+   Address: Jalan KBP 16, Seri Kembangan, Selangor
+   State: Selangor
+
+380. Tiara Faber
+   ID: 4df6dd0c-875d-4a2a-8cca-cdf39ac65bcd
+   Address: 456 456, Jalan Desa Utama, Taman Desa, Kuala Lumpur
+   State: Kuala Lumpur
+
+381. (FULL LOAN + GOOD CONDITION) TAMAN PRIMA SAUJANA, KAJANG
+   ID: cbd151aa-caf4-4cb6-937b-564352d09030
+   Address: Prima Saujana Impian Jelok Impian Kajang Perdana, Taman Prima Saujana, Kajang, Selangor
+   State: Selangor
+
+382. Bandar Country Homes, Kota Bidari, Desa 12, Rawang
+   ID: 4109d472-f07f-45da-8555-2812e9cb92a9
+   Address: Jln Kb 2/1, Bandar Country Homes, Rawang, Selangor
+   State: Selangor
+
+383. Idaman Iris
+   ID: 5d350352-3b2d-4261-8bb2-1df6f412d39c
+   Address: Persiaran Relau, Jalan Dato Ismail Hashim, Sungai Ara, Penang
+   State: Penang
+
+384. (FULL LOAN + RENOVATED) 2 STOREY @ TAMAN SERI MAWAR, SEMENYIH
+   ID: 10d39d76-0b19-453d-ac8e-e50e8b6d329a
+   Address: Taman Seri Mawar Dusun Jaya Semenyih Sentral, Pekan Semenyih, Semenyih, Selangor
+   State: Selangor
+
+385. Taman Kristal
+   ID: 11cd34cc-9568-4d60-9806-55988c7048f0
+   Address: - Gerbang Mount Eskine, Tanjung Tokong, Penang
+   State: Penang
+
+386. Templer Residence
+   ID: cc1e97be-ef84-4579-b8d0-97d145b7db32
+   Address: Bandar Country Homes, Rawang, Selangor
+   State: Selangor
+
+387. Taman Tenaga Kajang @ 3 Storey
+   ID: a8191a87-d44b-4b57-bef7-0f73c6f78e0c
+   Address: Fully Renovated, Taman Tenaga, Kajang, Selangor
+   State: Selangor
+
+388. Sri Putramas III / Royal Regent
+   ID: fc5e2bbf-574d-4e78-95c1-23b65e1cecbc
+   Address: 1 Jalan Putramas, Jalan Kuching, Kuala Lumpur
+   State: Kuala Lumpur
+
+389. Bandar Nusaputra
+   ID: 131a0a03-9b69-493e-a15c-b9664529dc4f
+   Address: Bandar Nusaputra, Puchong, Selangor
+   State: Selangor
+
+390. Minden Heights Triple Storey Bungalow Corner Unit
+   ID: 43f5f2be-2e78-4769-a455-9e8f2cd3e9a0
+   Address: Lintang Minden, Minden Heights, Gelugor, Penang
+   State: Penang
+
+391. Clearwater Residences
+   ID: b9b4535c-783f-40ce-bfb7-bee7e446e735
+   Address: Changkat Semantan, Damansara Heights, Kuala Lumpur
+   State: Kuala Lumpur
+
+392. Good Deal Semi D,Bungalow,Mansion Villas,Family Living(Harmony,Peaceful,18km to TRX)The Nxt KL City
+   ID: 5bb630cc-c9da-4de2-869e-6f0b2d34790c
+   Address: Jalan The Mines,Mines Resort City, Cheras, Selangor
+   State: Selangor
+
+393. Taman Molek
+   ID: feb2fe14-100f-4a4a-ad4b-e1a3333b9684
+   Address: Taman Molek 1.5 Storey, Taman Molek, Johor Bahru, Johor
+   State: Johor
+
+394. Lakeville Residence
+   ID: 0e8b037d-5439-4956-9a39-272a0e2510b3
+   Address: Jalan Sibu Jalan Sibu, Batu Caves, Kuala Lumpur
+   State: Kuala Lumpur
+
+395. Lakeville Residence
+   ID: daf0b423-83a4-4574-9999-cde8c3e44a4b
+   Address: Jalan Sibu Jalan Sibu, Batu Caves, Kuala Lumpur
+   State: Kuala Lumpur
+
+396. jalan makmur jalans makmurs taman damai tamans damais skudai skudais tun aminah tuns aminahs
+   ID: e36d8d9e-e208-4aac-b56f-1e4b313f4dda
+   Address: jalan makmur, Skudai, Johor
+   State: Johor
+
+397. Setia Eco Garden Setias Ecos Gardens
+   ID: 146825ff-1aaa-4799-8765-55e2bfea8a10
+   Address: Laman Jentayu, Setia Eco Gardens, Gelang Patah, Johor
+   State: Johor
+
+398. Lakeville Residence
+   ID: d5438f4a-d9f8-4cb1-8d6f-c12d47bd5b39
+   Address: Jalan Sibu Jalan Sibu, Batu Caves, Kuala Lumpur
+   State: Kuala Lumpur
+
+399. Setia Eco Village Setias Ecos Villages
+   ID: 9010b7b5-666a-45fe-917b-ace2a064078c
+   Address: Setia Eco Village, Setia Eco Village, Gelang Patah, Johor
+   State: Johor
+
+400. Lakeville Residence
+   ID: 49bad02f-f820-41db-a6dd-d787ba362121
+   Address: Jalan Sibu Jalan Sibu, Batu Caves, Kuala Lumpur
+   State: Kuala Lumpur
+
+401. Akasa
+   ID: a691dcde-5d98-4895-baa8-b0c6e17c6714
+   Address: Lebuhraya Silk, Tmn Cheras Jaya, Cheras, Selangor
+   State: Selangor
+
+402. Amaya Saujana
+   ID: 7797ccb5-8e43-4df1-89f5-c77ae9d9b7a5
+   Address: - Persiaran Golf, Saujana, Selangor
+   State: Selangor
+
+403. Amaya Saujana
+   ID: 205c78d6-6f1a-4ebb-bb99-01b034f9a471
+   Address: - Persiaran Golf, Saujana, Selangor
+   State: Selangor
+
+404. Tree Sparina
+   ID: f1e29f91-a0ce-4efa-a440-8843d04022ce
+   Address: Ideal Vision Park Jalan Sungai Tiram 11, Taman Tunas Damai, Bayan Lepas, Penang
+   State: Penang
+
+405. Southbay Plaza
+   ID: aa5c9102-7048-4981-b648-0c957e1c57ac
+   Address: Changkat Batu Maung, Batu Maung, Penang
+   State: Penang
+
+406. Orchard Ville
+   ID: 0ddb2e3f-4b4b-4fbe-91bc-e5471c4f97b4
+   Address: Lengkuk Kelicap Lengkok Kelicap, Mutiara Perdana, Bayan Lepas, Penang
+   State: Penang
+
+407. Horizon Hill Horizons Hills
+   ID: bdcb9492-a91c-4b5c-898a-ab169485e149
+   Address: Canal Garden South, Horizon Hills, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+408. Seri Tecoma
+   ID: 03ac078c-41eb-4117-adf7-48c27b8f8f0e
+   Address: 1 Jalan Palma A/7, Ipoh, Perak
+   State: Perak
+
+409. 216 Residences
+   ID: 1506ebf1-5704-4ec1-b1e7-a894ac508f5e
+   Address: Jalan Kuchai Lama, Taman Kuchai Jaya, Kuchai Lama, Kuala Lumpur
+   State: Kuala Lumpur
+
+410. The Raffles Suites
+   ID: a420416c-5d03-45bf-8e82-c3c12e5c15b4
+   Address: Taman Sutera Utama Jalan Uda Utama 2, Johor Bahru, Johor
+   State: Johor
+
+411. cahaya masai pasir gudang unblock view can full loan cash out house for sale
+   ID: 0387380a-a1f3-4ce3-87d4-9d77f0820162
+   Address: Taman Cahaya Masai, Pasir Gudang, Johor
+   State: Johor
+
+412. St Marco Park Kulai Corner Double Storey Terrace House
+   ID: 6b950ae7-3f85-4cfc-bba4-d1e9e71b5008
+   Address: Jalan mutiara hijau, Taman Cantik, Kulai, Johor
+   State: Johor
+
+413. Pangsapuri Setia Impian @ Kajang
+   ID: 161e2aac-9379-44f5-85be-705995e1174f
+   Address: Jade Hills, Seri Kembangan, Selangor
+   State: Selangor
+
+414. Setia Eco Garden Setias Ecos Gardens
+   ID: 1d9eaf03-df7d-4bd0-b692-1ec1e6b46150
+   Address: Jalan Laman Setia, Taman Laman Setia, Setia Eco Gardens, Gelang Patah, Johor
+   State: Johor
+
+415. 0% Down Payment Rawang New Bungalow The Rise Kota Emerald
+   ID: ee6935c0-953d-420e-871a-438f095c421a
+   Address: The rise kota emerald rawang, Kota Emerald, Rawang, Selangor
+   State: Selangor
+
+416. East Ledang
+   ID: e105ac57-3a7d-4fae-a86a-7191b3fc2f67
+   Address: Jalan Hang Tuah, East Ledang, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+417. Apartment Minang Ria 2
+   ID: fd43a9fb-0018-4348-8fef-cc02f6efcbc6
+   Address: - Jalan Minang Ria, Bandar Tun Hussein Onn, Cheras, Selangor
+   State: Selangor
+
+418. Bandar Sungai Long (SL6)
+   ID: 59dd0a4a-79cb-45d5-b078-748099e7bf57
+   Address: Jalan SL6, Bandar Sungai Long, Selangor
+   State: Selangor
+
+419. Opus KL
+   ID: 78971ca2-31d6-4e7d-a2fe-070e04164f00
+   Address: Jalan Talalla Jalan Maharajalela, Kampung Attap, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+420. Sri Putramas III / Royal Regent
+   ID: 39bd4507-185b-445a-979e-0c4b266cd7f7
+   Address: 1 Jalan Putramas, Jalan Kuching, Kuala Lumpur
+   State: Kuala Lumpur
+
+421. 05/01/2026 Bank Lelong No. 35, Jalan 14/3, Taman Tun Abdul Razak, Ampang, Selangor
+   ID: 5acfda6b-de78-493b-aaeb-2146a4b2ab11
+   Address: Taman TAR (Tun Abdul Razak), Ampang, Selangor
+   State: Selangor
+
+422. Arte Condominium
+   ID: 9f3d14a7-a780-430f-ae0c-b55820631f8c
+   Address: Jalan 1/116c Jalan Kuchai Maju 12, Kuchai Lama, Kuala Lumpur
+   State: Kuala Lumpur
+
+423. Ren Residences
+   ID: b38712a5-482d-4851-a082-4390cefcbb47
+   Address: Jalan Jalil Impian 2, Bukit Jalil, Kuala Lumpur
+   State: Kuala Lumpur
+
+424. Gembira Residen
+   ID: 29333422-552c-4746-8e63-febc6c6eb9aa
+   Address: Jalan Senang Ria, Off jalan Gembira, Taman Gembira, Jalan Klang Lama (Old Klang Road), Kuala Lumpur
+   State: Kuala Lumpur
+
+425. Taman Paya Terubong
+   ID: 9ef24c09-544f-472f-91ed-f121fb86f842
+   Address: - Tingkat Paya Terubong 3, Paya Terubong, Ayer Itam, Penang
+   State: Penang
+
+426. Taman Gembira
+   ID: 30d582ac-7ba0-46e2-8b37-a498a5d05bc4
+   Address: Taman Gembira, Jalan Klang Lama (Old Klang Road), Kuala Lumpur
+   State: Kuala Lumpur
+
+427. Gembira Residen
+   ID: 44f7f3d3-5867-4b44-8fb8-06a1b5e347ba
+   Address: Jalan Senang Ria, Off jalan Gembira, Taman Gembira, Jalan Klang Lama (Old Klang Road), Kuala Lumpur
+   State: Kuala Lumpur
+
+428. Jay Series (Greenlane Heights Block J)
+   ID: d29a925c-55a1-4603-96e0-5f431e25df7b
+   Address: 7 & 8 No. 7 & 8, Jalan Gangsa, Jelutong, Penang
+   State: Penang
+
+429. 8 Gurney (The Shore Condominium)
+   ID: 552173e4-7839-45fe-b886-5e6db5968e5b
+   Address: 5 5 Pesiaran Gurney, Gurney Drive, Penang
+   State: Penang
+
+430. 216 Residences
+   ID: ac8028d3-c1d6-4996-9c4f-fad83baf6382
+   Address: Jalan Kuchai Lama, Taman Kuchai Jaya, Kuchai Lama, Kuala Lumpur
+   State: Kuala Lumpur
+
+431. 1 Sentul
+   ID: 25491920-c6bb-40df-ad8f-6d4c2f9e976e
+   Address: 0 No. 1, Jalan Sentul Ria, Sentul, Kuala Lumpur
+   State: Kuala Lumpur
+
+432. Ixora
+   ID: d7839260-fcc8-4c17-9a4e-9889865c9773
+   Address: - Jalan Wangsa 2/6, Taman Wangsa Permai, Kepong, Selangor
+   State: Selangor
+
+433. Shamelin Star
+   ID: 9010bd4f-0ccc-44c9-a786-191ffcd701c7
+   Address: Shamelin Star Jalan 4/91, Taman Shamelin Perkasa, Cheras, Kuala Lumpur
+   State: Kuala Lumpur
+
+434. Taman Nusa Idaman
+   ID: d89fac32-abc7-4754-9720-d4f4f9a1c752
+   Address: Taman Nusa Idaman, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+435. Desa Putra
+   ID: dd1cd32d-0d97-4229-87e7-5e833c352624
+   Address: - Persiaran Bayan Indah 3, Bayan Lepas, Sungai Nibon, Bayan Lepas, Penang
+   State: Penang
+
+436. Ridgewood @ Taman Bercham Permai
+   ID: d0d1ab22-6918-46fb-9374-b65baf2ac796
+   Address: Lorong Bercham 19, Taman Bercham Permai, Ipoh, Perak
+   State: Perak
+
+437. Taman Rebana
+   ID: a4d26e34-3a4c-40bc-b997-7e328156315f
+   Address: Taman Rebana, Sungai Bakap, Penang
+   State: Penang
+
+438. 2-storey Terrace House at Bandar Puteri Puchong
+   ID: 26953143-7a80-4f8e-8073-5f6b89751a69
+   Address: Jalan Puteri 10 Puchong 2 storey Fully Extended & Renovated, Bandar Puteri Puchong, Puchong, Selangor
+   State: Selangor
+
+439. Perling
+   ID: e568d57b-88ef-4048-9dae-0da5324e3dfd
+   Address: Sutera Ungu, Taman Perling, Perling, Johor
+   State: Johor
+
+440. Gembira Residen
+   ID: 08bafb19-d0d8-4bf8-90a7-67e15b5ab1bd
+   Address: Jalan Senang Ria, Off jalan Gembira, Taman Gembira, Jalan Klang Lama (Old Klang Road), Kuala Lumpur
+   State: Kuala Lumpur
+
+441. Mont Kiara Bayu
+   ID: afaaa595-8940-477c-be58-6dc01b429d89
+   Address: 2 No. 2, Jalan Mont Kiara 2, Mont Kiara, Kuala Lumpur
+   State: Kuala Lumpur
+
+442. Asia Heights
+   ID: af6d6f79-c678-4f2b-bec4-92366b967806
+   Address: - Lorong Semarak Api 3, Ayer Itam, Penang
+   State: Penang
+
+443. Mahkota Garden
+   ID: 643c850b-8d07-42c3-969b-dca3da9f59a1
+   Address: Jalan Mutiara Garden Jalan Mahkota Garden, Bandar Mahkota Cheras, Cheras, Selangor
+   State: Selangor
+
+444. Taman Scientex Jaya Senai 2.5 Storey Terrace House End Lot Unit
+   ID: f9c291a4-bb30-4a19-95c0-7cdace762336
+   Address: Jalan Scientex jaya 20, Taman Scientex Senai, Senai, Johor
+   State: Johor
+
+445. i-Santorini
+   ID: 53f24581-6980-45ad-842f-13bd55108b32
+   Address: i-Santorini Jalan Desiran Tanjung, Tanjung Tokong, Penang
+   State: Penang
+
+446. 1-storey Terraced House at Taman Gembira
+   ID: 5fd6a969-f6a8-43da-aa4c-4aacd2b9eaae
+   Address: Taman Gembira, Jalan Klang Lama (Old Klang Road), Kuala Lumpur
+   State: Kuala Lumpur
+
+447. M City
+   ID: 68457fc9-308c-44c2-9153-263f9fd4d869
+   Address: Jalan Ampang, Kampung Berembang, Ampang, Kuala Lumpur
+   State: Kuala Lumpur
+
+448. Old Klang road 2026 complete
+   ID: 8013f587-e0a5-4cd6-9268-7829de302b0e
+   Address: Taman Sri Sentosa, Jalan Klang Lama (Old Klang Road), Kuala Lumpur
+   State: Kuala Lumpur
+
+449. Bukit Indah
+   ID: 8f5e4cb6-d3e1-427f-9320-ba808a2ded64
+   Address: Bukit Indah, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+450. Anggun 3 @ Rawang New Town Centre
+   ID: 24a248e4-80c9-40aa-813a-97e1af92ca1b
+   Address: Persiaran Selatan, Rawang, Selangor
+   State: Selangor
+
+451. 99 Residence
+   ID: 8d72c14a-14e4-461c-88b5-46e0dd1994b2
+   Address: Jalan Seri Utara 1, Taman Wahyu, Batu Caves, Kuala Lumpur
+   State: Kuala Lumpur
+
+452. Tuan 2egacy
+   ID: 717dd88c-1f83-4f51-ad04-83c7e18afee8
+   Address: Lot 60328 Jalan 1/42, Off Jalan Kuching, Segambut, Kuala Lumpur
+   State: Kuala Lumpur
+
+453. Taman Perling
+   ID: 292c8337-34e4-4f90-ac38-01591a236742
+   Address: Jalan Belibis 7, Tampoi, Johor
+   State: Johor
+
+454. Pinnacle Bangsar
+   ID: c641fb07-6d7b-43eb-8f9f-6009201eb81e
+   Address: Jalan Medang Kapas, Bangsar Baru, Bangsar, Kuala Lumpur
+   State: Kuala Lumpur
+
+455. Setia Impian, Setia Alam
+   ID: e8f62764-2394-4ac3-b229-9f3c32a32679
+   Address: Setia Impian, Alam Nusantara, Setia Indah, Setia Alam, Seksyen U13, Setia Permai,Setia Damai, Setia Eco Park, By Water, Musika Homes, Anggun, Setia Wawasan, Anjung Sari, Casa Sutra, Eco Ardence, Nara, Ember, Aeres, Dremien, Cora, Setia Alam, Selangor
+   State: Selangor
+
+456. Orchard Ville
+   ID: 92e04479-b2e1-462b-abed-caf3ed4d0823
+   Address: Lengkuk Kelicap Lengkok Kelicap, Mutiara Perdana, Bayan Lepas, Penang
+   State: Penang
+
+457. Sejati Lakeside 2
+   ID: 6066c611-c9ea-4960-bc0d-800937029546
+   Address: Paramount Property Gallery @ Sejati Lakeside 2 No 1 & 3, Jalan SL2/9 Sejati Lakeside 2, Cyber 10, Cyberjaya, Selangor
+   State: Selangor
+
+458. Molek Pulai
+   ID: 6b0f27d7-9d74-4a27-8e13-aff3aad46021
+   Address: Jln Molek 2/36,Off Jln Persiaran Molek, Tmn Molek, Taman Molek, Johor Bahru, Johor
+   State: Johor
+
+459. Eco Majestic
+   ID: e1d8d917-af4a-4986-8f3d-4540921396b3
+   Address: 1 Lingkaran Eco Majestic, Eco Majestic, Semenyih, Selangor
+   State: Selangor
+
+460. Skyvilla Residences
+   ID: f0edb504-4ce2-4715-9d73-c2dc3853ab0e
+   Address: Off Jalan Batu Kawa, Off Jalan Batu Kawa, Bandar Baru Batu Kawa, 93250 Kuching, Sarawak, Kuching, Sarawak
+   State: Sarawak
+
+461. Tamara
+   ID: 1cf50a88-8892-4903-9281-55e77529bf39
+   Address: - Precint 8, Putrajaya Presint 8, Putrajaya, Putrajaya
+   State: Putrajaya
+
+462. Tamara
+   ID: 19045b7a-3603-459e-ae81-d0c5243c468d
+   Address: - Precint 8, Putrajaya Presint 8, Putrajaya, Putrajaya
+   State: Putrajaya
+
+463. M Arisa
+   ID: c17c35d7-9749-419c-a50d-45106e8f56f1
+   Address: 25 Jalan Sentul Pasar, Sentul, Kuala Lumpur
+   State: Kuala Lumpur
+
+464. The Tamarind
+   ID: b167af0a-fb4c-4cff-a513-dcd057962282
+   Address: Jalan Seri Tg Pinang, Tanjung Tokong, Penang
+   State: Penang
+
+465. Kepong Sentral Condominium
+   ID: 3e6f0730-b40c-4bec-a4b6-4c7233b3ee4f
+   Address: Jalan Puncak Desa 2, Taman Sri Ehsan, Kepong, Selangor
+   State: Selangor
+
+466. Batu Feringghi
+   ID: 0395238b-71c3-4e8c-9517-b77ed62e98db
+   Address: cangkat ferringhi, Batu Feringghi, Penang
+   State: Penang
+
+467. LA Garden LAs Gardens
+   ID: 9e8dd4e7-9e22-401c-ac38-27343379f164
+   Address: LA Garden, Taman JP Perdana, Johor Bahru, Johor
+   State: Johor
+
+468. Jalan 24 Bukit Indah
+   ID: e227d425-d91d-45d1-92b3-21e1ac3b2035
+   Address: No. 2x, Jalan indah 24/1x, Taman Bukit Indah, Iskandar Puteri, Johor., Bukit Indah, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+469. SS 12
+   ID: eb58d339-4c9e-40ec-a0cc-91bfee611796
+   Address: [NEAR SJMC & SS 15] SS 12, SS12, Subang Jaya, SS12, Subang Jaya, Selangor
+   State: Selangor
+
+470. Serendah Golf Resort
+   ID: fb866bca-0033-4f84-9146-9ebb055106d0
+   Address: Persiaran Meranti Utara, Serendah, Selangor
+   State: Selangor
+
+471. The Kews
+   ID: 5f550b67-74fe-4870-824f-bcad1e13f9bc
+   Address: Leisure Farm, Gelang Patah, Johor
+   State: Johor
+
+472. Island Park 2 Storey Terrace, Greenlane
+   ID: fda9d911-fd1d-4a39-927a-399512ac627e
+   Address: Lorong Tembaga, Island Park, Jelutong, Penang
+   State: Penang
+
+473. Aradia Residence @ Lake City KL North
+   ID: adcb5c22-d9f1-4d1c-8f7c-436640316952
+   Address: 102, Jalan Sibu, Taman Wahyu, Batu Caves, Selangor
+   State: Selangor
+
+474. Taman budiman
+   ID: 4bfb148d-289f-46ce-a055-dad3b9180802
+   Address: Jalan kapar, Taman Sungai Sembilang, Jeram, Selangor
+   State: Selangor
+
+475. USJ 2 Corner House
+   ID: 4087ee53-c1da-4706-a432-5ca62e301862
+   Address: [CORNER HOUSE] USJ 2, USJ2, USJ, Subang Jaya, Usj 2, Subang Jaya, Selangor
+   State: Selangor
+
+476. ukay heights, ampang
+   ID: 31509e6c-20ed-485f-a0b7-33a11ada6cc2
+   Address: jalan teberau, Ukay Heights, Ampang, Selangor
+   State: Selangor
+
+477. ALIX Residences
+   ID: 3107db7f-9f90-469d-8305-c60e6f0a013e
+   Address: Jalan Dutamas Raya, Dutamas, Kuala Lumpur
+   State: Kuala Lumpur
+
+478. Taman Pinggiran Putra
+   ID: cd17ee6e-7dbb-452f-b1f6-6894060f2da8
+   Address: Taman Pinggiran Putra, Seri Kembangan, Selangor
+   State: Selangor
+
+479. Alila Horizons Condominium
+   ID: 2710e23c-c72c-4ae0-9663-865c59eb1fe2
+   Address: - Lorong Kejora, Tanjung Bungah, Penang
+   State: Penang
+
+480. Kaleidoscope (Residensi Setiawangsa)
+   ID: 89b2b43f-51b1-4d0d-b452-2b3bccdcf2df
+   Address: Off Jalan 1/56, Setiawangsa 54200 Kuala Lumpur, Setiawangsa, Kuala Lumpur
+   State: Kuala Lumpur
+
+481. Saujana Palma Residences
+   ID: 5683cd34-eeff-4e2b-ad77-43128a157c26
+   Address: Jalan Saujana Palma Suria 5, Kajang, Selangor
+   State: Selangor
+
+482. Shineville Park
+   ID: e0f1e6c8-8b8e-454d-90da-249976d67310
+   Address: Lebuhraya Thean Tek, Lebuhraya Thean Tek, Bandar Baru Air Itam, Ayer Itam, Penang
+   State: Penang
+
+483. Taman Jade
+   ID: ed83bd23-9e7b-424d-a890-50a71c0ab395
+   Address: Jalan Bukit Gambier, 11700 Gelugor, Penang, Gelugor, Penang
+   State: Penang
+
+484. Taman Minang Ria
+   ID: 37225d3a-82cb-4060-9b9b-ba9f3de24996
+   Address: Jalan Minang Ria 5, Taman Minang Ria, Cheras, Selangor
+   State: Selangor
+
+485. Residensi Bukit Palma 1 (Palm Hill Residence 1)
+   ID: f334682a-dd09-437f-9fe9-53c88d0e9dea
+   Address: Jalan Takdir, Taman Bukit Palma, Kajang, Selangor
+   State: Selangor
+
+486. Damai Vista
+   ID: 71c3a6ca-0f89-44dc-9125-bba50aad3bb4
+   Address: 10 Jalan Damai Perdana 1/2, Cheras, Kuala Lumpur
+   State: Kuala Lumpur
+
+487. Bandar Mahkota Cheras
+   ID: 0d503f10-ea77-4eba-8dac-7547f12f5796
+   Address: Mahkota Cheras , Sungai Long, Bandar Mahkota Cheras, Cheras, Selangor
+   State: Selangor
+
+488. One Central Park
+   ID: 41c3d54e-a22a-48ec-b95d-4a7007c9014e
+   Address: One Central Park Jalan Residen 2, Desa Parkcity, Kuala Lumpur
+   State: Kuala Lumpur
+
+489. Lakefield Residences @ Tropicana Heights, Kajang
+   ID: 60027d5c-c19d-40bf-818f-5abf4d262db9
+   Address: No. 2 Persiaran Tropicana Heights 2, Bandar Batu 18 Semenyih, Mukim Semenyih, Bandar Teknologi Kajang, Kajang, Selangor
+   State: Selangor
+
+490. Ridgefield Residences Tropicana Heights
+   ID: 40bebbfa-2b02-4d99-a319-3c8f400c3cf4
+   Address: Jalan Kajang Villa Off Jalan P6/2, Kajang, Selangor
+   State: Selangor
+
+491. Saujana Glenmarie
+   ID: 63ff60ef-c4d1-4801-a37c-68a994949637
+   Address: Saujana Glenmarie, Saujana 0 Lot, Glenmarie, Temasya Glenmarie, Glenmarie Courts, Glenmarie Residence, Shah Alam, Selangor
+   State: Selangor
+
+492. G Residence
+   ID: b0775a43-9deb-408d-9b13-be66cfe09012
+   Address: Jalan 1/76 Jalan Desa Pandan, Desa Pandan, Ampang, Kuala Lumpur
+   State: Kuala Lumpur
+
+493. Sunway Mont Residences
+   ID: 9381c634-2e68-4c6f-9510-9785cb097c0f
+   Address: Mont Residences Jln Kiara 5, Mont Kiara, Mont Kiara, Kuala Lumpur
+   State: Kuala Lumpur
+
+494. The Cove Horizon Hills
+   ID: 6651b51f-a687-4564-838b-4cf02c36d6b9
+   Address: Horizon Hills, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+495. East Ledang @ Melody Park
+   ID: 3328dacb-b535-4d2b-876e-895d834b2167
+   Address: Jalan Hang Jebat, East Ledang, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+496. Taman Lestari Putra
+   ID: 93b014fe-c644-4b74-81ba-bad0b61fc85d
+   Address: Jalan Lep 7/11, Taman Lestari Putra, Seri Kembangan, Selangor
+   State: Selangor
+
+497. Taman Putra Prima Phase 3E
+   ID: fb7b5ad8-8b96-4ad6-b560-52331f81aa9e
+   Address: Jalan PP 4/1 Taman Putra Prima Phase 3E, Puchong, Selangor
+   State: Selangor
+
+498. Taman Lagenda Mas
+   ID: f6920e7f-ec57-4957-816a-d992f4ca3da0
+   Address: Jalan Lagenda 8, Cheras 9 Miles, Cheras, Kuala Lumpur
+   State: Kuala Lumpur
+
+499. Bandar Sungai Long, Taman Makmur
+   ID: 6dde2c0e-d3b3-4e23-a407-e7ebbf506e56
+   Address: Jalan SL 12, Taman Makmur, Bandar Sungai Long, Selangor
+   State: Selangor
+
+500. Utamara Boutique Residences
+   ID: b7ec1f59-fadd-426f-b76a-0d08267b392f
+   Address: Jalan Melati, Jalan PJU 6a/3a, Kampung Sungai Kayu Ara, Petaling Jaya, Selangor
+   State: Selangor
+
+501. Taman Permata
+   ID: 548bae77-11a9-4a92-aabe-9b259ab77eb9
+   Address: Taman Permata, Keramat, Wangsa Maju, Wangsa Melawati, Taman Melawati, Taman Setiawangsa, Taman Melati, Taman Bunga Raya, Taman Ukay Bistari, Taman Permata, Ulu Kelang, Selangor
+   State: Selangor
+
+502. Taman Terubong Jaya
+   ID: e12b751c-2bad-45fd-940a-9adf475968a5
+   Address: Tingkat Paya Terubong 4, Paya Terubong, Ayer Itam, Penang
+   State: Penang
+
+503. Asia Heights
+   ID: ff41d82d-7c48-41cf-acc5-a9986febdb3d
+   Address: - Lorong Semarak Api 3, Ayer Itam, Penang
+   State: Penang
+
+504. Nusa Heights (Nusa Puncak)
+   ID: ca6fdb16-cb9a-484d-a7ed-727c76625818
+   Address: - Jalan Gelang Patah, Taman Nusa Perintis, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+505. Pine Residence
+   ID: 960acb77-2d50-4979-85f3-aece7f97a97d
+   Address: 99 Jln Bukit Kukus, Tmn Terubong Indah, Paya Terubong, Ayer Itam, Penang
+   State: Penang
+
+506. All Seasons Park
+   ID: beb0fac2-5c5b-46ee-ab17-3ba49c5b7f9d
+   Address: - Lebuhraya Thean Teik, Ayer Itam, Penang
+   State: Penang
+
+507. Raffel Tower
+   ID: 2b6b235e-6e35-4fda-84f8-cb0541213481
+   Address: Cangkat Minden Jalan Lorong Permai 7, Taman Brown, Gelugor, Penang
+   State: Penang
+
+508. Saujana Puchong SP 3 Shop Apartment
+   ID: de5f59ec-af14-4cd5-a80e-ac77520f2023
+   Address: Jalan SP 3/10 Off Persiaran Saujana Puchong, Puchong, Puchong, Selangor
+   State: Selangor
+
+509. Aetas Seputeh
+   ID: 6b8c8122-d2a2-422c-b6a7-52d3c2779e3c
+   Address: Persiaran Syed Putra 2, Taman Persiaran Desa, Seputeh, Kuala Lumpur
+   State: Kuala Lumpur
+
+510. Bukit Jalil
+   ID: 6a499335-d2c1-43d4-acfd-9e9fe1889a1a
+   Address: Jalan Mas 2, Bukit Jalil, Kuala Lumpur
+   State: Kuala Lumpur
+
+511. Taman Suria Jaya
+   ID: 7af9f24b-abf3-4cdb-b610-9f1adda5ae9a
+   Address: Jalan Bunga Raya 1, Taman Suria Jaya, Cheras, Kuala Lumpur
+   State: Kuala Lumpur
+
+512. Southkey Mosaic
+   ID: aaf318fe-eeee-4390-a9df-59e763ab6fc1
+   Address: Jalan Bakar Batu, Kem Majidee, Johor Bahru, Johor
+   State: Johor
+
+513. Residensi Andalan Rumawip Bukit Jalil
+   ID: 207fd21c-9fe4-4e62-9dcd-6cffb6b01ee5
+   Address: Jalan Mas 1, Bukit Jalil, Kuala Lumpur
+   State: Kuala Lumpur
+
+514. Horizon Hills
+   ID: 48481f54-6d2e-4415-b69f-2014871c50aa
+   Address: Jalan Persiaran Timur, Horizon Hills, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+515. [3091sf] 2 Storey Corner House, Anggun 3, Kota Emerald, Rawang
+   ID: ff0b8557-2f92-497e-beea-88355f6f1170
+   Address: Taman Anggun 3, Rawang, Selangor
+   State: Selangor
+
+516. Ketumbar Hill
+   ID: 8afd768a-bbb4-4b9d-bd3f-cbf1977cd015
+   Address: - Jalan Ketumbar, Taman Cheras, 56100 Cheras, WP Kua, Taman Cheras, Cheras, Kuala Lumpur
+   State: Kuala Lumpur
+
+517. 6 CapSquare
+   ID: 5efd37f7-72e9-4c5f-ac9b-1111002678f1
+   Address: - Persiaran Capsquare, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+518. [32x75] 2 Storey Semi D House, Scientex Rawang, Taman Anggun, Rawang
+   ID: bbd06283-3cfd-4cdd-a39f-18fa2dfff851
+   Address: Taman Scientex Rawang, Rawang, Selangor
+   State: Selangor
+
+519. Isle of Kamares
+   ID: 4b443f7e-9b08-4831-b6f3-fbebfeaf8be7
+   Address: Persiaran Setia Eco Glades, Cyberjaya, Selangor
+   State: Selangor
+
+520. Townhouse at Laman Residen Kipark Sri Utara
+   ID: f024ee4c-750b-4b58-a7a9-e8d3ee1c9875
+   Address: Laman Residen Kipark Sri Utara, Batu Caves, Kuala Lumpur
+   State: Kuala Lumpur
+
+521. Villa Mas
+   ID: 87ea390a-e256-490a-b936-264fd8622f63
+   Address: Jln 2/3C, Jalan Ipoh, Kuala Lumpur
+   State: Kuala Lumpur
+
+522. myHabitat
+   ID: f52052ea-9cf3-4dc4-9057-e45297ee20bb
+   Address: 3 Jalan Aman, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+523. Straits View
+   ID: 3990199c-464f-4ff3-9fb3-b8957b54fe19
+   Address: Jalan Straits View, Straits View, Johor Bahru, Johor
+   State: Johor
+
+524. Rawang New Property Project, Freehold, Rawang
+   ID: a1517ca9-bfba-407a-b839-d2d65744ffea
+   Address: Jalan Rawang-Kuala Selangor, Rawang, Kota Emerald, Rawang, Selangor
+   State: Selangor
+
+525. Utamara Boutique Residences
+   ID: 36616f69-fc10-44bc-b592-639b07c09d94
+   Address: Jalan Melati, Jalan PJU 6a/3a, Kampung Sungai Kayu Ara, Petaling Jaya, Selangor
+   State: Selangor
+
+526. Luminari
+   ID: 022df684-df01-40ae-9fd1-8acc1e0e2d08
+   Address: Jalan Harbour Place Jalan Assumption, Butterworth, Penang
+   State: Penang
+
+527. The Boulevard
+   ID: 3a581c56-f94b-4100-9b25-501e017187ed
+   Address: Persiaran Wangsa Baiduri 12/1, SS12, Subang Jaya, Selangor
+   State: Selangor
+
+528. Taman Desa impian
+   ID: 210a61f5-c6e5-45f5-b334-c1705fc55abb
+   Address: Lorong Desa impian 2, Alma, Bukit Mertajam, Penang
+   State: Penang
+
+529. Country Heights Damansara
+   ID: 31549bea-6a32-48b1-93f5-61374a824f01
+   Address: Jalan Sungai Penchala, Country Heights Damansara, Kuala Lumpur, Kuala Lumpur
+   State: Kuala Lumpur
+
+530. Seri Puri
+   ID: d4c44929-0d3f-4d8d-9150-46bbaf9d9497
+   Address: - Jalan Aman, Desa Aman Puri, Kepong, Kuala Lumpur
+   State: Kuala Lumpur
+
+531. Mahkota Impian
+   ID: dfb92e6b-1b7f-4492-9a10-9767e15cf52c
+   Address: Persiaran Seri Impian, Alma, Bukit Mertajam, Penang
+   State: Penang
+
+532. Ascenda Residence @ Skyarena
+   ID: fe940913-912b-4e2c-9d32-a9af4476c7e5
+   Address: Jalan Ayer Jerneh, Off Jalan Genting Kelang, Setapak, Kuala Lumpur
+   State: Kuala Lumpur
+
+533. Platinum Lake PV 21
+   ID: df25f392-d5a7-47b2-ad11-e094cb37c05b
+   Address: Jalan Usahawan, Off Jalan Genting Kelang, Setapak, Kuala Lumpur
+   State: Kuala Lumpur
+
+534. East Park 72 Mahkota Cheras
+   ID: 059e35e1-0324-4a92-9c58-11b92f190daa
+   Address: East Park 72 Mahkota Cheras, Bandar Mahkota Cheras, Cheras, Selangor
+   State: Selangor
+
+535. Taman bandar raya
+   ID: 60686489-c913-4c46-a726-8e4ed7f6cb73
+   Address: Taman sepakat, Taman Sepakat, Bukit Mertajam, Penang
+   State: Penang
+
+536. Taman Remia
+   ID: d1efba60-2714-440a-aa65-2b0da524d91c
+   Address: Lorong Remia 2 Lorong Remia 2, Taman Remia, Bukit Mertajam, Penang
+   State: Penang
+
+537. Country Heights Kajang
+   ID: 54aca613-14a9-45a7-8631-de6f01cd2632
+   Address: Unnamed Road, Country Heights, Kajang, Selangor
+   State: Selangor
+
+538. Pinggiran bukit segar
+   ID: 7e197c7b-7108-4dde-a321-b7e738b791fb
+   Address: Taman Bukit Segar, Cheras, Kuala Lumpur
+   State: Kuala Lumpur
+
+539. D'Summit Residences
+   ID: b9e3d947-4994-4ebb-8d68-82aaee87a85c
+   Address: Jalan Kempas Lama Jln Kempas Utama 2/1, Kempas, Johor Bahru, Johor
+   State: Johor
+
+540. Amani Residence
+   ID: 0a29042f-1ceb-4208-b924-fefb3dbf66dd
+   Address: Amani Residences Persiaran Puteri, Bandar Puteri Puchong, Puchong, Selangor
+   State: Selangor
+
+541. Anggun Residences
+   ID: cd446a1b-38ae-476e-adfb-edaa89e75c99
+   Address: Jalan Sultan Ismail, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+542. Horizon Hill Horizon Hills
+   ID: d8ac417b-09ad-47f1-a9da-8fa9be6d5e86
+   Address: Horizon Hills, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+543. Desa Mar Vista
+   ID: 6b169a57-8dd4-4187-b8d9-0da9238db794
+   Address: 1 Jalan Batu Ferringhi, Batu Feringghi, Penang
+   State: Penang
+
+544. Platinum Hill PV 2
+   ID: 2cfb929d-4155-452d-9b91-5fe861fd12df
+   Address: No. 2 Taman Melati, Setapak 53100, Kuala Lumpur, Taman Melati, Setapak, Kuala Lumpur
+   State: Kuala Lumpur
+
+545. Subang Heights
+   ID: 748d75a5-f849-4db3-b66d-f9efeea77bbe
+   Address: Subang Heights, Subang Heights West, Subang Jaya, Selangor
+   State: Selangor
+
+546. Kulai Taman Mawar
+   ID: 608ae119-fb06-481f-9190-609f72046952
+   Address: Add up 2, Jalan Mawar x, Kulai, Johor
+   State: Johor
+
+547. Bay Point @ Country Garden Danga Bay
+   ID: d4d005d2-0cf5-4714-9238-7efa06cdac3e
+   Address: Jalan Skudai Off Country Garden Danga Bay, Johor Bahru, Johor
+   State: Johor
+
+548. Taman Setia Indah Taman Setia Indah
+   ID: 9035d85d-f9d2-47e0-828e-dbb578ff2ff9
+   Address: Jalan Setia 4, Taman Setia Indah, Tebrau, Johor
+   State: Johor
+
+549. Stulang Villa
+   ID: 12987fc5-1171-4557-a774-350b81ad5c0f
+   Address: - Jalan Indera Putera, Johor Bahru, Johor
+   State: Johor
+
+550. Taman Desa Cemerlang
+   ID: 8a0f3a22-89dc-4c98-a0cb-d17eacc3ba31
+   Address: Jalan Saga, Taman Desa Cemerlang, Ulu Tiram, Johor
+   State: Johor
+
+551. Starhill Luxury Residence
+   ID: f35fd2b0-c2a7-4780-ab73-1c33541617d6
+   Address: Jalan Bukit Gambir Jalan Bukit Gambir,Off Persiaran Bukit Gambir,, Sunway Bukit Gambier, Gelugor, Penang
+   State: Penang
+
+552. Horizon Hills Horizon Hills
+   ID: a3448c57-3d29-4496-8263-3f58c13a1779
+   Address: Jalan Ambang, Horizon Hills, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+553. Starhill Luxury Residence
+   ID: e4f9b372-6c56-4bcf-8a44-723f53eb5ac6
+   Address: Jalan Bukit Gambir Jalan Bukit Gambir,Off Persiaran Bukit Gambir,, Sunway Bukit Gambier, Gelugor, Penang
+   State: Penang
+
+554. Taman Lagenda Mas
+   ID: abae5e7b-6d04-4d40-a9be-0b006647dfcd
+   Address: Jalan Lagenda 8, Cheras 9 Miles, Cheras, Kuala Lumpur
+   State: Kuala Lumpur
+
+555. Twinstar
+   ID: a78f6a06-cf3e-44e3-8106-ac37278ca697
+   Address: Lintang Slim, Taman Desa Green, Jelutong, Penang
+   State: Penang
+
+556. Regency Heights Condo
+   ID: a9d68c98-02ee-48ad-979e-417f8d0f048b
+   Address: Changkat Kenari, Sungai Ara, Penang, Sungai Ara, Penang
+   State: Penang
+
+557. Eco Botanic
+   ID: dce17420-13a3-48a7-a930-b5442df8e104
+   Address: Eco Botanic, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+558. Eco Botanic The Chateau
+   ID: cc83a3b3-a8b4-4667-b17e-f2fb19c0fe2f
+   Address: Eco Botanic, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+559. Alam Nusantara
+   ID: 2a614803-a840-4ac2-8c3f-396321a6f3f9
+   Address: Jln Setia Perdana U13/25A, Shah Alam, Selangor
+   State: Selangor
+
+560. D'Suites Akasia Horizon
+   ID: 4facfcd0-563b-4f04-8bf3-210d6e8f6fd1
+   Address: No.9 Jalan Persiaran Selata, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+561. Country Garden Forest City
+   ID: a7900e3e-1270-4cce-b39e-2c4c2e4753fd
+   Address: Jalan Tanjung Kupang, Kampung Pok, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+562. Horizon Hill Horizon Hills
+   ID: d83de2c5-8ce8-4ac3-86ff-2aab6e48efe8
+   Address: Horizon Hills, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+563. Taman Scientex Rawang
+   ID: aa7311e0-9699-4eaa-8f09-3bffcec1ebc3
+   Address: Jln TSR 8, Taman Scientex Rawang, Rawang, Selangor
+   State: Selangor
+
+564. Eco Botanic
+   ID: 8c7ce684-2934-422d-85c5-e6ddb5306ad1
+   Address: No 25, 27, 29 Jalan Eko Botani 3/5, Taman Eko Botani, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+565. Bukit Indah Bukit Indahs
+   ID: 19839fbc-b684-4fdf-bb4d-d008e7bba8a1
+   Address: Bukit Indah, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+566. Starview Bay @ Forest City
+   ID: 7255cd30-1b2c-41f9-ad83-89ab441c1c4d
+   Address: Jalan Forest City, Gelang Patah, Johor
+   State: Johor
+
+567. BUKIT INDAH BANDAR NUSAJAYA
+   ID: bd16d037-1f1f-474f-8831-7178170902db
+   Address: Jalan Indah, Bukit Indah, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+568. Eco Botanic
+   ID: 37a62b37-73a9-425a-b1a7-c130744e3de2
+   Address: No 25, 27, 29 Jalan Eko Botani 3/5, Taman Eko Botani, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+569. Leisure Farm
+   ID: e6104bbe-4526-4880-87ad-14765a21a292
+   Address: Jalan Tanjung Kupang, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+570. 3-storey Terraced House at Taman Bukit Prima
+   ID: e1031899-7310-45b4-bf71-ae3f7934fb8c
+   Address: JALAN PRIMA, Taman Bukit Prima, Cheras, Selangor
+   State: Selangor
+
+571. KM1 West
+   ID: 271c5c4a-0954-470f-8aba-f6eac93fbfaa
+   Address: KM1 West Jln Jalil Perkasa 1,, Bukit Jalil, Kuala Lumpur
+   State: Kuala Lumpur
+
+572. The Clovers
+   ID: ece61b11-c6f0-441b-9245-e919a42f6457
+   Address: 12836 Jalan Merbah, Taman Sri Bayan, Bayan Lepas, Penang
+   State: Penang
+
+573. Taman Gembira (Happy Garden)
+   ID: 6c4e66c3-1973-4631-a435-7cd92c6669b6
+   Address: Jalan Sukacita, Kuchai Entrepreneurs Park, Kuchai Lama, Kuala Lumpur
+   State: Kuala Lumpur
+
+574. Bank Lelong - Taman Anggerik Emas @ Kajang
+   ID: 78abfa71-9eb9-473e-b987-1273c9b1fc3a
+   Address: Jalan Anggerik Emas 1, Taman Anggerik Emas, Kajang, Selangor
+   State: Selangor
+
+575. The Tamarind
+   ID: 4a277ca8-6b98-49db-bb1b-97b9979a1ca4
+   Address: Jalan Seri Tg Pinang, Tanjung Tokong, Penang
+   State: Penang
+
+576. Midlands Condo
+   ID: 3fb6fdae-a5b5-4997-a80c-63e80545faad
+   Address: 488-5 No. 488-5, Jalan Burmah, Pulau Tikus, Penang
+   State: Penang
+
+577. Mutiara View
+   ID: dc96fff2-d281-413f-8a24-57be1e04c647
+   Address: - Lorong Delima 13, Jelutong, Penang
+   State: Penang
+
+578. Menara Kuda Lari
+   ID: fe03742a-7a46-4f96-9baa-6e05a288f9a0
+   Address: - Jalan Lahat, Ayer Itam, Penang
+   State: Penang
+
+579. BL Avenue
+   ID: 49735895-e57b-4740-8734-454690dbc516
+   Address: - Solok Thean Teik, Ayer Itam, Penang
+   State: Penang
+
+580. Molek Pulai
+   ID: 0db6c6af-6ec2-4b6c-9f47-b893be38b8cf
+   Address: Jln Molek 2/36,Off Jln Persiaran Molek, Tmn Molek, Taman Molek, Johor Bahru, Johor
+   State: Johor
+
+581. Mutiara Heights
+   ID: af19210c-08de-4491-ba08-bb7b1c77a119
+   Address: Block 2A & 2B Lintang Hajjah Rehmah, Jelutong, Penang
+   State: Penang
+
+582. Seri Meranti @ Bandar Seri Botani
+   ID: ebd9ae42-a03e-44af-b6f3-040d02828df5
+   Address: Seri Meranti B/2, Bandar Seri Botani, Simpang Pulai, Perak
+   State: Perak
+
+583. Majestic Gen Sphere
+   ID: b7873b7c-7753-4f4e-84f8-6735640dac13
+   Address: Jalan Lepas, Tanjung Puteri, Johor Bahru, Johor
+   State: Johor
+
+584. Taman Sri Hijau
+   ID: b7987d2c-ed62-4abe-8c0e-a46d6419c3b4
+   Address: Taman Sri Hijau, Taman Sri Hijau, Rawang, Selangor
+   State: Selangor
+
+585. BL Garden
+   ID: fa134c37-2c26-45e8-ae84-133636c051f4
+   Address: - Solok Thean Teik, Ayer Itam, Penang
+   State: Penang
+
+586. Southbay Plaza
+   ID: 7d1237c7-8f58-40b7-86c1-80a9442da907
+   Address: Changkat Batu Maung, Batu Maung, Penang
+   State: Penang
+
+587. Acacia Park 4B
+   ID: 0f65cf92-f675-46fa-b97b-00a9b705ecae
+   Address: Jalan Puteri 5, Bandar Tasik Puteri, Rawang, Selangor
+   State: Selangor
+
+588. BL Garden
+   ID: 450dfa9d-62b2-4d00-98ec-9344ee44a8fb
+   Address: - Solok Thean Teik, Ayer Itam, Penang
+   State: Penang
+
+589. Kiara Residence (Residensi Kiara Jalil 1)
+   ID: 20c709d7-fa45-4b3b-8ef5-2585d87fdf8d
+   Address: Jalan 3/155 Jalan Perwira 1, Bukit Jalil, Kuala Lumpur
+   State: Kuala Lumpur
+
+590. 2 storey Terrace Corner at Pekaka
+   ID: 6fe5ca17-80a6-4731-9fdd-9bf2429aac2b
+   Address: Jalan Pekaka, Lintang Pekaka, Solok Pekaka, Taman Pekaka, Sungai Dua, Penang
+   State: Penang
+
+591. Bungalow at SS3
+   ID: 16e26d6e-9703-4165-8e05-1babda3d95e3
+   Address: ss3 ss 3 Taman Universiti Petaling Jaya, SS3, Petaling Jaya, Selangor
+   State: Selangor
+
+592. Taman Putra Prima 8B
+   ID: 259c5f3f-42a4-4752-bdd3-1dff742b8964
+   Address: Jalan PP 2, Taman Putra Prima, Puchong, Selangor
+   State: Selangor
+
+593. Aseana Puteri
+   ID: b366a3e8-bd15-43f8-9c52-59b2197cd04b
+   Address: Jalan Puteri 9/1 Jalan Puteri 9/1, Bandar Puteri Puchong, Puchong, Selangor
+   State: Selangor
+
+594. The Garden Residences
+   ID: 10ae91e8-7b6c-4757-9650-4234dcf50b33
+   Address: Jalan Mutiara Mas 1/15, Taman Mutiara Mas, Skudai, Johor
+   State: Johor
+
+595. Tanjung Beach Condominium
+   ID: e740e868-7fea-4b1f-8d3d-99b7c6020d47
+   Address: 535-A No. 535-A Jalan Tanjung Bungah, Tanjung Bungah, Penang
+   State: Penang
+
+596. Scientex Utama, Senai
+   ID: b12ac0de-7f50-4264-8e90-d1a034e383fc
+   Address: Jalan Scientex Utama 7, Taman Aman, Senai, Johor
+   State: Johor
+
+597. Pandan Residence
+   ID: f7f50139-6560-4b10-ae74-a3a44c9c20fa
+   Address: Jalan Pandan Ria 7 Jalan Pandan Ria 7, Tebrau, Johor
+   State: Johor
+
+598. Desa Acacia
+   ID: d0bc8a04-10e9-45ab-b725-4249dd960df2
+   Address: 107 No. 107, Medan York, George Town, Penang
+   State: Penang
+
+599. Sri Petaling
+   ID: ad3cbd5e-d5fc-4832-805b-6b05da9fba91
+   Address: Guarded Street, Sri Petaling, Kuala Lumpur
+   State: Kuala Lumpur
+
+600. Elit Heights @ Bayan City
+   ID: e9580e99-2f80-4780-9993-7cb302db8af1
+   Address: 3 Jalan Mayang Pasir 2, Bandar Bayan Baru, Bayan Lepas, Penang
+   State: Penang
+
+601. Taman Pulai Jaya
+   ID: 7b98da17-c75c-436c-91b9-a1dda053b1a5
+   Address: Persisir Pulai Jaya Utara 2, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+602. The Treez Jalil Residen
+   ID: 89708b59-a609-46d6-908a-7b81e15fa6c4
+   Address: Jalan 13/155c Jalan 13/155C, Bukit Jalil, Kuala Lumpur
+   State: Kuala Lumpur
+
+603. Eco Botanic Eco Botanic Eco Botanics
+   ID: 1265e1aa-518e-4736-8203-6fb4524935d2
+   Address: The Tate, Eco Botanic, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+604. Eco Botanic Eco Botanic Ecos Botanics
+   ID: 80c39384-3460-4adf-884e-69f9e2d07dc1
+   Address: Borough @ Type Chamborough, Eco Botanic, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+605. Eco Botanic Eco Botanic Ecos Botanics
+   ID: 30171b76-ad87-44c4-b370-5614591f961b
+   Address: Eco Botanic, Laeken, Eco Botanic, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+606. Eco Botanic Eco Botanic Ecos Botanics
+   ID: 94a52bdd-f8a9-4403-8893-b6f53b70af92
+   Address: Eco Botanic, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+607. Eco Botanic Eco Botanic Ecos Botanics
+   ID: 5dedc8b5-35d9-40ae-8a53-eb13413d5472
+   Address: Eco Botanic, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+608. Eco Botanic Eco Botanic Ecos Botanics
+   ID: b33f540e-a0ce-468e-a83c-d04b72c6b472
+   Address: Eco Botanic 1/x @ The Grassten, Eco Botanic, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+609. Residensi Ava @ Kiara Bay
+   ID: 514335d9-6f31-4281-8c1a-76d8b6cdae04
+   Address: Jalan Benteng Utama, Kepong, Kuala Lumpur
+   State: Kuala Lumpur
+
+610. K Residence @ KLCC
+   ID: 7dc08899-8d89-416b-b68e-13aeafd8c9ad
+   Address: K Residence Jalan Mayang Off Jalan Ampang, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+611. Orion Residence Bukit Bintang
+   ID: 37dde8ad-8507-45c7-8595-be327d10e9a8
+   Address: Jln Gading, Bukit Bintang, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+612. The Seed Taman Sutera Utama
+   ID: e63845f9-c62c-409c-b63d-811f032acd0a
+   Address: Jalan Sutera Dahlia, Taman Sutera Utama, Skudai, Johor
+   State: Johor
+
+613. Aetas Seputeh
+   ID: 35a88f5c-4306-4f56-8f37-b337f4f78747
+   Address: Persiaran Syed Putra 2, Taman Persiaran Desa, Seputeh, Kuala Lumpur
+   State: Kuala Lumpur
+
+614. Orion Residence Bukit Bintang
+   ID: c10393cd-d971-4b23-a52c-efb505c7c232
+   Address: Jln Gading, Bukit Bintang, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+615. The Seed Taman Sutera Utama
+   ID: 8d1ca4b4-b202-456f-8cc2-5ab93482731d
+   Address: Jalan Sutera Dahlia, Taman Sutera Utama, Skudai, Johor
+   State: Johor
+
+616. The LIGHT COLLECTION II
+   ID: cf7445dd-eedf-4a21-bc39-ee58fb79292e
+   Address: - Jalan Pantai Sinaran, Gelugor, Penang
+   State: Penang
+
+617. Nusa Idaman Precinct 8
+   ID: 51c37e7a-a7be-4fa5-859d-2daef623ab59
+   Address: Jalan Idaman 8, Taman Nusa Idaman, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+618. Corner Flat Bungalow Land @ Taman Duta
+   ID: 53013be4-871a-4341-b7b1-cad470185030
+   Address: Taman Duta, Bukit Tunku (Kenny Hills), Kuala Lumpur
+   State: Kuala Lumpur
+
+619. Orion Residence Bukit Bintang
+   ID: 436ecca2-bb25-426d-aa0d-f50fb597e3f8
+   Address: Jln Gading, Bukit Bintang, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+620. Eaton Residence
+   ID: 12eae9cb-46fa-4326-a93f-fe1d93a13b12
+   Address: 28 Jalan Kia Peng, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+621. Corner Bungalow Land in Prestigious Taman Duta, Kuala Lumpur
+   ID: 43b15c06-5cac-41f0-826c-6f385bfc402b
+   Address: Taman Duta, Bukit Tunku (Kenny Hills), Kuala Lumpur
+   State: Kuala Lumpur
+
+622. Bukit Tunku Corner Bungalow Land
+   ID: 43639359-d554-413c-b6c4-a8d5b08154cd
+   Address: Taman Tunku, Bukit Tunku (Kenny Hills), Kuala Lumpur
+   State: Kuala Lumpur
+
+623. SO Sofitel Kuala Lumpur Residences
+   ID: c006edd5-f6e9-4dce-99c3-1b12f9a05779
+   Address: No 159, Jalan Ampang, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+624. Four Seasons Place
+   ID: 320f0f6a-d293-405b-8bc8-3d0c27eb30c6
+   Address: 0 Jalan Ampang, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+625. Setia SKY Residences
+   ID: c3103414-ca1a-4505-836e-05cfa5749426
+   Address: Jalan Raja Muda Abdul Aziz, Off Jalan Tun Razak, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+626. Pavilion Square
+   ID: 5b7a3d8e-e80c-469b-bcde-817b08f13ca0
+   Address: Jalan Raja Chulan, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+627. Da Men
+   ID: f27aad32-83a3-4108-9ee1-fd5a8ed545dc
+   Address: - Persiaran Kewajipan, Usj 1, Subang Jaya, Selangor
+   State: Selangor
+
+628. The Mark @ Cheras
+   ID: de822ff4-0b53-4773-a95b-4758b86ac0ea
+   Address: Jalan Cemara 1 Jalan Cheras Hartamas, Ampang, Selangor
+   State: Selangor
+
+629. Rumah Pangsa Permas Jaya
+   ID: d6745ffc-aad8-4826-9800-7adf761b1354
+   Address: Jalan Permas 7, Masai, Johor
+   State: Johor
+
+630. Jenderam Hilir
+   ID: ebcead2b-9b18-449d-8c9d-65fbdfacb383
+   Address: Taman Jenderam, Desa Dengkil, Dengkil, Selangor
+   State: Selangor
+
+631. Pangsapuri Sri Astana
+   ID: 07aabfb3-efdc-422f-96f1-18dc2d2a922d
+   Address: Jalan 7 Jalan 20, Selayang, Selangor
+   State: Selangor
+
+632. The Conlay
+   ID: a0a47d4e-7885-41f3-aefe-3b0a1dc8834e
+   Address: 29 Jalan Conlay, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+633. HOT SALE / Jalan AMPANG 6mins to KLCC Residential Land
+   ID: 14915a3c-e215-42ed-8b0e-ae1e25a91b0a
+   Address: Jalan Ampang / Ampang Hilir / TREC, Ampang Hilir, Ampang, Kuala Lumpur
+   State: Kuala Lumpur
+
+634. Agile Bukit Bintang
+   ID: ff5dfc30-eaea-42b1-8a5b-89bd239afec7
+   Address: Jalan Bukit Bintang, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+635. Skyline KL
+   ID: ad344f8b-e127-40df-99d6-b165948ceaab
+   Address: Jalan San Peng, Pudu, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+636. Agile Bukit Bintang
+   ID: fa3640f0-9d8b-46d0-8e91-1f02ea02d1af
+   Address: Jalan Bukit Bintang, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+637. Agile Bukit Bintang
+   ID: 91e5c336-9796-4bf4-9ba7-817e0fca1315
+   Address: Jalan Bukit Bintang, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+638. Agile Bukit Bintang
+   ID: 58c6582c-909c-4978-9cdc-f4674390a2d8
+   Address: Jalan Bukit Bintang, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+639. Rajawali Apartment
+   ID: 7dcd0ba5-bdfe-4ef5-956e-8f2f5f64f90a
+   Address: Jalan Desa 5/4 Jalan Desa 5/4 Off Jalan Desa Jaya, Bandar Country Homes, Rawang, Selangor
+   State: Selangor
+
+640. Bukit Gita Bayu
+   ID: f50524d7-21db-446c-b7d1-b6e9d67e5e75
+   Address: Serdang, Bukit Gita Bayu, Seri Kembangan, Selangor
+   State: Selangor
+
+641. Agile Bukit Bintang
+   ID: ca423d81-2374-4258-b95e-92e504043ac5
+   Address: Jalan Bukit Bintang, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+642. Agile Bukit Bintang
+   ID: 00d836ac-144e-4cbd-9aec-ee637b59b001
+   Address: Jalan Bukit Bintang, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+643. Agile Bukit Bintang
+   ID: 76a74d7a-a136-4c09-adef-2de4204ec92e
+   Address: Jalan Bukit Bintang, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+644. Taman Pendamar Indah 1
+   ID: 62f3fd43-014a-4972-a433-799c278c6217
+   Address: Off Jalan Banting Pandamaran, Port Klang (Pelabuhan Klang), Selangor
+   State: Selangor
+
+645. Bellisa Court
+   ID: 2367a808-fc9c-4d54-a919-f381ede834db
+   Address: 1 No. 1, Lorong Leandros, Pulau Tikus, Penang
+   State: Penang
+
+646. The Vyne
+   ID: 5a192d08-5c7b-41f1-b685-a434492667d3
+   Address: Jaln 2/108d Jalan 6/108D, Sungai Besi, Kuala Lumpur
+   State: Kuala Lumpur
+
+647. Agile Bukit Bintang
+   ID: d18ca044-8434-438b-b216-1d5b3ad0034b
+   Address: Jalan Bukit Bintang, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+648. Taman Wangsa Permai
+   ID: 78e325f5-522f-4b58-8cdd-7e53f807423d
+   Address: Jalan Wangsa, Taman Wangsa Permai, Kepong, Selangor
+   State: Selangor
+
+649. Agile Bukit Bintang
+   ID: 3fd6f001-2fcf-47b5-8cca-c2f35ccd9a18
+   Address: Jalan Bukit Bintang, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+650. Agile Bukit Bintang
+   ID: e266f97c-5d1f-4294-86be-f105ee1a0f6a
+   Address: Jalan Bukit Bintang, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+651. Agile Bukit Bintang
+   ID: 0f5c65d8-d13c-48da-b503-da962c197eea
+   Address: Jalan Bukit Bintang, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+652. Horizon Hills
+   ID: df1781ce-f034-4b3a-b612-d087d885a160
+   Address: Horizon Hills, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+653. 2-storey Brand New Bungalow House Gelang Patah
+   ID: a0be802b-f937-48a1-8ba5-ed60934c1d5c
+   Address: Setia Eco Gardens, Gelang Patah, Johor
+   State: Johor
+
+654. Core Residence @ TRX
+   ID: 7dc3a687-fb43-4eb1-9565-80657d822861
+   Address: Jalan Tun Razak, The Tun Razak Exchange (TRX), KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+655. Camellia Serviced Suites
+   ID: 4ff891f1-0945-4a8c-87d4-08f6afcf8e60
+   Address: - Jalan 112H, Off Jalan Kerinchi, Kampung Kerinchi (Bangsar South), Kuala Lumpur
+   State: Kuala Lumpur
+
+656. South View
+   ID: 1490b96e-a358-441f-9b36-b5133868a857
+   Address: 2 Lorong Kerinchi Kiri, Kampung Kerinchi (Bangsar South), Kuala Lumpur
+   State: Kuala Lumpur
+
+657. Casa Almyra
+   ID: 3ce1e09a-68d5-470d-94e9-c9c9e64b2ad8
+   Address: Jalan Seri Amira 7, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+658. City Gardens
+   ID: e6870705-e97a-4c1f-bc3a-778c13a44ad0
+   Address: Persiaran Raja Chulan, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+659. The Hills @ Horizon Hills
+   ID: 1545ee51-0c57-4d02-b5f8-6b5dbe0fc50d
+   Address: The Hills, Horizon Hills, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+660. Taman Molek Taman Molek Tamans Moleks
+   ID: c740bef3-6599-400f-8ca9-161faf100fe2
+   Address: Jalan Harmoni, Taman Molek, Johor Bahru, Johor
+   State: Johor
+
+661. The Leafz @ Dedaun
+   ID: baec8d41-468c-4591-8502-b42a26a60334
+   Address: Sungai Besi Highway Jalan Hang Tuah 2, Salak Selatan, Kuala Lumpur
+   State: Kuala Lumpur
+
+662. Laguna Biru
+   ID: 164c0f51-4c79-4bef-9d1b-a92af58e7f59
+   Address: Jalan Tasik Biru 1 Off Jalan Setia, Taman Tasik Biru, Rawang, Selangor
+   State: Selangor
+
+663. Rimbayu Perennia
+   ID: a53150b3-520c-4c25-82de-97ce064697c4
+   Address: Jalan Flora 3B/5, Bandar Rimbayu, Kota Kemuning, Shah Alam, Selangor
+   State: Selangor
+
+664. Taman Shahab
+   ID: 792ed6d1-1d9a-4098-ab19-5dd4358dcf61
+   Address: Alor Setar Kedah Jalan Bayan 7/1, Alor Setar, Kedah
+   State: Kedah
+
+665. Palma Laguna
+   ID: 0ca1897b-272a-4d5b-9bcc-dd7e6850b37a
+   Address: 5460 Jalan Laguna 3, Kampung Jawa, Perai, Penang
+   State: Penang
+
+666. Palma Laguna
+   ID: 06400bf5-d322-4c40-a85b-5224cbab4ac2
+   Address: 5460 Jalan Laguna 3, Kampung Jawa, Perai, Penang
+   State: Penang
+
+667. The Legacy OUG
+   ID: dd00200c-0719-45a0-8bb3-19bd4635892a
+   Address: Jalan Awan Besar, Jalan Klang Lama (Old Klang Road), Kuala Lumpur
+   State: Kuala Lumpur
+
+668. Double Storey Low Cost Corner Lot @ 99 Jalan Mutiara Emas 2/33, Taman Mount Austin, Johor Bahru.
+   ID: d5fe5050-efba-466d-a8d9-fa667077ac63
+   Address: 99 Jalan Mutiara Emas 2/33, Taman Mount Austin, Johor Bahru., Taman Mount Austin, Tebrau, Johor
+   State: Johor
+
+669. The Legacy OUG
+   ID: bb705d14-5bbe-4e4a-9a2a-742d79a4bf88
+   Address: Jalan Awan Besar, Jalan Klang Lama (Old Klang Road), Kuala Lumpur
+   State: Kuala Lumpur
+
+670. Pandan Puteri
+   ID: 368a7d48-643a-452d-a2b9-bf11e89dc507
+   Address: - Jalan Pandah Indah 6/1, Pandan Indah, Ampang, Selangor
+   State: Selangor
+
+671. The M @ Medini Macrolink
+   ID: b42c760d-d048-4930-bd69-5cc6dcf56f56
+   Address: Persiaran Medini Sentral 1, Medini, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+672. Twin Residences
+   ID: 749238d8-308e-4982-ae52-f0c17d628bb2
+   Address: Jalan Pipit Jalan Pipit, BANDAR PUCHONG JAYA, Puchong, Selangor
+   State: Selangor
+
+673. [Foreigner can buy] One Residence 1250sqft 3room, near TRX KLCC
+   ID: d966c3f1-4ef1-432e-b795-15cf43a6e4bc
+   Address: Chan Sow Lin, KL City Centre, Bukit Bintang, TRX, Pudu, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+674. Trion 2 @ KL
+   ID: 15fa034d-88c0-4033-89fc-8285c38315e0
+   Address: Jalan Satu, Chan Sow Lin, Cheras, Kuala Lumpur
+   State: Kuala Lumpur
+
+675. Maxwell Towers
+   ID: be3b8799-b234-4742-91e7-6015557199fd
+   Address: 10 Jalan 5/58C, Gasing Indah, Petaling Jaya, Selangor
+   State: Selangor
+
+676. ALIX Residences
+   ID: 4cc93332-3647-4377-8740-9eb46d3ec60a
+   Address: Jalan Dutamas Raya, Dutamas, Kuala Lumpur
+   State: Kuala Lumpur
+
+677. Sri Kristal
+   ID: decf37e0-2ad3-445d-8280-100e96f25a51
+   Address: - Lengkok Angsana, Bandar Baru Air Itam, Ayer Itam, Penang
+   State: Penang
+
+678. Eco Botanic
+   ID: 40864e82-b46b-4696-b2d2-2d5be11933e4
+   Address: No 25, 27, 29 Jalan Eko Botani 3/5, Taman Eko Botani, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+679. Nusa Idaman Precint 8
+   ID: 44a90ddc-f366-47ef-874c-7f0ae16f92d1
+   Address: Bukit Indah, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+680. Riana Green Condominium
+   ID: 81f5cc05-d0fc-4950-98fb-057f0e0f1a7b
+   Address: - Jalan Tropicana Utara, Tropicana, Selangor
+   State: Selangor
+
+681. Altitude 236
+   ID: 9d96aff3-9f41-4914-aa8e-4fccd53bfb07
+   Address: Persiaran Alam Damai Persiaran Alam Damai Off Bukit Manda'rina, Alam Damai, Cheras, Kuala Lumpur
+   State: Kuala Lumpur
+
+682. Jalan Bayan, Taman Scientex, Pasir Gudang
+   ID: fc06263a-2014-4168-a5c4-777d20f60b3f
+   Address: No 3 jalan Bayan 1x Taman Scientex 81700 Pasir Gudang, Taman Scientex, Pasir Gudang, Johor
+   State: Johor
+
+683. Wave @ Marina Cove
+   ID: 7e99e9d0-fbf1-42d4-be2c-817f39152cf2
+   Address: Marina Cove, Taman Bayu Puteri, Johor Bahru, Johor
+   State: Johor
+
+684. Bay Laurel @ Country Garden Danga Bay
+   ID: 4a88ad67-7dc0-4b1d-9c7c-45416270a431
+   Address: Jalan Skudai Jalan Skudai Off Country Garden Danga Bay, Johor Bahru, Johor
+   State: Johor
+
+685. Riana Green Condominium
+   ID: c3983fc8-ff82-4ed1-b105-8e5185abd890
+   Address: - Jalan Tropicana Utara, Tropicana, Selangor
+   State: Selangor
+
+686. Venice Hill
+   ID: da0666c2-140d-449e-bba8-e3dc3bf24d42
+   Address: - Persiaran Puteri 1, Taman Puteri, Batu 9, Cheras, Selangor
+   State: Selangor
+
+687. Taman Tun Dr Ismail
+   ID: e6d6f035-fef5-40ec-861f-7d993aa60a13
+   Address: Athinahappan, Taman Tun Dr Ismail, Kuala Lumpur
+   State: Kuala Lumpur
+
+688. Berlian Setapak Residency
+   ID: c88526c0-9a57-4393-8e2b-87fa2c2b501e
+   Address: Jalan Semarak Api 4, Taman Tai Onn, Setapak, Kuala Lumpur
+   State: Kuala Lumpur
+
+689. SKS Pavillion Residences
+   ID: 50c8d9bc-5579-4e88-8194-dccd058f1173
+   Address: Jalan Storey Jalan Storey, Kim Teng Park, Johor Bahru, Johor
+   State: Johor
+
+690. Riana Green Condominium
+   ID: 099ae564-68d0-4add-94a2-dca546b4451d
+   Address: - Jalan Tropicana Utara, Tropicana, Selangor
+   State: Selangor
+
+691. Eco Botanic Ecos Botanics
+   ID: f91892c3-1714-4efd-bd99-b0052f1b04f8
+   Address: Eco Botanic, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+692. Nadi Bangsar
+   ID: 1e75321e-ecfa-47cf-8e41-dca789bdf58c
+   Address: Jalan Tandok Jalan Tandok Off Jalan Maarof, Bangsar, Kuala Lumpur
+   State: Kuala Lumpur
+
+693. Taman Desa Kempas
+   ID: 66e9a5b6-1841-404a-a6c4-3595838f6603
+   Address: Taman Desa Kempas, Tampoi, Johor
+   State: Johor
+
+694. Royal Strand @ Country Garden Danga Bay
+   ID: 32eabc4e-e456-4c5a-88d5-b8082ac4cd4b
+   Address: Jalan Skudai Off Country Garden Danga Bay, Danga Bay, Johor Bahru, Johor
+   State: Johor
+
+695. Riana Green Condominium
+   ID: 14d2dfe6-6786-43ff-8318-c78db2b16271
+   Address: - Jalan Tropicana Utara, Tropicana, Selangor
+   State: Selangor
+
+696. Laelia 1
+   ID: db0e0877-6fc0-4ecf-a996-31d1609fc6df
+   Address: No 4, Jalan Bayu Impian 10/KS9, Kota Bayuemas, Klang, Selangor
+   State: Selangor
+
+697. Riana Green Condominium
+   ID: 3786b43a-860d-4cb4-96d2-e631eba1ee4c
+   Address: - Jalan Tropicana Utara, Tropicana, Selangor
+   State: Selangor
+
+698. Taman Maju Jaya
+   ID: 40ad4939-9fdf-4b92-ae5c-17460fd18d42
+   Address: Taman Maju Jaya, Ampang, Kuala Lumpur
+   State: Kuala Lumpur
+
+699. The Astaka @ 1 Bukit Senyum
+   ID: 6eff51e0-44f3-4578-9e66-ee4920fddc82
+   Address: 1 1 Bukit Senyum, Jalan Terbau, Johor Bahru, Johor
+   State: Johor
+
+700. Sang Suria
+   ID: 07f0bb82-25f5-4b40-b962-d45eb16a283d
+   Address: - Persiaran Park View, Sentul, Kuala Lumpur
+   State: Kuala Lumpur
+
+701. Quayside @ Clear Water Bay
+   ID: 57e917eb-8027-4713-a431-789f016bc9ee
+   Address: Quayside Tingkat Laksamana 8, Taman Bayu Aman, Butterworth, Penang
+   State: Penang
+
+702. 99 Residence
+   ID: b1aab28c-87aa-44af-a6e6-c4c2ad73dfb5
+   Address: Jalan Seri Utara 1, Taman Wahyu, Batu Caves, Kuala Lumpur
+   State: Kuala Lumpur
+
+703. Banyan Tree Signatures
+   ID: c421d606-e906-4416-8133-79fa398acef8
+   Address: Jalan Conlay, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+704. Desiran Bayu
+   ID: c3b6420a-b46b-4fc9-99bb-104537eb2bcc
+   Address: Desiran Bayu Site, Puchong. PT55104, Mukim Of Dengkil, Sepang, Selangor
+   State: Selangor
+
+705. EkoCheras
+   ID: 2eb06211-60b7-421b-9e99-10ae74fe29b3
+   Address: Jalan Cheras, Taman Mutiara Barat, Cheras, Kuala Lumpur
+   State: Kuala Lumpur
+
+706. Andaman @ Quayside
+   ID: 8830497a-a971-4227-ac9d-25ba782587be
+   Address: Off Jalan Seri Tanjung Pinang, Seri Tanjung Pinang, Tanjung Tokong, Penang
+   State: Penang
+
+707. Serini Melawati
+   ID: 1df7d40c-5a69-4c43-b2de-ad0bacbeb0cc
+   Address: Jalan Melawati 1 Off Jalan Taman Melawati, Ulu Kelang, Selangor
+   State: Selangor
+
+708. Monet Springtime @ Monet Residences Sunsuria City
+   ID: d1202831-989a-420e-81a4-fb58a1826391
+   Address: Persiaran Sunsuria, Dengkil, Selangor
+   State: Selangor
+
+709. Royal Domain Sri Putramas 2
+   ID: 5aba20a0-5c9b-4e02-ba44-fbe6e7f7c91e
+   Address: Jalan Putramas 1 off Jalan Kuching, Jalan Kuching, Kuala Lumpur
+   State: Kuala Lumpur
+
+710. Taman Kempas Utama
+   ID: bd5e1ffb-b20e-48db-8c5c-aa359c1530ae
+   Address: Jalan Kempas Utama 1/10, Setia Tropika, Johor Bahru, Johor
+   State: Johor
+
+711. Pulai View
+   ID: 8071e264-979b-4cd3-ab5b-0813e9a24b9f
+   Address: - Jalan Skudai, Taman Kobena, Tampoi, Johor
+   State: Johor
+
+712. The Reach @ Titiwangsa
+   ID: bf63b0fb-99b8-4f4c-84b1-5b5a8e3c9a3e
+   Address: Jalan Tembaga Off Jalan Pahang, Setapak, Kuala Lumpur
+   State: Kuala Lumpur
+
+713. The Reach @ Titiwangsa
+   ID: faa99441-7288-4fd0-98a3-00cac97f2204
+   Address: Jalan Tembaga Off Jalan Pahang, Setapak, Kuala Lumpur
+   State: Kuala Lumpur
+
+714. Southkey Mosaic
+   ID: 4c3d9c2e-0d52-4955-83fd-a8022dade2cd
+   Address: Jalan Bakar Batu, Kem Majidee, Johor Bahru, Johor
+   State: Johor
+
+715. Green Haven
+   ID: 644db068-3184-4078-93e6-7e44b73dde33
+   Address: Jalan Kota Jalan Mersawa 16, Masai, Johor
+   State: Johor
+
+716. Green Haven
+   ID: a5d05fb1-f452-4f29-8938-3fdcbcf049be
+   Address: Jalan Kota Jalan Mersawa 16, Masai, Johor
+   State: Johor
+
+717. Solaris Dutamas
+   ID: c70031f8-99d8-4f80-bfae-758983bb6dd6
+   Address: - No 1, Jalan Dutamas 1, Dutamas, Kuala Lumpur
+   State: Kuala Lumpur
+
+718. Sky Gardens Residences
+   ID: 95eea810-09da-44f5-b298-77180352e8fa
+   Address: - Jalan Setia Tropika 1/21, Tampoi, Johor
+   State: Johor
+
+719. The Tamarind
+   ID: 4a59fc0c-b62a-44aa-a6f3-094378bde9bc
+   Address: Jalan Seri Tg Pinang, Tanjung Tokong, Penang
+   State: Penang
+
+720. PARC Regency (Residensi Masai)
+   ID: 2cd495ce-9a7f-4294-9ff6-5919087d07b4
+   Address: Jalan Masai Jaya, Jalan Masai Jaya 2, Taman Molek, Johor Bahru, Johor
+   State: Johor
+
+721. Sutera Bukit Tunku
+   ID: b79ccb76-ec36-4b1d-94bb-6cab8bff7071
+   Address: 20 Jalan Tun Ismail, Bukit Tunku (Kenny Hills), Kuala Lumpur
+   State: Kuala Lumpur
+
+722. Eco Botanic
+   ID: 26de9771-ae8f-440e-9037-eeebf5c397ae
+   Address: Eco Botanic, Eco Botanic, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+723. Aera Residence
+   ID: ec46af61-ff3f-491f-8a44-cc9faa12c6cd
+   Address: Jalan PJS 5/28 Kampung Ghandi, Taman Medan, Petaling Jaya, Selangor
+   State: Selangor
+
+724. Denai Bayu
+   ID: 5d5e4530-af29-426b-accf-0ccf4f648339
+   Address: Denai Bayu 26, Tanjung Tokong, Penang
+   State: Penang
+
+725. Damansara Fifty6
+   ID: 8282bb86-3167-45da-8549-aaa182ee16c3
+   Address: Jalan Bukit Ledang, Damansara Heights, Kuala Lumpur
+   State: Kuala Lumpur
+
+726. Taman Gembira
+   ID: 1c444149-5f0b-49ba-bc54-3be8092d4ef8
+   Address: Off Persiaran Raja Muda Musa, Taman Gembira, Klang, Selangor
+   State: Selangor
+
+727. Damansara Fifty6
+   ID: d69be925-350c-485a-a622-399d76fe2b95
+   Address: Jalan Bukit Ledang, Damansara Heights, Kuala Lumpur
+   State: Kuala Lumpur
+
+728. Meldrum Heights (Residensi Meldrum)
+   ID: 49aa16bc-598c-4cbe-9a0c-1879644fdecb
+   Address: Jalan Bukit Meldrum, Tanjung Puteri, Johor Bahru, Johor Bahru, Johor
+   State: Johor
+
+729. Teluk Bahang
+   ID: dd84de4c-c4ac-438c-b680-a06767449221
+   Address: Lorong Hassan Abas 3, Teluk Bahang, Penang
+   State: Penang
+
+730. Bandar Bukit Raja
+   ID: 1bc79430-5c0c-4daa-946e-0ea7eacefc75
+   Address: Casira @ Bandar Bukit Raja, Corner 47x75, Alura Ayra Kyra, Azira, Persada, Athira, Lyra, Nadira, Lumira, Fuego, Paloma, Cogan, Nafiri, Setia Alam, Setia Indah 9 10 11 12 13, Setia Permai 1 2 3, Bywater, Setia Utama 1 2 3 4, Setia Impian 2 3 4 5 6 7 8, Bandar Bukit Raja, Klang, Selangor
+   State: Selangor
+
+731. Jenderam Hilir Dengkil
+   ID: 92323ac0-94fc-4b9c-a5ab-3c9624c887d4
+   Address: Jenderam Hilir, Kampung Jenderam Hilir, Dengkil, Selangor
+   State: Selangor
+
+732. Lorong Air Terjun Georgetown Semi Detached
+   ID: a75b09c7-5913-4d60-80bc-8ee47afd056b
+   Address: Lorong Air Terjun, Jalan Kebun Bunga, George Town, Penang
+   State: Penang
+
+733. Plaza Serdang Raya
+   ID: e7b072f0-ffab-4991-b4cc-7bce03450d93
+   Address: - Jalan Serdang Raya Section 7, Taman Serdang Raya, Seri Kembangan, Selangor
+   State: Selangor
+
+734. myHabitat
+   ID: f768f41d-5f75-43af-adc5-5822249ccd5e
+   Address: 3 Jalan Aman, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+735. Taman Pulai Indah
+   ID: 3b2ec583-a6cc-481a-9293-747a4c0d0700
+   Address: Pulai Indah, Skudai, Johor
+   State: Johor
+
+736. Greenlane Lebuhraya Mas Taman Guan Joo Seng
+   ID: dc5ca39d-f014-4f0c-a1bb-15c077adb384
+   Address: Lebuhraya Mas, Taman Guan Joo Seng, Jelutong, Penang
+   State: Penang
+
+737. Taman Greenview 1 Greenlane Semi Detached
+   ID: 35bcf6eb-4c89-422e-9b0e-14adbc221609
+   Address: Taman Greenview 1, Taman Green Lane, Jelutong, Penang
+   State: Penang
+
+738. Agile Bukit Bintang
+   ID: 7a6e3afc-16fc-41ee-a72e-ca7370985140
+   Address: Jalan Bukit Bintang, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+739. Taman Taming Jaya
+   ID: 044a446b-6654-4ca7-b11a-5b0715fbc42c
+   Address: Jalan Taming Kiri 4, Seri Kembangan, Selangor
+   State: Selangor
+
+740. Apartment Serindit
+   ID: 57aad6df-8fbe-401b-bdba-75337d424b6c
+   Address: - Persiaran Impian, Taman Impian Ehsan, Seri Kembangan, Selangor
+   State: Selangor
+
+741. Royal Lexis
+   ID: 339f5e80-12e5-404b-9d81-f15692e76d6f
+   Address: Jalan Sultan Ismail, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+742. SKS Pavillion Residences
+   ID: 0b7b06fb-483f-417b-80ab-cf1768ce82bf
+   Address: Jalan Storey Jalan Storey, Kim Teng Park, Johor Bahru, Johor
+   State: Johor
+
+743. Valeria Garden Homes
+   ID: b7ff726e-d6d5-40b6-858d-a3e6198f06aa
+   Address: Bandar Gamuda Gardens, Rawang, Selangor
+   State: Selangor
+
+744. Idaman Hills
+   ID: 4e302aff-1eee-4ff0-bf96-c10d90455463
+   Address: Jalan bukit idaman, Batu Caves, Selangor
+   State: Selangor
+
+745. Gelang Patah Setia Eco Village Double Storey
+   ID: 4adc5a6d-bbba-4f96-b31a-0d412c4201b9
+   Address: Setia Eco Village, Gelang Patah, Johor
+   State: Johor
+
+746. Taman Bukit Indah
+   ID: 1d88fee3-01a8-498e-9ffd-d8f3e6666403
+   Address: Jln Bukit Indah 5, Tmn Bukit Indah, Ampang Jaya, Ampang, Selangor
+   State: Selangor
+
+747. Laguna Biru
+   ID: fe8e1f57-f8c0-4b52-9930-3157dc38dd2c
+   Address: Jalan Tasik Biru 1 Off Jalan Setia, Taman Tasik Biru, Rawang, Selangor
+   State: Selangor
+
+748. Iskandar Puteri Taman Nusa Indah Duoble Storey End Lot
+   ID: c2c7bf69-67cd-4550-91d4-807d8642e1af
+   Address: Taman Nusa Indah, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+749. Taman Sin Sawit Kelapa Sawit
+   ID: 6a136c21-a2ac-4321-b090-2bf747ef6558
+   Address: Kulai Jaya, Taman Sin Sawit Kelapa Sawit, Sedenak, Johor
+   State: Johor
+
+750. Beverly 2
+   ID: f81bcf6f-638a-4a99-a1ce-42eefad36741
+   Address: - Plaza Medan Putra, Jalan Putra Medan 6, Kepong, Kuala Lumpur
+   State: Kuala Lumpur
+
+751. Seri Sungai Long
+   ID: b316acfd-403a-45fa-8fa3-baff15f6ce36
+   Address: 11 Jalan Pahlawan 38/3 Taman Seri Sungai Long, Bandar Mahkota Cheras, Cheras, Selangor
+   State: Selangor
+
+752. Seri Jati
+   ID: 8d6008a8-2a8a-4bce-811d-47a8052aaea7
+   Address: Precinct 15 Jalan Setia Gemilang U13/45B, Setia Alam, Selangor
+   State: Selangor
+
+753. The Sky Executive Suites
+   ID: 43d747b9-86b6-4cba-bf1f-059ce75d7028
+   Address: Jalan Indah 15, Jalan Indah 15, Bukit Indah, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+754. One Eleven Menerung
+   ID: 924abbf9-4805-491d-b900-09c9588fe2f7
+   Address: Jalan Menerung, Bukit Bandaraya, Bangsar, Kuala Lumpur
+   State: Kuala Lumpur
+
+755. Orchard Ville
+   ID: cf3df579-9736-4e74-b78e-4053298194fd
+   Address: Lengkuk Kelicap Lengkok Kelicap, Mutiara Perdana, Bayan Lepas, Penang
+   State: Penang
+
+756. KSL D'Esplanade Residence
+   ID: 04ea4ed6-fdc9-403b-9ab6-60f640a3c44b
+   Address: Jalan Seladang, Taman Century, Johor Bahru, Johor
+   State: Johor
+
+757. 2-storey Terrace House at Tiara East
+   ID: ff65a743-b530-4933-987a-2e3deb579a8c
+   Address: Jalan TE 1, Tiara East, Semenyih, Selangor
+   State: Selangor
+
+758. The Ritz-Carlton Residences
+   ID: 1d898d49-312f-463a-b5ff-eebe44b0b354
+   Address: Jalan Sultan Ismail, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+759. ALIX Residences
+   ID: 4ca05146-86da-4367-b1fc-fb1b9437926f
+   Address: Jalan Dutamas Raya, Dutamas, Kuala Lumpur
+   State: Kuala Lumpur
+
+760. Platinum Lake PV 20
+   ID: ddfb8ef5-38a7-4654-b34a-89a7f21e55f5
+   Address: No. 5 Jalan Usahawan Jalan Usahawan 2 off Jalan Genting Kelang, Setapak, Kuala Lumpur
+   State: Kuala Lumpur
+
+761. Bandar Bukit Raja
+   ID: 3f77da47-2046-4eb6-8f3a-93a47b11f935
+   Address: Persada @ Bandar Bukit Raja, Corner 45x70, Alura Ayra Kyra, Azira, Casira, Athira, Lyra, Nadira, Lumira, Fuego, Paloma, Cogan, Nafiri, Setia Alam, Setia Indah 9 10 11 12 13, Setia Permai 1 2 3, Bywater, Setia Utama 1 2 3 4, Setia Impian 2 3 4 5 6 7 8, Bandar Bukit Raja, Klang, Selangor
+   State: Selangor
+
+762. [ Corner Lot ] Agalia , Gamuda Gardens , Rawang
+   ID: 6a486daf-ed9e-4f8a-b649-59957574e5ff
+   Address: jalan dc 1/3, Bandar Gamuda Gardens, Rawang, Selangor
+   State: Selangor
+
+763. Mount Austin Mounts Austins
+   ID: 43f2fb20-2b87-4482-b50f-2a1070969c83
+   Address: Austin Crest, Taman Mount Austin, Austin Crest, Johor Bahru, Johor
+   State: Johor
+
+764. Pavilion Square
+   ID: ce8daecb-bf3e-4a45-ac0e-88c4ca082fb3
+   Address: Jalan Raja Chulan, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+765. Hemingway Residences
+   ID: 9dff98df-92da-4f52-aaad-2d3ba5af9885
+   Address: North Haven Coalfields, Sungai Buloh, Selangor
+   State: Selangor
+
+766. bukit tunku
+   ID: d5d94682-8cd8-4418-8a44-d01923d9eeb4
+   Address: Taman Duta, Bukit Tunku (Kenny Hills), Kuala Lumpur
+   State: Kuala Lumpur
+
+767. Tree Sparina
+   ID: 4b76eccf-7a3e-4370-b00e-077d15cf151d
+   Address: Ideal Vision Park Jalan Sungai Tiram 11, Taman Tunas Damai, Bayan Lepas, Penang
+   State: Penang
+
+768. Baron Residence @ Lake City
+   ID: 1b03ed16-5324-49df-9ddc-3fbfe872cb6a
+   Address: Jalan Sibu, Kepong, Kuala Lumpur
+   State: Kuala Lumpur
+
+769. Damansara Heights Bungalow , Bukit Damansara
+   ID: 6bb0bcfc-6a69-4189-9530-2862efb5ea32
+   Address: jalan setia murni 12, Bukit Damansara, Damansara Heights, Kuala Lumpur
+   State: Kuala Lumpur
+
+770. Taman Sri Putri
+   ID: 37ccf452-fbf4-496f-9baf-fd510502f0e0
+   Address: Taman Sri Putri, Skudai, Johor
+   State: Johor
+
+771. Eco Botanic
+   ID: 25dedc25-4956-4fad-be42-e28a6786b40f
+   Address: Eco Botanic, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+772. Kampung Pasir Putih Baru
+   ID: 2913baf0-b0fa-4c50-b210-da4d7d2ee13c
+   Address: Jalan Sheikh Abdul Rahman, Kampung Pasir Putih Baru, Ipoh, Perak
+   State: Perak
+
+773. Dua Menjalara
+   ID: 5bb51c29-02d1-4f49-b312-b199d1039bce
+   Address: Jalan 2/62b Jalan 1/62B, Bandar Menjalara, Kuala Lumpur
+   State: Kuala Lumpur
+
+774. Changkat Kiara
+   ID: 91496293-0689-4f6c-b8e0-e17d4d07f2c4
+   Address: Jalan Dutamas Cempaka 1, Sri Hartamas, Kuala Lumpur
+   State: Kuala Lumpur
+
+775. Riana Green Condominium
+   ID: 330a3476-895b-4da2-9785-7b5e87688c29
+   Address: - Jalan Tropicana Utara, Tropicana, Selangor
+   State: Selangor
+
+776. CYBERJAYA!!! CYBERJAYA !!!CORNER LOT
+   ID: c3e51635-5759-4076-952e-bbc2427d8424
+   Address: Double Storey/Corner Lot/Dengkil/Sendayan/Klang/S2, Cyberjaya, Selangor
+   State: Selangor
+
+777. Havona
+   ID: 312e5c71-4430-4b08-8a14-31c798487d97
+   Address: Jalan Mutiara Emas 2 Jalan Mutiara Emas Utama, Taman Mount Austin, Tebrau, Johor
+   State: Johor
+
+778. Idaman Residence
+   ID: 33e4feb9-827d-416c-b806-1551b1f9f5c5
+   Address: Jalan Idaman 8 Jalan Idaman 5/9, Bukit Indah, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+779. Alfa Bangsar
+   ID: 454ec8bb-b50f-4ac0-a71d-d07ea81d92a8
+   Address: Jalan Tandok Off Jalan Maarof, Bangsar, Kuala Lumpur
+   State: Kuala Lumpur
+
+780. Casa Sutra
+   ID: d3ce9bf6-ad1e-4349-bbef-4df506ab81fb
+   Address: Jalan Setia Perdana U13/29, Setia Alam, Selangor
+   State: Selangor
+
+781. The Latitude Condominium
+   ID: 7aa35425-4ab2-4315-bd6d-ad6409429643
+   Address: Persiaran Halia 3, Mount Erskine, Tanjung Tokong, Penang
+   State: Penang
+
+782. Menara Greenview
+   ID: d37f0016-c51d-416e-b068-1886cb6a4b0f
+   Address: 18 No. 18, Halaman Tembaga, 11600 Greenlane, Penang, Jelutong, Penang
+   State: Penang
+
+783. Tropicana Cheras
+   ID: e74d8ba1-ba9f-42f4-9bf5-7dc674e6f975
+   Address: Tropicana Cheras, Jalan Suria 5, Taman Suria, Batu 9, Cheras, Selangor
+   State: Selangor
+
+784. Skyluxe On The Park Bukit Jalil
+   ID: f0a451fa-a246-4cff-b5a6-d0b4f969eca3
+   Address: Jln Jalil Perkasa 1, Off Lebuhraya Bukit Jalil, Bukit Jalil, Kuala Lumpur
+   State: Kuala Lumpur
+
+785. M residence 2 @ Alpine , Bandar Tasik Puteri
+   ID: 81bd51fa-b624-4fd1-97db-ff235943c937
+   Address: jalan Mr 2, Bandar Tasik Puteri, Rawang, Selangor
+   State: Selangor
+
+786. Skyluxe On The Park Bukit Jalil
+   ID: 97c6a1a6-771d-4cd4-9564-dd3f31abf2d2
+   Address: Jln Jalil Perkasa 1, Off Lebuhraya Bukit Jalil, Bukit Jalil, Kuala Lumpur
+   State: Kuala Lumpur
+
+787. D' Larkin Residence
+   ID: 191e1195-baf7-4662-96cb-ebf335ed0968
+   Address: Taman Larkin Idaman Jalan Idaman 1, Taman Larkin Idaman, Johor Bahru, Johor
+   State: Johor
+
+788. Taman Pertama
+   ID: 7d2ce7f3-f9c3-4714-a6cd-1aaf876183fb
+   Address: Taman Pertama, Taman Pertama, Cheras, Kuala Lumpur
+   State: Kuala Lumpur
+
+789. Golden Crown Residence
+   ID: 90df7c12-b6b5-4588-844c-59c137d8b861
+   Address: Jalan Tun Razak, The Tun Razak Exchange (TRX), KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+790. D'Cerrum Apartment
+   ID: 7f732770-0662-4159-91ff-89d04d8bd62f
+   Address: Pesiaran EcoHill Timur, Semenyih, Selangor
+   State: Selangor
+
+791. Aman Residences @ Iramanis
+   ID: 4b9bac65-bc33-4cdc-a29c-9cdebaea072b
+   Address: Lorong Iramanis 7, Taman Iramanis, Kota Kinabalu, Sabah
+   State: Sabah
+
+792. Rimbayu Perennia
+   ID: 50313c49-4f5e-4c75-ac09-e6b388bd835d
+   Address: Jalan Flora 3B/5, Bandar Rimbayu, Kota Kemuning, Shah Alam, Selangor
+   State: Selangor
+
+793. Ehsan Heights
+   ID: 9d18db2b-7602-429e-bf87-15fd4874ff0f
+   Address: Jalan EJ 3/xx, Taman Ehsan Jaya, Ulu Tiram, Johor
+   State: Johor
+
+794. Jade Hills
+   ID: 01bb483c-b376-4296-b73c-748151adf360
+   Address: Persiaran Jade Hills Utama, Jade Hills, Kajang, Selangor
+   State: Selangor
+
+795. 18 Madge
+   ID: aa85c5e5-95cb-4c07-bde4-11c34bd5129d
+   Address: 18 18 Jalan Madge, Ampang Hilir, Ampang, Kuala Lumpur
+   State: Kuala Lumpur
+
+796. Taman Kempas Utama
+   ID: 1de464fd-caf2-4259-a84d-81322709ec25
+   Address: Jalan Kempas Utama 1/10, Setia Tropika, Johor Bahru, Johor
+   State: Johor
+
+797. Taman Bestari Indah
+   ID: ceb338d7-aaad-4db1-828c-b1e3c488fef3
+   Address: Taman Bestari Indah, Ulu Tiram, Johor
+   State: Johor
+
+798. Kristal Heights
+   ID: 757023e5-e0dd-4652-845e-d8a251bcf724
+   Address: 2A Jalan Kristal Tujuh 7/70G, Seksyen 7, Shah Alam, Selangor
+   State: Selangor
+
+799. The Conlay
+   ID: bdd73401-88a9-4b58-9367-be4dd7a3911e
+   Address: 29 Jalan Conlay, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+800. Idaman Selasih
+   ID: b1d88959-63cd-482b-94bc-ccd36b5ad1d8
+   Address: Lintang Sungai Ara 9 & Lilitan Sungai Ara, Bayan Lepas, Penang
+   State: Penang
+
+801. Pangsapuri Bayu
+   ID: 2cdf689e-9503-4e01-a2fe-edf269671ee6
+   Address: - Jalan Mawar, Taman Bukit Serdang, Section 8, 43300, Serdang, Seri Kembangan, Selangor
+   State: Selangor
+
+802. Four Seasons Place
+   ID: 48461d42-95fa-4ef7-95dc-02fcc38b2a60
+   Address: Jalan Ampang, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+803. Marc Residence
+   ID: 8555065e-d684-4876-92c8-7b7caab5e89b
+   Address: - No. 3 Jalan Pinang, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+804. Dalia Residences
+   ID: 86019ae7-d08a-4759-b860-6a90cd32566a
+   Address: No.2 Persiaran Aman Perdana 3, Bandar Tropicana Aman, Kota Kemuning, Shah Alam, Selangor
+   State: Selangor
+
+805. BANDAR BUKIT RAJA KLANG GETA
+   ID: 80a0103a-1568-4bb9-ae24-41b0ef917de0
+   Address: BANDAR BUKIT RAJA KLANG GETA 2STY 20X70, Bandar Bukit Raja, Klang, Selangor
+   State: Selangor
+
+806. Andira Park @ Bandar Bukit Puchong
+   ID: f40099a8-cb96-4062-b0e1-fc0f810d17e5
+   Address: SP 247 Jalan Puchong, Puchong, Selangor
+   State: Selangor
+
+807. Four Seasons Place
+   ID: 681c418d-1559-451a-9cd9-cf84129736e3
+   Address: Jalan Ampang, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+808. M-Residence
+   ID: 80febdcc-709d-44d6-8938-8c998185b5b6
+   Address: Jalan Tasik Puteri, Rawang, Selangor
+   State: Selangor
+
+809. The Woodlands Cluster Homes @ Horizon Hills
+   ID: 9cddbd64-fb2e-4184-a79e-4d695102219c
+   Address: No 1 Jalan Eka, Horizon Hills, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+810. Havona
+   ID: b5b4933e-ec59-487d-a5d0-877ceb7b588a
+   Address: Jalan Mutiara Emas 2 Jalan Mutiara Emas Utama, Taman Mount Austin, Tebrau, Johor
+   State: Johor
+
+811. The Ritz-Carlton Residences
+   ID: 2b2ac50a-f770-47a9-9e77-79a092d508d0
+   Address: Jalan Sultan Ismail, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+812. Eco Botanic
+   ID: 4ce7d6af-8882-4210-b83a-dc19668645a6
+   Address: No 25, 27, 29 Jalan Eko Botani 3/5, Taman Eko Botani, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+813. Terrace house at Bandar Rimbayu
+   ID: c23ef712-bdd3-4a2a-b3f8-15e7d613ef1a
+   Address: Jalan Flora, Bandar Rimbayu, Tanjong Duabelas, Selangor
+   State: Selangor
+
+814. [Clear stock] One Residence 1250sqft 3room, near KLCC TRX
+   ID: 718a7645-4d67-4eb6-8b65-e041ce6757d4
+   Address: Chan Sow Lin, KL City Centre, KLCC, TRX, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+815. Banyan Tree Signatures
+   ID: d02cd376-2d98-4bd8-a7d7-6ab9b887e0f5
+   Address: Jalan Conlay, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+816. Chimes
+   ID: 2c64f1a7-dfa5-497b-bd5c-a7d66497b72b
+   Address: Jalan Flora 3E Telok Panglima Garang, Bandar Rimbayu, Bandar Saujana Putra, Tanjong Duabelas, Selangor
+   State: Selangor
+
+817. Canary Residence
+   ID: b34be07f-d5ee-482f-97df-9af5a48ffc2e
+   Address: Jalan Cheras Hartamas 10, Batu 9, Cheras, Selangor
+   State: Selangor
+
+818. Penduline @ Bandar Rimbayu
+   ID: a28837e2-d7d3-4089-933f-c2e0e59d240f
+   Address: Jalan Fauna 2B/3, Kota Kemuning, Shah Alam, Selangor
+   State: Selangor
+
+819. Pavilion Square
+   ID: 68bdd446-9e1c-4c37-8af7-da7551078deb
+   Address: Jalan Raja Chulan, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+820. Jasmine Park, Taman Putri Kulai
+   ID: 9d07d122-e1dd-4caf-89c8-ac442b49e53b
+   Address: Jasmine Park, Johor Bahru, Johor
+   State: Johor
+
+821. The LightHauz
+   ID: 56eb8920-4ac9-4262-aeed-8742105f7723
+   Address: Persiaran Pantai Sinaran, Gelugor, Penang
+   State: Penang
+
+822. 5min to Mid Valley City, Linked LRT, Foreigner can buy, penthouse layouts
+   ID: dc5733ef-799c-495e-96ed-8f2ac7dc89f7
+   Address: Bangsar, Mid Valley City, Bangsar Baru, Bangsar, Kuala Lumpur
+   State: Kuala Lumpur
+
+823. Spring Avenue (Kuchai Damai)
+   ID: 11d1c823-f82f-487c-b9fc-b7d034775fb2
+   Address: Jalan 8/116b Jalan 9/116B, Kuchai Lama, Kuala Lumpur
+   State: Kuala Lumpur
+
+824. Casa Prima Condominium
+   ID: e7ae9f60-bbfd-4f18-bd05-3c9247a5585d
+   Address: - Metro Prima, Metro Prima, Kepong, Kuala Lumpur
+   State: Kuala Lumpur
+
+825. Eco Majestic
+   ID: 6423dade-7324-481f-99cf-e4b1586484a4
+   Address: Corner Cluster Semi D Full Loan have chance, Eco Majestic, Semenyih, Selangor
+   State: Selangor
+
+826. Diamond Villa Condominium
+   ID: b5cef8cd-7d9a-41bf-9ddd-40d6b9cd50b5
+   Address: 501 No. 501, Jalan Tanjung Bungah, Tanjung Bungah, Penang
+   State: Penang
+
+827. Nusa Duta
+   ID: 6ffb0495-2c35-4932-8245-326bbd1fa24a
+   Address: Jalan Duta Utama, Taman Nusa Bestari, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+828. Eco Majestic
+   ID: 7769e78a-a6db-4ea6-bd3e-3aa50decf443
+   Address: Mellowood 22x80 Renovated, Eco Majestic, Semenyih, Selangor
+   State: Selangor
+
+829. Mira Residence
+   ID: 44486f74-ba12-46a4-877a-e8251aca72c9
+   Address: Jalan Lembah Permai Jalan Lembah Permai, Tanjung Bungah, Penang
+   State: Penang
+
+830. Moulmein Rise
+   ID: 2a58eb25-c679-44dd-a25f-80d11139b44c
+   Address: 9 Jalan Moulmein Off Jln Pasar, Lengkok Moulmein, Pulau Tikus, Penang
+   State: Penang
+
+831. Park Direction Bu 6 bu6 Bandar Utama
+   ID: 3ca4937d-d7da-49ee-811a-ddccb0db3cec
+   Address: BU6 BU 6,BU 1 BU1 BU 2 BU2 BU3 BU3,BU4 BU 4,BU 7 bu7 ,BU12 bu 11,BU 10 BU10 bandar utama Petaling Jaya, Bandar Utama, Selangor
+   State: Selangor
+
+832. Kenanga Point
+   ID: 004c02c0-3fd7-46b8-ada2-605e68714a2d
+   Address: - Jalan Gelugor, Pudu, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+833. Residensi Platinum
+   ID: 830ae08b-ede5-4e1a-a41f-21ab1e813b62
+   Address: Jalan 1/64, Jalan Ipoh, Kuala Lumpur
+   State: Kuala Lumpur
+
+834. Damansara Foresta
+   ID: 4647f183-84a4-4a8b-8863-58be3de2accd
+   Address: Persiaran Meranti, Off Persiaran Perdana, Bandar Sri Damansara, Selangor
+   State: Selangor
+
+835. D'suria Condominium
+   ID: cb0a417e-280f-42fd-b9aa-398b81861c18
+   Address: Jalan D'Suria Jalan D'suria, Ampang Jaya, Ampang, Selangor
+   State: Selangor
+
+836. Bandar Nusaputra
+   ID: b35dc8dd-ac9d-4947-bb81-e220b896fae0
+   Address: Bandar Nusaputra, Puchong, Selangor
+   State: Selangor
+
+837. Lavinia Apartments
+   ID: 05b5d87b-0a64-4b54-9caa-5474649da6e3
+   Address: 11 No. 11, Jalan Bukit Kecil, Taman Sri Nibong, 11900, Sungai Nibong, Bayan Lepas, Penang
+   State: Penang
+
+838. The Mews
+   ID: 88c68839-2cd8-408e-911c-6852f6766de5
+   Address: Jalan Yap Kwan Seng, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+839. Taman Melawati
+   ID: 1a1b18d3-3f02-4c10-82bf-068aa2ea94c2
+   Address: Jalan Melawati 1, Skudai, Johor
+   State: Johor
+
+840. Oleander @ Bandar Seri Coalfield
+   ID: b3cd7a76-6820-456a-a155-9e2f22a5e4f1
+   Address: Jalan BSC 1a/4, Bandar Seri Coalfields, Ijok, Selangor
+   State: Selangor
+
+841. Taman Saujana Emas
+   ID: d85796a9-ae95-4924-9d77-1617b9fbd52d
+   Address: TAMAN SAUJANA EMAS, Taman Saujana Emas, Kajang, Selangor
+   State: Selangor
+
+842. The Riviera
+   ID: 0faa314c-8ead-45ad-a54a-65e2aa1f2fa9
+   Address: No. 1, Jalan Bunga Mewah 5A, Ampang Jaya, Ampang, Selangor
+   State: Selangor
+
+843. SKS Pavillion Residences
+   ID: 11212c33-2045-4353-8df4-5356c8f1281a
+   Address: Jalan Storey Jalan Storey, Kim Teng Park, Johor Bahru, Johor
+   State: Johor
+
+844. D'Zone Condominium
+   ID: e6eb8eb2-9c67-477b-b541-05e2e162bae8
+   Address: Changkat Bukit Belah, Telok Kumbar, Penang
+   State: Penang
+
+845. Bangsar
+   ID: dd6994c9-5a78-4cd7-874d-b54b5cafd09b
+   Address: Jalan Keruing, Taman Bandaraya, Bangsar, Kuala Lumpur
+   State: Kuala Lumpur
+
+846. SS1 Jalan SS1/24 Kampung Tunku, Petaling Jaya
+   ID: 62504410-92aa-47b6-ba14-aa701e73a87e
+   Address: Jalan SS1/24 Kampung Tunku, Kampung Tunku, Petaling Jaya, Selangor
+   State: Selangor
+
+847. Pavilion Square
+   ID: 0b7c8e47-e130-4b74-a4a0-dfb4c34135a3
+   Address: Jalan Raja Chulan, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+848. 10 Mont Kiara @ MK10
+   ID: aae6e587-4480-46a3-87c1-7a6d9a6d63a9
+   Address: Jalan Kiara 1 Jalan Kiara 1, Mont Kiara, Kuala Lumpur
+   State: Kuala Lumpur
+
+849. Leisure Farm
+   ID: 8cb45f22-fc4e-41e2-aaf1-9823f9d41c77
+   Address: Jalan Tanjung Kupang, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+850. DEXTORA @ BANDAR SRI SENDAYAN
+   ID: a02928cc-2d98-46b4-9a9c-2d592ef7867f
+   Address: Taman Ara Sendayan, Bandar Sri Sendayan, Negeri Sembilan
+   State: Negeri Sembilan
+
+851. Eco Botanic
+   ID: 856bc99a-fa52-416c-98ea-5e656659ee29
+   Address: No 25, 27, 29 Jalan Eko Botani 3/5, Taman Eko Botani, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+852. Tropicana Aman - Freesia Residences
+   ID: 8d29cacb-dae2-4b60-adf1-c217ebb0bfb7
+   Address: No. 2 Persiaran Aman Perdana 3,Telok Panglima Garang, Telok Panglima Garang, Selangor
+   State: Selangor
+
+853. Kings Bay @ Country Garden Danga Bay
+   ID: c97005d4-e2e9-4a89-a1fd-fcaf6fde39ce
+   Address: Jalan Skudai Off Country Garden Danga Bay, Johor Bahru, Johor
+   State: Johor
+
+854. H2O Residences
+   ID: 844f0b2d-7777-47d0-b7ef-b5cd35df4d51
+   Address: Jalan PJU 1a/3 Jalan PJU 1a/3, Ara Damansara, Selangor
+   State: Selangor
+
+855. SO Sofitel Kuala Lumpur Residences
+   ID: 09302f26-8e3e-4f94-a79c-98c11d31c0d2
+   Address: No 159, Jalan Ampang, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+856. TRX Residences
+   ID: 0e51df55-1897-42a1-a976-5420dffaaf8d
+   Address: Jalan Tun Razak, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+857. Nest 2 Residences
+   ID: f9952aa4-bbcf-485c-96a9-99940d76d0aa
+   Address: Jalan A, Off Jalan Puchong, Jalan Klang Lama (Old Klang Road), Kuala Lumpur
+   State: Kuala Lumpur
+
+858. Kanvas SOHO
+   ID: 95840ead-e981-44b2-bf8c-13c205e6a3bc
+   Address: Jalan Teknokrat 6 Off Persiaran Apec, Cyberjaya, Selangor
+   State: Selangor
+
+859. Uptown Residences 2, Berkeley Uptown
+   ID: ad06554b-a8e8-45a7-a398-6bbf0b79dc2a
+   Address: N/A
+   State: Unknown
+
+860. Platinum Lake PV 21
+   ID: 5f00b7eb-4492-4207-a7b5-1cb63bd6dbec
+   Address: Jalan Usahawan, Off Jalan Genting Kelang, Setapak, Kuala Lumpur
+   State: Kuala Lumpur
+
+861. Stellaris @ Riana Dutamas
+   ID: f88dd54f-d42b-4294-a6db-0674e06bd08d
+   Address: Riana Dutamas, Dutamas, Kuala Lumpur
+   State: Kuala Lumpur
+
+862. The Treez Jalil Residen
+   ID: 6e96d4b8-ecc4-4df8-aba2-c5dda1c1c276
+   Address: Jalan 13/155c Jalan 13/155C, Bukit Jalil, Kuala Lumpur
+   State: Kuala Lumpur
+
+863. Akasa
+   ID: 8b30bd8d-8444-4a5d-bb39-a05a71bf790f
+   Address: Lebuhraya Silk, Tmn Cheras Jaya, Cheras, Selangor
+   State: Selangor
+
+864. Bungalow Taman Kota Perdana
+   ID: 88fa48d5-7547-4842-a54a-ba317464cf71
+   Address: Taman Kota Perdana, Bandar Putra Permai, Seri Kembangan, Selangor
+   State: Selangor
+
+865. Taman Permata, Ulu Kelang
+   ID: 1c241727-f944-4566-a61a-8cadf035e325
+   Address: Jalan Permata 23, Taman Melawati, Ulu Kelang, Kuala Lumpur
+   State: Kuala Lumpur
+
+866. The Zizz @ Damansara North
+   ID: b60c9010-575a-426e-9e71-7c9fc10b0d14
+   Address: Jalan PJU 10/1A Jalan PJU 10/1A, Damansara Damai, Selangor
+   State: Selangor
+
+867. Bungalow at Bukit Pantai
+   ID: 1ba77743-ac78-4a37-b595-955badfd042d
+   Address: Guarded Area, Brand New Completion Q1 2026, Bukit Pantai, Bangsar, Kuala Lumpur
+   State: Kuala Lumpur
+
+868. kepong kepong
+   ID: 55885115-571f-43e0-817f-5b82b3b78ef1
+   Address: jalan kuching, Kepong, Kuala Lumpur
+   State: Kuala Lumpur
+
+869. FOREST CITY
+   ID: cb9464e9-0bd2-4a6f-9bb3-d6659c7f1708
+   Address: Galeri Jualan Mentari, Presint Aurora, Jalan Forest City1, Pulau Satu, Nusajaya, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+870. Summerton
+   ID: c908ab7e-b730-4816-9d41-e04a756e9cb9
+   Address: Jalan Aziz Ibrahim, Persiaran Bayan Indah, Bayan Lepas, Penang
+   State: Penang
+
+871. Gerbang Nusajaya Aspira Hills
+   ID: 5f0d654e-66ae-4e83-ba22-9de71409488c
+   Address: N/A
+   State: Unknown
+
+872. Eco Botanic
+   ID: 4f933982-89a0-4f87-8525-2f36edb411ff
+   Address: No 25, 27, 29 Jalan Eko Botani 3/5, Taman Eko Botani, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+873. Eco Botanic
+   ID: af86b204-007e-4dcf-aa35-96b66b0766b8
+   Address: No 25, 27, 29 Jalan Eko Botani 3/5, Taman Eko Botani, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+874. Kings Bay @ Country Garden Danga Bay
+   ID: dae2fce4-acbe-42e9-a26f-6ba730008159
+   Address: Jalan Skudai Off Country Garden Danga Bay, Johor Bahru, Johor
+   State: Johor
+
+875. Bungalow at Ukay Heights
+   ID: 7f65ed71-8e12-403c-b0d1-183d572ce772
+   Address: Jalan Chong Koon Lin, Ukay Heights, Ampang, Selangor
+   State: Selangor
+
+876. Suria Mutiara
+   ID: e850d796-34d2-4a8a-b8e4-bd1a6cb43078
+   Address: - No. 6, Jalan Grik, Taman Continental, Jelutong, Penang
+   State: Penang
+
+877. Casawood
+   ID: de11182b-fb6e-4d32-88a9-2db9d00537fb
+   Address: Pintasan Dengkil Bypass, Cybersouth, Cyberjaya, Selangor
+   State: Selangor
+
+878. Sang Suria
+   ID: a4a72b3c-1e91-4b93-80ab-b63c359b2fc3
+   Address: - Persiaran Park View, Sentul, Kuala Lumpur
+   State: Kuala Lumpur
+
+879. Bandar Sri Menjalara 62B, Desa Parkcity, Kepong, Bandar Menjalara
+   ID: 7fed6acc-6f64-4816-a469-69e03182481a
+   Address: Sri Menjalara 62B, Desa Parkcity, Kepong, Bandar Menjalara, Taman Sri Sinar, Taman Bukit Maluri, Sri Bintang, Kepong Uphill, Segambut, Jalan 13/62B, Bandar Menjalara, Kuala Lumpur
+   State: Kuala Lumpur
+
+880. Taman Pelangi Tamans Pelangis
+   ID: a39ac0d9-e392-4b10-99fb-e2641ea1e983
+   Address: 017.778.5073 Jalan Hijau, Taman Pelangi, Johor Bahru, Johor
+   State: Johor
+
+881. Platinum Lake PV 21
+   ID: 382dd272-ee35-4ca7-b2db-95032676858c
+   Address: Jalan Usahawan, Off Jalan Genting Kelang, Setapak, Kuala Lumpur
+   State: Kuala Lumpur
+
+882. Maxim Residences
+   ID: 1f10e8ed-561f-4889-85a6-49b67a659f50
+   Address: Jalan 9, Taman Len Seng, Cheras, Kuala Lumpur
+   State: Kuala Lumpur
+
+883. Pavilion Suites
+   ID: 25fb6a4d-1c39-4514-9303-6eaa034af753
+   Address: Jalan Bukit Bintang, Bukit Bintang, 55100, Bukit Bintang, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+884. The Maple Residences
+   ID: f971f30f-d37c-46f2-a1f1-948508d2167f
+   Address: Lot PT 15210, Jalan Awan Besar,, Taman Overseas Union (Taman Oug), Jalan Klang Lama (Old Klang Road), Kuala Lumpur
+   State: Kuala Lumpur
+
+885. Indah Alam (Subang Andaman)
+   ID: 9bd2d0fe-8406-409f-9765-41b11c8242ef
+   Address: 2J Jalan Jubli Perak 22/1, Seksyen 20, Shah Alam, Selangor
+   State: Selangor
+
+886. Planters' Haven : Planters' Haven
+   ID: 49734517-45b2-4df3-a981-d75c08716dca
+   Address: Planters' Haven, Persiaran Alamanda, Nilai, Negeri Sembilan
+   State: Negeri Sembilan
+
+887. The Legacy OUG
+   ID: f7c0a435-939f-4a3b-a411-41b949f2f2b4
+   Address: Jalan Awan Besar, Jalan Klang Lama (Old Klang Road), Kuala Lumpur
+   State: Kuala Lumpur
+
+888. The Mews
+   ID: d6f4baaf-9c08-46b5-ac13-5bf9da7fe126
+   Address: Jalan Yap Kwan Seng, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+889. Taman Saujana Emas Kajang
+   ID: f015edfc-57aa-4d8e-9cc0-ad46c180bebd
+   Address: Taman Saujana Emas, Kajang, Selangor
+   State: Selangor
+
+890. Tun Aminah Tuns Aminahs
+   ID: 531ac41e-1701-4881-8997-27cb579c524b
+   Address: Hang Jebat Double Storey Low Cost, Taman Ungku Tun Aminah, Skudai, Johor
+   State: Johor
+
+891. D'Summit Residences
+   ID: 62853cc1-e092-4a1c-b7f9-e8f020e95c6e
+   Address: Jalan Kempas Lama Jln Kempas Utama 2/1, Kempas, Johor Bahru, Johor
+   State: Johor
+
+892. Sunway Belfield
+   ID: d00d29f1-f918-4735-8a88-5d48d87a57db
+   Address: Jalan Belfield, Kampung Attap, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+893. Taman Selayang
+   ID: f7d8d570-a6f3-4bd9-b3b8-237d3c62f898
+   Address: Taman Selayang, Butterworth, Penang
+   State: Penang
+
+894. Casa Green Condominium
+   ID: cd9921dd-d5cf-4db7-9f74-2544eb26fcce
+   Address: Jalan Casa Green, Taman Seri Minang, Cheras, Selangor
+   State: Selangor
+
+895. Pelangi Magna
+   ID: 828c6826-cd76-4913-90b3-46577d915629
+   Address: 1 Jalan Prima 3, Metro Prima, Kepong, Kuala Lumpur
+   State: Kuala Lumpur
+
+896. Taman Nusa Sentral
+   ID: 095e29e9-c0c1-49e2-81bf-e916e8bb0b76
+   Address: Jalan Sentral, Nusa Sentral, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+897. Perma Perma Permas
+   ID: da40c6b8-29cc-48de-97d3-8992555e65c2
+   Address: 0187721363, Sri Plentong, Plentong, Johor
+   State: Johor
+
+898. Lavinia Apartments
+   ID: bf65a89b-b77e-4eed-adec-bb1a334ee319
+   Address: 11 No. 11, Jalan Bukit Kecil, Taman Sri Nibong, 11900, Sungai Nibong, Bayan Lepas, Penang
+   State: Penang
+
+899. Idaman Lavender 3
+   ID: d5de1900-b0fc-4c1c-874c-ddb64afcd1b7
+   Address: Lilitan Sungai Ara Jalan Dato Ismail Hashim, Sungai Ara, Penang
+   State: Penang
+
+900. Pavilion Hilltop
+   ID: 54e4b04d-def9-4c60-bf85-77cb3411a422
+   Address: Lot 67209 Jalan Kiara, Mont Kiara, Kuala Lumpur
+   State: Kuala Lumpur
+
+901. The Oval
+   ID: ef74cdea-5ad0-46bc-b730-7040e2c27c65
+   Address: Jalan Binjai, off Lorong Kuda, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+902. Taman Ehsan
+   ID: ce1aae79-12c2-4b5e-b0d9-f631bb68521a
+   Address: Desa Jaya Kepong, Taman Ehsan, Kepong, Selangor
+   State: Selangor
+
+903. Skysuites @ Meldrum Hills
+   ID: 5ce27e26-162b-40d7-a8c6-0c7c4eccb02b
+   Address: Jalan Bukit Meldrum, Jalan Bukit Meldrum, Off Jalan Tanjung Puteri,, Johor Bahru, Johor
+   State: Johor
+
+904. Aster Court
+   ID: 17a958a3-5ee8-47d5-bd1b-feb56f565205
+   Address: - Jalan Datuk Abdullah Tahir, Taman Abad, Johor Bahru, Johor
+   State: Johor
+
+905. M-Residence
+   ID: 067c2a06-a772-4f53-a3f2-97d2f818824e
+   Address: Jalan Tasik Puteri, Rawang, Selangor
+   State: Selangor
+
+906. Wave @ Marina Cove
+   ID: 5dbf8ac0-a059-45a7-9698-bd6d883f80b7
+   Address: Marina Cove, Taman Bayu Puteri, Johor Bahru, Johor
+   State: Johor
+
+907. Jelutong Apartment
+   ID: 4f18b277-8083-4f77-90b4-46b6174657ee
+   Address: Jalan Sh 1/2 Jalan Sh 1/2 Off Jalan Ipoh, Rawang, Selangor
+   State: Selangor
+
+908. Starview Bay @ Forest City
+   ID: 3ab07e22-9573-45e8-b9db-135f7fd3ff97
+   Address: Jalan Forest City, Gelang Patah, Johor
+   State: Johor
+
+909. Aricia Residences
+   ID: 16564de5-5334-43f0-8aee-bb4d44a15d4f
+   Address: 304, 302, Jalan Sungai Besi, Chan Sow Lin, Cheras, Kuala Lumpur
+   State: Kuala Lumpur
+
+910. The M @ Medini Macrolink
+   ID: 6f51c736-05e4-4601-9b0c-3d6cbe427535
+   Address: Persiaran Medini Sentral 2, Medini, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+911. The Astaka @ 1 Bukit Senyum
+   ID: e4f2c76b-16a7-4c66-b689-47455d82f5aa
+   Address: 1 1 Bukit Senyum, Jalan Terbau, Johor Bahru, Johor
+   State: Johor
+
+912. The Pines Residence
+   ID: 47793189-7851-450d-be0b-62f3a9677be3
+   Address: Jalan Paya Mengkuang Jalan Paya Mengkuang, Gelang Patah, Johor
+   State: Johor
+
+913. Ivory Residence
+   ID: c7ef3422-b4ba-4006-8731-73f6dfe12a02
+   Address: Ivory Residence Persiaran Prima Saujana, Mutiara Heights, Kajang, Selangor
+   State: Selangor
+
+914. Arden @ One Bukit Senyum
+   ID: 9e86040a-96b2-4dd9-9420-78ef39555000
+   Address: 1 Jalan Tebrau, Bukit Senyum, Kampung Wadihana, Johor Bahru, Johor
+   State: Johor
+
+915. The Astaka @ 1 Bukit Senyum
+   ID: d0dc1fd8-2891-4099-aa2b-1d855d844d96
+   Address: 1 1 Bukit Senyum, Jalan Terbau, Johor Bahru, Johor
+   State: Johor
+
+916. Eco Majestic
+   ID: 18333882-a8ae-4277-bb27-6059854ab69b
+   Address: Tenderfield,Cheerywood,Cyberjaya,Setia Ecohill,Setia Mayuri,Bangi,Kajang,Serdang,Seri Kembangan,Cheras,Kajang East,Alam Sari,Putrajaya,Bandar Baru Bangi,Sungai Long,Balakong,Semenyih House, Eco Majestic, Semenyih, Selangor
+   State: Selangor
+
+917. Radium Adesa
+   ID: 5400c4e3-dbc5-4e5f-922c-1fe08e77ea9c
+   Address: LOT481729(PT 9749) Jalan Sungai Besi, Mukim, Salak Selatan, Salak Selatan, Kuala Lumpur
+   State: Kuala Lumpur
+
+918. Casa Prima Condominium
+   ID: 72fb225c-4bf8-43a3-8ecf-36a91a40bec5
+   Address: - Metro Prima, Metro Prima, Kepong, Kuala Lumpur
+   State: Kuala Lumpur
+
+919. Royal Strand @ Country Garden Danga Bay
+   ID: 964fc923-261c-45fe-85dd-1d00774fea04
+   Address: Jalan Skudai Off Country Garden Danga Bay, Danga Bay, Johor Bahru, Johor
+   State: Johor
+
+920. Royal Strand @ Country Garden Danga Bay
+   ID: ce99ee5a-990f-4ee5-bb9d-a2abfa05937c
+   Address: Jalan Skudai Off Country Garden Danga Bay, Danga Bay, Johor Bahru, Johor
+   State: Johor
+
+921. St Regis
+   ID: c00050b1-3c52-4994-a706-8390308f41dd
+   Address: Jalan Stesen Sentral Jalan Stesen Sentral 2, Kl Sentral, Kuala Lumpur
+   State: Kuala Lumpur
+
+922. Bukit Indah Bukit Indah Bukits Indahs
+   ID: 9ca62759-3515-44e7-ad84-9e3af2ec92d3
+   Address: Jalan Indah 7, Bukit Indah, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+923. Bay Point @ Country Garden Danga Bay
+   ID: 5330a844-99e7-49f4-aca1-cdeae40583d1
+   Address: Jalan Skudai Off Country Garden Danga Bay, Johor Bahru, Johor
+   State: Johor
+
+924. Bay Laurel @ Country Garden Danga Bay
+   ID: 8d776d27-500b-4972-9b74-657a6ecffb67
+   Address: Jalan Skudai Jalan Skudai Off Country Garden Danga Bay, Johor Bahru, Johor
+   State: Johor
+
+925. Starview Bay @ Forest City
+   ID: b578c42a-45e5-4366-9706-38d73edf52b1
+   Address: Jalan Forest City, Gelang Patah, Johor
+   State: Johor
+
+926. Bay Laurel @ Country Garden Danga Bay
+   ID: 2564066d-14dd-465f-8792-daac9fd9dc30
+   Address: Jalan Skudai Jalan Skudai Off Country Garden Danga Bay, Johor Bahru, Johor
+   State: Johor
+
+927. M Terra
+   ID: 2b4f265d-1b44-41bd-aa55-920a73be5258
+   Address: Taman Desa Millennia, Puchong, Selangor
+   State: Selangor
+
+928. Kings Bay @ Country Garden Danga Bay
+   ID: 7e2085c1-3940-40ee-a911-87a9161e6a01
+   Address: Jalan Skudai Off Country Garden Danga Bay, Johor Bahru, Johor
+   State: Johor
+
+929. LakePark Residence @ KL North
+   ID: 09d6acd4-d80d-4511-b71b-95135376db31
+   Address: LakePark Residence Jalan 2/3a, Batu Caves, Kuala Lumpur
+   State: Kuala Lumpur
+
+930. PSV 2 Residences
+   ID: 95e01467-c9fc-47ee-9aa5-d793541e0c1d
+   Address: Platinum South Valley, Bandar Tasik Selatan, Kuala Lumpur
+   State: Kuala Lumpur
+
+931. RV2 Residence (Riverville Residences 2)
+   ID: 840c4d85-d326-4ce6-ac3e-92c73dd23221
+   Address: Off, Old Klang Rd, Taman Sri Sentosa, Jalan Klang Lama (Old Klang Road), Kuala Lumpur
+   State: Kuala Lumpur
+
+932. BK4 (Bandar Kinrara 4)
+   ID: bb1e5797-d092-40bb-99e2-d84943ef262f
+   Address: Jalan BK 4/6, Bandar Kinrara Seksyen 1, Bandar Kinrara, Selangor
+   State: Selangor
+
+933. SINGLE STOREY @ TAMAN JAYAMAS SEREMBAN
+   ID: c0b34ed5-0ca7-4ff1-9a8a-5eaff988a4bd
+   Address: Taman Jayamas, Seremban, Negeri Sembilan
+   State: Negeri Sembilan
+
+934. Radium Arena (Urban Residences) Old Klang Road
+   ID: 29e39b08-94a2-4106-b782-dd4fa46ecc59
+   Address: Kampung Pasir, Jalan Klang Lama (Old Klang Road), Kuala Lumpur
+   State: Kuala Lumpur
+
+935. PKNS Ixora
+   ID: e55af2d7-7207-41c2-a8cd-34586713fab0
+   Address: N/A
+   State: Unknown
+
+936. Condo @ Eden by The Parque Residences
+   ID: d14e0976-bfe4-4f17-896e-17bca6214e84
+   Address: Persiaran Eco Sanctuari 1, Eco Sanctuary, Telok Panglima Garang, Selangor
+   State: Selangor
+
+937. Eco Botanic
+   ID: dbe32ae3-3547-4806-a4bf-e35d130b993e
+   Address: No 25, 27, 29 Jalan Eko Botani 3/5, Taman Eko Botani, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+938. Star Residences Two
+   ID: 538c606b-45c6-4c38-9355-1965ce16744b
+   Address: Jalan Yap Kwan Seng, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+939. Majestic @ Kiara Reserve
+   ID: a7b54802-ae31-40f2-8df6-2155029a9006
+   Address: N/A
+   State: Unknown
+
+940. Danga Sutera
+   ID: b5d924f1-d367-49c7-b808-0cc4e750efb4
+   Address: Jalan Sutera Dahlia, Skudai, Johor
+   State: Johor
+
+941. Setia Eco Gardens
+   ID: 3a645cd4-6040-4bb6-b36e-666307aa7811
+   Address: Jalan 3/x, Setia Eco Gardens, Gelang Patah, Johor
+   State: Johor
+
+942. Horizon Hill Horizon Hill Horizons Hills
+   ID: 6e04bc8c-a64a-41d1-a145-c37409f4069e
+   Address: Jalan Maya, Horizon Hills, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+943. Horizon Hill Horizon Hill Horizons Hills
+   ID: 5b2454d7-b1fc-4c07-9465-97a4adb973fa
+   Address: Horizon Hills, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+944. Four Seasons Place
+   ID: 441f2137-8a59-486f-a8c6-026bbc1552c7
+   Address: 0 Jalan Ampang, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+945. Taman Bukit Teratai (Ampang)
+   ID: ed448656-da12-4e0c-93b0-554b573e8a06
+   Address: Taman Bukit Teratai, Ampang, Kuala Lumpur
+   State: Kuala Lumpur
+
+946. Bukit indah bukit indah bukit indah bukit indah
+   ID: cf72a2b3-52ca-4c42-b098-b5c306cb7e5a
+   Address: Bukit Indah, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+947. Single Storey Bungalow @ Golf Height
+   ID: 960488c6-bfba-44af-ae8e-3d1fe28839f1
+   Address: Golf Height, Ampangan, Negeri Sembilan
+   State: Negeri Sembilan
+
+948. Four Seasons Place
+   ID: e446f151-220a-4d6c-ab29-4bddc1abc7cf
+   Address: 0 Jalan Ampang, KLCC, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+949. lorong merak
+   ID: 8fad5469-9fbd-4e3c-bbc6-18b62623e40c
+   Address: Taman Merak, Sungai Dua, Penang
+   State: Penang
+
+950. Sunway Aspera
+   ID: e5f6fe9b-e5b3-4aff-8c27-3d0cb801a0e0
+   Address: 11 Lintang Sungai Batu 2, Telok Kumbar, Penang
+   State: Penang
+
+951. Skudai Taman Skudai Baru Renovated Single Storey Semi Detached 4bed
+   ID: 834cee27-a4de-4d6e-b094-7dd8ba28c875
+   Address: Jalan Inang x, Taman Skudai Baru, Skudai, Johor
+   State: Johor
+
+952. Scenaria @ North Kiara Hills
+   ID: 1693ba60-ef14-4c4c-90a4-77965a434c45
+   Address: Jalan 6/38a Jalan 6/38a, Off Jalan Segambut, Segambut, Kuala Lumpur
+   State: Kuala Lumpur
+
+953. Bukit Gita Bayu
+   ID: 7b97e505-9888-46ed-af89-f6371d1f79fe
+   Address: bukit gita bayu, Seri Kembangan, Selangor
+   State: Selangor
+
+954. Sky Gardens Residences
+   ID: 4f396b14-f22e-493d-83c2-792aec6d3dd8
+   Address: - Jalan Setia Tropika 1/21, Tampoi, Johor
+   State: Johor
+
+955. Pesona Apartment
+   ID: 88dceac0-2a83-41c0-8e03-9e591b78fc35
+   Address: Jalan Seksyen 3/1A, Taman Kajang Utama, Section 3,, Taman Kajang Utama, Kajang, Selangor
+   State: Selangor
+
+956. Amberside @ Country Garden Danga Bay
+   ID: 8f9ca234-eb73-49c2-8c6b-0b9e26bf3238
+   Address: Jalan Skudai Off Country Garden Danga Bay, Johor Bahru, Johor
+   State: Johor
+
+957. Wellesley Residences
+   ID: 340e09b5-9f04-4bc3-b976-0f1338ebf3d7
+   Address: Jalan Harbour Place Jalan Harbour Place, Butterworth, Penang
+   State: Penang
+
+958. Taman Seri Murni, Desa Murni, Sungai Dua, Butterworth
+   ID: 9c109608-f6ab-4d55-95b5-1be56c259f18
+   Address: Jalan Seri Murni, Taman Seri Murni, Butterworth, Penang
+   State: Penang
+
+959. One Imperial
+   ID: 08c2c323-0b49-4cbe-9dce-661f71befbd5
+   Address: Jalan Paya Terubong Lintang Sungai Ara, Sungai Ara, Penang
+   State: Penang
+
+960. The Light Collection III
+   ID: e2c6650f-1f72-4148-b83a-c09212b89b2e
+   Address: Jalan Pantai Sinaran, Gelugor, Penang
+   State: Penang
+
+961. Taman Desa Impian II, Alma, Bukit Mertajam, Semi-D for Sale
+   ID: 57d905eb-3e78-4077-838f-bced0116ac72
+   Address: Lorong Desa Impian 13, Alma, Bukit Mertajam, Penang
+   State: Penang
+
+962. Taman Sembilang, Seberang Jaya, Perai, Terrace for Sale
+   ID: 9653db33-b0ab-48a2-bfc3-b05767ac5bcc
+   Address: Lorong Sembilang 34, Desa Sembilang, Seberang Jaya, Penang
+   State: Penang
+
+963. Taman Kampar
+   ID: 2a34e73d-30fc-4343-89f6-21d2b0f3df09
+   Address: 2 No. 2, Jalan Kampar, Taman Kampar, George Town, Penang
+   State: Penang
+
+964. Double Storey Terrace End Lot @ Greenlane Island Park
+   ID: bd05a389-e66b-4c78-a04c-8ac4307d33a8
+   Address: Lorong Tembaga, Island Park, Jelutong, Penang
+   State: Penang
+
+965. The Regency Condominium
+   ID: c6cf6b2a-81b9-47dd-be0f-436f9c4b65ae
+   Address: 168 No. 168, Persiaran Gurney, 10250 Georgetown, Penan, George Town, Penang
+   State: Penang
+
+966. Double Storey Bungalow 8500sf @ Kebun Bunga Pulau Tikus
+   ID: a6bfa951-584d-4913-8f62-703972acf411
+   Address: Taman Gottlieb, Pulau Tikus, Penang
+   State: Penang
+
+967. Tree Sparina
+   ID: e7085045-c358-48aa-a1bb-64ad6c996d8d
+   Address: Ideal Vision Park Jalan Sungai Tiram 11, Taman Tunas Damai, Bayan Lepas, Penang
+   State: Penang
+
+968. 1.5 Storey Terrace @ Ayer Itam
+   ID: cce4c360-1300-43d3-9d1f-171d1bf5c9af
+   Address: Taman Hye Keat, Taman Hye Keat, Ayer Itam, Penang
+   State: Penang
+
+969. Double Storey Semi Detached @ Berjaya Pulau Tikus
+   ID: 7427b9ec-a31d-475d-b58c-92dcd5b56b01
+   Address: Pulau Tikus, Taman Berjaya, George Town, Penang
+   State: Penang
+
+970. Single Storey Corner Semi Detached @ Lengkok Ariff
+   ID: ebd56c92-824b-4570-b2ab-e29831cd4120
+   Address: Lengkok Ariff, Jelutong, Penang
+   State: Penang
+
+971. Double Storey Semi Detached @ Taman Ayer Rajah Pulau Tikus
+   ID: c4fae9d5-f69e-4786-8058-cdeaf4856db5
+   Address: Taman Ayer Rajah, Taman Ayer Rajah, Pulau Tikus, Penang
+   State: Penang
+
+972. Molek Regency
+   ID: 6fa72898-38f6-4a95-b303-a617d4d8da6f
+   Address: Molek Regency Jln Molek 3/20, Taman Molek, Johor Bahru, Johor
+   State: Johor
+
+973. Molek Regency
+   ID: 8dac2440-5a3e-4dc4-95cd-5a8a4022b057
+   Address: Molek Regency Jln Molek 3/20, Taman Molek, Johor Bahru, Johor
+   State: Johor
+
+974. Taman Setia Impian
+   ID: f7c98bcb-a520-4ca3-b398-9349ae24712c
+   Address: Jade Hills, Taman Setia Impian, Kajang, Selangor
+   State: Selangor
+
+975. Fera Residence @ The Quartz WM
+   ID: 7ffd2bb2-737e-43c8-9842-4254a1af34a0
+   Address: Jalan 34/26 Jalan 34/26, Seksyen 10 Wangsa Maju, Wangsa Maju, Kuala Lumpur
+   State: Kuala Lumpur
+
+976. Seremban Bukit Jed
+   ID: 84cfce63-b23d-4f99-b3ca-41d51a406a1d
+   Address: Taman Jed Villa, Seremban, Negeri Sembilan
+   State: Negeri Sembilan
+
+977. The Astaka @ 1 Bukit Senyum
+   ID: 49abf414-277b-467f-b46f-04ea1ba9d582
+   Address: 1 1 Bukit Senyum, Jalan Terbau, Johor Bahru, Johor
+   State: Johor
+
+978. Platinum Hill PV 6
+   ID: 440b1596-e2ef-4ba5-b5c4-62c754b783cd
+   Address: 3 No.3, Jalan Melati Utama, Setapak, Kuala Lumpur
+   State: Kuala Lumpur
+
+979. 2 Storey Semi Detached @ Lorong Bintang Tanjung Bungah
+   ID: b5a31571-3316-41bc-be86-1da3057f6287
+   Address: Lorong Bintang, Tanjung Bungah, Penang
+   State: Penang
+
+980. 2.5 Storey Bungalow @ Tanjung Bungah
+   ID: 2c7444d4-c95d-4e85-8021-a89e841f1854
+   Address: Jalan Oldham, Pearl Hill, Tanjung Bungah, Penang
+   State: Penang
+
+981. Nusa Sentral
+   ID: 499617a6-1afa-4417-a8a1-1298e9ed091d
+   Address: 12 JIn Sentral, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+982. RV2 Residence (Riverville Residences 2)
+   ID: 8a923922-ffd1-4cd5-bf30-59030d1bb379
+   Address: Off, Old Klang Rd, Taman Sri Sentosa, Jalan Klang Lama (Old Klang Road), Kuala Lumpur
+   State: Kuala Lumpur
+
+983. Beverly 2
+   ID: 0c26eaf4-4883-4513-b53f-9b3040bae563
+   Address: - Plaza Medan Putra, Jalan Putra Medan 6, Kepong, Kuala Lumpur
+   State: Kuala Lumpur
+
+984. Bukit Indah
+   ID: 0061646b-13bc-4937-b788-60f1cb5c9674
+   Address: Bukit Indah, Iskandar Puteri (Nusajaya), Johor
+   State: Johor
+
+985. Zenith Residences
+   ID: 69bb9be6-2b12-421f-96b8-ea6b5bad0569
+   Address: Jalan SS 7/26, Jalan SS7/26, SS7, Petaling Jaya, Selangor
+   State: Selangor
+
+986. Zenith Residences
+   ID: c531211a-dc20-4a7d-a660-962c1265186f
+   Address: Jalan SS 7/26, Jalan SS7/26, SS7, Petaling Jaya, Selangor
+   State: Selangor
+
+987. Flat Tasek 64
+   ID: f7ac3ac8-d6b1-4ee4-8790-1ea97dd59bf9
+   Address: Jln Tasek 64, Bandar Baru Seri Alam, Masai, Johor
+   State: Johor
+
+988. Templer Residence
+   ID: 99e75ef5-3816-4b11-ba5f-c2d2a8614d3e
+   Address: Bandar Country Homes, Rawang, Selangor
+   State: Selangor
+
+989. Mutiara mas mutiara mas mutiara mas
+   ID: 5dfc0874-0da8-4d06-86ea-77fc741945ee
+   Address: Taman Mutiara Mas, Skudai, Johor
+   State: Johor
+
+990. Citrine Residenz Bandar Seri Alam
+   ID: fe8468f1-2ae1-439f-9b21-33da21392bca
+   Address: Jalan Alam Sitrin, Bandar Seri Alam, Masai, Johor
+   State: Johor
+
+991. Damai Residences
+   ID: 2606eadf-7a52-47b3-b30b-f8f77606dd2e
+   Address: Persiaran Kemuning Prima, Kota Kemuning, Shah Alam, Selangor
+   State: Selangor
+
+992. TRX Residences
+   ID: 7fbff4f7-2fb3-4889-ae87-0bcc86c92de4
+   Address: Jalan Tun Razak, KL City Centre, Kuala Lumpur
+   State: Kuala Lumpur
+
+993. Puncak Prima
+   ID: 4476ee58-b5c7-4f38-bcbe-92cf44aac7e9
+   Address: - Jalan Sri Hartamas 17, Taman Sri Hartamas, Taman Sri Hartamas, Sri Hartamas, Kuala Lumpur
+   State: Kuala Lumpur
+
+994. The Nest @ Genting Klang
+   ID: 9badc8ed-6972-4a5d-8565-30a20285de38
+   Address: Lorong 2/23D Jalan Genting Kelang, Taman Danau Kota, Setapak, Kuala Lumpur
+   State: Kuala Lumpur
+
+995. Titiwangsa Sentral
+   ID: 5d11982e-6e44-48ea-99a6-8ce17e15e143
+   Address: - Jalan Chemor, Titiwangsa, Kuala Lumpur
+   State: Kuala Lumpur
+
+996. Sk One Residence
+   ID: 87c7123b-69c4-484a-af09-170505b78e9c
+   Address: Jalan PSK 4 Jalan PSK 3, Taman Bukit Serdang, Seri Kembangan, Selangor
+   State: Selangor
+
+997. Perling Heights Apartments
+   ID: 148a3bf3-6b83-4a1e-b90e-abc726a49e83
+   Address: - Jalan Baiduri 1/1, Perling, Johor
+   State: Johor
+
+998. Tree Residency
+   ID: 289632af-8b82-4617-974a-0f3ff30973fb
+   Address: 28 Lorong Rajawali 7, Kampung Perlis, Bayan Lepas, Penang
+   State: Penang
+
+999. Setia Greens
+   ID: ab146a45-4810-4d8f-a9bf-e4efdd62b931
+   Address: Cangkat Sungai Ara 5, Setia Greens, Sungai Ara, Penang
+   State: Penang
+
+1000. Taman Mastiara
+   ID: 0f9db8fc-3560-4130-a13f-29bcc6e9b599
+   Address: Jalan Ipoh Taman Mastiara Batu Permai Taman Wahyu Kok Lian Kuala Lumpur Kepong, Taman Mastiara, Jalan Ipoh, Kuala Lumpur
+   State: Kuala Lumpur
