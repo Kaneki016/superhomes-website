@@ -42,6 +42,9 @@ export default function Navbar() {
                         <Link href="/properties" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
                             Properties
                         </Link>
+                        <Link href="/new-projects" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                            New Projects
+                        </Link>
                         <Link href="/agents" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
                             Agents
                         </Link>
@@ -171,6 +174,9 @@ export default function Navbar() {
                             </Link>
                             <Link href="/properties" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
                                 Properties
+                            </Link>
+                            <Link href="/new-projects" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                                New Projects
                             </Link>
                             <Link href="/agents" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
                                 Agents

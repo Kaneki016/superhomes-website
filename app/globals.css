@@ -430,6 +430,252 @@
   .seo-info-card .icon-container {
     @apply w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4;
   }
+
+  /* ========================================
+     MAP VIEW STYLES - Premium Design
+     ======================================== */
+
+  /* Map View Container */
+  .map-view-container {
+    @apply relative flex w-full;
+    height: calc(100vh - 280px);
+    min-height: 600px;
+    /* Create isolated stacking context to prevent Leaflet z-index from overlapping header */
+    z-index: 1;
+    isolation: isolate;
+  }
+
+  /* Map Sidebar - Property List */
+  .map-sidebar {
+    @apply flex flex-col bg-white border-r border-gray-200;
+    width: 420px;
+    min-width: 420px;
+    max-width: 480px;
+  }
+
+  .map-sidebar-header {
+    @apply flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50/80 backdrop-blur-sm;
+  }
+
+  .map-sidebar-title {
+    @apply text-sm font-semibold text-gray-700;
+  }
+
+  .map-sidebar-list {
+    @apply flex-1 overflow-y-auto;
+  }
+
+  .map-sidebar-content {
+    @apply p-3 space-y-2;
+  }
+
+  /* Collapse Toggle Button */
+  .map-collapse-btn {
+    @apply absolute left-0 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center w-6 h-16 bg-white border border-gray-200 border-l-0 rounded-r-lg shadow-md hover:bg-gray-50 transition-all cursor-pointer;
+  }
+
+  .map-collapse-btn svg {
+    @apply w-4 h-4 text-gray-500 transition-transform;
+  }
+
+  .map-sidebar.collapsed+.map-main .map-collapse-btn svg {
+    @apply rotate-180;
+  }
+
+  /* Map Main Area */
+  .map-main {
+    @apply relative flex-1;
+  }
+
+  /* Compact Property Card for Map View */
+  .map-property-card {
+    @apply bg-white rounded-lg border border-gray-100 overflow-hidden transition-all duration-200 cursor-pointer;
+  }
+
+  .map-property-card:hover,
+  .map-property-card.hovered {
+    @apply border-primary-300 shadow-md bg-primary-50/30;
+  }
+
+  .map-property-card.selected {
+    @apply border-primary-500 shadow-lg bg-primary-50 ring-2 ring-primary-200;
+  }
+
+  .map-card-image {
+    @apply relative w-28 h-28 flex-shrink-0 bg-gray-100 overflow-hidden rounded-lg;
+  }
+
+  .map-card-image img {
+    @apply w-full h-full object-cover transition-transform duration-300;
+  }
+
+  .map-property-card:hover .map-card-image img {
+    @apply scale-105;
+  }
+
+  .map-card-badge {
+    @apply absolute bottom-1 left-1 px-1.5 py-0.5 text-[9px] font-medium bg-black/70 text-white rounded;
+    max-width: 90%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .map-card-price {
+    @apply text-base font-bold text-gray-900 mb-0.5;
+  }
+
+  .map-card-title {
+    @apply text-xs font-medium text-gray-700 line-clamp-1 mb-0.5;
+  }
+
+  .map-card-location {
+    @apply text-[11px] text-gray-500 line-clamp-1 mb-1;
+  }
+
+  .map-card-details {
+    @apply flex items-center gap-2 text-[11px] text-gray-500;
+  }
+
+  .map-card-detail {
+    @apply flex items-center gap-0.5;
+  }
+
+  /* Map Controls */
+  .map-controls {
+    @apply absolute bottom-4 right-4 flex flex-col gap-2 z-10;
+  }
+
+  .map-control-btn {
+    @apply w-10 h-10 flex items-center justify-center bg-white rounded-lg shadow-md border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-primary-600 transition-all cursor-pointer;
+  }
+
+  .map-control-btn:active {
+    @apply bg-gray-100;
+  }
+
+  .map-control-btn svg {
+    @apply w-5 h-5;
+  }
+
+  .map-control-divider {
+    @apply w-full h-px bg-gray-200 my-1;
+  }
+
+  /* Recenter Button */
+  .map-recenter-btn {
+    @apply absolute bottom-4 left-4 flex items-center gap-2 px-3 py-2 bg-white rounded-lg shadow-md border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-all cursor-pointer z-10;
+  }
+
+  /* Search This Area Button */
+  .map-search-area-btn {
+    @apply absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-lg border border-gray-200 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-600 hover:border-primary-300 transition-all cursor-pointer z-10;
+  }
+
+  .map-search-area-btn svg {
+    @apply w-4 h-4;
+  }
+
+  /* Mobile Map Bottom Sheet */
+  .map-bottom-sheet {
+    @apply fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl shadow-2xl;
+    max-height: 60vh;
+  }
+
+  .map-bottom-sheet-handle {
+    @apply w-12 h-1.5 bg-gray-300 rounded-full mx-auto my-3;
+  }
+
+  .map-bottom-sheet-content {
+    @apply overflow-y-auto px-4 pb-6;
+    max-height: calc(60vh - 40px);
+  }
+
+  /* Enhanced Map Markers */
+  .map-marker {
+    @apply relative cursor-pointer;
+    transition: transform 0.2s ease, z-index 0s;
+  }
+
+  .map-marker:hover,
+  .map-marker.highlighted {
+    transform: scale(1.15);
+    z-index: 1000 !important;
+  }
+
+  .map-marker-price {
+    @apply px-3 py-1.5 text-xs font-bold text-white rounded-full shadow-lg border-2 border-white;
+    background: linear-gradient(135deg, #EC4899 0%, #F97316 100%);
+    white-space: nowrap;
+  }
+
+  .map-marker.highlighted .map-marker-price {
+    @apply ring-4 ring-primary-300/50;
+    background: linear-gradient(135deg, #DB2777 0%, #EA580C 100%);
+  }
+
+  .map-marker-arrow {
+    @apply w-0 h-0 mx-auto;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid white;
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1));
+  }
+
+  /* Map Empty State */
+  .map-empty-state {
+    @apply absolute inset-0 z-10 flex items-center justify-center bg-gray-100/95 rounded-lg;
+  }
+
+  .map-empty-state-content {
+    @apply text-center p-8 max-w-md;
+  }
+
+  .map-empty-state-icon {
+    @apply w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4;
+  }
+
+  .map-empty-state-icon svg {
+    @apply w-8 h-8 text-primary-500;
+  }
+
+  .map-empty-state-title {
+    @apply text-lg font-semibold text-gray-900 mb-2;
+  }
+
+  .map-empty-state-text {
+    @apply text-gray-600 text-sm;
+  }
+
+  /* Map Popup Styles */
+  .map-popup {
+    @apply bg-white rounded-xl overflow-hidden shadow-xl;
+    width: 280px;
+  }
+
+  .map-popup-image {
+    @apply w-full h-36 object-cover bg-gray-100;
+  }
+
+  .map-popup-content {
+    @apply p-3;
+  }
+
+  .map-popup-price {
+    @apply text-lg font-bold text-gray-900 mb-1;
+  }
+
+  .map-popup-title {
+    @apply text-sm font-medium text-gray-700 line-clamp-2 mb-1;
+  }
+
+  .map-popup-details {
+    @apply flex items-center gap-3 text-xs text-gray-500 mb-2;
+  }
+
+  .map-popup-btn {
+    @apply w-full py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors text-center;
+  }
 }
 
 @layer utilities {

@@ -9,7 +9,6 @@ import Pagination from '@/components/Pagination'
 import PropertyCard from '@/components/PropertyCard'
 import { ListSkeleton } from '@/components/SkeletonLoader'
 import { getAgentsPaginated, getPropertiesByAgentIds, searchAgents } from '@/lib/database'
-import { mockAgents } from '@/lib/mockData'
 import { Agent, Property } from '@/lib/supabase'
 
 const AGENTS_PER_PAGE = 12
@@ -120,24 +119,15 @@ function AgentsPageContent() {
 
             const result = await getAgentsPaginated(page, AGENTS_PER_PAGE)
 
-            if (result.totalCount > 0) {
-                setAgents(result.agents)
-                setFilteredAgents(result.agents)
-                setTotalCount(result.totalCount)
-                setCurrentPage(page)
-            } else if (page === 1) {
-                // Fallback to mock data if no agents in database
-                setAgents(mockAgents)
-                setFilteredAgents(mockAgents)
-                setTotalCount(mockAgents.length)
-            }
+            setAgents(result.agents)
+            setFilteredAgents(result.agents)
+            setTotalCount(result.totalCount)
+            setCurrentPage(page)
         } catch (error) {
             console.error('Error loading agents:', error)
-            if (page === 1) {
-                setAgents(mockAgents)
-                setFilteredAgents(mockAgents)
-                setTotalCount(mockAgents.length)
-            }
+            setAgents([])
+            setFilteredAgents([])
+            setTotalCount(0)
         } finally {
             setLoading(false)
         }

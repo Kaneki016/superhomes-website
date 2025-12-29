@@ -15,6 +15,12 @@ export async function getProperties(): Promise<Property[]> {
     return data || []
 }
 
+// Common words to filter out from search queries
+const STOPWORDS = new Set([
+    'in', 'at', 'on', 'for', 'to', 'with', 'and', 'or', 'the', 'a', 'an',
+    'near', 'around', 'by', 'from', 'of', 'is', 'are', 'was', 'were'
+])
+
 // Fetch properties with pagination
 export async function getPropertiesPaginated(
     page: number = 1,
@@ -35,6 +41,82 @@ export async function getPropertiesPaginated(
     const from = (page - 1) * limit
     const to = from + limit - 1
 
+    // Check if we have a multi-word location search
+    const locationQuery = filters?.location?.trim() || ''
+    const words = locationQuery
+        .toLowerCase()
+        .split(/\s+/)
+        .filter(word => word.length >= 2 && !STOPWORDS.has(word))
+
+    // If we have multi-word search, we need to fetch and filter client-side
+    const hasMultiWordSearch = words.length > 1
+
+    if (hasMultiWordSearch) {
+        // For multi-word search, we can't use Supabase filters directly
+        // Fetch a larger dataset first, then filter client-side
+        const firstWord = words[0]
+
+        // Build query to match first keyword across multiple fields
+        let dataQuery = supabase
+            .from('dup_properties')
+            .select('*')
+            .or(`property_name.ilike.%${firstWord}%,address.ilike.%${firstWord}%,state.ilike.%${firstWord}%,property_type.ilike.%${firstWord}%`)
+
+        // Apply other filters
+        if (filters?.state) {
+            dataQuery = dataQuery.ilike('state', `%${filters.state}%`)
+        }
+        if (filters?.propertyType) {
+            dataQuery = dataQuery.ilike('property_type', `%${filters.propertyType}%`)
+        }
+        if (filters?.minPrice) {
+            dataQuery = dataQuery.gte('price', filters.minPrice)
+        }
+        if (filters?.maxPrice) {
+            dataQuery = dataQuery.lte('price', filters.maxPrice)
+        }
+        if (filters?.bedrooms) {
+            dataQuery = dataQuery.eq('bedrooms_num', filters.bedrooms)
+        }
+
+        const { data, error } = await dataQuery
+            .order('latitude', { ascending: false, nullsFirst: false })
+            .order('created_at', { ascending: false })
+            .limit(500) // Fetch more for client-side filtering
+
+        if (error) {
+            console.error('Error fetching properties:', error)
+            return { properties: [], totalCount: 0, hasMore: false }
+        }
+
+        if (!data || data.length === 0) {
+            return { properties: [], totalCount: 0, hasMore: false }
+        }
+
+        // Filter properties that match ALL keywords across any field
+        const filteredResults = data.filter(property => {
+            const combinedText = [
+                property.property_name || '',
+                property.address || '',
+                property.state || '',
+                property.property_type || ''
+            ].join(' ').toLowerCase()
+
+            return words.every(word => combinedText.includes(word))
+        })
+
+        const totalCount = filteredResults.length
+        const paginatedResults = filteredResults.slice(from, to + 1)
+        const hasMore = (page * limit) < totalCount
+
+        return {
+            properties: paginatedResults,
+            totalCount,
+            hasMore
+        }
+    }
+
+    // Standard single-word or no location search
     // Build base query for count
     let countQuery = supabase
         .from('dup_properties')
@@ -46,10 +128,11 @@ export async function getPropertiesPaginated(
         .select('*')
 
     // Apply filters to both queries
-    if (filters?.location) {
-        // Simple search on address
-        countQuery = countQuery.ilike('address', `%${filters.location}%`)
-        dataQuery = dataQuery.ilike('address', `%${filters.location}%`)
+    if (filters?.location && words.length === 1) {
+        // Single keyword: search across multiple fields
+        const searchTerm = words[0]
+        countQuery = countQuery.or(`property_name.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%,state.ilike.%${searchTerm}%,property_type.ilike.%${searchTerm}%`)
+        dataQuery = dataQuery.or(`property_name.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%,state.ilike.%${searchTerm}%,property_type.ilike.%${searchTerm}%`)
     }
     if (filters?.state) {
         countQuery = countQuery.ilike('state', `%${filters.state}%`)
@@ -100,6 +183,7 @@ export async function getPropertiesPaginated(
         hasMore
     }
 }
+
 
 // Fetch properties by a single agent ID with pagination
 export async function getPropertiesByAgentId(
@@ -809,4 +893,53 @@ export async function getPlatformStats(): Promise<{
         citiesCount,
         recentListings
     }
+}
+
+// Fetch new projects (category = 'new_projects')
+// Temporarily returning empty until category column is verified in Supabase
+export async function getNewProjects(filters?: {
+    propertyType?: string
+    minPrice?: string
+    maxPrice?: string
+    bedrooms?: string
+    state?: string
+    tenure?: string
+}): Promise<Property[]> {
+    console.log('[getNewProjects] Returning empty array (category column needs to be added in Supabase)')
+    // Return empty for now - category column needs to exist in Supabase
+    return []
+}
+
+// Search result type for typeahead suggestions
+export interface PropertySuggestion {
+    id: string
+    property_name: string
+    address: string
+    state: string | null
+    property_type: string
+    price: number
+}
+
+// Search properties by keyword for typeahead suggestions
+export async function searchPropertiesByKeyword(keyword: string, limit: number = 5): Promise<PropertySuggestion[]> {
+    if (!keyword || keyword.trim().length < 2) {
+        return []
+    }
+
+    const searchTerm = keyword.trim()
+
+    // Search in property_name, address, state, and property_type
+    const { data, error } = await supabase
+        .from('dup_properties')
+        .select('id, property_name, address, state, property_type, price')
+        .or(`property_name.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%,state.ilike.%${searchTerm}%,property_type.ilike.%${searchTerm}%`)
+        .limit(limit)
+        .order('created_at', { ascending: false })
+
+    if (error) {
+        console.error('Error searching properties:', error)
+        return []
+    }
+
+    return (data || []) as PropertySuggestion[]
 }

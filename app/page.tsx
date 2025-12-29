@@ -6,10 +6,9 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import PropertyCard from '@/components/PropertyCard'
 import PropertyCardSkeleton from '@/components/PropertyCardSkeleton'
+import SearchInput from '@/components/SearchInput'
 import { getFeaturedProperties, getDiverseProperties } from '@/lib/database'
 import { Property } from '@/lib/supabase'
-// Fallback to mock data if database is empty
-import { mockProperties } from '@/lib/mockData'
 
 export default function HomePage() {
     const [featuredProperties, setFeaturedProperties] = useState<Property[]>([])
@@ -38,24 +37,15 @@ export default function HomePage() {
                     getDiverseProperties(12)
                 ])
 
-                if (featured.length > 0) {
-                    setFeaturedProperties(featured)
-                } else {
-                    setFeaturedProperties(mockProperties.slice(0, 4))
-                }
-
-                if (diverse.length > 0) {
-                    // Filter out any properties already in featured
-                    const featuredIds = new Set(featured.map(p => p.id))
-                    const uniqueHandpicked = diverse.filter(p => !featuredIds.has(p.id))
-                    setHandpickedProperties(uniqueHandpicked.slice(0, 12))
-                } else {
-                    setHandpickedProperties(mockProperties.slice(4, 12))
-                }
+                setFeaturedProperties(featured)
+                // Filter out any properties already in featured
+                const featuredIds = new Set(featured.map(p => p.id))
+                const uniqueHandpicked = diverse.filter(p => !featuredIds.has(p.id))
+                setHandpickedProperties(uniqueHandpicked.slice(0, 12))
             } catch (error) {
                 console.error('Error loading properties:', error)
-                setFeaturedProperties(mockProperties.slice(0, 4))
-                setHandpickedProperties(mockProperties.slice(4, 12))
+                setFeaturedProperties([])
+                setHandpickedProperties([])
             } finally {
                 setLoading(false)
             }
@@ -230,23 +220,16 @@ export default function HomePage() {
                         {/* Main Search Box */}
                         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6">
                             <div className="flex flex-col md:flex-row gap-3">
-                                {/* Search Input */}
-                                <div className="flex-1 relative">
-                                    <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                    <input
-                                        id="property-search"
-                                        name="search"
-                                        type="text"
-                                        placeholder="Search by location, property name, or keyword..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                                        className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-rose-300 focus:ring-2 focus:ring-rose-100"
-                                        suppressHydrationWarning
-                                    />
-                                </div>
+                                {/* Search Input with Typeahead */}
+                                <SearchInput
+                                    value={searchQuery}
+                                    onChange={setSearchQuery}
+                                    onSearch={(val) => {
+                                        setSearchQuery(val)
+                                        handleSearch()
+                                    }}
+                                    className="flex-1"
+                                />
                                 {/* Search Button */}
                                 <button
                                     onClick={handleSearch}

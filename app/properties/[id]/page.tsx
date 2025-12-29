@@ -11,7 +11,6 @@ import PropertyDescription from '@/components/PropertyDescription'
 import ImageGallery from '@/components/ImageGallery'
 import SinglePropertyMap from '@/components/SinglePropertyMap'
 import { getPropertyById, getAgentByAgentId, getSimilarProperties } from '@/lib/database'
-import { getPropertyById as getMockPropertyById, getAgentById as getMockAgentById, mockProperties } from '@/lib/mockData'
 import { Property, Agent } from '@/lib/supabase'
 import { useFavorites } from '@/contexts/FavoritesContext'
 import ShareButton from '@/components/ShareButton'
@@ -34,43 +33,20 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                 let agentData: Agent | null = null
                 let similar: Property[] = []
 
-                if (propertyData) {
-                    // Got from database
-                    agentData = await getAgentByAgentId(propertyData.agent_id)
-                    similar = await getSimilarProperties(id, propertyData.property_type, propertyData.state)
-                } else {
-                    // Fallback to mock data
-                    const mockProperty = getMockPropertyById(id)
-                    if (mockProperty) {
-                        propertyData = mockProperty
-                        agentData = getMockAgentById(mockProperty.agent_id) || null
-                        similar = mockProperties
-                            .filter(p => p.id !== id && p.property_type === mockProperty.property_type)
-                            .slice(0, 3)
-                    }
-                }
-
                 if (!propertyData) {
                     setNotFoundState(true)
                     return
                 }
+
+                agentData = await getAgentByAgentId(propertyData.agent_id)
+                similar = await getSimilarProperties(id, propertyData.property_type, propertyData.state)
 
                 setProperty(propertyData)
                 setAgent(agentData)
                 setSimilarProperties(similar)
             } catch (error) {
                 console.error('Error loading property:', error)
-                // Try mock data on error
-                const mockProperty = getMockPropertyById(id)
-                if (mockProperty) {
-                    setProperty(mockProperty)
-                    setAgent(getMockAgentById(mockProperty.agent_id) || null)
-                    setSimilarProperties(mockProperties
-                        .filter(p => p.id !== id && p.property_type === mockProperty.property_type)
-                        .slice(0, 3))
-                } else {
-                    setNotFoundState(true)
-                }
+                setNotFoundState(true)
             } finally {
                 setLoading(false)
             }

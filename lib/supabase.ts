@@ -36,6 +36,7 @@ export interface Property {
     latitude: number | null // For map display
     longitude: number | null // For map display
     source: string // e.g., "propertyguru"
+    category: 'buy' | 'rent' | 'new_projects' // Property category
     scraped_at: string
     created_at: string
     updated_at: string

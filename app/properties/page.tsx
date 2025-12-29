@@ -12,9 +12,10 @@ import FilterChips from '@/components/FilterChips'
 import { ListSkeleton } from '@/components/SkeletonLoader'
 import EmptyState from '@/components/EmptyState'
 import PropertyMap from '@/components/PropertyMap'
+import MapPropertyCard from '@/components/MapPropertyCard'
+import SearchInput from '@/components/SearchInput'
 import { getPropertiesPaginated, getFilterOptions, searchAgents, getPropertiesByAgentIds, getDistinctStates } from '@/lib/database'
 import { Property, Agent } from '@/lib/supabase'
-import { mockProperties } from '@/lib/mockData'
 import { useAuth } from '@/contexts/AuthContext'
 
 const PROPERTIES_PER_PAGE = 12
@@ -72,6 +73,8 @@ function PropertiesPageContent() {
     const [activeTab, setActiveTab] = useState('all')
     const [showFilters, setShowFilters] = useState(false)
     const [mapView, setMapView] = useState(false)
+    const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null)
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
     const [filters, setFilters] = useState({
         propertyType: '',
         minPrice: '',
@@ -114,33 +117,15 @@ function PropertiesPageContent() {
                 bedrooms: activeFilters.bedrooms ? Number(activeFilters.bedrooms) : undefined,
             })
 
-            if (result.totalCount > 0) {
-                setProperties(result.properties)
-                setTotalCount(result.totalCount)
-                setHasMore(result.hasMore)
-                setCurrentPage(page)
-            } else if (page === 1 && !hasActiveFilters) {
-                // Only fallback to mock data if no filters AND database is empty
-                setProperties(mockProperties)
-                setTotalCount(mockProperties.length)
-                setHasMore(false)
-            } else {
-                // Search/filter returned no results - show empty
-                setProperties([])
-                setTotalCount(0)
-                setHasMore(false)
-            }
+            setProperties(result.properties)
+            setTotalCount(result.totalCount)
+            setHasMore(result.hasMore)
+            setCurrentPage(page)
         } catch (error) {
             console.error('Error loading properties:', error)
-            if (page === 1 && !hasActiveFilters) {
-                setProperties(mockProperties)
-                setTotalCount(mockProperties.length)
-                setHasMore(false)
-            } else {
-                setProperties([])
-                setTotalCount(0)
-                setHasMore(false)
-            }
+            setProperties([])
+            setTotalCount(0)
+            setHasMore(false)
         } finally {
             setLoading(false)
             setLoadingMore(false)
@@ -379,22 +364,16 @@ function PropertiesPageContent() {
                 <div className="container-custom py-4">
                     {/* Search Input + Save Search */}
                     <div className="flex gap-4 mb-4">
-                        <div className="flex-1 relative">
-                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                            </div>
-                            <input
-                                type="text"
-                                placeholder="Search location, project, or area..."
-                                value={filters.location}
-                                onChange={(e) => setFilters({ ...filters, location: e.target.value })}
-                                onKeyDown={(e) => e.key === 'Enter' && handleApplyFilters()}
-                                className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all"
-                                suppressHydrationWarning
-                            />
-                        </div>
+                        <SearchInput
+                            value={filters.location}
+                            onChange={(val) => setFilters({ ...filters, location: val })}
+                            onSearch={(val) => {
+                                setFilters({ ...filters, location: val })
+                                handleApplyFilters()
+                            }}
+                            placeholder="Search location, project, or area..."
+                            className="flex-1"
+                        />
                         <button
                             onClick={handleSaveSearch}
                             className="flex items-center gap-2 px-5 py-3 border border-gray-200 rounded-xl bg-white hover:border-primary-400 hover:bg-primary-50 transition-colors"
@@ -582,8 +561,8 @@ function PropertiesPageContent() {
                     </div>
                 </div>
 
-                {/* Category Tabs */}
-                <div className="container-custom">
+                {/* Category Tabs - Hidden for now */}
+                {/* <div className="container-custom">
                     <div className="search-tabs -mb-px">
                         <button
                             onClick={() => setActiveTab('all')}
@@ -604,7 +583,7 @@ function PropertiesPageContent() {
                             Subsale
                         </button>
                     </div>
-                </div>
+                </div> */}
 
                 {/* Active Filter Chips */}
                 <div className="container-custom">
@@ -787,34 +766,63 @@ function PropertiesPageContent() {
                             </div>
                         )}
 
-                        {/* Map View - Split Screen Layout */}
+                        {/* Map View - Premium Split Screen Layout */}
                         {mapView ? (
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6" style={{ height: 'calc(100vh - 400px)', minHeight: '600px' }}>
-                                {/* Left: Property List (scrollable) */}
-                                <div className="overflow-y-auto pr-2" style={{ maxHeight: 'calc(100vh - 400px)' }}>
-                                    <div className="flex flex-col gap-6">
-                                        {sortedProperties.map((property) => (
-                                            <PropertyCard key={property.id} property={property} />
-                                        ))}
+                            <div className="map-view-container rounded-xl overflow-hidden border border-gray-200 shadow-lg">
+                                {/* Sidebar - Property List */}
+                                <div className={`map-sidebar transition-all duration-300 ${sidebarCollapsed ? 'w-0 min-w-0 opacity-0 overflow-hidden' : ''}`}>
+                                    <div className="map-sidebar-header">
+                                        <span className="map-sidebar-title">
+                                            {sortedProperties.length} Properties
+                                        </span>
+                                        <button
+                                            onClick={() => setSidebarCollapsed(true)}
+                                            className="p-1 hover:bg-gray-100 rounded transition-colors"
+                                            aria-label="Collapse sidebar"
+                                        >
+                                            <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div className="map-sidebar-list">
+                                        <div className="map-sidebar-content">
+                                            {sortedProperties.map((property) => (
+                                                <MapPropertyCard
+                                                    key={property.id}
+                                                    property={property}
+                                                    isHovered={hoveredPropertyId === property.id}
+                                                    onHover={setHoveredPropertyId}
+                                                    onClick={(id) => router.push(`/properties/${id}`)}
+                                                />
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
 
-                                {/* Right: Map (sticky) */}
-                                <div className="hidden lg:block sticky top-24 h-full">
+                                {/* Main Map Area */}
+                                <div className="map-main">
+                                    {/* Expand sidebar button (shown when collapsed) */}
+                                    {sidebarCollapsed && (
+                                        <button
+                                            onClick={() => setSidebarCollapsed(false)}
+                                            className="map-collapse-btn"
+                                            aria-label="Expand sidebar"
+                                        >
+                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                                            </svg>
+                                        </button>
+                                    )}
+
                                     <PropertyMap
                                         properties={sortedProperties}
-                                        className="border border-gray-200 shadow-sm"
+                                        hoveredPropertyId={hoveredPropertyId}
+                                        onPropertyHover={setHoveredPropertyId}
+                                        onPropertySelect={(id) => router.push(`/properties/${id}`)}
+                                        className="h-full"
+                                        showControls={true}
                                     />
-                                </div>
-
-                                {/* Mobile: Full-screen map below list */}
-                                <div className="lg:hidden col-span-1">
-                                    <div className="h-96">
-                                        <PropertyMap
-                                            properties={sortedProperties}
-                                            className="border border-gray-200 shadow-sm"
-                                        />
-                                    </div>
                                 </div>
                             </div>
                         ) : (
