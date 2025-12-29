@@ -371,7 +371,7 @@ export default function NewProjectsPage() {
 
                                 {/* Description */}
                                 <p className="text-gray-600 text-center max-w-md mb-6">
-                                    We're working on bringing you the latest new property launches in Malaysia.
+                                    We&apos;re working on bringing you the latest new property launches in Malaysia.
                                     This feature will be available soon!
                                 </p>
 
