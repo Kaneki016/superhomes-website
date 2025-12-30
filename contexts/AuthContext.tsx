@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { User, Session } from '@supabase/supabase-js'
-import { Buyer, Agent } from '@/lib/supabase'
+// Types are defined inline in this file
 
 interface UserProfile {
     id: string
@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const fetchProfile = useCallback(async (userId: string, userEmail: string) => {
         try {
             // First check if user is a buyer
-            const { data: buyerData, error: buyerError } = await supabase
+            const { data: buyerData } = await supabase
                 .from('buyers')
                 .select('*')
                 .eq('auth_id', userId)
@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
 
             // If not a buyer, check if user is an agent
-            const { data: agentData, error: agentError } = await supabase
+            const { data: agentData } = await supabase
                 .from('dup_agents')
                 .select('*')
                 .eq('auth_id', userId)

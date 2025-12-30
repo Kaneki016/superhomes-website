@@ -35,19 +35,11 @@ export default function ProfilePage() {
     const handleSave = async () => {
         if (!user || !profile) return
 
-        console.log('Starting save...', { userId: user.id, profileType: profile.user_type })
-
         setSaving(true)
         setSaveMessage('')
 
         try {
             if (profile.user_type === 'buyer') {
-                console.log('Attempting to update buyer profile...', {
-                    auth_id: user.id,
-                    name: formData.name,
-                    phone: formData.phone
-                })
-
                 // Update buyer profile
                 const { data, error } = await supabase
                     .from('buyers')
@@ -59,8 +51,6 @@ export default function ProfilePage() {
                     .eq('auth_id', user.id)
                     .select()
 
-                console.log('Update result:', { data, error })
-
                 if (error) {
                     console.error('Error updating profile:', error)
                     setSaveMessage(`Failed to update profile: ${error.message}`)
@@ -68,7 +58,6 @@ export default function ProfilePage() {
                     console.error('No buyer record found for auth_id:', user.id)
                     setSaveMessage('Profile not found. Please try logging out and back in.')
                 } else {
-                    console.log('Profile updated successfully!')
                     setSaveMessage('Profile updated successfully!')
                     // Refresh the page after a brief delay to show updated data
                     setTimeout(() => {

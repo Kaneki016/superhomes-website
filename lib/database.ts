@@ -287,23 +287,29 @@ const MALAYSIAN_STATES = [
 ]
 
 // Get distinct states from the database
-// Uses static list of Malaysian states and checks which have properties
+// Optimized: Single query instead of 16 sequential queries
 export async function getDistinctStates(): Promise<string[]> {
-    // Check which states have at least one property
-    const statesWithData: string[] = []
+    const { data, error } = await supabase
+        .from('dup_properties')
+        .select('state')
+        .not('state', 'is', null)
 
-    for (const state of MALAYSIAN_STATES) {
-        const { count, error } = await supabase
-            .from('dup_properties')
-            .select('id', { count: 'exact', head: true })
-            .ilike('state', `%${state}%`)
-
-        if (!error && count && count > 0) {
-            statesWithData.push(state)
-        }
+    if (error || !data) {
+        console.error('Error fetching distinct states:', error)
+        return []
     }
 
-    return statesWithData.sort()
+    // Get unique states from the data
+    const uniqueStates = [...new Set(data.map(d => d.state).filter(Boolean))]
+
+    // Filter to only valid Malaysian states and sort
+    const validStates = uniqueStates.filter(state =>
+        MALAYSIAN_STATES.some(ms =>
+            state.toLowerCase().includes(ms.toLowerCase())
+        )
+    )
+
+    return validStates.sort()
 }
 
 // Fetch featured properties with optional limit
@@ -905,7 +911,6 @@ export async function getNewProjects(filters?: {
     state?: string
     tenure?: string
 }): Promise<Property[]> {
-    console.log('[getNewProjects] Returning empty array (category column needs to be added in Supabase)')
     // Return empty for now - category column needs to exist in Supabase
     return []
 }

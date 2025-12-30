@@ -20,8 +20,7 @@ export default function ShareButton({ url, title = 'Check out this property', cl
                     url: url,
                 })
             } catch (error) {
-                // User cancelled share or error occurred
-                console.log('Share cancelled or failed:', error)
+                // User cancelled share or error occurred - silently ignore
             }
         } else {
             // Fallback to clipboard copy (desktop)

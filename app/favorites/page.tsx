@@ -25,7 +25,6 @@ export default function FavoritesPage() {
     }, [user, authLoading, router])
 
     // Fetch favorite properties when favorites change
-    // Fetch favorite properties when favorites change
     useEffect(() => {
         const fetchProperties = async () => {
             // Don't do anything if still loading auth or favorites

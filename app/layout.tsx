@@ -3,7 +3,9 @@ import './globals.css'
 import 'leaflet/dist/leaflet.css'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { FavoritesProvider } from '@/contexts/FavoritesContext'
+import { CompareProvider } from '@/contexts/CompareContext'
 import ScrollToTop from '@/components/ScrollToTop'
+import CompareBar from '@/components/CompareBar'
 
 export const metadata: Metadata = {
     title: 'SuperHomes - Your Premium Property Marketplace',
@@ -21,11 +23,15 @@ export default function RootLayout({
             <body suppressHydrationWarning>
                 <AuthProvider>
                     <FavoritesProvider>
-                        {children}
-                        <ScrollToTop />
+                        <CompareProvider>
+                            {children}
+                            <ScrollToTop />
+                            <CompareBar />
+                        </CompareProvider>
                     </FavoritesProvider>
                 </AuthProvider>
             </body>
         </html>
     )
 }
+

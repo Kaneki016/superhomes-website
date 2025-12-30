@@ -2,7 +2,6 @@
 
 import { use, useEffect, useState } from 'react'
 import Link from 'next/link'
-import Head from 'next/head'
 import { notFound, useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
@@ -131,24 +130,6 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
 
     return (
         <>
-            <Head>
-                <title>{property.property_name} - SuperHomes</title>
-                <meta name="description" content={`${property.property_name} - ${formatPrice(property.price)} | ${property.bedrooms > 0 ? `${property.bedrooms} bed, ` : ''}${property.bathrooms} bath, ${property.size}`} />
-
-                {/* Open Graph / Facebook */}
-                <meta property="og:type" content="website" />
-                <meta property="og:title" content={`${property.property_name} - ${formatPrice(property.price)}`} />
-                <meta property="og:description" content={`${property.property_type} | ${property.bedrooms > 0 ? `${property.bedrooms} bed, ` : ''}${property.bathrooms} bath, ${property.size} | ${property.state || property.address}`} />
-                <meta property="og:image" content={property.main_image_url || property.images[0] || '/og-default.jpg'} />
-                <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
-
-                {/* Twitter */}
-                <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content={`${property.property_name} - ${formatPrice(property.price)}`} />
-                <meta name="twitter:description" content={`${property.property_type} | ${property.bedrooms > 0 ? `${property.bedrooms} bed, ` : ''}${property.bathrooms} bath, ${property.size}`} />
-                <meta name="twitter:image" content={property.main_image_url || property.images[0] || '/og-default.jpg'} />
-            </Head>
-
             <div className="min-h-screen bg-gray-50">
                 <Navbar />
 

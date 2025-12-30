@@ -25,17 +25,11 @@ export default function NewProjectsPage() {
     useEffect(() => {
         async function loadData() {
             setLoading(true)
-            console.log('Loading new projects with filters:', filters)
             try {
-                // Load separately to debug
-                console.log('Fetching new projects...')
                 const projectsData = await getNewProjects(filters)
-                console.log('New projects fetched:', projectsData.length)
                 setProjects(projectsData)
 
-                console.log('Fetching states...')
                 const states = await getDistinctStates()
-                console.log('States fetched:', states.length)
                 setStateOptions(states)
             } catch (error) {
                 console.error('Error loading projects:', error)

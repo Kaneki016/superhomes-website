@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, memo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Property } from '@/lib/supabase'
@@ -8,15 +8,18 @@ import { getAgentByAgentId } from '@/lib/database'
 import { Agent } from '@/lib/supabase'
 import { useFavorites } from '@/contexts/FavoritesContext'
 import { useAuth } from '@/contexts/AuthContext'
+import { useCompare } from '@/contexts/CompareContext'
 
 interface PropertyCardProps {
     property: Property
+    agent?: Agent | null  // Optional: pass agent from parent to avoid N+1 fetches
 }
 
-export default function PropertyCard({ property }: PropertyCardProps) {
-    const [agent, setAgent] = useState<Agent | null>(null)
+function PropertyCard({ property, agent: providedAgent }: PropertyCardProps) {
+    const [agent, setAgent] = useState<Agent | null>(providedAgent || null)
     const { user } = useAuth()
     const { isFavorite, toggleFavorite } = useFavorites()
+    const { isInCompare, addToCompare, removeFromCompare, canAddMore } = useCompare()
     const router = useRouter()
     const [isToggling, setIsToggling] = useState(false)
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
@@ -25,8 +28,13 @@ export default function PropertyCard({ property }: PropertyCardProps) {
 
     const favorited = isFavorite(property.id)
 
-    // Fetch agent data
+    // Fetch agent data only if not provided by parent
     useEffect(() => {
+        // Skip fetch if agent was provided from parent
+        if (providedAgent !== undefined) {
+            setAgent(providedAgent)
+            return
+        }
         async function loadAgent() {
             if (property.agent_id) {
                 const agentData = await getAgentByAgentId(property.agent_id)
@@ -34,7 +42,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
             }
         }
         loadAgent()
-    }, [property.agent_id])
+    }, [property.agent_id, providedAgent])
 
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat('en-MY', {
@@ -183,6 +191,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                             <img
                                 src={images[currentImageIndex]}
                                 alt={property.property_name}
+                                loading="lazy"
                                 className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-500 ${!imageLoaded ? 'blur-md scale-110' : 'blur-0 scale-100'}`}
                                 onLoad={() => setImageLoaded(true)}
                                 onError={() => setImageError(true)}
@@ -246,8 +255,29 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                         </div>
                     )}
 
-                    {/* Favorite & Hide Actions */}
+                    {/* Favorite & Compare Actions */}
                     <div className="gallery-actions">
+                        {/* Compare Button */}
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                if (isInCompare(property.id)) {
+                                    removeFromCompare(property.id)
+                                } else {
+                                    addToCompare(property)
+                                }
+                            }}
+                            disabled={!canAddMore && !isInCompare(property.id)}
+                            className={`action-btn ${isInCompare(property.id) ? 'active bg-primary-500 text-white' : ''} ${!canAddMore && !isInCompare(property.id) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            aria-label={isInCompare(property.id) ? 'Remove from compare' : 'Add to compare'}
+                            title={isInCompare(property.id) ? 'Remove from compare' : canAddMore ? 'Add to compare' : 'Compare list full (max 3)'}
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                        </button>
+                        {/* Favorite Button */}
                         <button
                             onClick={handleFavoriteClick}
                             disabled={isToggling}
@@ -345,3 +375,6 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         </div>
     )
 }
+
+// Memoize to prevent unnecessary re-renders in lists
+export default memo(PropertyCard)
