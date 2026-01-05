@@ -14,11 +14,18 @@ export default function MortgageCalculator({ propertyPrice, isRent = false }: Mo
     const [loanTermYears, setLoanTermYears] = useState(30)
     const [isExpanded, setIsExpanded] = useState(false)
 
-    // Don't render for rental properties
-    if (isRent || !propertyPrice) return null
-
-    // Calculate mortgage details
+    // Calculate mortgage details - must be called before any early returns
     const calculations = useMemo(() => {
+        if (!propertyPrice || propertyPrice === 0) {
+            return {
+                downPayment: 0,
+                loanAmount: 0,
+                monthlyPayment: 0,
+                totalPayment: 0,
+                totalInterest: 0
+            }
+        }
+
         const downPayment = (propertyPrice * downPaymentPercent) / 100
         const loanAmount = propertyPrice - downPayment
         const monthlyInterestRate = interestRate / 100 / 12
@@ -46,6 +53,9 @@ export default function MortgageCalculator({ propertyPrice, isRent = false }: Mo
     }, [propertyPrice, downPaymentPercent, interestRate, loanTermYears])
 
     const loanTermOptions = [15, 20, 25, 30, 35]
+
+    // Don't render for rental properties - must be AFTER all hooks
+    if (isRent || !propertyPrice) return null
 
     return (
         <div className="glass p-6 rounded-2xl">
@@ -144,8 +154,8 @@ export default function MortgageCalculator({ propertyPrice, isRent = false }: Mo
                                     key={years}
                                     onClick={() => setLoanTermYears(years)}
                                     className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${loanTermYears === years
-                                            ? 'bg-primary-500 text-white'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        ? 'bg-primary-500 text-white'
+                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                         }`}
                                 >
                                     {years} yrs
