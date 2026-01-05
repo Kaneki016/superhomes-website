@@ -18,12 +18,17 @@ export default function MapPropertyCard({
     onHover,
     onClick
 }: MapPropertyCardProps) {
-    const formatPrice = (price: number) => {
+    const formatPrice = (price: number | null | undefined, isRent: boolean = false) => {
+        if (!price) return 'Price on Request'
         if (price >= 1000000) {
-            return `RM ${(price / 1000000).toFixed(2)}M`
+            return isRent ? `RM ${(price / 1000000).toFixed(2)}M/mo` : `RM ${(price / 1000000).toFixed(2)}M`
         }
-        return `RM ${(price / 1000).toFixed(0)}K`
+        return isRent ? `RM ${(price / 1000).toFixed(0)}K/mo` : `RM ${(price / 1000).toFixed(0)}K`
     }
+
+    const propertyName = property.title || property.property_name || 'Property'
+    const propertySize = property.floor_area_sqft || property.size
+    const bedroomCount = property.total_bedrooms || property.bedrooms_num || property.bedrooms
 
     const getPropertyImage = () => {
         if (property.images && property.images.length > 0) {
@@ -65,9 +70,9 @@ export default function MapPropertyCard({
 
     // Parse size string - just get the number
     const getSizeValue = () => {
-        if (!property.size) return null
-        const match = property.size.match(/[\d,]+/)
-        return match ? match[0] : null
+        if (!propertySize) return null
+        const match = propertySize.match?.(/[\d,]+/)
+        return match ? match[0] : propertySize
     }
 
     return (
@@ -83,7 +88,7 @@ export default function MapPropertyCard({
                 <div className="map-card-image">
                     <img
                         src={getPropertyImage()}
-                        alt={property.property_name}
+                        alt={propertyName}
                         className="w-full h-full object-cover"
                         loading="lazy"
                     />
@@ -98,12 +103,12 @@ export default function MapPropertyCard({
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
                     {/* Price */}
                     <div className="text-lg font-bold text-gray-900">
-                        {formatPrice(property.price)}
+                        {formatPrice(property.price, property.listing_type === 'rent')}
                     </div>
 
                     {/* Title/Address - truncated */}
                     <h3 className="text-sm font-medium text-gray-800 truncate">
-                        {property.property_name}
+                        {propertyName}
                     </h3>
 
                     {/* Location */}
@@ -113,10 +118,10 @@ export default function MapPropertyCard({
 
                     {/* Details Row */}
                     <div className="flex items-center gap-3 text-xs text-gray-600">
-                        {property.bedrooms && (
+                        {bedroomCount && (
                             <span className="flex items-center gap-1">
                                 <span className="font-medium">
-                                    {String(property.bedrooms).replace(/[^\d]/g, '') || property.bedrooms}
+                                    {String(bedroomCount).replace(/[^\d]/g, '') || bedroomCount}
                                 </span> Beds
                             </span>
                         )}

@@ -28,13 +28,29 @@ function PropertyCard({ property, agent: providedAgent }: PropertyCardProps) {
 
     const favorited = isFavorite(property.id)
 
-    // Fetch agent data only if not provided by parent
+    // Get agent from contacts if available, otherwise fetch
     useEffect(() => {
-        // Skip fetch if agent was provided from parent
+        // If agent was provided from parent, use it
         if (providedAgent !== undefined) {
             setAgent(providedAgent)
             return
         }
+
+        // Check if property has contacts embedded
+        if (property.contacts && property.contacts.length > 0) {
+            // Use the first contact as the agent
+            const contact = property.contacts[0]
+            setAgent({
+                ...contact,
+                agent_id: contact.id,
+                agency: contact.company_name,
+                whatsapp_link: contact.whatsapp_url,
+                created_at: contact.scraped_at,
+            } as Agent)
+            return
+        }
+
+        // Fallback: fetch agent by ID
         async function loadAgent() {
             if (property.agent_id) {
                 const agentData = await getAgentByAgentId(property.agent_id)
@@ -42,24 +58,38 @@ function PropertyCard({ property, agent: providedAgent }: PropertyCardProps) {
             }
         }
         loadAgent()
-    }, [property.agent_id, providedAgent])
+    }, [property.agent_id, property.contacts, providedAgent])
 
-    const formatPrice = (price: number) => {
-        return new Intl.NumberFormat('en-MY', {
+    // Format price based on listing type
+    const formatPrice = (price: number | null | undefined, isRent: boolean = false) => {
+        if (!price) return 'Price on Request'
+        const formatted = new Intl.NumberFormat('en-MY', {
             style: 'currency',
             currency: 'MYR',
             minimumFractionDigits: 0,
         }).format(price)
+        return isRent ? `${formatted}/month` : formatted
     }
 
-    const formatPricePerSqft = (price: number, size: string) => {
+    // Get display price based on listing type
+    const getDisplayPrice = () => {
+        if (property.listing_type === 'rent') {
+            const rentPrice = property.rent_details?.monthly_rent || property.price
+            return formatPrice(rentPrice, true)
+        }
+        return formatPrice(property.price, false)
+    }
+
+    const formatPricePerSqft = (price: number | null | undefined, size: string | null | undefined) => {
+        if (!price || !size) return null
         const sizeNum = parseInt(size.replace(/[^0-9]/g, ''))
         if (!sizeNum || sizeNum === 0) return null
         const psf = price / sizeNum
         return `RM ${psf.toFixed(2)} psf`
     }
 
-    const getTimeAgo = (dateString: string) => {
+    const getTimeAgo = (dateString: string | undefined) => {
+        if (!dateString) return ''
         const date = new Date(dateString)
         const now = new Date()
         const diffMs = now.getTime() - date.getTime()
@@ -93,24 +123,22 @@ function PropertyCard({ property, agent: providedAgent }: PropertyCardProps) {
         e.preventDefault()
         e.stopPropagation()
 
-        // Open WhatsApp with agent's phone number and property details
         if (agent?.phone) {
             const phoneNumber = agent.phone.replace(/[^0-9]/g, '')
+            const propertyImage = property.main_image_url || (property.images && property.images[0]) || ''
+            const propertyName = property.title || property.property_name || 'Property'
+            const displayPrice = getDisplayPrice()
 
-            // Get the property image URL
-            const propertyImage = property.main_image_url || property.images[0] || ''
-
-            // Build comprehensive message with property details
-            // Using WhatsApp markdown (*bold*) for better URL encoding compatibility
             const propertyDetails = [
-                `*${property.property_name}*`,
+                `*${propertyName}*`,
                 ``,
-                `*Price:* ${formatPrice(property.price)}`,
-                (property.bedrooms_num || property.bedrooms) > 0 ? `*Bedrooms:* ${property.bedrooms_num || property.bedrooms}` : null,
-                `*Bathrooms:* ${property.bathrooms}`,
-                `*Size:* ${property.size}`,
-                `*Location:* ${property.state || property.address}`,
-                `*Type:* ${property.property_type}`,
+                `*Price:* ${displayPrice}`,
+                (property.total_bedrooms || property.bedrooms_num) ? `*Bedrooms:* ${property.total_bedrooms || property.bedrooms_num}` : null,
+                property.bathrooms ? `*Bathrooms:* ${property.bathrooms}` : null,
+                (property.floor_area_sqft || property.size) ? `*Size:* ${property.floor_area_sqft || property.size}` : null,
+                `*Location:* ${property.state || property.address || ''}`,
+                property.property_type ? `*Type:* ${property.property_type}` : null,
+                property.listing_type ? `*Listing:* For ${property.listing_type === 'sale' ? 'Sale' : property.listing_type === 'rent' ? 'Rent' : 'New Project'}` : null,
                 ``,
                 `View full details:`,
                 `${typeof window !== 'undefined' ? `${window.location.origin}/properties/${property.id}` : ''}`,
@@ -126,7 +154,7 @@ function PropertyCard({ property, agent: providedAgent }: PropertyCardProps) {
         }
     }
 
-    const images = property.images && property.images.length > 0
+    const images = (property.images && property.images.length > 0)
         ? property.images
         : property.main_image_url
             ? [property.main_image_url]
@@ -144,16 +172,37 @@ function PropertyCard({ property, agent: providedAgent }: PropertyCardProps) {
 
     // Check if property is new (less than 7 days old)
     const isNew = () => {
-        const daysDiff = Math.floor((new Date().getTime() - new Date(property.created_at).getTime()) / (1000 * 60 * 60 * 24))
+        const dateToCheck = property.created_at || property.scraped_at
+        if (!dateToCheck) return false
+        const daysDiff = Math.floor((new Date().getTime() - new Date(dateToCheck).getTime()) / (1000 * 60 * 60 * 24))
         return daysDiff <= 7
     }
+
+    // Get listing type badge style
+    const getListingTypeBadge = () => {
+        switch (property.listing_type) {
+            case 'sale':
+                return { text: 'For Sale', className: 'bg-green-500 text-white' }
+            case 'rent':
+                return { text: 'For Rent', className: 'bg-blue-500 text-white' }
+            case 'project':
+                return { text: 'New Project', className: 'bg-purple-500 text-white' }
+            default:
+                return null
+        }
+    }
+
+    const listingBadge = getListingTypeBadge()
+    const propertyName = property.title || property.property_name || 'Property'
+    const propertySize = property.floor_area_sqft || property.size || ''
+    const bedroomCount = property.total_bedrooms || property.bedrooms_num || property.bedrooms
 
     return (
         <div className="property-card-v2 group hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 active:scale-[0.98] touch-manipulation">
             {/* Agent Header */}
             {agent && (
                 <div className="property-card-header">
-                    <Link href={`/agents/${agent.agent_id}`} className="flex items-center gap-3 flex-1 min-w-0 group">
+                    <Link href={`/agents/${agent.id || agent.agent_id}`} className="flex items-center gap-3 flex-1 min-w-0 group">
                         <div className="property-card-avatar group-hover:ring-2 group-hover:ring-primary-300 transition-all">
                             {agent.photo_url ? (
                                 <img
@@ -190,7 +239,7 @@ function PropertyCard({ property, agent: providedAgent }: PropertyCardProps) {
                         <>
                             <img
                                 src={images[currentImageIndex]}
-                                alt={property.property_name}
+                                alt={propertyName}
                                 loading="lazy"
                                 className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-500 ${!imageLoaded ? 'blur-md scale-110' : 'blur-0 scale-100'}`}
                                 onLoad={() => setImageLoaded(true)}
@@ -248,7 +297,7 @@ function PropertyCard({ property, agent: providedAgent }: PropertyCardProps) {
                         </>
                     )}
 
-                    {/* Image Counter Badge - PropertyGuru Style */}
+                    {/* Image Counter Badge */}
                     {images.length > 0 && (
                         <div className="image-counter-badge">
                             <span>{currentImageIndex + 1}/{images.length}</span>
@@ -302,6 +351,12 @@ function PropertyCard({ property, agent: providedAgent }: PropertyCardProps) {
 
                     {/* Property Type & Status Badges */}
                     <div className="property-badge">
+                        {/* Listing Type Badge (Sale/Rent/Project) */}
+                        {listingBadge && (
+                            <span className={`badge-pill ${listingBadge.className} shadow-md font-semibold`}>
+                                {listingBadge.text}
+                            </span>
+                        )}
                         {isNew() && (
                             <span className="badge-pill bg-gradient-primary text-white shadow-md font-semibold">
                                 ✨ New
@@ -317,42 +372,57 @@ function PropertyCard({ property, agent: providedAgent }: PropertyCardProps) {
                 <div className="property-card-content">
                     {/* Price Section */}
                     <div className="price-section">
-                        <div className="price-main">{formatPrice(property.price)}</div>
-                        {property.price_per_sqft ? (
-                            <div className="price-psf">RM {property.price_per_sqft.toFixed(2)} psf</div>
-                        ) : formatPricePerSqft(property.price, property.size) && (
-                            <div className="price-psf">{formatPricePerSqft(property.price, property.size)}</div>
+                        <div className="price-main">{getDisplayPrice()}</div>
+                        {property.listing_type === 'sale' && (
+                            property.price_per_sqft ? (
+                                <div className="price-psf">RM {property.price_per_sqft.toFixed(2)} psf</div>
+                            ) : formatPricePerSqft(property.price, propertySize) && (
+                                <div className="price-psf">{formatPricePerSqft(property.price, propertySize)}</div>
+                            )
+                        )}
+                        {property.listing_type === 'rent' && property.rent_details?.deposit_months && (
+                            <div className="price-psf">{property.rent_details.deposit_months} month deposit</div>
                         )}
                     </div>
 
                     {/* Title & Location */}
-                    <h3 className="property-title">{property.property_name}</h3>
+                    <h3 className="property-title">{propertyName}</h3>
                     <p className="property-address">{property.address}</p>
 
                     {/* Feature Icons */}
                     <div className="property-features">
-                        {(property.bedrooms_num || property.bedrooms) > 0 && (
+                        {bedroomCount && Number(bedroomCount) > 0 && (
                             <div className="feature-item">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                                 </svg>
-                                <span>{property.bedrooms_num || property.bedrooms}</span>
+                                <span>{bedroomCount}</span>
                             </div>
                         )}
-                        <div className="feature-item">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-                            </svg>
-                            <span>{property.bathrooms}</span>
-                        </div>
-                        <span className="feature-divider"></span>
-                        <div className="feature-item">
-                            <span>{property.size}</span>
-                        </div>
-                        <span className="feature-divider"></span>
-                        <div className="feature-item">
-                            <span>{property.property_type}</span>
-                        </div>
+                        {property.bathrooms && (
+                            <div className="feature-item">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+                                </svg>
+                                <span>{property.bathrooms}</span>
+                            </div>
+                        )}
+                        {propertySize && (
+                            <>
+                                <span className="feature-divider"></span>
+                                <div className="feature-item">
+                                    <span>{propertySize}</span>
+                                </div>
+                            </>
+                        )}
+                        {property.property_type && (
+                            <>
+                                <span className="feature-divider"></span>
+                                <div className="feature-item">
+                                    <span>{property.property_type}</span>
+                                </div>
+                            </>
+                        )}
                         {property.built_year && (
                             <>
                                 <span className="feature-divider"></span>
@@ -368,7 +438,7 @@ function PropertyCard({ property, agent: providedAgent }: PropertyCardProps) {
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span>Listed {getTimeAgo(property.created_at)}</span>
+                        <span>Listed {getTimeAgo(property.created_at || property.scraped_at)}</span>
                     </div>
                 </div>
             </Link>

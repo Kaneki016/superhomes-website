@@ -27,17 +27,17 @@ export default function CompareBar() {
                                     <div className="w-10 h-10 rounded overflow-hidden flex-shrink-0">
                                         <img
                                             src={property.main_image_url || property.images?.[0] || '/placeholder-property.jpg'}
-                                            alt={property.property_name}
+                                            alt={property.title || property.property_name || 'Property'}
                                             className="w-full h-full object-cover"
                                         />
                                     </div>
                                     {/* Name */}
                                     <div className="hidden sm:block max-w-[120px]">
                                         <p className="text-sm font-medium text-gray-900 truncate">
-                                            {property.property_name}
+                                            {property.title || property.property_name || 'Property'}
                                         </p>
                                         <p className="text-xs text-gray-500">
-                                            RM {(property.price / 1000000).toFixed(2)}M
+                                            {property.price ? `RM ${(property.price / 1000000).toFixed(2)}M` : 'POA'}
                                         </p>
                                     </div>
                                     {/* Remove button */}

@@ -40,13 +40,14 @@ export default function Navbar() {
                             Home
                         </Link>
                         <Link href="/properties" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                            Properties
+                            Buy
                         </Link>
-                        {/* Hidden until data is available
+                        <Link href="/rent" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                            Rent
+                        </Link>
                         <Link href="/new-projects" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
                             New Projects
                         </Link>
-                        */}
                         <Link href="/agents" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
                             Agents
                         </Link>
@@ -175,13 +176,14 @@ export default function Navbar() {
                                 Home
                             </Link>
                             <Link href="/properties" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                                Properties
+                                Buy
                             </Link>
-                            {/* Hidden until data is available
+                            <Link href="/rent" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                                Rent
+                            </Link>
                             <Link href="/new-projects" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
                                 New Projects
                             </Link>
-                            */}
                             <Link href="/agents" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
                                 Agents
                             </Link>
