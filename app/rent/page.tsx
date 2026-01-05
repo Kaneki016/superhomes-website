@@ -4,8 +4,11 @@ import { useEffect, useState } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import PropertyCard from '@/components/PropertyCard'
+import Pagination from '@/components/Pagination'
 import { Property } from '@/lib/supabase'
 import { getRentListings, getDistinctStates } from '@/lib/database'
+
+const ITEMS_PER_PAGE = 12
 
 export default function RentPage() {
     const [properties, setProperties] = useState<Property[]>([])
@@ -20,6 +23,19 @@ export default function RentPage() {
         furnishing: '',
     })
     const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+    const [currentPage, setCurrentPage] = useState(1)
+
+    // Pagination calculations
+    const totalPages = Math.ceil(properties.length / ITEMS_PER_PAGE)
+    const paginatedProperties = properties.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE
+    )
+
+    // Reset to page 1 when filters change
+    useEffect(() => {
+        setCurrentPage(1)
+    }, [filters])
 
     // Load rent listings
     useEffect(() => {
@@ -381,11 +397,22 @@ export default function RentPage() {
                                 )}
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {properties.map(property => (
-                                    <PropertyCard key={property.id} property={property} />
-                                ))}
-                            </div>
+                            <>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                    {paginatedProperties.map(property => (
+                                        <PropertyCard key={property.id} property={property} />
+                                    ))}
+                                </div>
+
+                                {/* Pagination */}
+                                {totalPages > 1 && (
+                                    <Pagination
+                                        currentPage={currentPage}
+                                        totalPages={totalPages}
+                                        onPageChange={setCurrentPage}
+                                    />
+                                )}
+                            </>
                         )}
                     </div>
                 </section>

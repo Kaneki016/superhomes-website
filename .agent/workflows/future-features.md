@@ -82,6 +82,20 @@ description: Future features to implement for SuperHomes
 
 ---
 
+### 7. 📄 Server-Side Pagination for Large Datasets
+**Priority**: High | **Effort**: Medium  
+**Location**: `lib/database.ts` (getRentListings, getNewProjects, etc.)  
+**Issue**: Supabase returns max 1000 rows by default. Rent page shows 1000 properties but DB has 6000+.
+
+**Implementation**:
+- Modify database functions to accept `page` and `limit` parameters
+- Use Supabase `.range(start, end)` for efficient pagination
+- Return total count alongside results for pagination UI
+- Update rent page and properties page to use server-side pagination
+- Benefits: Faster page loads, less memory usage, scalable
+
+---
+
 ## 🔥 High Impact - Recommended Next
 
 ### 1. 💳 Mortgage Calculator

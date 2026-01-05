@@ -535,9 +535,14 @@ export async function getFeaturedProperties(limit: number = 8): Promise<Property
         return []
     }
 
-    // Transform and filter to only include properties with contacts/agents
+    // Transform and filter to only include properties with contacts/agents that have valid names
     const properties = (data || []).map(transformListingToProperty)
-    const propertiesWithAgents = properties.filter(p => p.contacts && p.contacts.length > 0)
+    const propertiesWithAgents = properties.filter(p => {
+        if (!p.contacts || p.contacts.length === 0) return false
+        // Filter out properties where the first contact has "Unknown" or empty name
+        const agentName = p.contacts[0]?.name?.toLowerCase().trim()
+        return agentName && agentName !== 'unknown'
+    })
 
     return propertiesWithAgents.slice(0, limit)
 }
@@ -559,9 +564,13 @@ export async function getDiverseProperties(limit: number = 8): Promise<Property[
 
     if (!data) return []
 
-    // Transform and filter to only include properties with contacts/agents
+    // Transform and filter to only include properties with contacts/agents that have valid names
     const allProperties = data.map(transformListingToProperty)
-    const properties = allProperties.filter(p => p.contacts && p.contacts.length > 0)
+    const properties = allProperties.filter(p => {
+        if (!p.contacts || p.contacts.length === 0) return false
+        const agentName = p.contacts[0]?.name?.toLowerCase().trim()
+        return agentName && agentName !== 'unknown'
+    })
 
     // Pick one property per unique agent
     const seenAgents = new Set<string>()
