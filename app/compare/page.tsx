@@ -4,19 +4,10 @@ import { useCompare } from '@/contexts/CompareContext'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { formatPrice, formatPricePerSqft } from '@/lib/utils'
 
 export default function ComparePage() {
     const { compareList, removeFromCompare, clearCompare } = useCompare()
-
-    const formatPrice = (price: number | null | undefined, isRent: boolean = false) => {
-        if (!price) return 'Price on Request'
-        const formatted = new Intl.NumberFormat('en-MY', {
-            style: 'currency',
-            currency: 'MYR',
-            minimumFractionDigits: 0,
-        }).format(price)
-        return isRent ? `${formatted}/month` : formatted
-    }
 
     const calculatePSF = (price: number | null | undefined, size: string | null | undefined) => {
         if (!price || !size) return '-'
@@ -198,8 +189,8 @@ export default function ComparePage() {
                                     {compareList.map(property => (
                                         <td key={property.id} className="p-4 text-center">
                                             <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${property.listing_type === 'sale' ? 'bg-green-100 text-green-700' :
-                                                    property.listing_type === 'rent' ? 'bg-blue-100 text-blue-700' :
-                                                        'bg-purple-100 text-purple-700'
+                                                property.listing_type === 'rent' ? 'bg-blue-100 text-blue-700' :
+                                                    'bg-purple-100 text-purple-700'
                                                 }`}>
                                                 {property.listing_type === 'sale' ? 'For Sale' :
                                                     property.listing_type === 'rent' ? 'For Rent' : 'New Project'}

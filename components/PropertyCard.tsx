@@ -9,6 +9,7 @@ import { Agent } from '@/lib/supabase'
 import { useFavorites } from '@/contexts/FavoritesContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { useCompare } from '@/contexts/CompareContext'
+import { formatPrice, formatPricePerSqft, getTimeAgo } from '@/lib/utils'
 
 interface PropertyCardProps {
     property: Property
@@ -60,17 +61,6 @@ function PropertyCard({ property, agent: providedAgent }: PropertyCardProps) {
         loadAgent()
     }, [property.agent_id, property.contacts, providedAgent])
 
-    // Format price based on listing type
-    const formatPrice = (price: number | null | undefined, isRent: boolean = false) => {
-        if (!price) return 'Price on Request'
-        const formatted = new Intl.NumberFormat('en-MY', {
-            style: 'currency',
-            currency: 'MYR',
-            minimumFractionDigits: 0,
-        }).format(price)
-        return isRent ? `${formatted}/month` : formatted
-    }
-
     // Get display price based on listing type
     const getDisplayPrice = () => {
         if (property.listing_type === 'rent') {
@@ -78,29 +68,6 @@ function PropertyCard({ property, agent: providedAgent }: PropertyCardProps) {
             return formatPrice(rentPrice, true)
         }
         return formatPrice(property.price, false)
-    }
-
-    const formatPricePerSqft = (price: number | null | undefined, size: string | null | undefined) => {
-        if (!price || !size) return null
-        const sizeNum = parseInt(size.replace(/[^0-9]/g, ''))
-        if (!sizeNum || sizeNum === 0) return null
-        const psf = price / sizeNum
-        return `RM ${psf.toFixed(2)} psf`
-    }
-
-    const getTimeAgo = (dateString: string | undefined) => {
-        if (!dateString) return ''
-        const date = new Date(dateString)
-        const now = new Date()
-        const diffMs = now.getTime() - date.getTime()
-        const diffMins = Math.floor(diffMs / (1000 * 60))
-        const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-
-        if (diffMins < 60) return `${diffMins}m ago`
-        if (diffHours < 24) return `${diffHours}h ago`
-        if (diffDays < 7) return `${diffDays}d ago`
-        return date.toLocaleDateString('en-MY', { month: 'short', day: 'numeric', year: 'numeric' })
     }
 
     const handleFavoriteClick = async (e: React.MouseEvent) => {

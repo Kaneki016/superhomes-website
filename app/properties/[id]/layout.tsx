@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import { getPropertyById } from '@/lib/database'
+import { formatPrice } from '@/lib/utils'
 
 type Props = {
     params: Promise<{ id: string }>
@@ -13,16 +14,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         return {
             title: 'Property Not Found - SuperHomes',
         }
-    }
-
-    const formatPrice = (price: number | null | undefined, isRent: boolean = false) => {
-        if (!price) return 'Price on Request'
-        const formatted = new Intl.NumberFormat('en-MY', {
-            style: 'currency',
-            currency: 'MYR',
-            minimumFractionDigits: 0,
-        }).format(price)
-        return isRent ? `${formatted}/month` : formatted
     }
 
     const propertyName = property.title || property.property_name || 'Property'

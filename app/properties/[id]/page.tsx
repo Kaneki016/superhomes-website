@@ -14,6 +14,9 @@ import { Property, Agent } from '@/lib/supabase'
 import { useFavorites } from '@/contexts/FavoritesContext'
 import ShareButton from '@/components/ShareButton'
 import NearbyAmenities from '@/components/NearbyAmenities'
+import MortgageCalculator from '@/components/MortgageCalculator'
+import MobileContactBar from '@/components/MobileContactBar'
+import { formatPrice } from '@/lib/utils'
 
 export default function PropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params)
@@ -88,16 +91,6 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
         return null
     }
 
-    const formatPrice = (price: number | null | undefined, isRent: boolean = false) => {
-        if (!price) return 'Price on Request'
-        const formatted = new Intl.NumberFormat('en-MY', {
-            style: 'currency',
-            currency: 'MYR',
-            minimumFractionDigits: 0,
-        }).format(price)
-        return isRent ? `${formatted}/month` : formatted
-    }
-
     // Computed values for backward compatibility
     const propertyName = property.title || property.property_name || 'Property'
     const propertySize = property.floor_area_sqft || property.size || ''
@@ -169,8 +162,8 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                                                 </span>
                                                 {property.listing_type && (
                                                     <span className={`inline-block ml-2 px-3 py-1 rounded-full text-sm font-semibold mb-3 ${property.listing_type === 'sale' ? 'bg-green-100 text-green-600' :
-                                                            property.listing_type === 'rent' ? 'bg-blue-100 text-blue-600' :
-                                                                'bg-purple-100 text-purple-600'
+                                                        property.listing_type === 'rent' ? 'bg-blue-100 text-blue-600' :
+                                                            'bg-purple-100 text-purple-600'
                                                         }`}>
                                                         {property.listing_type === 'sale' ? 'For Sale' :
                                                             property.listing_type === 'rent' ? 'For Rent' : 'New Project'}
@@ -396,6 +389,15 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                                         longitude={property.longitude}
                                     />
                                 )}
+
+                                {/* Mortgage Calculator */}
+                                <div className="mt-8">
+                                    <h2 className="font-heading font-bold text-xl mb-4">Mortgage Calculator</h2>
+                                    <MortgageCalculator
+                                        propertyPrice={property.price || 0}
+                                        isRent={property.listing_type === 'rent'}
+                                    />
+                                </div>
                             </div>
 
                             {/* Similar Properties */}
@@ -477,11 +479,16 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                                     </div>
                                 )}
                             </div>
+
+
                         </div>
                     </div>
                 </div>
 
                 <Footer />
+
+                {/* Mobile Contact Bar - Only visible on mobile */}
+                <MobileContactBar agent={agent} property={property} />
             </div>
         </>
     )

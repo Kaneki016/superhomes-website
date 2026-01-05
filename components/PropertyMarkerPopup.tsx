@@ -2,21 +2,13 @@
 
 import Link from 'next/link'
 import { Property } from '@/lib/supabase'
+import { formatPrice } from '@/lib/utils'
 
 interface PropertyMarkerPopupProps {
     property: Property
 }
 
 export default function PropertyMarkerPopup({ property }: PropertyMarkerPopupProps) {
-    const formatPrice = (price: number | null | undefined, isRent: boolean = false) => {
-        if (!price) return 'Price on Request'
-        const formatted = new Intl.NumberFormat('en-MY', {
-            style: 'currency',
-            currency: 'MYR',
-            minimumFractionDigits: 0,
-        }).format(price)
-        return isRent ? `${formatted}/month` : formatted
-    }
 
     const propertyName = property.title || property.property_name || 'Property'
     const propertySize = property.floor_area_sqft || property.size || ''
@@ -52,8 +44,8 @@ export default function PropertyMarkerPopup({ property }: PropertyMarkerPopupPro
                 {property.listing_type && (
                     <div className="absolute top-2 right-2">
                         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${property.listing_type === 'sale' ? 'bg-green-500 text-white' :
-                                property.listing_type === 'rent' ? 'bg-blue-500 text-white' :
-                                    'bg-purple-500 text-white'
+                            property.listing_type === 'rent' ? 'bg-blue-500 text-white' :
+                                'bg-purple-500 text-white'
                             }`}>
                             {property.listing_type === 'sale' ? 'Sale' :
                                 property.listing_type === 'rent' ? 'Rent' : 'Project'}

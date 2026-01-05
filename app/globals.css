@@ -803,3 +803,8 @@ html {
 ::-webkit-scrollbar-thumb:hover {
   background: #C44569;
 }
+
+/* Safe area support for iOS devices */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
