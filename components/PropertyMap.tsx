@@ -179,7 +179,8 @@ export default function PropertyMap({
         })
     }, [hoveredPropertyId, selectedPropertyId, leaflet])
 
-    const formatPrice = (price: number) => {
+    const formatPrice = (price: number | null | undefined) => {
+        if (!price) return 'POA'
         if (price >= 1000000) {
             return `RM${(price / 1000000).toFixed(1)}M`
         }

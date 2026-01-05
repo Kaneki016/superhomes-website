@@ -1,18 +1,146 @@
-import { supabase, Property, Agent } from './supabase'
+import { supabase, Property, Agent, Contact, Listing, ListingSaleDetails, ListingRentDetails, ListingProjectDetails } from './supabase'
+
+// Helper function to transform listing data from Supabase joins to Property type
+function transformListingToProperty(listing: any): Property {
+    const property: Property = {
+        // Base listing fields
+        id: listing.id,
+        listing_url: listing.listing_url,
+        listing_type: listing.listing_type,
+        title: listing.title,
+        scraped_at: listing.scraped_at,
+        updated_at: listing.updated_at,
+        created_at: listing.scraped_at, // Use scraped_at as created_at
+        description: listing.description,
+        address: listing.address,
+        district: listing.district,
+        state: listing.state,
+        postcode: listing.postcode,
+        latitude: listing.latitude,
+        longitude: listing.longitude,
+        property_type: listing.property_type,
+        bedrooms: listing.bedrooms,
+        bathrooms: listing.bathrooms,
+        car_parks: listing.car_parks,
+        floor_area_sqft: listing.floor_area_sqft,
+        land_area_sqft: listing.land_area_sqft,
+        images: listing.images,
+        furnishing: listing.furnishing,
+        is_active: listing.is_active ?? true,
+        image_count: listing.image_count,
+        main_image_url: listing.main_image_url,
+        facilities: listing.facilities,
+        listing_id: listing.listing_id,
+        total_bedrooms: listing.total_bedrooms,
+        bedrooms_main: listing.bedrooms_main,
+        bedrooms_additional: listing.bedrooms_additional,
+
+        // Backward compatibility fields
+        property_name: listing.title,
+        size: listing.floor_area_sqft,
+        bedrooms_num: listing.total_bedrooms,
+        source: 'propertyguru',
+        category: listing.listing_type === 'sale' ? 'buy' :
+            listing.listing_type === 'rent' ? 'rent' : 'new_projects',
+    }
+
+    // Add type-specific details
+    // Note: Supabase returns single objects for one-to-one relationships, arrays for one-to-many
+    const saleDetails = Array.isArray(listing.listing_sale_details)
+        ? listing.listing_sale_details[0]
+        : listing.listing_sale_details
+    const rentDetails = Array.isArray(listing.listing_rent_details)
+        ? listing.listing_rent_details[0]
+        : listing.listing_rent_details
+    const projectDetails = Array.isArray(listing.listing_project_details)
+        ? listing.listing_project_details[0]
+        : listing.listing_project_details
+
+    if (saleDetails && saleDetails.price !== undefined) {
+        property.sale_details = saleDetails
+        property.price = saleDetails.price
+        property.price_per_sqft = saleDetails.price_per_sqft
+        property.tenure = saleDetails.tenure
+        property.built_year = saleDetails.year_built
+        property.listed_date = saleDetails.listing_date
+    } else if (rentDetails && rentDetails.monthly_rent !== undefined) {
+        property.rent_details = rentDetails
+        property.price = rentDetails.monthly_rent // Use monthly_rent as price for display
+        property.listed_date = rentDetails.listing_date
+    } else if (projectDetails) {
+        property.project_details = projectDetails
+    }
+
+    // Add contacts
+    if (listing.listing_contacts && listing.listing_contacts.length > 0) {
+        property.contacts = listing.listing_contacts
+            .filter((lc: any) => lc.contacts)
+            .map((lc: any) => lc.contacts)
+
+        // Set primary agent_id for backward compatibility
+        if (property.contacts && property.contacts.length > 0) {
+            property.agent_id = property.contacts[0].id
+        }
+    }
+
+    return property
+}
+
+// Helper function to transform contact to Agent type for backward compatibility
+function transformContactToAgent(contact: any): Agent {
+    return {
+        id: contact.id,
+        profile_url: contact.profile_url,
+        contact_type: contact.contact_type || 'agent',
+        name: contact.name,
+        scraped_at: contact.scraped_at,
+        updated_at: contact.updated_at,
+        phone: contact.phone,
+        email: contact.email,
+        whatsapp_url: contact.whatsapp_url,
+        company_name: contact.company_name,
+        company_logo_url: contact.company_logo_url,
+        bio: contact.bio,
+        agency_reg_no: contact.agency_reg_no,
+        photo_url: contact.photo_url,
+        ren_number: contact.ren_number,
+        listings_for_sale_count: contact.listings_for_sale_count,
+        listings_for_rent_count: contact.listings_for_rent_count,
+        address: contact.address,
+        // Backward compatibility fields
+        agent_id: contact.id,
+        agency: contact.company_name,
+        whatsapp_link: contact.whatsapp_url,
+        created_at: contact.scraped_at,
+    }
+}
+
+// Build the select query with joins for listings
+const LISTING_SELECT_QUERY = `
+    *,
+    listing_sale_details (*),
+    listing_rent_details (*),
+    listing_project_details (*),
+    listing_contacts (
+        *,
+        contacts (*)
+    )
+`
 
 // Fetch all active properties
 export async function getProperties(): Promise<Property[]> {
     const { data, error } = await supabase
-        .from('dup_properties')
-        .select('*')
-        .order('created_at', { ascending: false })
+        .from('listings')
+        .select(LISTING_SELECT_QUERY)
+        .eq('is_active', true)
+        .order('scraped_at', { ascending: false })
 
     if (error) {
         console.error('Error fetching properties:', error)
         return []
     }
 
-    return data || []
+    return (data || []).map(transformListingToProperty)
 }
 
 // Common words to filter out from search queries
@@ -31,7 +159,8 @@ export async function getPropertiesPaginated(
         minPrice?: number
         maxPrice?: number
         bedrooms?: number
-        state?: string // Malaysian state filter
+        state?: string
+        listingType?: 'sale' | 'rent' | 'project' // New filter for listing type
     }
 ): Promise<{
     properties: Property[]
@@ -52,37 +181,32 @@ export async function getPropertiesPaginated(
     const hasMultiWordSearch = words.length > 1
 
     if (hasMultiWordSearch) {
-        // For multi-word search, we can't use Supabase filters directly
-        // Fetch a larger dataset first, then filter client-side
         const firstWord = words[0]
 
-        // Build query to match first keyword across multiple fields
         let dataQuery = supabase
-            .from('dup_properties')
-            .select('*')
-            .or(`property_name.ilike.%${firstWord}%,address.ilike.%${firstWord}%,state.ilike.%${firstWord}%,property_type.ilike.%${firstWord}%`)
+            .from('listings')
+            .select(LISTING_SELECT_QUERY)
+            .eq('is_active', true)
+            .or(`title.ilike.%${firstWord}%,address.ilike.%${firstWord}%,state.ilike.%${firstWord}%,property_type.ilike.%${firstWord}%`)
 
-        // Apply other filters
+        // Apply filters
         if (filters?.state) {
             dataQuery = dataQuery.ilike('state', `%${filters.state}%`)
         }
         if (filters?.propertyType) {
             dataQuery = dataQuery.ilike('property_type', `%${filters.propertyType}%`)
         }
-        if (filters?.minPrice) {
-            dataQuery = dataQuery.gte('price', filters.minPrice)
-        }
-        if (filters?.maxPrice) {
-            dataQuery = dataQuery.lte('price', filters.maxPrice)
+        if (filters?.listingType) {
+            dataQuery = dataQuery.eq('listing_type', filters.listingType)
         }
         if (filters?.bedrooms) {
-            dataQuery = dataQuery.eq('bedrooms_num', filters.bedrooms)
+            dataQuery = dataQuery.eq('total_bedrooms', filters.bedrooms)
         }
 
         const { data, error } = await dataQuery
             .order('latitude', { ascending: false, nullsFirst: false })
-            .order('created_at', { ascending: false })
-            .limit(500) // Fetch more for client-side filtering
+            .order('scraped_at', { ascending: false })
+            .limit(500)
 
         if (error) {
             console.error('Error fetching properties:', error)
@@ -93,9 +217,21 @@ export async function getPropertiesPaginated(
             return { properties: [], totalCount: 0, hasMore: false }
         }
 
-        // Filter properties that match ALL keywords across any field
-        const filteredResults = data.filter(property => {
+        // Transform data
+        let properties = data.map(transformListingToProperty)
+
+        // Filter by price if needed (after transformation since price comes from details)
+        if (filters?.minPrice) {
+            properties = properties.filter(p => (p.price || 0) >= filters.minPrice!)
+        }
+        if (filters?.maxPrice) {
+            properties = properties.filter(p => (p.price || 0) <= filters.maxPrice!)
+        }
+
+        // Filter by all keywords
+        const filteredResults = properties.filter(property => {
             const combinedText = [
+                property.title || '',
                 property.property_name || '',
                 property.address || '',
                 property.state || '',
@@ -117,56 +253,104 @@ export async function getPropertiesPaginated(
     }
 
     // Standard single-word or no location search
-    // Build base query for count
-    let countQuery = supabase
-        .from('dup_properties')
-        .select('*', { count: 'exact', head: true })
+    // When price filter is active, we need to fetch all matching records first,
+    // then filter by price, then paginate (since price is in a related table)
+    const hasPriceFilter = filters?.minPrice || filters?.maxPrice
 
-    // Build base query for data
     let dataQuery = supabase
-        .from('dup_properties')
-        .select('*')
+        .from('listings')
+        .select(LISTING_SELECT_QUERY)
+        .eq('is_active', true)
 
-    // Apply filters to both queries
+    // Apply filters at database level (except price)
     if (filters?.location && words.length === 1) {
-        // Single keyword: search across multiple fields
         const searchTerm = words[0]
-        countQuery = countQuery.or(`property_name.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%,state.ilike.%${searchTerm}%,property_type.ilike.%${searchTerm}%`)
-        dataQuery = dataQuery.or(`property_name.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%,state.ilike.%${searchTerm}%,property_type.ilike.%${searchTerm}%`)
+        dataQuery = dataQuery.or(`title.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%,state.ilike.%${searchTerm}%,property_type.ilike.%${searchTerm}%`)
     }
     if (filters?.state) {
-        countQuery = countQuery.ilike('state', `%${filters.state}%`)
         dataQuery = dataQuery.ilike('state', `%${filters.state}%`)
     }
     if (filters?.propertyType) {
-        countQuery = countQuery.ilike('property_type', `%${filters.propertyType}%`)
         dataQuery = dataQuery.ilike('property_type', `%${filters.propertyType}%`)
     }
-    if (filters?.minPrice) {
-        countQuery = countQuery.gte('price', filters.minPrice)
-        dataQuery = dataQuery.gte('price', filters.minPrice)
-    }
-    if (filters?.maxPrice) {
-        countQuery = countQuery.lte('price', filters.maxPrice)
-        dataQuery = dataQuery.lte('price', filters.maxPrice)
+    if (filters?.listingType) {
+        dataQuery = dataQuery.eq('listing_type', filters.listingType)
     }
     if (filters?.bedrooms) {
-        countQuery = countQuery.eq('bedrooms_num', filters.bedrooms)
-        dataQuery = dataQuery.eq('bedrooms_num', filters.bedrooms)
+        dataQuery = dataQuery.eq('total_bedrooms', filters.bedrooms)
+    }
+
+    // If price filter is active, fetch more data and filter/paginate client-side
+    if (hasPriceFilter) {
+        const { data, error } = await dataQuery
+            .order('latitude', { ascending: false, nullsFirst: false })
+            .order('scraped_at', { ascending: false })
+            .limit(2000) // Fetch more to allow for price filtering
+
+        if (error) {
+            console.error('Error fetching properties:', error)
+            return { properties: [], totalCount: 0, hasMore: false }
+        }
+
+        // Transform data
+        let properties = (data || []).map(transformListingToProperty)
+
+        // Filter by price
+        if (filters?.minPrice) {
+            properties = properties.filter(p => (p.price || 0) >= filters.minPrice!)
+        }
+        if (filters?.maxPrice) {
+            properties = properties.filter(p => (p.price || 0) <= filters.maxPrice!)
+        }
+
+        // Paginate the filtered results
+        const totalCount = properties.length
+        const paginatedResults = properties.slice(from, to + 1)
+        const hasMore = (page * limit) < totalCount
+
+        return {
+            properties: paginatedResults,
+            totalCount,
+            hasMore
+        }
+    }
+
+    // No price filter - use standard pagination at database level
+    const countQuery = supabase
+        .from('listings')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_active', true)
+
+    // Apply same filters to count query
+    let countQueryFiltered = countQuery
+    if (filters?.location && words.length === 1) {
+        const searchTerm = words[0]
+        countQueryFiltered = countQueryFiltered.or(`title.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%,state.ilike.%${searchTerm}%,property_type.ilike.%${searchTerm}%`)
+    }
+    if (filters?.state) {
+        countQueryFiltered = countQueryFiltered.ilike('state', `%${filters.state}%`)
+    }
+    if (filters?.propertyType) {
+        countQueryFiltered = countQueryFiltered.ilike('property_type', `%${filters.propertyType}%`)
+    }
+    if (filters?.listingType) {
+        countQueryFiltered = countQueryFiltered.eq('listing_type', filters.listingType)
+    }
+    if (filters?.bedrooms) {
+        countQueryFiltered = countQueryFiltered.eq('total_bedrooms', filters.bedrooms)
     }
 
     // Get total count
-    const { count, error: countError } = await countQuery
+    const { count, error: countError } = await countQueryFiltered
 
     if (countError) {
-        // Silently return empty if count fails
         return { properties: [], totalCount: 0, hasMore: false }
     }
 
-    // Get paginated data - sort by coordinates first (geocoded properties appear first), then by date
+    // Get paginated data
     const { data, error } = await dataQuery
-        .order('latitude', { ascending: false, nullsFirst: false }) // Properties with coordinates first
-        .order('created_at', { ascending: false })
+        .order('latitude', { ascending: false, nullsFirst: false })
+        .order('scraped_at', { ascending: false })
         .range(from, to)
 
     if (error) {
@@ -174,18 +358,20 @@ export async function getPropertiesPaginated(
         return { properties: [], totalCount: count || 0, hasMore: false }
     }
 
+    const properties = (data || []).map(transformListingToProperty)
+
     const totalCount = count || 0
     const hasMore = (page * limit) < totalCount
 
     return {
-        properties: data || [],
+        properties,
         totalCount,
         hasMore
     }
 }
 
 
-// Fetch properties by a single agent ID with pagination
+// Fetch properties by a single contact/agent ID with pagination
 export async function getPropertiesByAgentId(
     agentId: string,
     page: number = 1,
@@ -198,11 +384,24 @@ export async function getPropertiesByAgentId(
     const from = (page - 1) * limit
     const to = from + limit - 1
 
+    // First get listing IDs associated with this contact
+    const { data: listingContacts, error: lcError } = await supabase
+        .from('listing_contacts')
+        .select('listing_id')
+        .eq('contact_id', agentId)
+
+    if (lcError || !listingContacts || listingContacts.length === 0) {
+        return { properties: [], totalCount: 0, hasMore: false }
+    }
+
+    const listingIds = listingContacts.map(lc => lc.listing_id)
+
     // Get total count
     const { count, error: countError } = await supabase
-        .from('dup_properties')
+        .from('listings')
         .select('*', { count: 'exact', head: true })
-        .eq('agent_id', agentId)
+        .in('id', listingIds)
+        .eq('is_active', true)
 
     if (countError) {
         return { properties: [], totalCount: 0, hasMore: false }
@@ -210,10 +409,11 @@ export async function getPropertiesByAgentId(
 
     // Get paginated data
     const { data, error } = await supabase
-        .from('dup_properties')
-        .select('*')
-        .eq('agent_id', agentId)
-        .order('created_at', { ascending: false })
+        .from('listings')
+        .select(LISTING_SELECT_QUERY)
+        .in('id', listingIds)
+        .eq('is_active', true)
+        .order('scraped_at', { ascending: false })
         .range(from, to)
 
     if (error) {
@@ -224,7 +424,7 @@ export async function getPropertiesByAgentId(
     const hasMore = (page * limit) < totalCount
 
     return {
-        properties: data || [],
+        properties: (data || []).map(transformListingToProperty),
         totalCount,
         hasMore
     }
@@ -236,34 +436,46 @@ export async function getPropertiesByAgentIds(agentIds: string[], limit: number 
         return []
     }
 
+    // Get listing IDs for all contacts
+    const { data: listingContacts, error: lcError } = await supabase
+        .from('listing_contacts')
+        .select('listing_id')
+        .in('contact_id', agentIds)
+
+    if (lcError || !listingContacts || listingContacts.length === 0) {
+        return []
+    }
+
+    const listingIds = [...new Set(listingContacts.map(lc => lc.listing_id))]
+
     const { data, error } = await supabase
-        .from('dup_properties')
-        .select('*')
-        .in('agent_id', agentIds)
-        .order('created_at', { ascending: false })
+        .from('listings')
+        .select(LISTING_SELECT_QUERY)
+        .in('id', listingIds)
+        .eq('is_active', true)
+        .order('scraped_at', { ascending: false })
         .limit(limit)
 
     if (error) {
         return []
     }
 
-    return data || []
+    return (data || []).map(transformListingToProperty)
 }
 
 // Fetch a single property by ID
 export async function getPropertyById(id: string): Promise<Property | null> {
     const { data, error } = await supabase
-        .from('dup_properties')
-        .select('*')
+        .from('listings')
+        .select(LISTING_SELECT_QUERY)
         .eq('id', id)
         .single()
 
     if (error) {
-        // Silently return null - not found is expected, errors handled by fallback
         return null
     }
 
-    return data
+    return transformListingToProperty(data)
 }
 
 // All Malaysian states and federal territories
@@ -287,55 +499,58 @@ const MALAYSIAN_STATES = [
 ]
 
 // Get distinct states from the database
-// Optimized: Single query instead of 16 sequential queries
 export async function getDistinctStates(): Promise<string[]> {
-    const { data, error } = await supabase
-        .from('dup_properties')
-        .select('state')
-        .not('state', 'is', null)
+    // Query for each Malaysian state to see which ones have active listings
+    // This avoids the Supabase 1000 row limit issue
+    const statesWithListings: string[] = []
 
-    if (error || !data) {
-        console.error('Error fetching distinct states:', error)
-        return []
+    for (const state of MALAYSIAN_STATES) {
+        const { count, error } = await supabase
+            .from('listings')
+            .select('id', { count: 'exact', head: true })
+            .eq('is_active', true)
+            .ilike('state', state)
+
+        if (!error && count && count > 0) {
+            statesWithListings.push(state)
+        }
     }
 
-    // Get unique states from the data
-    const uniqueStates = [...new Set(data.map(d => d.state).filter(Boolean))]
-
-    // Filter to only valid Malaysian states and sort
-    const validStates = uniqueStates.filter(state =>
-        MALAYSIAN_STATES.some(ms =>
-            state.toLowerCase().includes(ms.toLowerCase())
-        )
-    )
-
-    return validStates.sort()
+    return statesWithListings.sort()
 }
 
-// Fetch featured properties with optional limit
+// Fetch featured properties with optional limit (only sale properties with agents)
 export async function getFeaturedProperties(limit: number = 8): Promise<Property[]> {
+    // Fetch more to account for filtering out properties without agents
     const { data, error } = await supabase
-        .from('dup_properties')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(limit)
+        .from('listings')
+        .select(LISTING_SELECT_QUERY)
+        .eq('is_active', true)
+        .eq('listing_type', 'sale')
+        .order('scraped_at', { ascending: false })
+        .limit(limit * 3)
 
     if (error) {
         console.error('Error fetching featured properties:', error)
         return []
     }
 
-    return data || []
+    // Transform and filter to only include properties with contacts/agents
+    const properties = (data || []).map(transformListingToProperty)
+    const propertiesWithAgents = properties.filter(p => p.contacts && p.contacts.length > 0)
+
+    return propertiesWithAgents.slice(0, limit)
 }
 
-// Fetch diverse properties (one per agent for variety)
+// Fetch diverse properties (one per agent for variety, only sale properties with agents)
 export async function getDiverseProperties(limit: number = 8): Promise<Property[]> {
-    // Fetch more properties than needed so we can pick unique agents
     const { data, error } = await supabase
-        .from('dup_properties')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(limit * 5) // Fetch more to ensure variety
+        .from('listings')
+        .select(LISTING_SELECT_QUERY)
+        .eq('is_active', true)
+        .eq('listing_type', 'sale')
+        .order('scraped_at', { ascending: false })
+        .limit(limit * 8) // Fetch more to account for filtering
 
     if (error) {
         console.error('Error fetching diverse properties:', error)
@@ -344,11 +559,15 @@ export async function getDiverseProperties(limit: number = 8): Promise<Property[
 
     if (!data) return []
 
+    // Transform and filter to only include properties with contacts/agents
+    const allProperties = data.map(transformListingToProperty)
+    const properties = allProperties.filter(p => p.contacts && p.contacts.length > 0)
+
     // Pick one property per unique agent
     const seenAgents = new Set<string>()
     const diverseProperties: Property[] = []
 
-    for (const property of data) {
+    for (const property of properties) {
         const agentId = property.agent_id || 'unknown'
         if (!seenAgents.has(agentId) && diverseProperties.length < limit) {
             seenAgents.add(agentId)
@@ -356,9 +575,9 @@ export async function getDiverseProperties(limit: number = 8): Promise<Property[
         }
     }
 
-    // If we don't have enough unique agents, fill with remaining properties
+    // Fill with remaining if needed
     if (diverseProperties.length < limit) {
-        for (const property of data) {
+        for (const property of properties) {
             if (!diverseProperties.find(p => p.id === property.id) && diverseProperties.length < limit) {
                 diverseProperties.push(property)
             }
@@ -368,10 +587,10 @@ export async function getDiverseProperties(limit: number = 8): Promise<Property[
     return diverseProperties
 }
 
-// Fetch agent by ID
+// Fetch agent/contact by ID
 export async function getAgentById(id: string): Promise<Agent | null> {
     const { data, error } = await supabase
-        .from('dup_agents')
+        .from('contacts')
         .select('*')
         .eq('id', id)
         .single()
@@ -381,47 +600,20 @@ export async function getAgentById(id: string): Promise<Agent | null> {
         return null
     }
 
-    return data
+    return transformContactToAgent(data)
 }
 
-// NOTE: getAgentByUserId is deprecated - agents from PropertyGuru don't have user_id
-// If you need to link agents to users, you'll need a separate mapping table
-// export async function getAgentByUserId(userId: string): Promise<Agent | null> {
-//     const { data, error } = await supabase
-//         .from('agents')
-//         .select('*')
-//         .eq('user_id', userId)
-//         .single()
-//
-//     if (error) {
-//         console.error('Error fetching agent by user:', error)
-//         return null
-//     }
-//
-//     return data
-// }
-
-// Fetch agent by PropertyGuru agent_id
+// Fetch agent by agent_id (same as id in new schema)
 export async function getAgentByAgentId(agentId: string): Promise<Agent | null> {
-    const { data, error } = await supabase
-        .from('dup_agents')
-        .select('*')
-        .eq('agent_id', agentId)
-        .single()
-
-    if (error) {
-        // Silently return null - not found is expected
-        return null
-    }
-
-    return data
+    return getAgentById(agentId)
 }
 
 // Fetch all agents
 export async function getAgents(): Promise<Agent[]> {
     const { data, error } = await supabase
-        .from('dup_agents')
+        .from('contacts')
         .select('*')
+        .eq('contact_type', 'agent')
         .order('name', { ascending: true })
 
     if (error) {
@@ -429,27 +621,27 @@ export async function getAgents(): Promise<Agent[]> {
         return []
     }
 
-    return data || []
+    return (data || []).map(transformContactToAgent)
 }
 
-// Search agents by name or agency
+// Search agents by name or company
 export async function searchAgents(query: string, limit: number = 5): Promise<Agent[]> {
     if (!query || query.trim().length < 2) {
         return []
     }
 
     const { data, error } = await supabase
-        .from('dup_agents')
+        .from('contacts')
         .select('*')
-        .or(`name.ilike.%${query}%,agency.ilike.%${query}%`)
+        .eq('contact_type', 'agent')
+        .or(`name.ilike.%${query}%,company_name.ilike.%${query}%`)
         .limit(limit)
 
     if (error) {
-        // Silently return empty if search fails
         return []
     }
 
-    return data || []
+    return (data || []).map(transformContactToAgent)
 }
 
 // Fetch agents with pagination
@@ -461,20 +653,20 @@ export async function getAgentsPaginated(page: number = 1, limit: number = 12): 
     const from = (page - 1) * limit
     const to = from + limit - 1
 
-    // Get total count
     const { count, error: countError } = await supabase
-        .from('dup_agents')
+        .from('contacts')
         .select('*', { count: 'exact', head: true })
+        .eq('contact_type', 'agent')
 
     if (countError) {
         console.error('Error counting agents:', countError)
         return { agents: [], totalCount: 0, hasMore: false }
     }
 
-    // Get paginated agents
     const { data, error } = await supabase
-        .from('dup_agents')
+        .from('contacts')
         .select('*')
+        .eq('contact_type', 'agent')
         .order('name', { ascending: true })
         .range(from, to)
 
@@ -487,7 +679,7 @@ export async function getAgentsPaginated(page: number = 1, limit: number = 12): 
     const hasMore = (page * limit) < totalCount
 
     return {
-        agents: data || [],
+        agents: (data || []).map(transformContactToAgent),
         totalCount,
         hasMore
     }
@@ -500,10 +692,12 @@ export async function searchProperties(filters: {
     minPrice?: number
     maxPrice?: number
     bedrooms?: number
+    listingType?: 'sale' | 'rent' | 'project'
 }): Promise<Property[]> {
     let query = supabase
-        .from('dup_properties')
-        .select('*')
+        .from('listings')
+        .select(LISTING_SELECT_QUERY)
+        .eq('is_active', true)
 
     if (filters.location) {
         query = query.ilike('address', `%${filters.location}%`)
@@ -513,83 +707,91 @@ export async function searchProperties(filters: {
         query = query.eq('property_type', filters.propertyType)
     }
 
-    if (filters.minPrice) {
-        query = query.gte('price', filters.minPrice)
-    }
-
-    if (filters.maxPrice) {
-        query = query.lte('price', filters.maxPrice)
+    if (filters.listingType) {
+        query = query.eq('listing_type', filters.listingType)
     }
 
     if (filters.bedrooms) {
-        query = query.eq('bedrooms_num', filters.bedrooms)
+        query = query.eq('total_bedrooms', filters.bedrooms)
     }
 
-    const { data, error } = await query.order('created_at', { ascending: false })
+    const { data, error } = await query.order('scraped_at', { ascending: false })
 
     if (error) {
         console.error('Error searching properties:', error)
         return []
     }
 
-    return data || []
+    let properties = (data || []).map(transformListingToProperty)
+
+    // Filter by price after transformation
+    if (filters.minPrice) {
+        properties = properties.filter(p => (p.price || 0) >= filters.minPrice!)
+    }
+    if (filters.maxPrice) {
+        properties = properties.filter(p => (p.price || 0) <= filters.maxPrice!)
+    }
+
+    return properties
 }
 
-// Get similar properties (prioritize same state, then same type, excluding current)
+// Get similar properties
 export async function getSimilarProperties(propertyId: string, propertyType: string, state?: string | null): Promise<Property[]> {
-    // First, try to get properties from the same state AND same type
     if (state) {
         const { data: sameStateAndType, error: error1 } = await supabase
-            .from('dup_properties')
-            .select('*')
+            .from('listings')
+            .select(LISTING_SELECT_QUERY)
             .eq('property_type', propertyType)
             .ilike('state', `%${state}%`)
             .neq('id', propertyId)
+            .eq('is_active', true)
             .limit(3)
 
         if (!error1 && sameStateAndType && sameStateAndType.length >= 3) {
-            return sameStateAndType
+            return sameStateAndType.map(transformListingToProperty)
         }
 
-        // If not enough, try same state (any type)
         const { data: sameState, error: error2 } = await supabase
-            .from('dup_properties')
-            .select('*')
+            .from('listings')
+            .select(LISTING_SELECT_QUERY)
             .ilike('state', `%${state}%`)
             .neq('id', propertyId)
+            .eq('is_active', true)
             .limit(3)
 
         if (!error2 && sameState && sameState.length >= 3) {
-            return sameState
+            return sameState.map(transformListingToProperty)
         }
 
-        // Combine what we have from same state with same type elsewhere
+        // Combine
         const existingIds = new Set((sameState || []).map(p => p.id))
         const needed = 3 - (sameState?.length || 0)
 
         if (needed > 0) {
             const { data: sameType, error: error3 } = await supabase
-                .from('dup_properties')
-                .select('*')
+                .from('listings')
+                .select(LISTING_SELECT_QUERY)
                 .eq('property_type', propertyType)
                 .neq('id', propertyId)
-                .limit(needed + 5) // Get extras in case of overlap
+                .eq('is_active', true)
+                .limit(needed + 5)
 
             if (!error3 && sameType) {
                 const additional = sameType.filter(p => !existingIds.has(p.id)).slice(0, needed)
-                return [...(sameState || []), ...additional].slice(0, 3)
+                const combined = [...(sameState || []), ...additional].slice(0, 3)
+                return combined.map(transformListingToProperty)
             }
         }
 
-        return sameState || []
+        return (sameState || []).map(transformListingToProperty)
     }
 
-    // Fallback: just match by property type
     const { data, error } = await supabase
-        .from('dup_properties')
-        .select('*')
+        .from('listings')
+        .select(LISTING_SELECT_QUERY)
         .eq('property_type', propertyType)
         .neq('id', propertyId)
+        .eq('is_active', true)
         .limit(3)
 
     if (error) {
@@ -597,7 +799,7 @@ export async function getSimilarProperties(propertyId: string, propertyType: str
         return []
     }
 
-    return data || []
+    return (data || []).map(transformListingToProperty)
 }
 
 // Property types and locations (static for now)
@@ -617,11 +819,10 @@ export const locations = [
 
 // Get user's favorite properties
 export async function getFavoriteProperties(buyerId: string): Promise<Property[]> {
-    // First get the favorite property IDs
     const { data: favorites, error: favError } = await supabase
         .from('favorites')
         .select('property_id')
-        .eq('buyer_id', buyerId) // Changed from user_id to buyer_id
+        .eq('buyer_id', buyerId)
 
     if (favError || !favorites || favorites.length === 0) {
         return []
@@ -629,10 +830,9 @@ export async function getFavoriteProperties(buyerId: string): Promise<Property[]
 
     const propertyIds = favorites.map(f => f.property_id)
 
-    // Then fetch the actual properties
     const { data: properties, error: propError } = await supabase
-        .from('dup_properties')
-        .select('*')
+        .from('listings')
+        .select(LISTING_SELECT_QUERY)
         .in('id', propertyIds)
 
     if (propError) {
@@ -640,14 +840,15 @@ export async function getFavoriteProperties(buyerId: string): Promise<Property[]
         return []
     }
 
-    return properties || []
+    return (properties || []).map(transformListingToProperty)
 }
 
 // Get distinct property types from the database
 export async function getDistinctPropertyTypes(): Promise<string[]> {
     const { data, error } = await supabase
-        .from('dup_properties')
+        .from('listings')
         .select('property_type')
+        .eq('is_active', true)
         .not('property_type', 'is', null)
 
     if (error) {
@@ -655,17 +856,17 @@ export async function getDistinctPropertyTypes(): Promise<string[]> {
         return []
     }
 
-    // Extract unique values
     const types = data?.map(d => d.property_type).filter(Boolean) || []
     const uniqueTypes = [...new Set(types)]
     return uniqueTypes.sort()
 }
 
-// Get distinct locations (extracted from address) from the database
+// Get distinct locations
 export async function getDistinctLocations(): Promise<string[]> {
     const { data, error } = await supabase
-        .from('dup_properties')
+        .from('listings')
         .select('address')
+        .eq('is_active', true)
         .not('address', 'is', null)
 
     if (error) {
@@ -673,19 +874,13 @@ export async function getDistinctLocations(): Promise<string[]> {
         return []
     }
 
-    // Extract unique location parts from addresses
-    // Typically format is "Area, City, State" - we'll extract the main area/city
     const locationSet = new Set<string>()
 
     data?.forEach(d => {
         if (d.address) {
-            // Split by comma and get meaningful parts
             const parts = d.address.split(',').map((p: string) => p.trim())
-            // Add the first part (usually the area/neighborhood)
             if (parts[0]) locationSet.add(parts[0])
-            // Add the second part (usually city) if exists
             if (parts[1]) locationSet.add(parts[1])
-            // Add state if exists (usually last part)
             if (parts.length > 2 && parts[parts.length - 1]) {
                 locationSet.add(parts[parts.length - 1])
             }
@@ -695,59 +890,63 @@ export async function getDistinctLocations(): Promise<string[]> {
     return [...locationSet].sort()
 }
 
-// Get distinct bedroom counts from the database
+// Get distinct bedroom counts
 export async function getDistinctBedrooms(): Promise<number[]> {
     const { data, error } = await supabase
-        .from('dup_properties')
-        .select('bedrooms_num')
-        .not('bedrooms_num', 'is', null)
+        .from('listings')
+        .select('total_bedrooms')
+        .eq('is_active', true)
+        .not('total_bedrooms', 'is', null)
 
     if (error) {
         console.error('Error fetching bedrooms:', error)
         return []
     }
 
-    // Extract unique values
-    const bedrooms = data?.map(d => d.bedrooms_num).filter((b): b is number => b != null && b > 0 && b <= 10) || []
+    const bedrooms = data?.map(d => d.total_bedrooms).filter((b): b is number => b != null && b > 0 && b <= 10) || []
     const uniqueBedrooms = [...new Set(bedrooms)]
     return uniqueBedrooms.sort((a, b) => a - b)
 }
 
-// Get price range (min and max) from the database
+// Get price range
 export async function getPriceRange(): Promise<{ min: number; max: number }> {
-    const { data, error } = await supabase
-        .from('dup_properties')
+    // Get sale prices
+    const { data: saleData } = await supabase
+        .from('listing_sale_details')
         .select('price')
         .not('price', 'is', null)
-        .order('price', { ascending: true })
 
-    if (error) {
-        console.error('Error fetching price range:', error)
+    // Get rent prices
+    const { data: rentData } = await supabase
+        .from('listing_rent_details')
+        .select('monthly_rent')
+        .not('monthly_rent', 'is', null)
+
+    const salePrices = (saleData || []).map(d => d.price).filter((p): p is number => p != null && p > 0)
+    const rentPrices = (rentData || []).map(d => d.monthly_rent).filter((p): p is number => p != null && p > 0)
+    const allPrices = [...salePrices, ...rentPrices]
+
+    if (allPrices.length === 0) {
         return { min: 0, max: 10000000 }
     }
 
-    if (!data || data.length === 0) {
-        return { min: 0, max: 10000000 }
-    }
-
-    const prices = data.map(d => d.price).filter((p): p is number => p != null && p > 0)
     return {
-        min: Math.min(...prices),
-        max: Math.max(...prices)
+        min: Math.min(...allPrices),
+        max: Math.max(...allPrices)
     }
 }
 
-// Get all filter options in one call (more efficient)
+// Get all filter options in one call
 export async function getFilterOptions(): Promise<{
     propertyTypes: string[]
     locations: string[]
     bedrooms: number[]
     priceRange: { min: number; max: number }
 }> {
-    // Fetch all properties once to extract all filter data
     const { data, error } = await supabase
-        .from('dup_properties')
-        .select('property_type, address, bedrooms_num, price')
+        .from('listings')
+        .select('property_type, address, total_bedrooms')
+        .eq('is_active', true)
 
     if (error) {
         console.error('Error fetching filter options:', error)
@@ -762,50 +961,40 @@ export async function getFilterOptions(): Promise<{
     const propertyTypeSet = new Set<string>()
     const locationSet = new Set<string>()
     const bedroomSet = new Set<number>()
-    let minPrice = Infinity
-    let maxPrice = 0
 
     data?.forEach(d => {
-        // Property type
         if (d.property_type) propertyTypeSet.add(d.property_type)
 
-        // Location (extract from address)
         if (d.address) {
             const parts = d.address.split(',').map((p: string) => p.trim())
             if (parts[0]) locationSet.add(parts[0])
             if (parts[1]) locationSet.add(parts[1])
         }
 
-        // Bedrooms (use bedrooms_num, filter to reasonable values)
-        if (d.bedrooms_num != null && d.bedrooms_num > 0 && d.bedrooms_num <= 10) bedroomSet.add(d.bedrooms_num)
-
-        // Price range
-        if (d.price != null && d.price > 0) {
-            if (d.price < minPrice) minPrice = d.price
-            if (d.price > maxPrice) maxPrice = d.price
+        if (d.total_bedrooms != null && d.total_bedrooms > 0 && d.total_bedrooms <= 10) {
+            bedroomSet.add(d.total_bedrooms)
         }
     })
+
+    const priceRange = await getPriceRange()
 
     return {
         propertyTypes: [...propertyTypeSet].sort(),
         locations: [...locationSet].sort(),
         bedrooms: [...bedroomSet].sort((a, b) => a - b),
-        priceRange: {
-            min: minPrice === Infinity ? 0 : minPrice,
-            max: maxPrice === 0 ? 10000000 : maxPrice
-        }
+        priceRange
     }
 }
 
 // ============================================
-// STATISTICS FUNCTIONS FOR DYNAMIC STATS
+// STATISTICS FUNCTIONS
 // ============================================
 
-// Get total property count
 export async function getPropertyCount(): Promise<number> {
     const { count, error } = await supabase
-        .from('dup_properties')
+        .from('listings')
         .select('*', { count: 'exact', head: true })
+        .eq('is_active', true)
 
     if (error) {
         console.error('Error counting properties:', error)
@@ -815,11 +1004,11 @@ export async function getPropertyCount(): Promise<number> {
     return count || 0
 }
 
-// Get total agent count
 export async function getAgentCount(): Promise<number> {
     const { count, error } = await supabase
-        .from('dup_agents')
+        .from('contacts')
         .select('*', { count: 'exact', head: true })
+        .eq('contact_type', 'agent')
 
     if (error) {
         console.error('Error counting agents:', error)
@@ -829,47 +1018,43 @@ export async function getAgentCount(): Promise<number> {
     return count || 0
 }
 
-// Get unique cities count
 export async function getCitiesCount(): Promise<number> {
-    // Try to get city data first
-    const { data: cityData, error: cityError } = await supabase
-        .from('dup_properties')
-        .select('city')
-        .not('city', 'is', null)
+    const { data: districtData, error: districtError } = await supabase
+        .from('listings')
+        .select('district')
+        .eq('is_active', true)
+        .not('district', 'is', null)
 
-    // If city column works and has data, use it
-    if (!cityError && cityData && cityData.length > 0) {
-        const cities = cityData.map(d => d.city).filter(Boolean)
-        const uniqueCities = new Set(cities)
-        return uniqueCities.size
+    if (!districtError && districtData && districtData.length > 0) {
+        const districts = districtData.map(d => d.district).filter(Boolean)
+        const uniqueDistricts = new Set(districts)
+        return uniqueDistricts.size
     }
 
-    // Fallback to state column if city doesn't exist or is empty
     const { data: stateData, error: stateError } = await supabase
-        .from('dup_properties')
+        .from('listings')
         .select('state')
+        .eq('is_active', true)
         .not('state', 'is', null)
 
     if (stateError || !stateData) {
-        // Silently return 0 if both city and state fail
         return 0
     }
 
-    // Extract unique states
     const states = stateData.map(d => d.state).filter(Boolean)
     const uniqueStates = new Set(states)
     return uniqueStates.size
 }
 
-// Get properties added in the last 30 days
 export async function getRecentActivityCount(): Promise<number> {
     const thirtyDaysAgo = new Date()
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
     const { count, error } = await supabase
-        .from('dup_properties')
+        .from('listings')
         .select('*', { count: 'exact', head: true })
-        .gte('created_at', thirtyDaysAgo.toISOString())
+        .eq('is_active', true)
+        .gte('scraped_at', thirtyDaysAgo.toISOString())
 
     if (error) {
         console.error('Error counting recent properties:', error)
@@ -879,7 +1064,6 @@ export async function getRecentActivityCount(): Promise<number> {
     return count || 0
 }
 
-// Get all stats in one call (more efficient)
 export async function getPlatformStats(): Promise<{
     propertyCount: number
     agentCount: number
@@ -901,8 +1085,7 @@ export async function getPlatformStats(): Promise<{
     }
 }
 
-// Fetch new projects (category = 'new_projects')
-// Temporarily returning empty until category column is verified in Supabase
+// Fetch new projects
 export async function getNewProjects(filters?: {
     propertyType?: string
     minPrice?: string
@@ -911,8 +1094,30 @@ export async function getNewProjects(filters?: {
     state?: string
     tenure?: string
 }): Promise<Property[]> {
-    // Return empty for now - category column needs to exist in Supabase
-    return []
+    let query = supabase
+        .from('listings')
+        .select(LISTING_SELECT_QUERY)
+        .eq('listing_type', 'project')
+        .eq('is_active', true)
+
+    if (filters?.propertyType) {
+        query = query.ilike('property_type', `%${filters.propertyType}%`)
+    }
+    if (filters?.state) {
+        query = query.ilike('state', `%${filters.state}%`)
+    }
+    if (filters?.bedrooms) {
+        query = query.eq('total_bedrooms', parseInt(filters.bedrooms))
+    }
+
+    const { data, error } = await query.order('scraped_at', { ascending: false })
+
+    if (error) {
+        console.error('Error fetching new projects:', error)
+        return []
+    }
+
+    return (data || []).map(transformListingToProperty)
 }
 
 // Search result type for typeahead suggestions
@@ -923,6 +1128,7 @@ export interface PropertySuggestion {
     state: string | null
     property_type: string
     price: number
+    listing_type: 'sale' | 'rent' | 'project'
 }
 
 // Search properties by keyword for typeahead suggestions
@@ -933,18 +1139,126 @@ export async function searchPropertiesByKeyword(keyword: string, limit: number =
 
     const searchTerm = keyword.trim()
 
-    // Search in property_name, address, state, and property_type
     const { data, error } = await supabase
-        .from('dup_properties')
-        .select('id, property_name, address, state, property_type, price')
-        .or(`property_name.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%,state.ilike.%${searchTerm}%,property_type.ilike.%${searchTerm}%`)
+        .from('listings')
+        .select(`
+            id, title, address, state, property_type, listing_type,
+            listing_sale_details (price),
+            listing_rent_details (monthly_rent)
+        `)
+        .eq('is_active', true)
+        .or(`title.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%,state.ilike.%${searchTerm}%,property_type.ilike.%${searchTerm}%`)
         .limit(limit)
-        .order('created_at', { ascending: false })
+        .order('scraped_at', { ascending: false })
 
     if (error) {
         console.error('Error searching properties:', error)
         return []
     }
 
-    return (data || []) as PropertySuggestion[]
+    return (data || []).map(item => {
+        let price = 0
+        if (item.listing_sale_details && item.listing_sale_details.length > 0) {
+            price = item.listing_sale_details[0].price || 0
+        } else if (item.listing_rent_details && item.listing_rent_details.length > 0) {
+            price = item.listing_rent_details[0].monthly_rent || 0
+        }
+
+        return {
+            id: item.id,
+            property_name: item.title,
+            address: item.address || '',
+            state: item.state,
+            property_type: item.property_type || '',
+            price,
+            listing_type: item.listing_type
+        }
+    })
 }
+
+// Fetch rent listings
+export async function getRentListings(filters?: {
+    propertyType?: string
+    minPrice?: string
+    maxPrice?: string
+    bedrooms?: string
+    state?: string
+    furnishing?: string
+}): Promise<Property[]> {
+    let query = supabase
+        .from('listings')
+        .select(LISTING_SELECT_QUERY)
+        .eq('listing_type', 'rent')
+        .eq('is_active', true)
+
+    if (filters?.propertyType) {
+        query = query.ilike('property_type', `%${filters.propertyType}%`)
+    }
+    if (filters?.state) {
+        query = query.ilike('state', `%${filters.state}%`)
+    }
+    if (filters?.bedrooms) {
+        query = query.eq('total_bedrooms', parseInt(filters.bedrooms))
+    }
+    if (filters?.furnishing) {
+        query = query.ilike('furnishing', `%${filters.furnishing}%`)
+    }
+
+    const { data, error } = await query.order('scraped_at', { ascending: false })
+
+    if (error) {
+        console.error('Error fetching rent listings:', error)
+        return []
+    }
+
+    // Filter by price range on the rent details
+    let results = (data || []).map(transformListingToProperty)
+
+    if (filters?.minPrice || filters?.maxPrice) {
+        results = results.filter(p => {
+            const price = p.price || 0
+            const min = filters.minPrice ? parseInt(filters.minPrice) : 0
+            const max = filters.maxPrice ? parseInt(filters.maxPrice) : Infinity
+            return price >= min && price <= max
+        })
+    }
+
+    return results
+}
+
+// ============================================
+// DEPRECATED - OLD FUNCTIONS (Commented for reference)
+// ============================================
+
+/*
+// OLD: Fetch all active properties from dup_properties
+export async function getProperties_OLD(): Promise<Property[]> {
+    const { data, error } = await supabase
+        .from('dup_properties')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+    if (error) {
+        console.error('Error fetching properties:', error)
+        return []
+    }
+
+    return data || []
+}
+
+// OLD: Fetch agent by ID from dup_agents
+export async function getAgentById_OLD(id: string): Promise<Agent | null> {
+    const { data, error } = await supabase
+        .from('dup_agents')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+    if (error) {
+        console.error('Error fetching agent:', error)
+        return null
+    }
+
+    return data
+}
+*/

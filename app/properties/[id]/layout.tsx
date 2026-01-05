@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import { getPropertyById } from '@/lib/database'
+import { formatPrice } from '@/lib/utils'
 
 type Props = {
     params: Promise<{ id: string }>
@@ -15,17 +16,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         }
     }
 
-    const formatPrice = (price: number) => {
-        return new Intl.NumberFormat('en-MY', {
-            style: 'currency',
-            currency: 'MYR',
-            minimumFractionDigits: 0,
-        }).format(price)
-    }
+    const propertyName = property.title || property.property_name || 'Property'
+    const priceDisplay = formatPrice(property.price, property.listing_type === 'rent')
+    const title = `${propertyName} - ${priceDisplay}`
 
-    const title = `${property.property_name} - ${formatPrice(property.price)}`
-    const description = `${property.property_type} | ${property.bedrooms > 0 ? `${property.bedrooms} bed, ` : ''}${property.bathrooms} bath, ${property.size} | ${property.state || property.address}`
-    const imageUrl = property.main_image_url || property.images[0] || 'https://superhomesv1.netlify.app/og-default.jpg'
+    const bedroomCount = property.total_bedrooms || property.bedrooms_num
+    const propertySize = property.floor_area_sqft || property.size || ''
+    const description = `${property.property_type || 'Property'} | ${bedroomCount && Number(bedroomCount) > 0 ? `${bedroomCount} bed, ` : ''}${property.bathrooms || ''} bath, ${propertySize} | ${property.state || property.address || ''}`
+    const imageUrl = property.main_image_url || property.images?.[0] || 'https://superhomesv1.netlify.app/og-default.jpg'
 
     return {
         title,
@@ -39,7 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
                     url: imageUrl,
                     width: 1200,
                     height: 630,
-                    alt: property.property_name,
+                    alt: propertyName,
                 }
             ],
             siteName: 'SuperHomes',

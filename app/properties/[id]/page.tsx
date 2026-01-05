@@ -14,6 +14,9 @@ import { Property, Agent } from '@/lib/supabase'
 import { useFavorites } from '@/contexts/FavoritesContext'
 import ShareButton from '@/components/ShareButton'
 import NearbyAmenities from '@/components/NearbyAmenities'
+import MortgageCalculator from '@/components/MortgageCalculator'
+import MobileContactBar from '@/components/MobileContactBar'
+import { formatPrice } from '@/lib/utils'
 
 export default function PropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params)
@@ -37,8 +40,8 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                     return
                 }
 
-                agentData = await getAgentByAgentId(propertyData.agent_id)
-                similar = await getSimilarProperties(id, propertyData.property_type, propertyData.state)
+                agentData = await getAgentByAgentId(propertyData.agent_id || '')
+                similar = await getSimilarProperties(id, propertyData.property_type || '', propertyData.state)
 
                 setProperty(propertyData)
                 setAgent(agentData)
@@ -88,13 +91,10 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
         return null
     }
 
-    const formatPrice = (price: number) => {
-        return new Intl.NumberFormat('en-MY', {
-            style: 'currency',
-            currency: 'MYR',
-            minimumFractionDigits: 0,
-        }).format(price)
-    }
+    // Computed values for backward compatibility
+    const propertyName = property.title || property.property_name || 'Property'
+    const propertySize = property.floor_area_sqft || property.size || ''
+    const bedroomCount = property.total_bedrooms || property.bedrooms_num
 
     const handleWhatsApp = () => {
         if (!agent || !agent.phone) return
@@ -104,7 +104,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
         const propertyUrl = typeof window !== 'undefined' ? window.location.href : ''
 
         // Get the property image URL
-        const propertyImage = property.main_image_url || property.images[0] || ''
+        const propertyImage = property.main_image_url || property.images?.[0] || ''
 
         // Build a comprehensive message with property details
         // Using WhatsApp markdown (*bold*) for better formatting
@@ -113,8 +113,8 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
             propertyUrl,
             ``,
             `Hi, I am interested in:`,
-            `*${property.property_name}*`,
-            `${(property.bedrooms_num || property.bedrooms) > 0 ? (property.bedrooms_num || property.bedrooms) + ' Beds / ' : ''}${formatPrice(property.price)}`,
+            `*${propertyName}*`,
+            `${bedroomCount && Number(bedroomCount) > 0 ? bedroomCount + ' Beds / ' : ''}${formatPrice(property.price, property.listing_type === 'rent')}`,
             ``,
             `Can you provide more information?`
         ].filter(Boolean).join('\n')
@@ -149,7 +149,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                         {/* Main Content */}
                         <div className="lg:col-span-2">
                             {/* PropertyGuru-Style Image Gallery */}
-                            <ImageGallery images={property.images} propertyName={property.property_name} mainImage={property.main_image_url} />
+                            <ImageGallery images={property.images || []} propertyName={propertyName} mainImage={property.main_image_url} />
 
                             {/* Property Info */}
                             <div className="glass p-8 rounded-2xl mb-6">
@@ -158,16 +158,25 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                                         <div className="flex items-start justify-between">
                                             <div>
                                                 <span className="inline-block bg-primary-100 text-primary-600 px-3 py-1 rounded-full text-sm font-semibold mb-3">
-                                                    {property.property_type}
+                                                    {property.property_type || 'Property'}
                                                 </span>
-                                                <h1 className="font-heading font-bold text-3xl text-gray-900 mb-2">{property.property_name}</h1>
+                                                {property.listing_type && (
+                                                    <span className={`inline-block ml-2 px-3 py-1 rounded-full text-sm font-semibold mb-3 ${property.listing_type === 'sale' ? 'bg-green-100 text-green-600' :
+                                                        property.listing_type === 'rent' ? 'bg-blue-100 text-blue-600' :
+                                                            'bg-purple-100 text-purple-600'
+                                                        }`}>
+                                                        {property.listing_type === 'sale' ? 'For Sale' :
+                                                            property.listing_type === 'rent' ? 'For Rent' : 'New Project'}
+                                                    </span>
+                                                )}
+                                                <h1 className="font-heading font-bold text-3xl text-gray-900 mb-2">{propertyName}</h1>
                                             </div>
                                             {/* Action Buttons */}
                                             <div className="flex items-center gap-2">
                                                 {/* Share Button */}
                                                 <ShareButton
                                                     url={typeof window !== 'undefined' ? window.location.href : ''}
-                                                    title={`Check out ${property.property_name}`}
+                                                    title={`Check out ${propertyName}`}
                                                     className="p-3 border-0 shadow-sm"
                                                 />
                                                 {/* Favorite Button */}
@@ -197,31 +206,37 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                                     </div>
                                     <div className="text-right">
                                         <p className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                                            {formatPrice(property.price)}
+                                            {formatPrice(property.price, property.listing_type === 'rent')}
                                         </p>
                                     </div>
                                 </div>
 
                                 {/* Property Details Grid */}
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 pb-6 border-b border-gray-200">
-                                    {(property.bedrooms_num || property.bedrooms) > 0 && (
+                                    {bedroomCount && Number(bedroomCount) > 0 && (
                                         <div className="text-center p-4 bg-gray-50 rounded-lg">
-                                            <p className="text-2xl font-bold text-gray-900">{property.bedrooms_num || property.bedrooms}</p>
+                                            <p className="text-2xl font-bold text-gray-900">{bedroomCount}</p>
                                             <p className="text-sm text-gray-600">Bedrooms</p>
                                         </div>
                                     )}
-                                    <div className="text-center p-4 bg-gray-50 rounded-lg">
-                                        <p className="text-2xl font-bold text-gray-900">{property.bathrooms}</p>
-                                        <p className="text-sm text-gray-600">Bathrooms</p>
-                                    </div>
-                                    <div className="text-center p-4 bg-gray-50 rounded-lg">
-                                        <p className="text-2xl font-bold text-gray-900">{property.size}</p>
-                                        <p className="text-sm text-gray-600">Size</p>
-                                    </div>
-                                    <div className="text-center p-4 bg-gray-50 rounded-lg">
-                                        <p className="text-lg font-bold text-gray-900">{property.tenure}</p>
-                                        <p className="text-sm text-gray-600">Tenure</p>
-                                    </div>
+                                    {property.bathrooms && (
+                                        <div className="text-center p-4 bg-gray-50 rounded-lg">
+                                            <p className="text-2xl font-bold text-gray-900">{property.bathrooms}</p>
+                                            <p className="text-sm text-gray-600">Bathrooms</p>
+                                        </div>
+                                    )}
+                                    {propertySize && (
+                                        <div className="text-center p-4 bg-gray-50 rounded-lg">
+                                            <p className="text-2xl font-bold text-gray-900">{propertySize}</p>
+                                            <p className="text-sm text-gray-600">Size</p>
+                                        </div>
+                                    )}
+                                    {property.tenure && (
+                                        <div className="text-center p-4 bg-gray-50 rounded-lg">
+                                            <p className="text-lg font-bold text-gray-900">{property.tenure}</p>
+                                            <p className="text-sm text-gray-600">Tenure</p>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Description */}
@@ -291,19 +306,18 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                                                 <span className="font-semibold text-gray-900">{property.furnishing}</span>
                                             </div>
                                         )}
-                                        {property.size && (
+                                        {propertySize && (
                                             <div className="flex justify-between py-2 border-b border-gray-200">
                                                 <span className="text-gray-600">Built-up Size</span>
-                                                <span className="font-semibold text-gray-900">{property.size}</span>
+                                                <span className="font-semibold text-gray-900">{propertySize}</span>
                                             </div>
                                         )}
                                         {/* Calculate and validate PSF */}
                                         {(() => {
-                                            // Try to calculate PSF from price and size
                                             let psf = property.price_per_sqft
-                                            if (!psf && property.size && property.price) {
+                                            if (!psf && propertySize && property.price) {
                                                 // Parse size like "1,400 sqft" or "3,570 sq. ft."
-                                                const sizeMatch = property.size.match(/[\d,]+/)
+                                                const sizeMatch = propertySize.match(/[\d,]+/)
                                                 if (sizeMatch) {
                                                     const sizeNum = parseFloat(sizeMatch[0].replace(/,/g, ''))
                                                     if (sizeNum > 0) {
@@ -359,7 +373,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                                         <SinglePropertyMap
                                             latitude={property.latitude}
                                             longitude={property.longitude}
-                                            propertyName={property.property_name}
+                                            propertyName={propertyName}
                                             className="border border-gray-200 shadow-sm"
                                         />
                                         <p className="text-sm text-gray-500 mt-2">
@@ -375,6 +389,15 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                                         longitude={property.longitude}
                                     />
                                 )}
+
+                                {/* Mortgage Calculator */}
+                                <div className="mt-8">
+                                    <h2 className="font-heading font-bold text-xl mb-4">Mortgage Calculator</h2>
+                                    <MortgageCalculator
+                                        propertyPrice={property.price || 0}
+                                        isRent={property.listing_type === 'rent'}
+                                    />
+                                </div>
                             </div>
 
                             {/* Similar Properties */}
@@ -398,7 +421,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                                     <h3 className="font-heading font-semibold text-lg mb-4">Contact Agent</h3>
                                     {agent ? (
                                         <>
-                                            <Link href={`/agents/${agent.agent_id}`} className="flex items-center mb-4 group">
+                                            <Link href={`/agents/${agent.id || agent.agent_id}`} className="flex items-center mb-4 group">
                                                 <div className="w-16 h-16 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold text-2xl mr-4 group-hover:ring-2 group-hover:ring-primary-300 transition-all">
                                                     {agent.photo_url ? (
                                                         <img
@@ -424,7 +447,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                                                 </div>
                                             </div>
                                             <Link
-                                                href={`/agents/${agent.agent_id}`}
+                                                href={`/agents/${agent.id || agent.agent_id}`}
                                                 className="inline-flex items-center text-primary-600 hover:text-primary-700 text-sm font-medium mt-3"
                                             >
                                                 View Agent Profile
@@ -456,11 +479,16 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                                     </div>
                                 )}
                             </div>
+
+
                         </div>
                     </div>
                 </div>
 
                 <Footer />
+
+                {/* Mobile Contact Bar - Only visible on mobile */}
+                <MobileContactBar agent={agent} property={property} />
             </div>
         </>
     )

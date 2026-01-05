@@ -115,6 +115,7 @@ function PropertiesPageContent() {
                 minPrice: activeFilters.minPrice ? Number(activeFilters.minPrice) : undefined,
                 maxPrice: activeFilters.maxPrice ? Number(activeFilters.maxPrice) : undefined,
                 bedrooms: activeFilters.bedrooms ? Number(activeFilters.bedrooms) : undefined,
+                listingType: 'sale', // Only show properties for sale, not rent
             })
 
             setProperties(result.properties)
@@ -191,7 +192,7 @@ function PropertiesPageContent() {
                     setMatchedAgents(agents)
                     // Fetch properties from matched agents
                     if (agents.length > 0) {
-                        const agentIds = agents.map(a => a.agent_id)
+                        const agentIds = agents.map(a => a.id || a.agent_id).filter((id): id is string => !!id)
                         const props = await getPropertiesByAgentIds(agentIds, 12)
                         setAgentProperties(props)
                     } else {
@@ -306,12 +307,17 @@ function PropertiesPageContent() {
 
     const totalPages = Math.ceil(totalCount / PROPERTIES_PER_PAGE)
 
-    // Sort properties client-side
-    const sortedProperties = [...properties].sort((a, b) => {
-        if (sortBy === 'price-low') return a.price - b.price
-        if (sortBy === 'price-high') return b.price - a.price
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    })
+    // Create a set of agent property IDs for deduplication
+    const agentPropertyIds = new Set(agentProperties.map(p => p.id))
+
+    // Sort properties client-side and filter out those already shown in agent section
+    const sortedProperties = [...properties]
+        .filter(p => !agentPropertyIds.has(p.id)) // Remove duplicates
+        .sort((a, b) => {
+            if (sortBy === 'price-low') return (a.price || 0) - (b.price || 0)
+            if (sortBy === 'price-high') return (b.price || 0) - (a.price || 0)
+            return new Date(b.created_at || b.scraped_at || 0).getTime() - new Date(a.created_at || a.scraped_at || 0).getTime()
+        })
 
     // Generate dynamic filter options from database
     const propertyTypeOptions = [
@@ -319,28 +325,18 @@ function PropertiesPageContent() {
         ...filterOptions.propertyTypes.map(type => ({ label: type, value: type }))
     ]
 
-    // Generate price range options based on actual data
-    const generatePriceRanges = () => {
-        const { min, max } = filterOptions.priceRange
-        const ranges = [
-            { label: 'Any Price', min: '', max: '' }
-        ]
-
-        if (max > 0) {
-            if (max >= 500000) ranges.push({ label: 'Under RM500K', min: '', max: '500000' })
-            if (max >= 1000000) ranges.push({ label: 'RM500K - RM1M', min: '500000', max: '1000000' })
-            if (max >= 2000000) ranges.push({ label: 'RM1M - RM2M', min: '1000000', max: '2000000' })
-            if (max >= 3000000) ranges.push({ label: 'RM2M - RM3M', min: '2000000', max: '3000000' })
-            if (max >= 5000000) ranges.push({ label: 'RM3M - RM5M', min: '3000000', max: '5000000' })
-            if (max > 5000000) ranges.push({ label: 'Above RM5M', min: '5000000', max: '' })
-            else if (max > 3000000) ranges.push({ label: `Above RM3M`, min: '3000000', max: '' })
-            else if (max > 2000000) ranges.push({ label: 'Above RM2M', min: '2000000', max: '' })
-        }
-
-        return ranges
-    }
-
-    const priceRanges = generatePriceRanges()
+    // Static price range options for consistent UX
+    const priceRanges = [
+        { label: 'Any Price', min: '', max: '' },
+        { label: 'Under RM300K', min: '', max: '300000' },
+        { label: 'RM300K - RM500K', min: '300000', max: '500000' },
+        { label: 'RM500K - RM800K', min: '500000', max: '800000' },
+        { label: 'RM800K - RM1M', min: '800000', max: '1000000' },
+        { label: 'RM1M - RM2M', min: '1000000', max: '2000000' },
+        { label: 'RM2M - RM3M', min: '2000000', max: '3000000' },
+        { label: 'RM3M - RM5M', min: '3000000', max: '5000000' },
+        { label: 'Above RM5M', min: '5000000', max: '' },
+    ]
 
     // Bedroom options based on actual data
     const bedroomOptions = [
@@ -440,31 +436,165 @@ function PropertiesPageContent() {
                         {/* Price Pill */}
                         <div className="relative">
                             <button
-                                onClick={() => setOpenDropdown(openDropdown === 'price' ? null : 'price')}
+                                onClick={() => setOpenDropdown(openDropdown === 'price' || openDropdown === 'priceMin' || openDropdown === 'priceMax' ? null : 'price')}
                                 className={`filter-pill ${filters.minPrice || filters.maxPrice ? 'active' : ''}`}
                             >
                                 <span className="font-medium">RM</span>
-                                <span>Price</span>
-                                <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === 'price' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <span>
+                                    {filters.minPrice || filters.maxPrice
+                                        ? filters.minPrice && filters.maxPrice
+                                            ? `${parseInt(filters.minPrice).toLocaleString()} - ${parseInt(filters.maxPrice).toLocaleString()}`
+                                            : filters.minPrice
+                                                ? `${parseInt(filters.minPrice).toLocaleString()}+`
+                                                : `≤ ${parseInt(filters.maxPrice).toLocaleString()}`
+                                        : 'Price'}
+                                </span>
+                                <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === 'price' || openDropdown === 'priceMin' || openDropdown === 'priceMax' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
-                            {openDropdown === 'price' && (
-                                <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 max-h-64 overflow-y-auto">
-                                    {priceRanges.map((range, idx) => (
+                            {(openDropdown === 'price' || openDropdown === 'priceMin' || openDropdown === 'priceMax') && (
+                                <div className="absolute top-full left-0 mt-2 w-[400px] bg-white rounded-2xl shadow-xl border border-gray-200 p-5 z-50">
+                                    {/* Labels Row */}
+                                    <div className="grid grid-cols-2 gap-4 mb-3">
+                                        <label className="text-sm font-medium text-gray-900">Minimum</label>
+                                        <label className="text-sm font-medium text-gray-900">Maximum</label>
+                                    </div>
+
+                                    {/* Input Fields Row */}
+                                    <div className="grid grid-cols-2 gap-4 mb-4">
+                                        {/* Min Input with Dropdown */}
+                                        <div className="relative">
+                                            <div
+                                                className="flex items-center border border-gray-300 rounded-lg px-3 py-2.5 bg-white cursor-pointer hover:border-gray-400 transition-colors"
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    setOpenDropdown(openDropdown === 'priceMin' ? 'price' : 'priceMin')
+                                                }}
+                                            >
+                                                <span className="text-gray-500 mr-2 text-sm font-medium">RM</span>
+                                                <span className="flex-1 text-gray-700 text-sm">
+                                                    {filters.minPrice ? parseInt(filters.minPrice).toLocaleString() : 'Min'}
+                                                </span>
+                                                <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === 'priceMin' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                </svg>
+                                            </div>
+                                            {openDropdown === 'priceMin' && (
+                                                <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-[60] max-h-60 overflow-y-auto">
+                                                    {[
+                                                        { label: 'No Min', value: '' },
+                                                        { label: '200,000', value: '200000' },
+                                                        { label: '300,000', value: '300000' },
+                                                        { label: '400,000', value: '400000' },
+                                                        { label: '500,000', value: '500000' },
+                                                        { label: '600,000', value: '600000' },
+                                                        { label: '800,000', value: '800000' },
+                                                        { label: '1,000,000', value: '1000000' },
+                                                        { label: '1,500,000', value: '1500000' },
+                                                        { label: '2,000,000', value: '2000000' },
+                                                        { label: '3,000,000', value: '3000000' },
+                                                        { label: '5,000,000', value: '5000000' },
+                                                    ].map((opt) => (
+                                                        <label
+                                                            key={opt.value}
+                                                            className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 cursor-pointer"
+                                                        >
+                                                            <input
+                                                                type="radio"
+                                                                name="minPrice"
+                                                                checked={filters.minPrice === opt.value}
+                                                                onChange={() => {
+                                                                    setFilters({ ...filters, minPrice: opt.value })
+                                                                    setOpenDropdown('price')
+                                                                }}
+                                                                className="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500"
+                                                            />
+                                                            <span className="text-sm text-gray-700">{opt.label}</span>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Max Input with Dropdown */}
+                                        <div className="relative">
+                                            <div
+                                                className="flex items-center border border-gray-300 rounded-lg px-3 py-2.5 bg-white cursor-pointer hover:border-gray-400 transition-colors"
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    setOpenDropdown(openDropdown === 'priceMax' ? 'price' : 'priceMax')
+                                                }}
+                                            >
+                                                <span className="text-gray-500 mr-2 text-sm font-medium">RM</span>
+                                                <span className="flex-1 text-gray-700 text-sm">
+                                                    {filters.maxPrice ? parseInt(filters.maxPrice).toLocaleString() : 'Max'}
+                                                </span>
+                                                <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === 'priceMax' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                </svg>
+                                            </div>
+                                            {openDropdown === 'priceMax' && (
+                                                <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-[60] max-h-60 overflow-y-auto">
+                                                    {[
+                                                        { label: 'No Max', value: '' },
+                                                        { label: '300,000', value: '300000' },
+                                                        { label: '400,000', value: '400000' },
+                                                        { label: '500,000', value: '500000' },
+                                                        { label: '600,000', value: '600000' },
+                                                        { label: '800,000', value: '800000' },
+                                                        { label: '1,000,000', value: '1000000' },
+                                                        { label: '1,500,000', value: '1500000' },
+                                                        { label: '2,000,000', value: '2000000' },
+                                                        { label: '3,000,000', value: '3000000' },
+                                                        { label: '5,000,000', value: '5000000' },
+                                                        { label: '10,000,000', value: '10000000' },
+                                                    ].map((opt) => (
+                                                        <label
+                                                            key={opt.value}
+                                                            className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 cursor-pointer"
+                                                        >
+                                                            <input
+                                                                type="radio"
+                                                                name="maxPrice"
+                                                                checked={filters.maxPrice === opt.value}
+                                                                onChange={() => {
+                                                                    setFilters({ ...filters, maxPrice: opt.value })
+                                                                    setOpenDropdown('price')
+                                                                }}
+                                                                className="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500"
+                                                            />
+                                                            <span className="text-sm text-gray-700">{opt.label}</span>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Action Buttons */}
+                                    <div className="grid grid-cols-2 gap-3 pt-4 border-t border-gray-100">
                                         <button
-                                            key={idx}
                                             onClick={() => {
-                                                const newFilters = { ...filters, minPrice: range.min, maxPrice: range.max }
+                                                const newFilters = { ...filters, minPrice: '', maxPrice: '' }
                                                 setFilters(newFilters)
-                                                setOpenDropdown(null)
                                                 loadProperties(1, true, newFilters)
+                                                setOpenDropdown(null)
                                             }}
-                                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${filters.minPrice === range.min && filters.maxPrice === range.max ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
+                                            className="py-2.5 px-4 border border-gray-300 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                                         >
-                                            {range.label}
+                                            Clear
                                         </button>
-                                    ))}
+                                        <button
+                                            onClick={() => {
+                                                setOpenDropdown(null)
+                                                loadProperties(1, true, filters)
+                                            }}
+                                            className="py-2.5 px-4 bg-primary-600 hover:bg-primary-700 rounded-full text-sm font-medium text-white transition-colors"
+                                        >
+                                            Apply
+                                        </button>
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -697,8 +827,8 @@ function PropertiesPageContent() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                             {matchedAgents.map((agent) => (
                                 <Link
-                                    key={agent.agent_id}
-                                    href={`/agents/${agent.agent_id}`}
+                                    key={agent.id || agent.agent_id}
+                                    href={`/agents/${agent.id || agent.agent_id}`}
                                     className="bg-white rounded-xl p-4 border border-gray-200 hover:border-rose-300 hover:shadow-md transition-all group"
                                 >
                                     <div className="flex items-center gap-3">
@@ -739,7 +869,7 @@ function PropertiesPageContent() {
                             </h2>
                             {matchedAgents.length === 1 && (
                                 <Link
-                                    href={`/agents/${matchedAgents[0].agent_id}`}
+                                    href={`/agents/${matchedAgents[0].id || matchedAgents[0].agent_id}`}
                                     className="text-rose-500 text-sm font-medium hover:text-rose-600"
                                 >
                                     View Agent Profile →
@@ -887,6 +1017,7 @@ function PropertiesPageContent() {
                     loadProperties(1, true, newFilters)
                 }}
                 filterOptions={filterOptions}
+                stateOptions={stateOptions}
             />
 
             <Footer />
