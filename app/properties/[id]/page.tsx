@@ -390,14 +390,16 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                                     />
                                 )}
 
-                                {/* Mortgage Calculator */}
-                                <div className="mt-8">
-                                    <h2 className="font-heading font-bold text-xl mb-4">Mortgage Calculator</h2>
-                                    <MortgageCalculator
-                                        propertyPrice={property.price || 0}
-                                        isRent={property.listing_type === 'rent'}
-                                    />
-                                </div>
+                                {/* Mortgage Calculator - Only for Sale/Project properties */}
+                                {property.listing_type !== 'rent' && (
+                                    <div className="mt-8">
+                                        <h2 className="font-heading font-bold text-xl mb-4">Mortgage Calculator</h2>
+                                        <MortgageCalculator
+                                            propertyPrice={property.price || 0}
+                                            isRent={false}
+                                        />
+                                    </div>
+                                )}
                             </div>
 
                             {/* Similar Properties */}

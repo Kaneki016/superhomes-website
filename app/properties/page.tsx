@@ -55,8 +55,15 @@ export default function PropertiesPage() {
 }
 
 function PropertiesPageContent() {
+    // URL Search Params
     const searchParams = useSearchParams()
     const router = useRouter()
+
+    // View Mode Initialization from URL
+    const initialViewMode = (searchParams.get('view') as 'grid' | 'list') || 'grid'
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>(initialViewMode)
+
+    // ... (rest of state items are fine)
     const { user } = useAuth()
     const [properties, setProperties] = useState<Property[]>([])
     const [matchedAgents, setMatchedAgents] = useState<Agent[]>([])
@@ -68,13 +75,37 @@ function PropertiesPageContent() {
     const [currentPage, setCurrentPage] = useState(initialPage)
     const [totalCount, setTotalCount] = useState(0)
     const [hasMore, setHasMore] = useState(false)
-    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
     const [sortBy, setSortBy] = useState('newest')
     const [activeTab, setActiveTab] = useState('all')
     const [showFilters, setShowFilters] = useState(false)
     const [mapView, setMapView] = useState(false)
     const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null)
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+    // ...
+
+    // Update view mode handler to persist to URL
+    const handleViewModeChange = (mode: 'grid' | 'list') => {
+        setViewMode(mode)
+        const params = new URLSearchParams(searchParams.toString())
+        params.set('view', mode)
+        router.replace(`?${params.toString()}`, { scroll: false })
+    }
+
+    // Sync state if URL changes externally (e.g. back button)
+    useEffect(() => {
+        const viewFromUrl = searchParams.get('view') as 'grid' | 'list'
+        if (viewFromUrl && viewFromUrl !== viewMode) {
+            setViewMode(viewFromUrl)
+        }
+    }, [searchParams])
+
+    // ... rest of component logic ...
+
+    // (Inside render, update ListSkeleton usage)
+    // <ListSkeleton count={12} type="property" viewMode={viewMode} />
+
+    // (Inside render, update View Toggle buttons to use handleViewModeChange)
+    // onClick={() => handleViewModeChange('grid')}
     const [filters, setFilters] = useState({
         propertyType: '',
         minPrice: '',
@@ -270,11 +301,17 @@ function PropertiesPageContent() {
     }
 
     const handleResetFilters = () => {
-        setFilters({ propertyType: '', minPrice: '', maxPrice: '', bedrooms: '', location: '', state: '' })
+        const resetFilters = { propertyType: '', minPrice: '', maxPrice: '', bedrooms: '', location: '', state: '' }
+        setFilters(resetFilters)
         setCurrentPage(1)
         setMatchedAgents([])
-        // Need to load after state updates
-        setTimeout(() => loadProperties(1, true), 0)
+        setOpenDropdown(null)
+
+        // Clear URL params
+        router.replace('/properties', { scroll: false })
+
+        // Load with reset filters immediately
+        loadProperties(1, true, resetFilters)
     }
 
     const handlePageChange = (page: number) => {
@@ -778,7 +815,7 @@ function PropertiesPageContent() {
                         {/* View Toggle */}
                         <div className="view-toggle">
                             <button
-                                onClick={() => setViewMode('grid')}
+                                onClick={() => handleViewModeChange('grid')}
                                 className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -786,7 +823,7 @@ function PropertiesPageContent() {
                                 </svg>
                             </button>
                             <button
-                                onClick={() => setViewMode('list')}
+                                onClick={() => handleViewModeChange('list')}
                                 className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -876,9 +913,9 @@ function PropertiesPageContent() {
                                 </Link>
                             )}
                         </div>
-                        <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' : 'flex flex-col gap-6'}>
+                        <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' : 'flex flex-col gap-6 max-w-4xl mx-auto'}>
                             {agentProperties.map((property) => (
-                                <PropertyCard key={property.id} property={property} />
+                                <PropertyCard key={property.id} property={property} variant={viewMode} />
                             ))}
                         </div>
                     </div>
@@ -957,9 +994,9 @@ function PropertiesPageContent() {
                             </div>
                         ) : (
                             /* Grid/List View */
-                            <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' : 'flex flex-col gap-6'}>
+                            <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' : 'flex flex-col gap-6 max-w-4xl mx-auto'}>
                                 {sortedProperties.map((property) => (
-                                    <PropertyCard key={property.id} property={property} />
+                                    <PropertyCard key={property.id} property={property} variant={viewMode} />
                                 ))}
                             </div>
                         )}
@@ -977,7 +1014,7 @@ function PropertiesPageContent() {
 
                 {/* Loading State */}
                 {loading && (
-                    <ListSkeleton count={12} type="property" />
+                    <ListSkeleton count={12} type="property" viewMode={viewMode} />
                 )}
 
                 {/* No Results - Only shown when both property search and agent search return nothing */}

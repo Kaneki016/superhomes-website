@@ -547,53 +547,49 @@ export async function getFeaturedProperties(limit: number = 8): Promise<Property
     return propertiesWithAgents.slice(0, limit)
 }
 
-// Fetch diverse properties (one per agent for variety, only sale properties with agents)
-export async function getDiverseProperties(limit: number = 8): Promise<Property[]> {
-    const { data, error } = await supabase
+// Fetch handpicked properties (Premium/Luxury listings - highest price)
+export async function getHandpickedProperties(limit: number = 8, state?: string): Promise<Property[]> {
+    // Fetch a pool of recent listings to select from
+    let query = supabase
         .from('listings')
         .select(LISTING_SELECT_QUERY)
         .eq('is_active', true)
         .eq('listing_type', 'sale')
+
+    if (state) {
+        query = query.ilike('state', `%${state}%`)
+    }
+
+    const { data, error } = await query
         .order('scraped_at', { ascending: false })
-        .limit(limit * 8) // Fetch more to account for filtering
+        .limit(50) // Fetch 50 candidates
 
     if (error) {
-        console.error('Error fetching diverse properties:', error)
+        console.error('Error fetching handpicked properties:', error)
         return []
     }
 
     if (!data) return []
 
-    // Transform and filter to only include properties with contacts/agents that have valid names
-    const allProperties = data.map(transformListingToProperty)
-    const properties = allProperties.filter(p => {
+    // Transform to properties
+    let properties = data.map(transformListingToProperty)
+
+    // Filter to ensure valid data
+    properties = properties.filter(p => {
+        if (!p.price) return false
+        // Ensure valid agent
         if (!p.contacts || p.contacts.length === 0) return false
         const agentName = p.contacts[0]?.name?.toLowerCase().trim()
         return agentName && agentName !== 'unknown'
     })
 
-    // Pick one property per unique agent
-    const seenAgents = new Set<string>()
-    const diverseProperties: Property[] = []
+    // Sort by price descending (Highest Price first) for "Premium" selection
+    properties.sort((a, b) => (b.price || 0) - (a.price || 0))
 
-    for (const property of properties) {
-        const agentId = property.agent_id || 'unknown'
-        if (!seenAgents.has(agentId) && diverseProperties.length < limit) {
-            seenAgents.add(agentId)
-            diverseProperties.push(property)
-        }
-    }
+    // Reduce strict agent diversity to allow best properties, but maybe limit 2 per agent?
+    // Let's just return the top expensive ones for now as differentiation.
 
-    // Fill with remaining if needed
-    if (diverseProperties.length < limit) {
-        for (const property of properties) {
-            if (!diverseProperties.find(p => p.id === property.id) && diverseProperties.length < limit) {
-                diverseProperties.push(property)
-            }
-        }
-    }
-
-    return diverseProperties
+    return properties.slice(0, limit)
 }
 
 // Fetch agent/contact by ID
