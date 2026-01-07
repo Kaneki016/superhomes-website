@@ -147,15 +147,21 @@ export async function getNearbyAmenities(
     lon: number,
     radiusKm: number = 5
 ): Promise<Amenity[]> {
+    // Ensure inputs are numbers (runtime safety)
+    const latNum = Number(lat)
+    const lonNum = Number(lon)
+
+    if (isNaN(latNum) || isNaN(lonNum)) return []
+
     // Check cache first
-    const cacheKey = `${lat.toFixed(4)},${lon.toFixed(4)}`
+    const cacheKey = `${latNum.toFixed(4)},${lonNum.toFixed(4)}`
     const cached = cache.get(cacheKey)
     if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
         return cached.data
     }
 
     const radiusMeters = radiusKm * 1000
-    const query = buildOverpassQuery(lat, lon, radiusMeters)
+    const query = buildOverpassQuery(latNum, lonNum, radiusMeters)
 
     try {
         const response = await fetch('https://overpass-api.de/api/interpreter', {
@@ -172,7 +178,7 @@ export async function getNearbyAmenities(
         }
 
         const data = await response.json()
-        const amenities = parseOverpassResponse(data.elements || [], lat, lon)
+        const amenities = parseOverpassResponse(data.elements || [], latNum, lonNum)
 
         // Cache the result
         cache.set(cacheKey, { data: amenities, timestamp: Date.now() })
