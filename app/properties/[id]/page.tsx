@@ -41,7 +41,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                 }
 
                 agentData = await getAgentByAgentId(propertyData.agent_id || '')
-                similar = await getSimilarProperties(id, propertyData.property_type || '', propertyData.state)
+                similar = await getSimilarProperties(id, propertyData.property_type || '', propertyData.state, propertyData.listing_type, propertyData.district)
 
                 setProperty(propertyData)
                 setAgent(agentData)

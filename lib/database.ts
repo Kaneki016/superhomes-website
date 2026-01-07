@@ -741,70 +741,66 @@ export async function searchProperties(filters: {
 }
 
 // Get similar properties
-export async function getSimilarProperties(propertyId: string, propertyType: string, state?: string | null): Promise<Property[]> {
-    if (state) {
-        const { data: sameStateAndType, error: error1 } = await supabase
+export async function getSimilarProperties(propertyId: string, propertyType: string, state?: string | null, listingType?: string, district?: string | null): Promise<Property[]> {
+    let similarProps: any[] = []
+    const LIMIT = 3
+
+    // 1. Strict Match: District + Property Type + Listing Type
+    if (district) {
+        let query1 = supabase
+            .from('listings')
+            .select(LISTING_SELECT_QUERY)
+            .eq('property_type', propertyType)
+            .ilike('district', `%${district}%`)
+            .neq('id', propertyId)
+            .eq('is_active', true)
+
+        if (listingType) {
+            query1 = query1.eq('listing_type', listingType)
+        }
+
+        if (state) {
+            query1 = query1.ilike('state', `%${state}%`) // Ensure strict state match too if district name is ambiguous
+        }
+
+        const { data, error } = await query1.limit(LIMIT)
+        if (!error && data) {
+            similarProps = [...data]
+        }
+    }
+
+    // 2. Fallback: State + Property Type + Listing Type
+    if (similarProps.length < LIMIT && state) {
+        let query2 = supabase
             .from('listings')
             .select(LISTING_SELECT_QUERY)
             .eq('property_type', propertyType)
             .ilike('state', `%${state}%`)
             .neq('id', propertyId)
             .eq('is_active', true)
-            .limit(3)
 
-        if (!error1 && sameStateAndType && sameStateAndType.length >= 3) {
-            return sameStateAndType.map(transformListingToProperty)
+        if (listingType) {
+            query2 = query2.eq('listing_type', listingType)
         }
 
-        const { data: sameState, error: error2 } = await supabase
-            .from('listings')
-            .select(LISTING_SELECT_QUERY)
-            .ilike('state', `%${state}%`)
-            .neq('id', propertyId)
-            .eq('is_active', true)
-            .limit(3)
-
-        if (!error2 && sameState && sameState.length >= 3) {
-            return sameState.map(transformListingToProperty)
+        // Exclude already found IDs
+        if (similarProps.length > 0) {
+            query2 = query2.not('id', 'in', `(${similarProps.map(p => p.id).join(',')})`)
         }
 
-        // Combine
-        const existingIds = new Set((sameState || []).map(p => p.id))
-        const needed = 3 - (sameState?.length || 0)
-
-        if (needed > 0) {
-            const { data: sameType, error: error3 } = await supabase
-                .from('listings')
-                .select(LISTING_SELECT_QUERY)
-                .eq('property_type', propertyType)
-                .neq('id', propertyId)
-                .eq('is_active', true)
-                .limit(needed + 5)
-
-            if (!error3 && sameType) {
-                const additional = sameType.filter(p => !existingIds.has(p.id)).slice(0, needed)
-                const combined = [...(sameState || []), ...additional].slice(0, 3)
-                return combined.map(transformListingToProperty)
-            }
+        const { data, error } = await query2.limit(LIMIT - similarProps.length)
+        if (!error && data) {
+            similarProps = [...similarProps, ...data]
         }
-
-        return (sameState || []).map(transformListingToProperty)
     }
 
-    const { data, error } = await supabase
-        .from('listings')
-        .select(LISTING_SELECT_QUERY)
-        .eq('property_type', propertyType)
-        .neq('id', propertyId)
-        .eq('is_active', true)
-        .limit(3)
+    // 3. Fallback: Just Listing Type + Property Type (if still desperate)
+    /* 
+    // Commented out to keep relevance high (User request was specific about geo-match)
+    // If we wanted to show ANY 4-storey house regardless of location, we would uncomment this.
+    */
 
-    if (error) {
-        console.error('Error fetching similar properties:', error)
-        return []
-    }
-
-    return (data || []).map(transformListingToProperty)
+    return similarProps.slice(0, LIMIT).map(transformListingToProperty)
 }
 
 // Property types and locations (static for now)
@@ -1098,6 +1094,7 @@ export async function getNewProjects(filters?: {
     bedrooms?: string
     state?: string
     tenure?: string
+    location?: string
 }): Promise<Property[]> {
     let query = supabase
         .from('listings')
@@ -1113,6 +1110,9 @@ export async function getNewProjects(filters?: {
     }
     if (filters?.bedrooms) {
         query = query.eq('total_bedrooms', parseInt(filters.bedrooms))
+    }
+    if (filters?.location) {
+        query = query.or(`title.ilike.%${filters.location}%,address.ilike.%${filters.location}%,state.ilike.%${filters.location}%`)
     }
 
     const { data, error } = await query.order('scraped_at', { ascending: false })
