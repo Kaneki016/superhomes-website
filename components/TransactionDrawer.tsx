@@ -76,6 +76,9 @@ export default function TransactionDrawer({ transaction, onClose, isOpen }: Tran
                                 <span className="font-semibold text-gray-900 text-sm uppercase tracking-tight">NAPIC</span>
                             </div>
                         </div>
+                        <div className="pt-2">
+                            <MortgageCalculator propertyPrice={transaction.price} />
+                        </div>
                     </div>
 
                     {/* Column 2: Property Info */}
@@ -127,23 +130,18 @@ export default function TransactionDrawer({ transaction, onClose, isOpen }: Tran
                         </div>
                     </div>
 
-                    {/* Column 3: Calculator */}
+                    {/* Column 3: Nearby Amenities (Moved Here) */}
                     <div>
-                        <MortgageCalculator initialPrice={transaction.price} className="h-full border-gray-200 shadow-sm" />
+                        {transaction.latitude && transaction.longitude && (
+                            <NearbyAmenities
+                                latitude={transaction.latitude}
+                                longitude={transaction.longitude}
+                                radiusKm={3}
+                            />
+                        )}
                     </div>
 
                 </div>
-
-                {/* Nearby Amenities Section */}
-                {transaction.latitude && transaction.longitude && (
-                    <div className="mt-8 border-t border-gray-100 pt-6">
-                        <NearbyAmenities
-                            latitude={transaction.latitude}
-                            longitude={transaction.longitude}
-                            radiusKm={3}
-                        />
-                    </div>
-                )}
             </div>
         </div>
     )
