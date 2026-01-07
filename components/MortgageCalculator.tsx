@@ -97,7 +97,7 @@ export default function MortgageCalculator({ propertyPrice, isRent = false }: Mo
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Property Price</label>
                         <div className="px-4 py-3 bg-gray-100 rounded-lg text-gray-900 font-semibold">
-                            {formatPrice(propertyPrice)}
+                            RM {propertyPrice.toLocaleString('en-MY', { maximumFractionDigits: 0 })}
                         </div>
                     </div>
 
