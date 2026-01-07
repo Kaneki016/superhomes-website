@@ -103,12 +103,12 @@ export default function TransactionDrawer({ transaction, onClose, isOpen }: Tran
 
                                 <div className="space-y-1">
                                     <span className="text-xs text-gray-500 uppercase font-medium flex items-center gap-1"><Ruler size={12} /> Built-up Size</span>
-                                    <p className="text-gray-900 font-semibold text-sm">{transaction.built_up_sqft ? `${transaction.built_up_sqft.toLocaleString()} sqft` : '-'}</p>
+                                    <p className="text-gray-900 font-semibold text-sm">{transaction.built_up_sqft ? `${Number(transaction.built_up_sqft).toLocaleString(undefined, { maximumFractionDigits: 0 })} sqft` : '-'}</p>
                                 </div>
 
                                 <div className="space-y-1">
                                     <span className="text-xs text-gray-500 uppercase font-medium flex items-center gap-1"><Ruler size={12} /> Land Area</span>
-                                    <p className="text-gray-900 font-semibold text-sm">{transaction.land_area_sqft ? `${transaction.land_area_sqft.toLocaleString()} sqft` : '-'}</p>
+                                    <p className="text-gray-900 font-semibold text-sm">{transaction.land_area_sqft ? `${Number(transaction.land_area_sqft).toLocaleString(undefined, { maximumFractionDigits: 0 })} sqft` : '-'}</p>
                                 </div>
 
                                 <div className="space-y-1">

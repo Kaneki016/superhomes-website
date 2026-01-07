@@ -82,8 +82,17 @@ async function main() {
     let totalSuccess = 0
     let totalFailed = 0
 
+    // Generic "Center of Malaysia" coordinates to avoid
+    const GENERIC_LAT = 4.5693754
+    const GENERIC_LON = 102.2656823
+    const EPSILON = 0.0001
+
+    async function isGeneric(lat: number, lon: number) {
+        return Math.abs(lat - GENERIC_LAT) < EPSILON && Math.abs(lon - GENERIC_LON) < EPSILON
+    }
+
     while (true) {
-        let query = supabase.from('transactions').select('id, address, latitude, longitude')
+        let query = supabase.from('transactions').select('id, address, district, latitude, longitude')
 
         if (retryFailed) {
             query = query.eq('latitude', -99)
@@ -118,11 +127,33 @@ async function main() {
                 continue
             }
 
-            // Try Nominatim
+            // 1. Try Nominatim (Address)
             let coords = await geocodeNominatim(row.address)
             let source = 'Nominatim'
 
-            // Try Google if Nominatim failed
+            // Check if generic
+            if (coords && await isGeneric(coords.lat, coords.lng)) {
+                // process.stdout.write('(Generic Result ignored)... ')
+                coords = null
+            }
+
+            // 2. Fallback: Try Nominatim (District)
+            if (!coords && row.district) {
+                // Clean district string
+                const cleanDistrict = row.district.replace(/\s*District\s*/i, '').trim()
+                const districtQuery = `${cleanDistrict}, Malaysia`
+
+                // process.stdout.write(`Trying District (${cleanDistrict})... `)
+                coords = await geocodeNominatim(districtQuery)
+                source = 'Nominatim (District Fallback)'
+
+                // Check generic again just in case
+                if (coords && await isGeneric(coords.lat, coords.lng)) {
+                    coords = null
+                }
+            }
+
+            // 3. Last Resort: Google (if enabled)
             if (!coords && googleMapsApiKey) {
                 coords = await geocodeGoogle(row.address)
                 source = 'Google'

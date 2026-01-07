@@ -46,38 +46,45 @@ export default function TransactionMap({
     useEffect(() => {
         if (!mapInstanceRef.current || !leaflet) return
 
-        if (!isDrawing) {
-            // Cancel drawing if disabled externally
+        // Cleanup function to disable any active drawer
+        const cleanup = () => {
             if (drawHandlerRef.current) {
                 drawHandlerRef.current.disable()
                 drawHandlerRef.current = null
             }
-            return
         }
 
-        // If enabling drawing
         if (isDrawing) {
-            // If already drawing, do nothing
+            // Check if already enabled to avoid duplicate handlers
             if (drawHandlerRef.current && drawHandlerRef.current._enabled) return
 
-            // Start Polygon Drawer
             const map = mapInstanceRef.current
 
-            // Use window.L.Draw.Polygon if available, or access via leaflet object if possible
-            // Since we loaded leaflet-draw, L.Draw should be attached to L
-            const PolygonDrawer = (leaflet.Draw && leaflet.Draw.Polygon) || (window.L && (window.L as any).Draw && (window.L as any).Draw.Polygon)
+            // Robustly find the Polygon constructor
+            // Check leaflet.Draw first, then fallback to window.L.Draw
+            const PolygonDrawer = (leaflet.Draw && leaflet.Draw.Polygon) ||
+                (window.L && (window.L as any).Draw && (window.L as any).Draw.Polygon)
 
             if (PolygonDrawer) {
+                // If there's an existing handler (even disabled), clean it up first
+                cleanup()
+
                 const drawer = new PolygonDrawer(map, {
                     allowIntersection: false,
                     showArea: true,
-                    shapeOptions: { color: '#4F46E5' }
+                    shapeOptions: { color: '#4F46E5', clickable: false } // clickable: false prevents self-clicks interference
                 })
                 drawer.enable()
                 drawHandlerRef.current = drawer
+            } else {
+                console.warn('Leaflet Draw not found')
             }
+        } else {
+            // If not drawing, ensure disabled
+            cleanup()
         }
 
+        return cleanup
     }, [isDrawing, leaflet])
 
     // Sync external polygon state with drawn items (e.g. for clearing)
