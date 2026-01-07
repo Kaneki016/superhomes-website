@@ -51,9 +51,11 @@ export default function Navbar() {
                         <Link href="/agents" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
                             Agents
                         </Link>
+                        {/* Hidden for now
                         <Link href="/sell" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
                             Sell Property
                         </Link>
+                        */}
                         <Link href="/transaction-map" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
                             Transaction Map
                         </Link>
@@ -190,9 +192,11 @@ export default function Navbar() {
                             <Link href="/agents" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
                                 Agents
                             </Link>
+                            {/* Hidden for now
                             <Link href="/sell" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
                                 Sell Property
                             </Link>
+                            */}
                             <Link href="/transaction-map" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
                                 Transaction Map
                             </Link>
