@@ -1,0 +1,38 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.8 e802775f",
+  "osm3s": {
+    "timestamp_osm_base": "2026-01-05T08:47:30Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+    {
+      "type": "relation",
+      "id": 8148849,
+      "members": [
+        {
+          "type": "relation",
+          "ref": 2546881,
+          "role": ""
+        },
+        {
+          "type": "relation",
+          "ref": 8149037,
+          "role": ""
+        }
+      ],
+      "tags": {
+        "colour": "#7dba00",
+        "name": "KL Monorail",
+        "name:zh": "吉隆坡单轨列车",
+        "network": "Klang Valley Rapid Transit",
+        "operator": "Rapid KL",
+        "ref": "MR",
+        "route_master": "monorail",
+        "type": "route_master",
+        "wikidata": "Q1790833",
+        "wikipedia": "en:KL Monorail"
+      }
+    }
+  ]
+}

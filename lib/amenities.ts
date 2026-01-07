@@ -54,25 +54,12 @@ function toRad(deg: number): number {
  */
 function buildOverpassQuery(lat: number, lon: number, radiusMeters: number): string {
     return `
-[out:json][timeout:25];
+[out:json][timeout:15];
 (
-  // Schools
-  node["amenity"="school"](around:${radiusMeters},${lat},${lon});
-  way["amenity"="school"](around:${radiusMeters},${lat},${lon});
-  
-  // Train/MRT/LRT stations
-  node["railway"="station"](around:${radiusMeters},${lat},${lon});
-  node["railway"="halt"](around:${radiusMeters},${lat},${lon});
-  node["station"="light_rail"](around:${radiusMeters},${lat},${lon});
-  
-  // Shopping malls
-  node["shop"="mall"](around:${radiusMeters},${lat},${lon});
-  way["shop"="mall"](around:${radiusMeters},${lat},${lon});
-  relation["shop"="mall"](around:${radiusMeters},${lat},${lon});
-  
-  // Hospitals
-  node["amenity"="hospital"](around:${radiusMeters},${lat},${lon});
-  way["amenity"="hospital"](around:${radiusMeters},${lat},${lon});
+  nwr["amenity"~"^(school|hospital)$"](around:${radiusMeters},${lat},${lon});
+  nwr["railway"~"^(station|halt)$"](around:${radiusMeters},${lat},${lon});
+  nwr["station"="light_rail"](around:${radiusMeters},${lat},${lon});
+  nwr["shop"="mall"](around:${radiusMeters},${lat},${lon});
 );
 out center;
 `.trim()

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import RangeSlider from './RangeSlider'
 
 interface FilterModalProps {
     isOpen: boolean
@@ -71,39 +72,6 @@ export default function FilterModal({ isOpen, onClose, filters, onApply, filterO
         })
     }
 
-    // Price options for dropdown
-    const minPriceOptions = [
-        { label: 'No Min', value: '' },
-        { label: '100,000', value: '100000' },
-        { label: '200,000', value: '200000' },
-        { label: '300,000', value: '300000' },
-        { label: '400,000', value: '400000' },
-        { label: '500,000', value: '500000' },
-        { label: '600,000', value: '600000' },
-        { label: '700,000', value: '700000' },
-        { label: '800,000', value: '800000' },
-        { label: '900,000', value: '900000' },
-        { label: '1,000,000', value: '1000000' },
-        { label: '1,500,000', value: '1500000' },
-        { label: '2,000,000', value: '2000000' },
-    ]
-
-    const maxPriceOptions = [
-        { label: 'No Max', value: '' },
-        { label: '200,000', value: '200000' },
-        { label: '300,000', value: '300000' },
-        { label: '400,000', value: '400000' },
-        { label: '500,000', value: '500000' },
-        { label: '600,000', value: '600000' },
-        { label: '700,000', value: '700000' },
-        { label: '800,000', value: '800000' },
-        { label: '900,000', value: '900000' },
-        { label: '1,000,000', value: '1000000' },
-        { label: '1,500,000', value: '1500000' },
-        { label: '2,000,000', value: '2000000' },
-        { label: '3,000,000', value: '3000000' },
-        { label: '5,000,000', value: '5000000' },
-    ]
 
     // Bedroom options
     const bedroomOptions = [
@@ -266,50 +234,30 @@ export default function FilterModal({ isOpen, onClose, filters, onApply, filterO
                                 </div>
                             </div>
 
-                            {/* Quick Select Options */}
-                            <div className="grid grid-cols-2 gap-4">
-                                {/* Min Price Options */}
-                                <div className="border border-gray-200 rounded-xl max-h-48 overflow-y-auto">
-                                    {minPriceOptions.map((option) => (
-                                        <div
-                                            key={option.value}
-                                            onClick={() => setLocalFilters({ ...localFilters, minPrice: option.value })}
-                                            className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                                        >
-                                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${localFilters.minPrice === option.value
-                                                ? 'border-primary-500 bg-primary-500'
-                                                : 'border-gray-300'
-                                                }`}>
-                                                {localFilters.minPrice === option.value && (
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                                                )}
-                                            </div>
-                                            <span className="text-sm text-gray-700">{option.label}</span>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                {/* Max Price Options */}
-                                <div className="border border-gray-200 rounded-xl max-h-48 overflow-y-auto">
-                                    {maxPriceOptions.map((option) => (
-                                        <div
-                                            key={option.value}
-                                            onClick={() => setLocalFilters({ ...localFilters, maxPrice: option.value })}
-                                            className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                                        >
-                                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${localFilters.maxPrice === option.value
-                                                ? 'border-primary-500 bg-primary-500'
-                                                : 'border-gray-300'
-                                                }`}>
-                                                {localFilters.maxPrice === option.value && (
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                                                )}
-                                            </div>
-                                            <span className="text-sm text-gray-700">{option.label}</span>
-                                        </div>
-                                    ))}
+                            {/* Range Slider */}
+                            <div className="px-2 pt-2 pb-6">
+                                <RangeSlider
+                                    min={0}
+                                    max={5000000}
+                                    step={50000}
+                                    value={[
+                                        Number(localFilters.minPrice.replace(/,/g, '')) || 0,
+                                        Number(localFilters.maxPrice.replace(/,/g, '')) || 5000000
+                                    ]}
+                                    onChange={([min, max]) => {
+                                        setLocalFilters({
+                                            ...localFilters,
+                                            minPrice: min.toString(),
+                                            maxPrice: max.toString()
+                                        })
+                                    }}
+                                />
+                                <div className="flex justify-between mt-2 text-xs text-gray-400 font-medium">
+                                    <span>RM 0</span>
+                                    <span>RM 5M+</span>
                                 </div>
                             </div>
+
                         </div>
                     )}
 
