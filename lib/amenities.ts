@@ -161,33 +161,59 @@ export async function getNearbyAmenities(
     }
 
     const radiusMeters = radiusKm * 1000
-    const query = buildOverpassQuery(latNum, lonNum, radiusMeters)
+    // Increase timeout to 30s in the query
+    const query = buildOverpassQuery(latNum, lonNum, radiusMeters).replace('[timeout:15]', '[timeout:30]')
 
-    try {
-        const response = await fetch('https://overpass-api.de/api/interpreter', {
-            method: 'POST',
-            body: query,
-            headers: {
-                'Content-Type': 'text/plain'
+    const MAX_RETRIES = 3
+    const INITIAL_BACKOFF = 1000 // 1s
+
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+            const controller = new AbortController()
+            const timeoutId = setTimeout(() => controller.abort(), 30000) // 30s client-side timeout
+
+            const response = await fetch('https://overpass-api.de/api/interpreter', {
+                method: 'POST',
+                body: query,
+                headers: {
+                    'Content-Type': 'text/plain'
+                },
+                signal: controller.signal
+            })
+
+            clearTimeout(timeoutId)
+
+            if (!response.ok) {
+                // If 429 (Too Many Requests) or 5xx, we might want to retry
+                if (response.status === 429 || response.status >= 500) {
+                    throw new Error(`Overpass API error: ${response.status}`)
+                }
+                console.error('Overpass API error:', response.status)
+                return []
             }
-        })
 
-        if (!response.ok) {
-            console.error('Overpass API error:', response.status)
-            return []
+            const data = await response.json()
+            const amenities = parseOverpassResponse(data.elements || [], latNum, lonNum)
+
+            // Cache the result
+            cache.set(cacheKey, { data: amenities, timestamp: Date.now() })
+
+            return amenities
+        } catch (error) {
+            const isLastAttempt = attempt === MAX_RETRIES
+            // Don't log abort errors if we're going to retry, unless it's the last attempt
+            if (isLastAttempt) {
+                console.error(`Error fetching nearby amenities (Attempt ${attempt}/${MAX_RETRIES}):`, error)
+                return []
+            }
+
+            // Wait before retrying (exponential backoff)
+            const delay = INITIAL_BACKOFF * Math.pow(2, attempt - 1)
+            await new Promise(resolve => setTimeout(resolve, delay))
         }
-
-        const data = await response.json()
-        const amenities = parseOverpassResponse(data.elements || [], latNum, lonNum)
-
-        // Cache the result
-        cache.set(cacheKey, { data: amenities, timestamp: Date.now() })
-
-        return amenities
-    } catch (error) {
-        console.error('Error fetching nearby amenities:', error)
-        return []
     }
+
+    return []
 }
 
 /**
