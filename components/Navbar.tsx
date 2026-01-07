@@ -51,6 +51,12 @@ export default function Navbar() {
                         <Link href="/agents" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
                             Agents
                         </Link>
+                        <Link href="/sell" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                            Sell Property
+                        </Link>
+                        <Link href="/transaction-map" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                            Transaction Map
+                        </Link>
                     </div>
 
                     {/* Auth Section */}
@@ -183,6 +189,12 @@ export default function Navbar() {
                             </Link>
                             <Link href="/agents" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
                                 Agents
+                            </Link>
+                            <Link href="/sell" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                                Sell Property
+                            </Link>
+                            <Link href="/transaction-map" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                                Transaction Map
                             </Link>
                             <div className="pt-4 border-t border-gray-200 flex flex-col space-y-2">
                                 {user ? (

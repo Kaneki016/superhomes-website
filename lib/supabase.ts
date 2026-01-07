@@ -202,6 +202,26 @@ export interface Favorite {
     created_at: string
 }
 
+export interface Transaction {
+    id: string
+    scraped_at: string
+    source_url: string | null
+    transaction_date: string | null
+    price: number
+    address: string | null
+    district: string | null
+    mukim: string | null
+    neighborhood: string | null
+    property_type: string | null
+    tenure: string | null
+    land_area_sqft: number | null
+    built_up_sqft: number | null
+    unit_level: string | null
+    raw_data: any
+    latitude: number | null
+    longitude: number | null
+}
+
 // ============================================
 // DEPRECATED - OLD SCHEMA TYPES (Keep for reference)
 // ============================================

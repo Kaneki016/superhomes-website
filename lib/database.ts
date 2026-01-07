@@ -1,4 +1,4 @@
-import { supabase, Property, Agent, Contact, Listing, ListingSaleDetails, ListingRentDetails, ListingProjectDetails } from './supabase'
+import { supabase, Property, Agent, Transaction, Contact, Listing, ListingSaleDetails, ListingRentDetails, ListingProjectDetails } from './supabase'
 
 // Helper function to transform listing data from Supabase joins to Property type
 function transformListingToProperty(listing: any): Property {
@@ -1267,3 +1267,245 @@ export async function getAgentById_OLD(id: string): Promise<Agent | null> {
     return data
 }
 */
+
+// ============================================
+// TRANSACTION DATA FUNCTIONS
+// ============================================
+
+// Fetch recent transactions with pagination
+export async function getTransactions(
+    page: number = 1,
+    limit: number = 500,
+    filters?: {
+        neighborhood?: string
+        minPrice?: number
+        maxPrice?: number
+        propertyType?: string[]
+        tenure?: string[]
+        searchQuery?: string
+        minYear?: number
+        maxYear?: number
+        bounds?: {
+            minLat: number
+            maxLat: number
+            minLng: number
+            maxLng: number
+        }
+    }
+): Promise<Transaction[]> {
+    const from = (page - 1) * limit
+    const to = from + limit - 1
+
+    let query = supabase
+        .from('transactions')
+        .select('id, price, transaction_date, address, district, neighborhood, latitude, longitude, property_type, tenure, built_up_sqft, land_area_sqft, unit_level')
+        // Only fetch valid coordinates for the map
+        .not('latitude', 'is', null)
+        .neq('latitude', -99)
+
+    // Bounding Box Filter (Viewport Optimization)
+    if (filters?.bounds) {
+        query = query.gte('latitude', filters.bounds.minLat)
+            .lte('latitude', filters.bounds.maxLat)
+            .gte('longitude', filters.bounds.minLng)
+            .lte('longitude', filters.bounds.maxLng)
+    }
+
+    if (filters?.neighborhood) {
+        query = query.eq('neighborhood', filters.neighborhood)
+    }
+
+    if (filters?.minYear) {
+        query = query.gte('transaction_date', `${filters.minYear}-01-01`)
+    }
+
+    if (filters?.maxYear) {
+        query = query.lte('transaction_date', `${filters.maxYear}-12-31`)
+    }
+
+    if (filters?.searchQuery) {
+        // Search across address, neighborhood, and district
+        query = query.or(`address.ilike.%${filters.searchQuery}%,neighborhood.ilike.%${filters.searchQuery}%,district.ilike.%${filters.searchQuery}%`)
+    }
+
+    if (filters?.minPrice) {
+        query = query.gte('price', filters.minPrice)
+    }
+
+    if (filters?.maxPrice) {
+        query = query.lte('price', filters.maxPrice)
+    }
+
+    if (filters?.propertyType && filters.propertyType.length > 0) {
+        query = query.in('property_type', filters.propertyType)
+    }
+
+    if (filters?.tenure && filters.tenure.length > 0) {
+        query = query.in('tenure', filters.tenure)
+    }
+
+    // Optimization: When searching, disable sort and reduce limit to prevent timeouts
+    const isSearching = !!filters?.searchQuery
+    const effectiveLimit = isSearching ? 100 : limit
+    const activeTo = from + effectiveLimit - 1
+
+    let finalQuery = query
+
+    // Only sort if NOT searching (searching requires full table scan for sort, causing timeout)
+    if (!isSearching) {
+        finalQuery = finalQuery.order('transaction_date', { ascending: false })
+    }
+
+    const { data, error } = await finalQuery
+        .range(from, activeTo)
+
+    if (error) {
+        console.error('Error fetching transactions:', error.message || error)
+        console.error('Error details:', error)
+        return []
+    }
+
+    return (data as any) || []
+}
+
+// Get distinct neighborhoods for filtering
+export async function getDistinctNeighborhoods(): Promise<string[]> {
+    const { data, error } = await supabase
+        .from('transactions')
+        .select('neighborhood')
+        .not('neighborhood', 'is', null)
+
+    if (error) {
+        console.error('Error fetching neighborhoods:', error)
+        return []
+    }
+
+    const neighborhoods = data.map(d => d.neighborhood).filter(Boolean) as string[]
+    return [...new Set(neighborhoods)].sort()
+}
+
+// Get distinct property types
+export async function getTransactionPropertyTypes(): Promise<string[]> {
+    const { data, error } = await supabase
+        .from('transactions')
+        .select('property_type')
+        .not('property_type', 'is', null)
+
+    if (error) {
+        console.error('Error fetching property types:', error)
+        return []
+    }
+
+    const types = data.map(d => d.property_type).filter(Boolean) as string[]
+    return [...new Set(types)].sort()
+}
+
+// Get distinct tenures
+export async function getTransactionTenures(): Promise<string[]> {
+    const { data, error } = await supabase
+        .from('transactions')
+        .select('tenure')
+        .not('tenure', 'is', null)
+
+    if (error) {
+        console.error('Error fetching tenures:', error)
+        return []
+    }
+
+
+    const tenures = data.map(d => d.tenure).filter(Boolean) as string[]
+    return [...new Set(tenures)].sort()
+}
+
+// Get metrics for transactions (overall or filtered)
+export async function getTransactionMetrics(filters?: {
+    neighborhood?: string
+    minPrice?: number
+    maxPrice?: number
+    propertyType?: string[]
+    tenure?: string[]
+    searchQuery?: string
+}): Promise<{
+    avgPrice: number
+    avgPsf: number
+    totalTransactions: number
+    minPrice: number
+    maxPrice: number
+}> {
+    let query = supabase
+        .from('transactions')
+        .select('price, built_up_sqft')
+        .not('price', 'is', null) // Ensure price exists
+
+    if (filters?.neighborhood) {
+        query = query.eq('neighborhood', filters.neighborhood)
+    }
+
+    if (filters?.searchQuery) {
+        query = query.ilike('address', `%${filters.searchQuery}%`)
+    }
+
+    if (filters?.minPrice) {
+        query = query.gte('price', filters.minPrice)
+    }
+
+    if (filters?.maxPrice) {
+        query = query.lte('price', filters.maxPrice)
+    }
+
+    if (filters?.propertyType && filters.propertyType.length > 0) {
+        query = query.in('property_type', filters.propertyType)
+    }
+
+    if (filters?.tenure && filters.tenure.length > 0) {
+        query = query.in('tenure', filters.tenure)
+    }
+
+    const { data, error } = await query
+
+    if (error) {
+        console.error('Error fetching metrics:', error)
+        return {
+            avgPrice: 0,
+            avgPsf: 0,
+            totalTransactions: 0,
+            minPrice: 0,
+            maxPrice: 0
+        }
+    }
+
+    if (!data || data.length === 0) {
+        return {
+            avgPrice: 0,
+            avgPsf: 0,
+            totalTransactions: 0,
+            minPrice: 0,
+            maxPrice: 0
+        }
+    }
+
+    // Calculate metrics
+    const totalTransactions = data.length
+    const totalPrice = data.reduce((sum, t) => sum + (t.price || 0), 0)
+    const avgPrice = totalPrice / totalTransactions
+
+    const prices = data.map(t => t.price).sort((a, b) => a - b)
+    const minPrice = prices[0]
+    const maxPrice = prices[prices.length - 1]
+
+    // Calculate avg PSF (only for records with sqft)
+    const validSqftData = data.filter(t => t.built_up_sqft && t.built_up_sqft > 0)
+    let avgPsf = 0
+    if (validSqftData.length > 0) {
+        const totalPsf = validSqftData.reduce((sum, t) => sum + (t.price / t.built_up_sqft), 0)
+        avgPsf = totalPsf / validSqftData.length
+    }
+
+    return {
+        avgPrice,
+        avgPsf,
+        totalTransactions,
+        minPrice,
+        maxPrice
+    }
+}
