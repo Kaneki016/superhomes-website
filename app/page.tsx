@@ -7,7 +7,8 @@ import Footer from '@/components/Footer'
 import PropertyCard from '@/components/PropertyCard'
 import PropertyCardSkeleton from '@/components/PropertyCardSkeleton'
 import SearchInput from '@/components/SearchInput'
-import { getFeaturedProperties, getDiverseProperties } from '@/lib/database'
+import FilterModal from '@/components/FilterModal'
+import { getFeaturedProperties, getHandpickedProperties, getFilterOptions, getDistinctStates } from '@/lib/database'
 import { Property } from '@/lib/supabase'
 
 export default function HomePage() {
@@ -16,25 +17,37 @@ export default function HomePage() {
     const [loading, setLoading] = useState(true)
     // Buy/Rent toggle removed - listing type data not available yet
     const [searchQuery, setSearchQuery] = useState('')
-    const [propertyType, setPropertyType] = useState('all')
-    const [priceRange, setPriceRange] = useState('')
+    const [propertyType, setPropertyType] = useState('')
+    const [minPrice, setMinPrice] = useState('')
+    const [maxPrice, setMaxPrice] = useState('')
     const [bedrooms, setBedrooms] = useState('')
     const [selectedState, setSelectedState] = useState('')
-    const [showPropertyTypeDropdown, setShowPropertyTypeDropdown] = useState(false)
-    const [showPriceDropdown, setShowPriceDropdown] = useState(false)
-    const [showBedroomDropdown, setShowBedroomDropdown] = useState(false)
-    const [showStateDropdown, setShowStateDropdown] = useState(false)
+    const [showFilterModal, setShowFilterModal] = useState(false)
+    const [filterOptions, setFilterOptions] = useState<{
+        propertyTypes: string[]
+        bedrooms: number[]
+        priceRange: { min: number; max: number }
+    }>({
+        propertyTypes: [],
+        bedrooms: [],
+        priceRange: { min: 0, max: 10000000 }
+    })
+    const [stateOptions, setStateOptions] = useState<string[]>([])
     const [handpickedIndex, setHandpickedIndex] = useState(0)
+    const [openDropdown, setOpenDropdown] = useState<string | null>(null)
 
     const filterRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         async function loadProperties() {
+            setLoading(true)
             try {
                 // Fetch Featured (4 newest) and Handpicked (12 from diverse agents) separately
+                // Featured is always global/newest
+                // Handpicked is now location-aware (if state selected)
                 const [featured, diverse] = await Promise.all([
                     getFeaturedProperties(4),
-                    getDiverseProperties(12)
+                    getHandpickedProperties(12, selectedState || undefined)
                 ])
 
                 setFeaturedProperties(featured)
@@ -51,7 +64,7 @@ export default function HomePage() {
             }
         }
         loadProperties()
-    }, [])
+    }, [selectedState])
 
     // Load preferred state from localStorage on mount
     useEffect(() => {
@@ -70,14 +83,28 @@ export default function HomePage() {
         }
     }, [selectedState])
 
-    // Close dropdowns when clicking outside
+    // Load filter options from database
+    useEffect(() => {
+        async function loadFilterOptions() {
+            try {
+                const [options, states] = await Promise.all([
+                    getFilterOptions(),
+                    getDistinctStates()
+                ])
+                setFilterOptions(options)
+                setStateOptions(states)
+            } catch (error) {
+                console.error('Error loading filter options:', error)
+            }
+        }
+        loadFilterOptions()
+    }, [])
+
+    // Close dropdown when clicking outside
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
-                setShowPropertyTypeDropdown(false)
-                setShowPriceDropdown(false)
-                setShowBedroomDropdown(false)
-                setShowStateDropdown(false)
+                setOpenDropdown(null)
             }
         }
         document.addEventListener('mousedown', handleClickOutside)
@@ -113,11 +140,14 @@ export default function HomePage() {
         if (searchQuery.trim()) {
             params.set('search', searchQuery)
         }
-        if (propertyType !== 'all') {
+        if (propertyType) {
             params.set('type', propertyType)
         }
-        if (priceRange) {
-            params.set('price', priceRange)
+        if (minPrice) {
+            params.set('minPrice', minPrice)
+        }
+        if (maxPrice) {
+            params.set('maxPrice', maxPrice)
         }
         if (bedrooms) {
             params.set('bedrooms', bedrooms)
@@ -125,74 +155,72 @@ export default function HomePage() {
         if (selectedState) {
             params.set('state', selectedState)
         }
-        // Listing type filter removed - data not available yet
         const queryString = params.toString()
         window.location.href = `/properties${queryString ? `?${queryString}` : ''}`
     }
 
-    // Property type options
-    const propertyTypes = [
-        { value: 'all', label: 'All Residential' },
-        { value: 'condo', label: 'Condominium' },
-        { value: 'apartment', label: 'Apartment' },
-        { value: 'terrace', label: 'Terrace House' },
-        { value: 'semi-d', label: 'Semi-D' },
-        { value: 'bungalow', label: 'Bungalow' },
-        { value: 'townhouse', label: 'Townhouse' },
-    ]
+    // Handle filter application from modal
+    const handleApplyFilters = (filters: {
+        propertyType: string
+        minPrice: string
+        maxPrice: string
+        bedrooms: string
+        location: string
+        state: string
+    }) => {
+        setPropertyType(filters.propertyType)
+        setMinPrice(filters.minPrice)
+        setMaxPrice(filters.maxPrice)
+        setBedrooms(filters.bedrooms)
+        setSelectedState(filters.state)
+    }
 
-    // Price range options
-    const priceRanges = [
-        { value: '', label: 'Any Price' },
-        { value: '0-300000', label: 'Below RM 300K' },
-        { value: '300000-500000', label: 'RM 300K - 500K' },
-        { value: '500000-800000', label: 'RM 500K - 800K' },
-        { value: '800000-1000000', label: 'RM 800K - 1M' },
-        { value: '1000000-2000000', label: 'RM 1M - 2M' },
-        { value: '2000000+', label: 'Above RM 2M' },
-    ]
+    // Count active filters
+    const activeFilterCount = [
+        propertyType,
+        minPrice || maxPrice,
+        bedrooms,
+        selectedState,
+    ].filter(Boolean).length
 
-    // Bedroom options
-    const bedroomOptions = [
-        { value: '', label: 'Any Bedroom' },
-        { value: '1', label: '1 Bedroom' },
-        { value: '2', label: '2 Bedrooms' },
-        { value: '3', label: '3 Bedrooms' },
-        { value: '4', label: '4 Bedrooms' },
-        { value: '5+', label: '5+ Bedrooms' },
-    ]
-
-    // Malaysian states options (same as locations array but with empty option)
-    const stateOptions = [
-        { value: '', label: 'Any Location' },
-        { value: 'Kuala Lumpur', label: 'Kuala Lumpur' },
-        { value: 'Selangor', label: 'Selangor' },
-        { value: 'Penang', label: 'Penang' },
-        { value: 'Johor', label: 'Johor' },
-        { value: 'Kedah', label: 'Kedah' },
-        { value: 'Kelantan', label: 'Kelantan' },
-        { value: 'Melaka', label: 'Melaka' },
-        { value: 'Negeri Sembilan', label: 'Negeri Sembilan' },
-        { value: 'Pahang', label: 'Pahang' },
-        { value: 'Perak', label: 'Perak' },
-        { value: 'Perlis', label: 'Perlis' },
-        { value: 'Putrajaya', label: 'Putrajaya' },
-        { value: 'Sabah', label: 'Sabah' },
-        { value: 'Sarawak', label: 'Sarawak' },
-        { value: 'Terengganu', label: 'Terengganu' },
-    ]
-
-    // Close dropdowns when clicking outside
-    const closeAllDropdowns = () => {
-        setShowPropertyTypeDropdown(false)
-        setShowPriceDropdown(false)
-        setShowBedroomDropdown(false)
-        setShowStateDropdown(false)
+    // Get display text for filters
+    const getFilterSummary = () => {
+        const parts = []
+        if (propertyType) parts.push(propertyType)
+        if (minPrice || maxPrice) {
+            if (minPrice && maxPrice) {
+                parts.push(`RM${(parseInt(minPrice) / 1000)}k - RM${(parseInt(maxPrice) / 1000)}k`)
+            } else if (minPrice) {
+                parts.push(`Above RM${(parseInt(minPrice) / 1000)}k`)
+            } else if (maxPrice) {
+                parts.push(`Under RM${(parseInt(maxPrice) / 1000)}k`)
+            }
+        }
+        if (bedrooms) parts.push(`${bedrooms} Bed`)
+        if (selectedState) parts.push(selectedState)
+        return parts.length > 0 ? parts.join(' • ') : 'All Filters'
     }
 
     return (
         <div className="min-h-screen bg-white">
             <Navbar />
+
+            {/* Filter Modal */}
+            <FilterModal
+                isOpen={showFilterModal}
+                onClose={() => setShowFilterModal(false)}
+                filters={{
+                    propertyType,
+                    minPrice,
+                    maxPrice,
+                    bedrooms,
+                    location: '',
+                    state: selectedState,
+                }}
+                onApply={handleApplyFilters}
+                filterOptions={filterOptions}
+                stateOptions={stateOptions}
+            />
 
             {/* Hero Search Section - Clean Light Style */}
             <section className="relative bg-gradient-to-b from-rose-50 via-pink-50 to-orange-50">
@@ -215,8 +243,6 @@ export default function HomePage() {
 
                     {/* Search Container */}
                     <div className="max-w-4xl mx-auto">
-                        {/* Buy/Rent toggle removed - will be added when listing_type data is available */}
-
                         {/* Main Search Box */}
                         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6">
                             <div className="flex flex-col md:flex-row gap-3">
@@ -244,162 +270,300 @@ export default function HomePage() {
 
                             {/* Quick Filters */}
                             <div ref={filterRef} className="flex flex-wrap gap-2 mt-4">
-                                {/* Property Type Dropdown */}
+                                {/* Filters Button */}
+                                <button
+                                    onClick={() => setShowFilterModal(true)}
+                                    className={`filter-pill ${activeFilterCount > 0 ? 'active' : ''}`}
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                    </svg>
+                                    <span>Filters</span>
+                                    {activeFilterCount > 0 && (
+                                        <span className="w-5 h-5 bg-primary-500 text-white text-xs rounded-full flex items-center justify-center">
+                                            {activeFilterCount}
+                                        </span>
+                                    )}
+                                </button>
+
+                                {/* Property Type Pill */}
                                 <div className="relative">
                                     <button
-                                        onClick={() => {
-                                            setShowPropertyTypeDropdown(!showPropertyTypeDropdown)
-                                            setShowPriceDropdown(false)
-                                            setShowBedroomDropdown(false)
-                                        }}
-                                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${propertyType !== 'all'
-                                            ? 'bg-pink-500 text-white'
-                                            : 'bg-pink-50 text-pink-700 hover:bg-pink-100'
-                                            }`}
+                                        onClick={() => setOpenDropdown(openDropdown === 'propertyType' ? null : 'propertyType')}
+                                        className={`filter-pill ${propertyType ? 'active' : ''}`}
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                         </svg>
-                                        {propertyTypes.find(t => t.value === propertyType)?.label || 'All Residential'}
-                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <span>{propertyType || 'Property Type'}</span>
+                                        <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === 'propertyType' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                         </svg>
                                     </button>
-                                    {showPropertyTypeDropdown && (
-                                        <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-[9999] max-h-64 overflow-y-auto">
-                                            {propertyTypes.map((type) => (
+                                    {openDropdown === 'propertyType' && (
+                                        <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 max-h-64 overflow-y-auto">
+                                            <button
+                                                onClick={() => {
+                                                    setPropertyType('')
+                                                    setOpenDropdown(null)
+                                                }}
+                                                className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${!propertyType ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
+                                            >
+                                                All Residential
+                                            </button>
+                                            {filterOptions.propertyTypes.map((type) => (
                                                 <button
-                                                    key={type.value}
+                                                    key={type}
                                                     onClick={() => {
-                                                        setPropertyType(type.value)
-                                                        setShowPropertyTypeDropdown(false)
+                                                        setPropertyType(type)
+                                                        setOpenDropdown(null)
                                                     }}
-                                                    className={`w-full text-left px-4 py-2 text-sm hover:bg-pink-50 transition-colors ${propertyType === type.value ? 'text-pink-600 font-medium bg-pink-50' : 'text-gray-700'
-                                                        }`}
+                                                    className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${propertyType === type ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
                                                 >
-                                                    {type.label}
+                                                    {type}
                                                 </button>
                                             ))}
                                         </div>
                                     )}
                                 </div>
 
-                                {/* Price Range Dropdown */}
+                                {/* Price Pill */}
                                 <div className="relative">
                                     <button
-                                        onClick={() => {
-                                            setShowPriceDropdown(!showPriceDropdown)
-                                            setShowPropertyTypeDropdown(false)
-                                            setShowBedroomDropdown(false)
-                                        }}
-                                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${priceRange
-                                            ? 'bg-pink-500 text-white'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-pink-50 hover:text-pink-700'
-                                            }`}
+                                        onClick={() => setOpenDropdown(openDropdown === 'price' || openDropdown === 'priceMin' || openDropdown === 'priceMax' ? null : 'price')}
+                                        className={`filter-pill ${minPrice || maxPrice ? 'active' : ''}`}
+                                    >
+                                        <span className="font-medium">RM</span>
+                                        <span>
+                                            {minPrice || maxPrice
+                                                ? minPrice && maxPrice
+                                                    ? `${parseInt(minPrice).toLocaleString()} - ${parseInt(maxPrice).toLocaleString()}`
+                                                    : minPrice
+                                                        ? `${parseInt(minPrice).toLocaleString()}+`
+                                                        : `≤ ${parseInt(maxPrice).toLocaleString()}`
+                                                : 'Price'}
+                                        </span>
+                                        <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === 'price' || openDropdown === 'priceMin' || openDropdown === 'priceMax' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </button>
+                                    {(openDropdown === 'price' || openDropdown === 'priceMin' || openDropdown === 'priceMax') && (
+                                        <div className="absolute top-full left-0 mt-2 w-[400px] bg-white rounded-2xl shadow-xl border border-gray-200 p-5 z-50">
+                                            {/* Labels Row */}
+                                            <div className="grid grid-cols-2 gap-4 mb-3">
+                                                <label className="text-sm font-medium text-gray-900">Minimum</label>
+                                                <label className="text-sm font-medium text-gray-900">Maximum</label>
+                                            </div>
+
+                                            {/* Input Fields Row */}
+                                            <div className="grid grid-cols-2 gap-4 mb-4">
+                                                {/* Min Input with Dropdown */}
+                                                <div className="relative">
+                                                    <div
+                                                        className="flex items-center border border-gray-300 rounded-lg px-3 py-2.5 bg-white cursor-pointer hover:border-gray-400 transition-colors"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation()
+                                                            setOpenDropdown(openDropdown === 'priceMin' ? 'price' : 'priceMin')
+                                                        }}
+                                                    >
+                                                        <span className="text-gray-500 mr-2 text-sm font-medium">RM</span>
+                                                        <span className="flex-1 text-gray-700 text-sm">
+                                                            {minPrice ? parseInt(minPrice).toLocaleString() : 'Min'}
+                                                        </span>
+                                                        <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === 'priceMin' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                        </svg>
+                                                    </div>
+                                                    {openDropdown === 'priceMin' && (
+                                                        <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-[60] max-h-60 overflow-y-auto">
+                                                            {[
+                                                                { label: 'No Min', value: '' },
+                                                                { label: '200,000', value: '200000' },
+                                                                { label: '300,000', value: '300000' },
+                                                                { label: '400,000', value: '400000' },
+                                                                { label: '500,000', value: '500000' },
+                                                                { label: '600,000', value: '600000' },
+                                                                { label: '800,000', value: '800000' },
+                                                                { label: '1,000,000', value: '1000000' },
+                                                                { label: '1,500,000', value: '1500000' },
+                                                                { label: '2,000,000', value: '2000000' },
+                                                                { label: '3,000,000', value: '3000000' },
+                                                                { label: '5,000,000', value: '5000000' },
+                                                            ].map((opt) => (
+                                                                <label
+                                                                    key={opt.value}
+                                                                    className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 cursor-pointer"
+                                                                >
+                                                                    <input
+                                                                        type="radio"
+                                                                        name="minPriceHome"
+                                                                        checked={minPrice === opt.value}
+                                                                        onChange={() => {
+                                                                            setMinPrice(opt.value)
+                                                                            setOpenDropdown('price')
+                                                                        }}
+                                                                        className="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500"
+                                                                    />
+                                                                    <span className="text-sm text-gray-700">{opt.label}</span>
+                                                                </label>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Max Input with Dropdown */}
+                                                <div className="relative">
+                                                    <div
+                                                        className="flex items-center border border-gray-300 rounded-lg px-3 py-2.5 bg-white cursor-pointer hover:border-gray-400 transition-colors"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation()
+                                                            setOpenDropdown(openDropdown === 'priceMax' ? 'price' : 'priceMax')
+                                                        }}
+                                                    >
+                                                        <span className="text-gray-500 mr-2 text-sm font-medium">RM</span>
+                                                        <span className="flex-1 text-gray-700 text-sm">
+                                                            {maxPrice ? parseInt(maxPrice).toLocaleString() : 'Max'}
+                                                        </span>
+                                                        <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === 'priceMax' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                        </svg>
+                                                    </div>
+                                                    {openDropdown === 'priceMax' && (
+                                                        <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-[60] max-h-60 overflow-y-auto">
+                                                            {[
+                                                                { label: 'No Max', value: '' },
+                                                                { label: '300,000', value: '300000' },
+                                                                { label: '400,000', value: '400000' },
+                                                                { label: '500,000', value: '500000' },
+                                                                { label: '600,000', value: '600000' },
+                                                                { label: '800,000', value: '800000' },
+                                                                { label: '1,000,000', value: '1000000' },
+                                                                { label: '1,500,000', value: '1500000' },
+                                                                { label: '2,000,000', value: '2000000' },
+                                                                { label: '3,000,000', value: '3000000' },
+                                                                { label: '5,000,000', value: '5000000' },
+                                                                { label: '10,000,000', value: '10000000' },
+                                                            ].map((opt) => (
+                                                                <label
+                                                                    key={opt.value}
+                                                                    className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 cursor-pointer"
+                                                                >
+                                                                    <input
+                                                                        type="radio"
+                                                                        name="maxPriceHome"
+                                                                        checked={maxPrice === opt.value}
+                                                                        onChange={() => {
+                                                                            setMaxPrice(opt.value)
+                                                                            setOpenDropdown('price')
+                                                                        }}
+                                                                        className="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500"
+                                                                    />
+                                                                    <span className="text-sm text-gray-700">{opt.label}</span>
+                                                                </label>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Action Buttons */}
+                                            <div className="grid grid-cols-2 gap-3 pt-4 border-t border-gray-100">
+                                                <button
+                                                    onClick={() => {
+                                                        setMinPrice('')
+                                                        setMaxPrice('')
+                                                    }}
+                                                    className="py-2.5 px-4 border border-gray-300 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                                                >
+                                                    Clear
+                                                </button>
+                                                <button
+                                                    onClick={() => setOpenDropdown(null)}
+                                                    className="py-2.5 px-4 bg-primary-600 hover:bg-primary-700 rounded-full text-sm font-medium text-white transition-colors"
+                                                >
+                                                    Apply
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Bedroom Pill */}
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setOpenDropdown(openDropdown === 'bedroom' ? null : 'bedroom')}
+                                        className={`filter-pill ${bedrooms ? 'active' : ''}`}
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                                         </svg>
-                                        {priceRanges.find(p => p.value === priceRange)?.label || 'Price'}
-                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <span>{bedrooms ? `${bedrooms} Bed` : 'Bedroom'}</span>
+                                        <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === 'bedroom' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                         </svg>
                                     </button>
-                                    {showPriceDropdown && (
-                                        <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-[9999] max-h-64 overflow-y-auto">
-                                            {priceRanges.map((price) => (
+                                    {openDropdown === 'bedroom' && (
+                                        <div className="absolute top-full left-0 mt-2 w-32 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                                            {[
+                                                { label: 'Any', value: '' },
+                                                { label: 'Studio', value: '0' },
+                                                { label: '1', value: '1' },
+                                                { label: '2', value: '2' },
+                                                { label: '3', value: '3' },
+                                                { label: '4', value: '4' },
+                                                { label: '5+', value: '5' },
+                                            ].map((opt) => (
                                                 <button
-                                                    key={price.value}
+                                                    key={opt.value}
                                                     onClick={() => {
-                                                        setPriceRange(price.value)
-                                                        setShowPriceDropdown(false)
+                                                        setBedrooms(opt.value)
+                                                        setOpenDropdown(null)
                                                     }}
-                                                    className={`w-full text-left px-4 py-2 text-sm hover:bg-pink-50 transition-colors ${priceRange === price.value ? 'text-pink-600 font-medium bg-pink-50' : 'text-gray-700'
-                                                        }`}
+                                                    className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${bedrooms === opt.value ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
                                                 >
-                                                    {price.label}
+                                                    {opt.label}
                                                 </button>
                                             ))}
                                         </div>
                                     )}
                                 </div>
 
-                                {/* Bedroom Dropdown */}
+                                {/* State Pill */}
                                 <div className="relative">
                                     <button
-                                        onClick={() => {
-                                            setShowBedroomDropdown(!showBedroomDropdown)
-                                            setShowPropertyTypeDropdown(false)
-                                            setShowPriceDropdown(false)
-                                        }}
-                                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${bedrooms
-                                            ? 'bg-pink-500 text-white'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-pink-50 hover:text-pink-700'
-                                            }`}
-                                    >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
-                                        </svg>
-                                        {bedroomOptions.find(b => b.value === bedrooms)?.label || 'Bedroom'}
-                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                    </button>
-                                    {showBedroomDropdown && (
-                                        <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-[9999] max-h-64 overflow-y-auto">
-                                            {bedroomOptions.map((option) => (
-                                                <button
-                                                    key={option.value}
-                                                    onClick={() => {
-                                                        setBedrooms(option.value)
-                                                        setShowBedroomDropdown(false)
-                                                    }}
-                                                    className={`w-full text-left px-4 py-2 text-sm hover:bg-pink-50 transition-colors ${bedrooms === option.value ? 'text-pink-600 font-medium bg-pink-50' : 'text-gray-700'
-                                                        }`}
-                                                >
-                                                    {option.label}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* State/Location Dropdown */}
-                                <div className="relative">
-                                    <button
-                                        onClick={() => {
-                                            setShowStateDropdown(!showStateDropdown)
-                                            setShowPropertyTypeDropdown(false)
-                                            setShowPriceDropdown(false)
-                                            setShowBedroomDropdown(false)
-                                        }}
-                                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedState
-                                            ? 'bg-pink-500 text-white'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-pink-50 hover:text-pink-700'
-                                            }`}
+                                        onClick={() => setOpenDropdown(openDropdown === 'state' ? null : 'state')}
+                                        className={`filter-pill ${selectedState ? 'active' : ''}`}
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                         </svg>
-                                        {stateOptions.find(s => s.value === selectedState)?.label || 'Location'}
-                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <span>{selectedState || 'State'}</span>
+                                        <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === 'state' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                         </svg>
                                     </button>
-                                    {showStateDropdown && (
-                                        <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-[9999] max-h-64 overflow-y-auto">
+                                    {openDropdown === 'state' && (
+                                        <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 max-h-64 overflow-y-auto">
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedState('')
+                                                    setOpenDropdown(null)
+                                                }}
+                                                className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${!selectedState ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
+                                            >
+                                                All States
+                                            </button>
                                             {stateOptions.map((state) => (
                                                 <button
-                                                    key={state.value}
+                                                    key={state}
                                                     onClick={() => {
-                                                        setSelectedState(state.value)
-                                                        setShowStateDropdown(false)
+                                                        setSelectedState(state)
+                                                        setOpenDropdown(null)
                                                     }}
-                                                    className={`w-full text-left px-4 py-2 text-sm hover:bg-pink-50 transition-colors ${selectedState === state.value ? 'text-pink-600 font-medium bg-pink-50' : 'text-gray-700'
-                                                        }`}
+                                                    className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${selectedState === state ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
                                                 >
-                                                    {state.label}
+                                                    {state}
                                                 </button>
                                             ))}
                                         </div>
@@ -680,12 +844,6 @@ export default function HomePage() {
                 <div className="container-custom">
                     <div className="flex items-center justify-between mb-6">
                         <h2 className="font-heading font-bold text-xl md:text-2xl text-gray-900">Explore Residential Areas In Malaysia</h2>
-                        <Link href="/properties" className="text-rose-500 font-semibold text-sm hover:text-rose-600 hidden md:flex items-center gap-1">
-                            More
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                        </Link>
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">

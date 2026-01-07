@@ -77,7 +77,7 @@ function AgentsPageContent() {
 
                     // Also fetch their properties
                     if (results.length > 0) {
-                        const agentIds = results.map(a => a.agent_id)
+                        const agentIds = results.map(a => a.id || a.agent_id).filter((id): id is string => !!id)
                         const props = await getPropertiesByAgentIds(agentIds, 12)
                         setAgentProperties(props)
                     } else {
@@ -245,7 +245,7 @@ function AgentsPageContent() {
                                     className="agent-card bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:border-primary-200 transition-all duration-300 group"
                                 >
                                     {/* Clickable Profile Section */}
-                                    <Link href={`/agents/${agent.agent_id}`} className="block p-5 pb-0">
+                                    <Link href={`/agents/${agent.id || agent.agent_id}`} className="block p-5 pb-0">
                                         {/* Agent Header */}
                                         <div className="flex items-start gap-4">
                                             {/* Photo */}
@@ -334,7 +334,7 @@ function AgentsPageContent() {
                                             </a>
                                         )}
                                         <Link
-                                            href={`/agents/${agent.agent_id}`}
+                                            href={`/agents/${agent.id || agent.agent_id}`}
                                             className="px-4 py-2.5 border border-gray-200 hover:border-primary-300 hover:bg-primary-50 text-gray-700 rounded-lg text-sm font-medium transition-colors"
                                         >
                                             View Profile

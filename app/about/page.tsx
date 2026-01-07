@@ -44,11 +44,11 @@ export default function AboutPage() {
                         <div className="glass p-8 rounded-2xl">
                             <div className="grid grid-cols-2 gap-6 text-center">
                                 <div className="p-4">
-                                    <p className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">1000+</p>
+                                    <p className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">200k+</p>
                                     <p className="text-gray-600 mt-2">Properties Listed</p>
                                 </div>
                                 <div className="p-4">
-                                    <p className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">500+</p>
+                                    <p className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">3000+</p>
                                     <p className="text-gray-600 mt-2">Trusted Agents</p>
                                 </div>
                                 <div className="p-4">

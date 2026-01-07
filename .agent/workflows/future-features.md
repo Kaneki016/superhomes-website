@@ -8,6 +8,91 @@ description: Future features to implement for SuperHomes
 - [x] 🗺️ Map View (Properties Page) - Leaflet + OpenStreetMap
 - [x] 🏫 Nearby Amenities - Shows schools, transit, malls near properties
 - [x] ⚡ Performance Optimizations - N+1 fixes, lazy loading, React.memo
+- [x] 📊 Property Comparison - Compare up to 3 properties side-by-side
+
+---
+
+## 🔧 Quick Fixes (Identified 2026-01-02)
+
+### 1. 💾 Save Search to Database
+**Priority**: High | **Effort**: Medium  
+**Location**: `app/properties/page.tsx:304`  
+**Issue**: "Save Search" button has a TODO placeholder but no actual implementation.
+
+**Implementation**:
+- Save current filter criteria to Supabase `saved_searches` table
+- Link to user account
+- Add "Saved Searches" section to user profile/dashboard
+
+---
+
+### 2. 🔄 Consolidate Price Formatting Utility
+**Priority**: Medium | **Effort**: Low  
+**Issue**: `formatPrice` function is duplicated across multiple files:
+- `components/PropertyCard.tsx`
+- `app/properties/[id]/page.tsx`
+
+**Implementation**:
+- Create `lib/utils.ts` with shared `formatPrice` function
+- Update all components to use shared utility
+
+---
+
+### 3. 📈 Enhance Comparison Page
+**Priority**: Medium | **Effort**: Low  
+**Issue**: Comparison feature exists but could show more detailed metrics.
+
+**Implementation**:
+- Add PSF comparison
+- Add facilities comparison
+- Add proximity to amenities comparison
+- Add visual price/size charts
+
+---
+
+### 4. ⏳ Loading States Consistency
+**Priority**: Low | **Effort**: Medium  
+**Issue**: Some pages use skeleton loaders, others don't.
+
+**Implementation**:
+- Ensure all listing pages use `PropertyCardSkeleton` or `AgentCardSkeleton`
+- Add skeleton to homepage handpicked section
+- Add skeleton to similar properties section
+
+---
+
+### 5. 👤 Agent Loading Optimization
+**Priority**: Low | **Effort**: Medium  
+**Location**: `components/PropertyCard.tsx:38-43`  
+**Issue**: Each PropertyCard fetches agent data individually when not provided.
+
+**Implementation**:
+- Batch load agents for property lists at parent level
+- Pass agent data to PropertyCard to avoid N+1 queries
+
+---
+
+### 6. 🏷️ Land Size Display
+**Priority**: Low | **Effort**: Low  
+**Issue**: `land_size` field exists in database but may not be displayed everywhere.
+
+**Implementation**:
+- Add land size to PropertyCard for landed properties
+- Add land size to property detail specifications
+
+---
+
+### 7. 📄 Server-Side Pagination for Large Datasets
+**Priority**: High | **Effort**: Medium  
+**Location**: `lib/database.ts` (getRentListings, getNewProjects, etc.)  
+**Issue**: Supabase returns max 1000 rows by default. Rent page shows 1000 properties but DB has 6000+.
+
+**Implementation**:
+- Modify database functions to accept `page` and `limit` parameters
+- Use Supabase `.range(start, end)` for efficient pagination
+- Return total count alongside results for pagination UI
+- Update rent page and properties page to use server-side pagination
+- Benefits: Faster page loads, less memory usage, scalable
 
 ---
 

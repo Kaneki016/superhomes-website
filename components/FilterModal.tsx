@@ -27,11 +27,12 @@ interface FilterModalProps {
         bedrooms: number[]
         priceRange: { min: number; max: number }
     }
+    stateOptions?: string[] // Dynamic state options from database
 }
 
 type TabType = 'propertyType' | 'price' | 'bedroom' | 'state'
 
-export default function FilterModal({ isOpen, onClose, filters, onApply, filterOptions }: FilterModalProps) {
+export default function FilterModal({ isOpen, onClose, filters, onApply, filterOptions, stateOptions = [] }: FilterModalProps) {
     const [activeTab, setActiveTab] = useState<TabType>('propertyType')
     const [localFilters, setLocalFilters] = useState(filters)
 
@@ -289,21 +290,7 @@ export default function FilterModal({ isOpen, onClose, filters, onApply, filterO
                         <div className="space-y-3">
                             {[
                                 { label: 'All States', value: '' },
-                                { label: 'Kuala Lumpur', value: 'Kuala Lumpur' },
-                                { label: 'Selangor', value: 'Selangor' },
-                                { label: 'Penang', value: 'Penang' },
-                                { label: 'Johor', value: 'Johor' },
-                                { label: 'Kedah', value: 'Kedah' },
-                                { label: 'Kelantan', value: 'Kelantan' },
-                                { label: 'Melaka', value: 'Melaka' },
-                                { label: 'Negeri Sembilan', value: 'Negeri Sembilan' },
-                                { label: 'Pahang', value: 'Pahang' },
-                                { label: 'Perak', value: 'Perak' },
-                                { label: 'Perlis', value: 'Perlis' },
-                                { label: 'Putrajaya', value: 'Putrajaya' },
-                                { label: 'Sabah', value: 'Sabah' },
-                                { label: 'Sarawak', value: 'Sarawak' },
-                                { label: 'Terengganu', value: 'Terengganu' },
+                                ...stateOptions.map(state => ({ label: state, value: state }))
                             ].map((option) => (
                                 <div
                                     key={option.value}

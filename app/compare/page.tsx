@@ -4,19 +4,13 @@ import { useCompare } from '@/contexts/CompareContext'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { formatPrice, formatPricePerSqft } from '@/lib/utils'
 
 export default function ComparePage() {
     const { compareList, removeFromCompare, clearCompare } = useCompare()
 
-    const formatPrice = (price: number) => {
-        return new Intl.NumberFormat('en-MY', {
-            style: 'currency',
-            currency: 'MYR',
-            minimumFractionDigits: 0,
-        }).format(price)
-    }
-
-    const calculatePSF = (price: number, size: string) => {
+    const calculatePSF = (price: number | null | undefined, size: string | null | undefined) => {
+        if (!price || !size) return '-'
         const sizeNum = parseInt(size?.replace(/[^0-9]/g, '') || '0')
         if (!sizeNum || sizeNum === 0) return '-'
         return `RM ${Math.round(price / sizeNum).toLocaleString()}`
@@ -84,11 +78,11 @@ export default function ComparePage() {
                                                 <Link href={`/properties/${property.id}`} className="block">
                                                     <img
                                                         src={property.main_image_url || property.images?.[0] || '/placeholder-property.jpg'}
-                                                        alt={property.property_name}
+                                                        alt={property.title || property.property_name || 'Property'}
                                                         className="w-full h-40 object-cover rounded-lg mb-3"
                                                     />
                                                     <h3 className="font-semibold text-gray-900 text-sm truncate hover:text-primary-600">
-                                                        {property.property_name}
+                                                        {property.title || property.property_name || 'Property'}
                                                     </h3>
                                                 </Link>
                                             </div>
@@ -103,7 +97,7 @@ export default function ComparePage() {
                                     {compareList.map(property => (
                                         <td key={property.id} className="p-4 text-center">
                                             <span className="text-xl font-bold text-primary-600">
-                                                {formatPrice(property.price)}
+                                                {formatPrice(property.price, property.listing_type === 'rent')}
                                             </span>
                                         </td>
                                     ))}
@@ -114,7 +108,7 @@ export default function ComparePage() {
                                     <td className="p-4 font-medium text-gray-700 bg-gray-50">Price/sqft</td>
                                     {compareList.map(property => (
                                         <td key={property.id} className="p-4 text-center text-gray-900">
-                                            {calculatePSF(property.price, property.size)}
+                                            {calculatePSF(property.price, property.floor_area_sqft || property.size)}
                                         </td>
                                     ))}
                                 </tr>
@@ -124,7 +118,7 @@ export default function ComparePage() {
                                     <td className="p-4 font-medium text-gray-700 bg-gray-50">Size</td>
                                     {compareList.map(property => (
                                         <td key={property.id} className="p-4 text-center text-gray-900">
-                                            {property.size || '-'}
+                                            {property.floor_area_sqft || property.size || '-'}
                                         </td>
                                     ))}
                                 </tr>
@@ -134,7 +128,7 @@ export default function ComparePage() {
                                     <td className="p-4 font-medium text-gray-700 bg-gray-50">Bedrooms</td>
                                     {compareList.map(property => (
                                         <td key={property.id} className="p-4 text-center text-gray-900">
-                                            {property.bedrooms_num || property.bedrooms || '-'}
+                                            {property.total_bedrooms || property.bedrooms_num || property.bedrooms || '-'}
                                         </td>
                                     ))}
                                 </tr>
@@ -185,6 +179,22 @@ export default function ComparePage() {
                                     {compareList.map(property => (
                                         <td key={property.id} className="p-4 text-center text-gray-900">
                                             {property.furnishing || '-'}
+                                        </td>
+                                    ))}
+                                </tr>
+
+                                {/* Listing Type */}
+                                <tr>
+                                    <td className="p-4 font-medium text-gray-700 bg-gray-50">Listing Type</td>
+                                    {compareList.map(property => (
+                                        <td key={property.id} className="p-4 text-center">
+                                            <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${property.listing_type === 'sale' ? 'bg-green-100 text-green-700' :
+                                                property.listing_type === 'rent' ? 'bg-blue-100 text-blue-700' :
+                                                    'bg-purple-100 text-purple-700'
+                                                }`}>
+                                                {property.listing_type === 'sale' ? 'For Sale' :
+                                                    property.listing_type === 'rent' ? 'For Rent' : 'New Project'}
+                                            </span>
                                         </td>
                                     ))}
                                 </tr>

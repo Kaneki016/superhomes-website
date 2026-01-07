@@ -15,7 +15,52 @@ export function Skeleton({ className = '' }: SkeletonProps) {
 }
 
 // Property Card Skeleton (PropertyGuru style)
-export function PropertyCardSkeleton() {
+export function PropertyCardSkeleton({ variant = 'grid' }: { variant?: 'grid' | 'list' }) {
+    if (variant === 'list') {
+        return (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col md:flex-row h-auto md:h-64">
+                {/* Image Skeleton */}
+                <div className="w-full md:w-2/5 h-48 md:h-full bg-gray-200 animate-pulse shrink-0" />
+
+                {/* Content Skeleton */}
+                <div className="flex-1 p-4 md:p-6 flex flex-col justify-between min-w-0">
+                    <div className="space-y-3">
+                        <div className="flex justify-between items-start gap-4">
+                            <div className="w-2/3 space-y-2">
+                                <div className="h-6 bg-gray-200 rounded w-full animate-pulse" />
+                                <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse" />
+                            </div>
+                            <div className="w-1/4 h-8 bg-gray-200 rounded animate-pulse" />
+                        </div>
+
+                        <div className="flex gap-3 pt-2">
+                            <div className="h-5 bg-gray-200 rounded w-12 animate-pulse" />
+                            <div className="h-5 bg-gray-200 rounded w-12 animate-pulse" />
+                            <div className="h-5 bg-gray-200 rounded w-16 animate-pulse" />
+                        </div>
+
+                        <div className="hidden md:block space-y-2 pt-2">
+                            <div className="h-4 bg-gray-200 rounded w-full animate-pulse" />
+                            <div className="h-4 bg-gray-200 rounded w-2/3 animate-pulse" />
+                        </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-4 mt-auto border-t border-gray-100">
+                        <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
+                            <div className="h-4 bg-gray-200 rounded w-24 animate-pulse" />
+                        </div>
+                        <div className="flex gap-2">
+                            <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
+                            <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
+                            <div className="w-20 h-8 rounded-lg bg-gray-200 animate-pulse" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             {/* Image Skeleton */}
@@ -117,19 +162,29 @@ export function SearchBarSkeleton() {
 interface ListSkeletonProps {
     count?: number
     type: 'property' | 'agent'
+    viewMode?: 'grid' | 'list'
 }
 
-export function ListSkeleton({ count = 6, type }: ListSkeletonProps) {
-    const SkeletonComponent = type === 'property' ? PropertyCardSkeleton : AgentCardSkeleton
+export function ListSkeleton({ count = 6, type, viewMode = 'grid' }: ListSkeletonProps) {
+    if (type === 'agent') {
+        return (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {Array.from({ length: count }).map((_, i) => (
+                    <AgentCardSkeleton key={i} />
+                ))}
+            </div>
+        )
+    }
 
+    // Property Skeleton
     return (
         <div className={
-            type === 'property'
-                ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6'
+            viewMode === 'list'
+                ? 'flex flex-col gap-4 max-w-4xl mx-auto' // Match the RentPage list container
                 : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
         }>
             {Array.from({ length: count }).map((_, i) => (
-                <SkeletonComponent key={i} />
+                <PropertyCardSkeleton key={i} variant={viewMode} />
             ))}
         </div>
     )

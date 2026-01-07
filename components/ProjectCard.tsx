@@ -9,7 +9,8 @@ interface ProjectCardProps {
 }
 
 export default function ProjectCard({ property }: ProjectCardProps) {
-    const formatPrice = (price: number) => {
+    const formatPrice = (price: number | null | undefined) => {
+        if (!price) return 'Price on Request'
         if (price >= 1000000) {
             return `RM ${(price / 1000000).toFixed(1)}M`
         }
@@ -17,11 +18,16 @@ export default function ProjectCard({ property }: ProjectCardProps) {
     }
 
     // Extract bedrooms display
-    const bedroomsDisplay = property.bedrooms_num
-        ? `${property.bedrooms_num}`
-        : property.bedrooms
-            ? String(property.bedrooms).replace(/[^0-9,\s]/g, '').trim()
-            : null
+    const bedroomsDisplay = property.total_bedrooms
+        ? `${property.total_bedrooms}`
+        : property.bedrooms_num
+            ? `${property.bedrooms_num}`
+            : property.bedrooms
+                ? String(property.bedrooms).replace(/[^0-9,\s]/g, '').trim()
+                : null
+
+    // Property name with fallback
+    const propertyName = property.title || property.property_name || 'Property'
 
     // Shorten property type for badge
     const shortPropertyType = (type: string) => {
@@ -48,7 +54,7 @@ export default function ProjectCard({ property }: ProjectCardProps) {
                 <div className="relative aspect-[4/3] overflow-hidden">
                     <Image
                         src={property.main_image_url || property.images?.[0] || '/placeholder-property.jpg'}
-                        alt={property.property_name}
+                        alt={propertyName}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
@@ -67,7 +73,7 @@ export default function ProjectCard({ property }: ProjectCardProps) {
                 <div className="p-4">
                     {/* Title */}
                     <h3 className="font-semibold text-gray-900 line-clamp-1 group-hover:text-primary-600 transition-colors">
-                        {property.property_name}
+                        {propertyName}
                     </h3>
 
                     {/* Location */}
