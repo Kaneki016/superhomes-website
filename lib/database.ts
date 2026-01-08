@@ -1368,6 +1368,22 @@ export async function getTransactions(
     return (data as any) || []
 }
 
+// Fetch single transaction by ID
+export async function getTransactionById(id: string): Promise<Transaction | null> {
+    const { data, error } = await supabase
+        .from('transactions')
+        .select('*') // Select all fields to ensure we have full details
+        .eq('id', id)
+        .single()
+
+    if (error) {
+        console.error('Error fetching transaction:', error)
+        return null
+    }
+
+    return data
+}
+
 // Get distinct neighborhoods for filtering
 export async function getDistinctNeighborhoods(): Promise<string[]> {
     const { data, error } = await supabase

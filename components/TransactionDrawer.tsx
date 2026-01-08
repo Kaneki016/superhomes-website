@@ -2,6 +2,7 @@ import { X, Building2, Ruler, Calendar, DollarSign, MapPin, Layers } from 'lucid
 import { Transaction } from '@/lib/supabase'
 import MortgageCalculator from './MortgageCalculator'
 import NearbyAmenities from './NearbyAmenities'
+import ShareButton from './ShareButton'
 
 interface TransactionDrawerProps {
     transaction: Transaction | null
@@ -44,12 +45,19 @@ export default function TransactionDrawer({ transaction, onClose, isOpen }: Tran
                     </h2>
                     {transaction.address && <p className="text-xs text-gray-500 mt-0.5">Transaction ID: {String(transaction.id).slice(0, 8)}</p>}
                 </div>
-                <button
-                    onClick={onClose}
-                    className="p-2 -mr-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
-                >
-                    <X size={20} />
-                </button>
+                <div className="flex items-center gap-2">
+                    <ShareButton
+                        url={`${window.location.origin}/transaction-map?transaction_id=${transaction.id}`}
+                        title={`Check out this property at ${transaction.address}`}
+                        className="!py-1.5 !px-3 !text-xs !bg-gray-100 !border-transparent hover:!bg-gray-200"
+                    />
+                    <button
+                        onClick={onClose}
+                        className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
+                    >
+                        <X size={20} />
+                    </button>
+                </div>
             </div>
 
             {/* Content w/ Horizontal Layout */}

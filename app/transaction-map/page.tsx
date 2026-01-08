@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getTransactions, getDistinctNeighborhoods, getTransactionMetrics, getTransactionPropertyTypes, getTransactionTenures } from '@/lib/database'
+import { getTransactions, getDistinctNeighborhoods, getTransactionMetrics, getTransactionPropertyTypes, getTransactionTenures, getTransactionById } from '@/lib/database'
 import { Transaction } from '@/lib/supabase'
 import TransactionMap from '@/components/TransactionMap'
 import RangeSlider from '@/components/RangeSlider'
@@ -82,6 +82,29 @@ export default function TransactionMapPage() {
         maxPrice: Math.max(...displayTransactions.map(t => t.price)) || 0
     } : metrics
 
+
+    // Handle Deep Linking (Share URL)
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search)
+        const transactionId = params.get('transaction_id')
+
+        if (transactionId) {
+            console.log('🔗 Deep link detected for transaction:', transactionId)
+            getTransactionById(transactionId).then(fetchedTx => {
+                if (fetchedTx) {
+                    setSelectedTransaction(fetchedTx)
+                    // Ensure the transaction is visible on map (add to list if not present)
+                    setTransactions(prev => {
+                        const exists = prev.some(t => t.id === fetchedTx.id)
+                        if (!exists) {
+                            return [...prev, fetchedTx]
+                        }
+                        return prev
+                    })
+                }
+            })
+        }
+    }, [])
 
     // Fetch initial options
     useEffect(() => {
