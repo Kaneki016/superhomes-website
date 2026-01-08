@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase-browser'
 import { User, Session } from '@supabase/supabase-js'
 // Types are defined inline in this file
 
@@ -23,6 +23,7 @@ interface AuthContextType {
     signUp: (email: string, password: string, userData: { name: string; userType: 'buyer' | 'agent'; phone?: string; agency?: string }) => Promise<{ error: Error | null }>
     signOut: () => Promise<void>
     signInWithGoogle: () => Promise<{ error: Error | null }>
+    refreshProfile: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -36,14 +37,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Memoized fetch profile function with timeout
     const fetchProfile = useCallback(async (userId: string, userEmail: string) => {
         try {
+            console.log('fetchProfile called for userId:', userId)
             // First check if user is a buyer
-            const { data: buyerData } = await supabase
+            const { data: buyerData, error: buyerError } = await supabase
                 .from('buyers')
                 .select('*')
                 .eq('auth_id', userId)
-                .single()
+                .maybeSingle()
+
+            console.log('Buyer fetch result:', { buyerData, buyerError })
 
             if (buyerData) {
+                console.log('Setting profile with buyer data:', buyerData)
                 setProfile({
                     id: buyerData.id,
                     email: buyerData.email,
@@ -54,12 +59,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 return
             }
 
-            // If not a buyer, check if user is an agent
+            // If not a buyer, check if user is an agent (in contacts table)
             const { data: agentData } = await supabase
-                .from('dup_agents')
+                .from('contacts')
                 .select('*')
                 .eq('auth_id', userId)
-                .single()
+                .eq('contact_type', 'agent')
+                .maybeSingle()
 
             if (agentData) {
                 setProfile({
@@ -73,23 +79,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
 
             // If neither exists, create a buyer profile (OAuth case)
+            // Use UPSERT to handle race conditions and RLS edge cases
+            console.log('No existing profile found. Attempting to create/update buyer profile for:', userId)
+
             const { data: newBuyer, error: insertError } = await supabase
                 .from('buyers')
-                .insert({
+                .upsert({
+                    id: userId,
                     auth_id: userId,
                     email: userEmail,
+                    user_type: 'buyer',
+                }, {
+                    onConflict: 'id',
+                    ignoreDuplicates: false
                 })
                 .select()
-                .single()
+                .maybeSingle()
+
+            if (insertError) {
+                // If duplicate key error (23505), try to fetch the existing record
+                if (insertError.code === '23505') {
+                    console.log('Record already exists, fetching existing buyer...')
+                    const { data: existingBuyer } = await supabase
+                        .from('buyers')
+                        .select('*')
+                        .eq('id', userId)
+                        .maybeSingle()
+
+                    if (existingBuyer) {
+                        console.log('Found existing buyer:', existingBuyer)
+                        setProfile({
+                            id: existingBuyer.id,
+                            email: existingBuyer.email,
+                            user_type: 'buyer',
+                            name: existingBuyer.name,
+                            phone: existingBuyer.phone,
+                        })
+                        return
+                    }
+                }
+                console.error('Error creating buyer profile (full):', JSON.stringify(insertError, null, 2))
+                console.error('Insert details:', { id: userId, auth_id: userId, email: userEmail })
+                // Don't show alert for handled errors
+            }
 
             if (!insertError && newBuyer) {
+                console.log('Successfully created new buyer profile:', newBuyer)
                 setProfile({
                     id: newBuyer.id,
                     email: newBuyer.email,
                     user_type: 'buyer',
                 })
             } else {
-                // Fallback minimal profile
+                // Fallback minimal profile (works even without database record)
+                // We use userId here, which matches the 'id' we tried to insert
+                console.log('Using fallback profile - database record may not exist yet or failed to create')
                 setProfile({
                     id: userId,
                     email: userEmail,
@@ -98,6 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
         } catch (error) {
             console.error('Error fetching profile:', error)
+            // Fallback minimal profile
             setProfile({
                 id: userId,
                 email: userEmail,
@@ -105,6 +150,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             })
         }
     }, [])
+
+    // Function to refresh the profile from the database
+    const refreshProfile = useCallback(async () => {
+        if (user) {
+            await fetchProfile(user.id, user.email || '')
+        }
+    }, [user, fetchProfile])
 
     useEffect(() => {
         let mounted = true
@@ -216,9 +268,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 // FIRST: Check by phone (most reliable for scraped agents)
                 if (userData.phone) {
                     const { data } = await supabase
-                        .from('dup_agents')
+                        .from('contacts')
                         .select('*')
                         .eq('phone', userData.phone)
+                        .eq('contact_type', 'agent')
                         .is('auth_id', null)
                         .single()
                     existingAgent = data
@@ -227,9 +280,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 // FALLBACK: Check by email if phone didn't match
                 if (!existingAgent && email) {
                     const { data } = await supabase
-                        .from('dup_agents')
+                        .from('contacts')
                         .select('*')
                         .eq('email', email)
+                        .eq('contact_type', 'agent')
                         .is('auth_id', null)
                         .single()
                     existingAgent = data
@@ -238,13 +292,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 if (existingAgent) {
                     // Agent exists - claim the profile
                     const { error: updateError } = await supabase
-                        .from('dup_agents')
+                        .from('contacts')
                         .update({
                             auth_id: authData.user.id,
                             email: email, // Add email to the scraped profile
                             name: userData.name || existingAgent.name, // Keep existing name if not provided
                             phone: userData.phone || existingAgent.phone,
-                            agency: userData.agency || existingAgent.agency,
+                            company_name: userData.agency || existingAgent.company_name,
                         })
                         .eq('id', existingAgent.id)
 
@@ -253,16 +307,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         return { error: new Error('Failed to claim agent profile') }
                     }
                 } else {
-                    // Create new agent profile
+                    // Create new agent profile in contacts table
                     const { error: agentError } = await supabase
-                        .from('dup_agents')
+                        .from('contacts')
                         .insert({
                             auth_id: authData.user.id,
-                            agent_id: `agent_${authData.user.id.substring(0, 8)}`,
+                            contact_type: 'agent',
                             email: email,
                             name: userData.name,
                             phone: userData.phone,
-                            agency: userData.agency,
+                            company_name: userData.agency,
                         })
 
                     if (agentError) {
@@ -330,6 +384,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             signUp,
             signOut,
             signInWithGoogle,
+            refreshProfile,
         }}>
             {children}
         </AuthContext.Provider>

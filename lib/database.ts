@@ -1,5 +1,30 @@
 import { supabase, Property, Agent, Transaction, Contact, Listing, ListingSaleDetails, ListingRentDetails, ListingProjectDetails } from './supabase'
 
+// Simple in-memory cache for frequently accessed data
+interface CacheEntry<T> {
+    data: T
+    expiry: number
+}
+
+const cache: Record<string, CacheEntry<any>> = {}
+
+function getCached<T>(key: string): T | null {
+    const entry = cache[key]
+    if (!entry) return null
+    if (Date.now() > entry.expiry) {
+        delete cache[key]
+        return null
+    }
+    return entry.data
+}
+
+function setCache<T>(key: string, data: T, ttlSeconds: number = 300): void {
+    cache[key] = {
+        data,
+        expiry: Date.now() + (ttlSeconds * 1000)
+    }
+}
+
 // Helper function to transform listing data from Supabase joins to Property type
 function transformListingToProperty(listing: any): Property {
     const property: Property = {
@@ -498,29 +523,39 @@ const MALAYSIAN_STATES = [
     'Terengganu'
 ]
 
-// Get distinct states from the database
+// Get distinct states from the database (cached for 5 minutes)
 export async function getDistinctStates(): Promise<string[]> {
-    // Query for each Malaysian state to see which ones have active listings
-    // This avoids the Supabase 1000 row limit issue
-    const statesWithListings: string[] = []
+    // Check cache first
+    const cached = getCached<string[]>('distinct_states')
+    if (cached) return cached
 
-    for (const state of MALAYSIAN_STATES) {
+    // Query all states in parallel instead of sequentially
+    const statePromises = MALAYSIAN_STATES.map(async (state) => {
         const { count, error } = await supabase
             .from('listings')
             .select('id', { count: 'exact', head: true })
             .eq('is_active', true)
             .ilike('state', state)
 
-        if (!error && count && count > 0) {
-            statesWithListings.push(state)
-        }
-    }
+        return (!error && count && count > 0) ? state : null
+    })
 
-    return statesWithListings.sort()
+    const results = await Promise.all(statePromises)
+    const statesWithListings = results.filter((s): s is string => s !== null).sort()
+
+    // Cache for 5 minutes
+    setCache('distinct_states', statesWithListings, 300)
+
+    return statesWithListings
 }
 
 // Fetch featured properties with optional limit (only sale properties with agents)
+// Cached for 2 minutes (only if we get results)
 export async function getFeaturedProperties(limit: number = 8): Promise<Property[]> {
+    const cacheKey = `featured_properties_${limit}`
+    const cached = getCached<Property[]>(cacheKey)
+    if (cached && cached.length > 0) return cached
+
     // Fetch more to account for filtering out properties without agents
     const { data, error } = await supabase
         .from('listings')
@@ -544,7 +579,14 @@ export async function getFeaturedProperties(limit: number = 8): Promise<Property
         return agentName && agentName !== 'unknown'
     })
 
-    return propertiesWithAgents.slice(0, limit)
+    const result = propertiesWithAgents.slice(0, limit)
+
+    // Only cache if we got results
+    if (result.length > 0) {
+        setCache(cacheKey, result, 120)
+    }
+
+    return result
 }
 
 // Fetch handpicked properties (Premium/Luxury listings - highest price)
@@ -844,13 +886,17 @@ export async function getFavoriteProperties(buyerId: string): Promise<Property[]
     return (properties || []).map(transformListingToProperty)
 }
 
-// Get distinct property types from the database
+// Get distinct property types from the database (cached for 5 minutes)
 export async function getDistinctPropertyTypes(): Promise<string[]> {
+    const cached = getCached<string[]>('distinct_property_types')
+    if (cached) return cached
+
     const { data, error } = await supabase
         .from('listings')
         .select('property_type')
         .eq('is_active', true)
         .not('property_type', 'is', null)
+        .limit(1000)
 
     if (error) {
         console.error('Error fetching property types:', error)
@@ -858,8 +904,10 @@ export async function getDistinctPropertyTypes(): Promise<string[]> {
     }
 
     const types = data?.map(d => d.property_type).filter(Boolean) || []
-    const uniqueTypes = [...new Set(types)]
-    return uniqueTypes.sort()
+    const uniqueTypes = [...new Set(types)].sort()
+
+    setCache('distinct_property_types', uniqueTypes, 300)
+    return uniqueTypes
 }
 
 // Get distinct locations
