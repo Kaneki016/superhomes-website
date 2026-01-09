@@ -5,6 +5,14 @@ import { renderToString } from 'react-dom/server'
 import { Property } from '@/lib/supabase'
 import PropertyMarkerPopup from './PropertyMarkerPopup'
 
+// Export bounds interface for parent components
+export interface MapBounds {
+    north: number
+    south: number
+    east: number
+    west: number
+}
+
 interface PropertyMapProps {
     properties: Property[]
     hoveredPropertyId?: string | null
@@ -12,6 +20,7 @@ interface PropertyMapProps {
     onPropertyHover?: (id: string | null) => void
     onPropertySelect?: (id: string) => void
     onMarkerClick?: (propertyId: string) => void
+    onBoundsChange?: (bounds: MapBounds, visiblePropertyIds: string[]) => void
     className?: string
     showControls?: boolean
 }
@@ -23,20 +32,70 @@ export default function PropertyMap({
     onPropertyHover,
     onPropertySelect,
     onMarkerClick,
+    onBoundsChange,
     className = '',
     showControls = true
 }: PropertyMapProps) {
     const mapRef = useRef<HTMLDivElement>(null)
     const mapInstanceRef = useRef<any>(null)
     const markersRef = useRef<Map<string, any>>(new Map())
+    const propertiesRef = useRef<Property[]>(properties)
+
+    // Refs for callbacks to avoid dependency cycles
+    const onPropertySelectRef = useRef(onPropertySelect)
+    const onMarkerClickRef = useRef(onMarkerClick)
+    const onPropertyHoverRef = useRef(onPropertyHover)
+
     const [noValidCoordinates, setNoValidCoordinates] = useState(false)
     const [leaflet, setLeaflet] = useState<any>(null)
 
-    // Initialize map
+    // Update refs
     useEffect(() => {
-        if (typeof window === 'undefined' || !mapRef.current) return
+        propertiesRef.current = properties
+        onPropertySelectRef.current = onPropertySelect
+        onMarkerClickRef.current = onMarkerClick
+        onPropertyHoverRef.current = onPropertyHover
+    }, [properties, onPropertySelect, onMarkerClick, onPropertyHover])
+
+    // Function to notify parent about visible properties within bounds
+    const notifyBoundsChange = useCallback(() => {
+        if (!mapInstanceRef.current || !onBoundsChange) return
+
+        const bounds = mapInstanceRef.current.getBounds()
+        const mapBounds: MapBounds = {
+            north: bounds.getNorth(),
+            south: bounds.getSouth(),
+            east: bounds.getEast(),
+            west: bounds.getWest()
+        }
+
+        // Filter properties that are within the visible bounds
+        const visiblePropertyIds = propertiesRef.current
+            .filter(p =>
+                p.latitude != null &&
+                p.longitude != null &&
+                p.latitude >= mapBounds.south &&
+                p.latitude <= mapBounds.north &&
+                p.longitude >= mapBounds.west &&
+                p.longitude <= mapBounds.east
+            )
+            .map(p => p.id)
+
+        onBoundsChange(mapBounds, visiblePropertyIds)
+    }, [onBoundsChange])
+
+    // Initialize map (run once)
+    // Initialize map (run once)
+    useEffect(() => {
+        if (typeof window === 'undefined' || !mapRef.current || mapInstanceRef.current) return
+
+        let isMounted = true
 
         import('leaflet').then((L) => {
+            if (!isMounted) return
+            if (mapInstanceRef.current) return
+            if (mapRef.current && (mapRef.current as any)._leaflet_id) return
+
             setLeaflet(L)
 
             // Fix for default marker icons in Next.js
@@ -47,28 +106,41 @@ export default function PropertyMap({
                 shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
             })
 
-            if (!mapInstanceRef.current && mapRef.current) {
-                const defaultCenter: [number, number] = [3.1390, 101.6869]
-                const defaultZoom = 11
+            const defaultCenter: [number, number] = [3.1390, 101.6869]
+            const defaultZoom = 11
 
-                mapInstanceRef.current = L.map(mapRef.current, {
-                    zoomControl: false // We'll add custom controls
-                }).setView(defaultCenter, defaultZoom)
+            const map = L.map(mapRef.current!, {
+                zoomControl: false // We'll add custom controls
+            }).setView(defaultCenter, defaultZoom)
 
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-                    maxZoom: 19,
-                }).addTo(mapInstanceRef.current)
-            }
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                maxZoom: 19,
+            }).addTo(map)
+
+            mapInstanceRef.current = map
         })
 
         return () => {
+            isMounted = false
             if (mapInstanceRef.current) {
                 mapInstanceRef.current.remove()
                 mapInstanceRef.current = null
             }
         }
     }, [])
+
+    // Manage event listeners separate from initialization
+    useEffect(() => {
+        if (!mapInstanceRef.current || !leaflet) return
+
+        const map = mapInstanceRef.current
+        map.on('moveend', notifyBoundsChange)
+
+        return () => {
+            map.off('moveend', notifyBoundsChange)
+        }
+    }, [leaflet, notifyBoundsChange])
 
     // Update markers when properties change
     useEffect(() => {
@@ -130,16 +202,16 @@ export default function PropertyMap({
 
                 // Event handlers
                 marker.on('click', () => {
-                    if (onPropertySelect) onPropertySelect(property.id)
-                    if (onMarkerClick) onMarkerClick(property.id)
+                    if (onPropertySelectRef.current) onPropertySelectRef.current(property.id)
+                    if (onMarkerClickRef.current) onMarkerClickRef.current(property.id)
                 })
 
                 marker.on('mouseover', () => {
-                    if (onPropertyHover) onPropertyHover(property.id)
+                    if (onPropertyHoverRef.current) onPropertyHoverRef.current(property.id)
                 })
 
                 marker.on('mouseout', () => {
-                    if (onPropertyHover) onPropertyHover(null)
+                    if (onPropertyHoverRef.current) onPropertyHoverRef.current(null)
                 })
 
                 markersRef.current.set(property.id, marker)
@@ -147,13 +219,13 @@ export default function PropertyMap({
         })
 
         // Fit bounds
-        if (bounds.length > 0) {
+        if (bounds.length > 0 && !noValidCoordinates) {
             mapInstanceRef.current!.fitBounds(bounds, {
                 padding: [50, 50],
                 maxZoom: 15
             })
         }
-    }, [properties, leaflet, hoveredPropertyId, selectedPropertyId, onPropertyHover, onPropertySelect, onMarkerClick])
+    }, [properties, leaflet, noValidCoordinates, hoveredPropertyId, selectedPropertyId]) // Safely added dependencies
 
     // Update marker styles when hover changes
     useEffect(() => {

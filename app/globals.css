@@ -541,9 +541,8 @@
     @apply flex items-center gap-0.5;
   }
 
-  /* Map Controls */
   .map-controls {
-    @apply absolute bottom-4 right-4 flex flex-col gap-2 z-10;
+    @apply absolute bottom-4 right-4 flex flex-col gap-2 z-[1000];
   }
 
   .map-control-btn {

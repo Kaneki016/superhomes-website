@@ -1,18 +1,21 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getTransactions, getDistinctNeighborhoods, getTransactionMetrics, getTransactionPropertyTypes, getTransactionTenures } from '@/lib/database'
-import { Transaction } from '@/lib/supabase'
+import { getTransactions, getDistinctNeighborhoods, getTransactionMetrics, getTransactionPropertyTypes, getTransactionTenures, getTransactionById, searchProperties } from '@/lib/database'
+import { Transaction, Property } from '@/lib/supabase'
 import TransactionMap from '@/components/TransactionMap'
 import RangeSlider from '@/components/RangeSlider'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import TransactionDrawer from '@/components/TransactionDrawer'
-import { Filter, Search, X, ChevronDown, Check } from 'lucide-react'
+import ListingDrawer from '@/components/ListingDrawer'
+import { Filter, Search, X, ChevronDown, Check, Map as MapIcon, Layers, Info, ArrowLeft } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 
 export default function TransactionMapPage() {
     const [transactions, setTransactions] = useState<Transaction[]>([])
+    const [listings, setListings] = useState<Property[]>([]) // Listings State
     // Data State
     const [neighborhoods, setNeighborhoods] = useState<string[]>([])
     const [propertyTypes, setPropertyTypes] = useState<string[]>([])
@@ -24,6 +27,7 @@ export default function TransactionMapPage() {
     const [polygonFilter, setPolygonFilter] = useState<{ lat: number, lng: number }[] | null>(null)
     const [isDrawing, setIsDrawing] = useState(false)
     const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
+    const [selectedListing, setSelectedListing] = useState<Property | null>(null) // Selected Listing State
 
     // Filters State
     const [openFilter, setOpenFilter] = useState<string | null>(null) // 'price' | 'type' | 'tenure' | 'recency' | null
@@ -37,7 +41,7 @@ export default function TransactionMapPage() {
         tenure: [] as string[],
         minYear: undefined as number | undefined,
         maxYear: undefined as number | undefined,
-        recencyLabel: 'All Time'
+        recencyLabel: 'Date'
     })
 
     const [loading, setLoading] = useState(true)
@@ -72,6 +76,11 @@ export default function TransactionMapPage() {
         ? transactions.filter(t => t.latitude && t.longitude && isPointInPolygon({ lat: t.latitude, lng: t.longitude }, polygonFilter))
         : transactions
 
+    // Derived state for filtered listings (Client-side Polygon Filter)
+    const displayListings = polygonFilter
+        ? listings.filter(l => l.latitude && l.longitude && isPointInPolygon({ lat: l.latitude, lng: l.longitude }, polygonFilter))
+        : listings
+
     // Update metrics based on displayTransactions locally if polygon is active
     // Otherwise use server metrics
     const displayMetrics = polygonFilter ? {
@@ -82,6 +91,29 @@ export default function TransactionMapPage() {
         maxPrice: Math.max(...displayTransactions.map(t => t.price)) || 0
     } : metrics
 
+
+    // Handle Deep Linking (Share URL)
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search)
+        const transactionId = params.get('transaction_id')
+
+        if (transactionId) {
+            console.log('🔗 Deep link detected for transaction:', transactionId)
+            getTransactionById(transactionId).then(fetchedTx => {
+                if (fetchedTx) {
+                    setSelectedTransaction(fetchedTx)
+                    // Ensure the transaction is visible on map (add to list if not present)
+                    setTransactions(prev => {
+                        const exists = prev.some(t => t.id === fetchedTx.id)
+                        if (!exists) {
+                            return [...prev, fetchedTx]
+                        }
+                        return prev
+                    })
+                }
+            })
+        }
+    }, [])
 
     // Fetch initial options
     useEffect(() => {
@@ -117,10 +149,12 @@ export default function TransactionMapPage() {
                     filters.tenure.length === 0 &&
                     !filters.minYear &&
                     !filters.maxYear &&
-                    !polygonFilter;
+                    !polygonFilter &&
+                    !currentBounds; // Added currentBounds check
 
                 if (isDefault) {
                     setTransactions([])
+                    setListings([])
                     setMetrics({
                         avgPrice: 0,
                         avgPsf: 0,
@@ -159,12 +193,39 @@ export default function TransactionMapPage() {
                     apiFilters.bounds = currentBounds
                 }
 
-                const [txs, mets] = await Promise.all([
+                // Prepare Listing Filters
+                const listingFilters: any = {
+                    location: filters.neighborhood
+                        ? filters.neighborhood // If neighborhood selected, filter by it
+                        : (apiFilters.bounds ? undefined : 'Kuala Lumpur'), // Fallback to KL if no bounds? Or rely on bounds if we had bounds search support.
+                    // Currently searchProperties doesn't support bounds, so we might fetch too many or need to filter client side or add bounds support.
+                    // For now, let's use the neighborhood as primary location filter if set.
+                    minPrice: filters.minPrice > 0 ? filters.minPrice : undefined,
+                    maxPrice: filters.maxPrice < 5000000 ? filters.maxPrice : undefined,
+                    // propertyType: filters.propertyType.length > 0 ? filters.propertyType[0] : undefined, // searchProperties takes string, our filter is array. Pick first?
+                    // Listing type logic? For now fetch 'sale'
+                    listingType: 'sale'
+                }
+
+                // Note: searchProperties logic in database.ts is mainly "location"-string based or exact matches.
+                // It doesn't fully mirror the complex transaction filters (like multi-select types).
+                // We will do a best-effort fetch here.
+
+                // If we display by bounds, we really should fetch listings by bounds.
+                // But existing `searchProperties` doesn't support bounds. 
+                // Let's rely on Client-side bounds filtering for listings if we fetch a reasonable set (e.g. by Neighborhood).
+                // If no neighborhood, we might be fetching default active listings.
+
+                const [txs, mets, lsts] = await Promise.all([
                     getTransactions(1, 2000, apiFilters), // Increased limit to 2000 per request
-                    getTransactionMetrics(apiFilters)
+                    getTransactionMetrics(apiFilters),
+                    // Fetch listings if reasonable context exists (neighborhood or bounds imply logic, but let's try generic search)
+                    searchProperties(listingFilters)
                 ])
                 setTransactions(txs)
                 setMetrics(mets)
+                setListings(lsts)
+
             } catch (error) {
                 console.error('Error loading map data:', error)
             } finally {
@@ -232,7 +293,7 @@ export default function TransactionMapPage() {
                         <div className="relative">
                             <button
                                 onClick={() => toggleFilterDropdown('recency')}
-                                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm border transition-all ${filters.recencyLabel !== 'All Time' ? 'bg-primary-50 border-primary-200 text-primary-700 font-medium' : 'bg-white border-gray-200 hover:border-gray-300 text-gray-700'}`}
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm border transition-all ${filters.recencyLabel !== 'Date' ? 'bg-primary-50 border-primary-200 text-primary-700 font-medium' : 'bg-white border-gray-200 hover:border-gray-300 text-gray-700'}`}
                             >
                                 <span>📅 {filters.recencyLabel}</span>
                                 <span className="text-[10px] opacity-60">▼</span>
@@ -242,7 +303,7 @@ export default function TransactionMapPage() {
                                 <>
                                     <div className="fixed inset-0 z-10" onClick={() => setOpenFilter(null)}></div>
                                     <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-20 animate-fade-in">
-                                        <button onClick={() => setRecency('All Time')} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700">All Time</button>
+                                        <button onClick={() => setRecency('Date')} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700">All Time</button>
                                         <button onClick={() => setRecency('2024', 2024, 2024)} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700">2024</button>
                                         <button onClick={() => setRecency('2023', 2023, 2023)} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700">2023</button>
                                         <button onClick={() => setRecency('2022', 2022, 2022)} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700">2022</button>
@@ -373,7 +434,7 @@ export default function TransactionMapPage() {
                                 tenure: [],
                                 minYear: undefined,
                                 maxYear: undefined,
-                                recencyLabel: 'All Time'
+                                recencyLabel: 'Date'
                             })
                             setPolygonFilter(null) // Reset polygon too
                         }}
@@ -396,6 +457,7 @@ export default function TransactionMapPage() {
                     )}
                     <TransactionMap
                         transactions={displayTransactions}
+                        listings={displayListings} // Pass filtered listings
                         hoveredId={hoveredId}
                         onHover={setHoveredId}
                         colorMode={colorMode}
@@ -405,16 +467,27 @@ export default function TransactionMapPage() {
                         polygon={polygonFilter}
                         isDrawing={isDrawing}
                         onDrawStop={() => setIsDrawing(false)}
-                        onSelectTransaction={setSelectedTransaction}
+                        onSelectTransaction={(transaction) => {
+                            setSelectedTransaction(transaction)
+                            setSelectedListing(null)
+                        }}
+                        onSelectListing={(listing) => {
+                            setSelectedListing(listing)
+                            setSelectedTransaction(null)
+                        }}
                         className="w-full h-full"
                     />
                 </div>
 
                 {/* Draw Control Hint Overlay */}
-                {isDrawing && (
+                {isDrawing ? (
                     <div className="absolute top-24 left-1/2 -translate-x-1/2 z-[2000] bg-gray-900/80 text-white px-4 py-2 rounded-full backdrop-blur-sm shadow-lg text-sm font-medium flex items-center gap-2 animate-in fade-in slide-in-from-top-4">
                         <span>✏️ Click on map to draw points. Click first point to finish.</span>
                         <button onClick={() => setIsDrawing(false)} className="ml-2 hover:bg-white/20 p-1 rounded-full"><X size={14} /></button>
+                    </div>
+                ) : !polygonFilter && (
+                    <div className="absolute top-24 left-1/2 -translate-x-1/2 z-[1000] bg-white/90 text-gray-700 px-4 py-2 rounded-full backdrop-blur-sm shadow-md border border-gray-200 text-xs font-medium flex items-center gap-2 animate-in fade-in slide-in-from-top-4 pointer-events-none select-none">
+                        <span>💡 Tip: Use the <b>Draw Area</b> tool to filter properties</span>
                     </div>
                 )}
             </main>
@@ -426,6 +499,12 @@ export default function TransactionMapPage() {
                 transaction={selectedTransaction}
                 isOpen={!!selectedTransaction}
                 onClose={() => setSelectedTransaction(null)}
+            />
+
+            <ListingDrawer
+                listing={selectedListing}
+                isOpen={!!selectedListing}
+                onClose={() => setSelectedListing(null)}
             />
         </div>
     )

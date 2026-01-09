@@ -87,6 +87,7 @@ export interface ListingProjectDetails {
 // Contact (agent/developer) - replaces Agent
 export interface Contact {
     id: string
+    auth_id?: string | null  // Supabase Auth ID for logged-in agents
     profile_url: string | null
     contact_type: 'agent' | 'developer'
     name: string
@@ -189,6 +190,7 @@ export interface Buyer {
     id: string
     auth_id: string // Supabase Auth ID
     email: string
+    user_type: 'buyer' | 'agent'
     name?: string | null
     phone?: string | null
     created_at: string

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 
 interface ImageLightboxProps {
     images: string[]
@@ -16,6 +16,16 @@ export default function ImageLightbox({ images, initialIndex = 0, isOpen, onClos
     useEffect(() => {
         setCurrentIndex(initialIndex)
     }, [initialIndex])
+
+    const goToPrevious = useCallback(() => {
+        setIsLoading(true)
+        setCurrentIndex((prev) => (prev - 1 + images.length) % images.length)
+    }, [images.length])
+
+    const goToNext = useCallback(() => {
+        setIsLoading(true)
+        setCurrentIndex((prev) => (prev + 1) % images.length)
+    }, [images.length])
 
     useEffect(() => {
         if (!isOpen) return
@@ -34,17 +44,7 @@ export default function ImageLightbox({ images, initialIndex = 0, isOpen, onClos
             window.removeEventListener('keydown', handleKeyDown)
             document.body.style.overflow = 'unset'
         }
-    }, [isOpen, currentIndex])
-
-    const goToPrevious = () => {
-        setIsLoading(true)
-        setCurrentIndex((prev) => (prev - 1 + images.length) % images.length)
-    }
-
-    const goToNext = () => {
-        setIsLoading(true)
-        setCurrentIndex((prev) => (prev + 1) % images.length)
-    }
+    }, [isOpen, onClose, goToPrevious, goToNext])
 
     if (!isOpen) return null
 
@@ -131,8 +131,8 @@ export default function ImageLightbox({ images, initialIndex = 0, isOpen, onClos
                                 setCurrentIndex(idx)
                             }}
                             className={`w-2 h-2 rounded-full transition-all ${idx === currentIndex
-                                    ? 'bg-white w-8'
-                                    : 'bg-white/50 hover:bg-white/75'
+                                ? 'bg-white w-8'
+                                : 'bg-white/50 hover:bg-white/75'
                                 }`}
                             aria-label={`Go to image ${idx + 1}`}
                         />

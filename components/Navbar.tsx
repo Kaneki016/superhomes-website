@@ -57,7 +57,7 @@ export default function Navbar() {
                         </Link>
                         */}
                         <Link href="/transaction-map" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                            Transaction Map
+                            Map
                         </Link>
                     </div>
 
@@ -71,9 +71,18 @@ export default function Navbar() {
                                     onClick={() => setUserMenuOpen(!userMenuOpen)}
                                     className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
                                 >
-                                    <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold">
-                                        {user.email?.charAt(0).toUpperCase()}
-                                    </div>
+                                    {user.user_metadata?.avatar_url ? (
+                                        <img
+                                            src={user.user_metadata.avatar_url}
+                                            alt="Profile"
+                                            className="w-10 h-10 rounded-full object-cover"
+                                            referrerPolicy="no-referrer"
+                                        />
+                                    ) : (
+                                        <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold">
+                                            {user.email?.charAt(0).toUpperCase()}
+                                        </div>
+                                    )}
                                     <span className="text-gray-700 font-medium">
                                         {profile?.name || user.email?.split('@')[0]}
                                     </span>
@@ -198,15 +207,24 @@ export default function Navbar() {
                             </Link>
                             */}
                             <Link href="/transaction-map" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                                Transaction Map
+                                Map
                             </Link>
                             <div className="pt-4 border-t border-gray-200 flex flex-col space-y-2">
                                 {user ? (
                                     <>
                                         <div className="flex items-center space-x-2 px-2 py-2">
-                                            <div className="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold text-sm">
-                                                {user.email?.charAt(0).toUpperCase()}
-                                            </div>
+                                            {user.user_metadata?.avatar_url ? (
+                                                <img
+                                                    src={user.user_metadata.avatar_url}
+                                                    alt="Profile"
+                                                    className="w-8 h-8 rounded-full object-cover"
+                                                    referrerPolicy="no-referrer"
+                                                />
+                                            ) : (
+                                                <div className="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold text-sm">
+                                                    {user.email?.charAt(0).toUpperCase()}
+                                                </div>
+                                            )}
                                             <span className="text-gray-700 font-medium text-sm">
                                                 {user.email}
                                             </span>
