@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { Transaction } from '@/lib/supabase'
+import { Transaction, Property } from '@/lib/supabase'
 
 
 interface TransactionMapProps {
@@ -21,6 +21,7 @@ interface TransactionMapProps {
 
 export default function TransactionMap({
     transactions,
+    listings = [], // Default to empty array
     hoveredId,
     onHover,
     className,
@@ -31,16 +32,24 @@ export default function TransactionMap({
     polygon,
     isDrawing,
     onDrawStop,
-    onSelectTransaction
-}: TransactionMapProps) {
+    onSelectTransaction,
+    onSelectListing // Add handler for listing selection
+}: TransactionMapProps & {
+    listings?: Property[] // Add listings prop
+    onSelectListing?: (listing: Property) => void
+}) {
 
     const mapRef = useRef<HTMLDivElement>(null)
     const mapInstanceRef = useRef<any>(null)
     const clusterGroupRef = useRef<any>(null)
-    const drawControlRef = useRef<any>(null)
+    const listingsClusterGroupRef = useRef<any>(null) // New cluster group for listings
     const drawnItemsRef = useRef<any>(null)
     const drawHandlerRef = useRef<any>(null)
     const [leaflet, setLeaflet] = useState<any>(null)
+
+    // Layer Visibility State
+    const [showTransactions, setShowTransactions] = useState(true)
+    const [showListings, setShowListings] = useState(true)
 
     // Handle external draw trigger
     useEffect(() => {
@@ -90,17 +99,6 @@ export default function TransactionMap({
                         // Only handle single-finger touches for drawing
                         if (e.touches.length !== 1) return
 
-                        // Prevent default to stop map panning (optional, but good for precise drawing)
-                        // Note: User might validly want to pan. Leaflet Draw usually allows panning (?)
-                        // But typically if you tap, you mean to draw.
-                        // e.preventDefault() // Try without first, or might interfere with other gestures?
-                        // Actually, if we want to ensure the point is added, let's just add it.
-                        // If we prevent default, we might block scrolling the page or panning map.
-                        // Let's rely on just adding the vertex. 'click' simulation by browser might fire later but 
-                        // drawer.addVertex handles deduplication usually or depends.
-                        // Better: stop propagation to map if we handled it?
-                        // Map touch events are handled by Leaflet. 
-
                         const touch = e.touches[0]
                         const containerPoint = map.mouseEventToContainerPoint({
                             clientX: touch.clientX,
@@ -111,7 +109,6 @@ export default function TransactionMap({
                         drawer.addVertex(latlng)
                     }
 
-                    // Use capture=true or just invalidation? 
                     // Add via native DOM listener
                     map.getContainer().addEventListener('touchstart', onTouchStart, { passive: false })
                 }
@@ -141,7 +138,8 @@ export default function TransactionMap({
     useEffect(() => {
         if (typeof window === 'undefined' || !mapRef.current) return
 
-        import('leaflet').then((L) => {
+        import('leaflet').then((module) => {
+            const L = module.default || module
             // Expose Leaflet globally for plugins that rely on window.L
             // @ts-ignore
             window.L = L
@@ -178,10 +176,6 @@ export default function TransactionMap({
                     drawnItemsRef.current = new L.FeatureGroup()
                     map.addLayer(drawnItemsRef.current)
 
-                    // Draw Control removed in favor of external button
-                    // But we keep the event listeners below
-
-
                     // Handle Create Event
                     map.on(L.Draw.Event.CREATED, (e: any) => {
                         const layer = e.layer
@@ -192,16 +186,13 @@ export default function TransactionMap({
 
                         if (e.layerType === 'polygon' || e.layerType === 'rectangle') {
                             // Extract coordinates
-                            // Polygon latlngs are nested array [[latlng, ...]]
                             const latlngs = layer.getLatLngs()[0]
-                            // Normalize to simple object array
                             const points = latlngs.map((p: any) => ({ lat: p.lat, lng: p.lng }))
                             onPolygonComplete?.(points)
                         }
 
                         // Reset internal and external drawing state
                         if (drawHandlerRef.current) {
-                            // drawHandlerRef.current.disable() // handled automatically by "created"?
                             drawHandlerRef.current = null
                         }
                         onDrawStop?.()
@@ -231,43 +222,55 @@ export default function TransactionMap({
         }
     }, [])
 
-    // Transport Layer Removed for Performance
 
-
-    // Transaction/Station Markers Effect
+    // Render Transactions Layer
     useEffect(() => {
         if (!leaflet || !mapInstanceRef.current) return
 
         const map = mapInstanceRef.current
 
-        // Initialize Cluster Group if not exists
+        // Initialize Cluster Group for Transactions
         if (!clusterGroupRef.current && leaflet.markerClusterGroup) {
             clusterGroupRef.current = leaflet.markerClusterGroup({
-                chunkedLoading: true, // Optimize performance
-                maxClusterRadius: 50, // Aggregate closer points
+                chunkedLoading: true,
+                maxClusterRadius: 50,
                 spiderfyOnMaxZoom: true,
                 showCoverageOnHover: false,
-                zoomToBoundsOnClick: true
+                zoomToBoundsOnClick: true,
+                iconCreateFunction: (cluster: any) => {
+                    return leaflet.divIcon({
+                        html: `<div class="bg-primary-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-xs border-2 border-white shadow-md">${cluster.getChildCount()}</div>`,
+                        className: 'custom-cluster-icon',
+                        iconSize: leaflet.point(32, 32)
+                    })
+                }
             })
-            map.addLayer(clusterGroupRef.current)
+            // Only add if visible
+            if (showTransactions) {
+                map.addLayer(clusterGroupRef.current)
+            }
         }
 
-        // Ensure cluster group is ready
+        // Toggle Layer Visibility
+        if (clusterGroupRef.current) {
+            if (showTransactions) {
+                if (!map.hasLayer(clusterGroupRef.current)) {
+                    map.addLayer(clusterGroupRef.current)
+                }
+            } else {
+                if (map.hasLayer(clusterGroupRef.current)) {
+                    map.removeLayer(clusterGroupRef.current)
+                }
+            }
+        }
+
         if (!clusterGroupRef.current) return;
 
-        // Clear existing markers from cluster group
+        // Clear existing markers
         clusterGroupRef.current.clearLayers()
-        // markersRef.current.clear() // No longer needed as markersRef is removed
 
-        // Remove heat layer if it exists (if it was ever added by this component)
-        // if (heatLayerRef.current) { // heatLayerRef is removed
-        //     heatLayerRef.current.remove()
-        //     heatLayerRef.current = null
-        // }
+        if (!showTransactions) return; // Skip population if hidden
 
-        // ==========================================
-        // RENDER: TRANSACTIONS MODE
-        // ==========================================
         const validTransactions = transactions.filter(t =>
             t.latitude && t.longitude && t.latitude !== -99
         )
@@ -276,8 +279,6 @@ export default function TransactionMap({
 
         validTransactions.forEach((t) => {
             const position: [number, number] = [t.latitude!, t.longitude!]
-            const priceLabel = formatPrice(t.price)
-            const dateStr = t.transaction_date ? new Date(t.transaction_date).toLocaleDateString() : 'N/A'
 
             // Determine Color
             let fillColor = '#ef4444' // red-500
@@ -300,66 +301,14 @@ export default function TransactionMap({
                 weight: 2,
                 opacity: 1,
                 fillOpacity: 0.9,
-                className: 'transaction-marker' // For cleanup if needed, though we track via refs
-            }) // DO NOT ADD TO MAP DIRECTLY
+                className: 'transaction-marker'
+            })
 
-            // Determine Size Label & PSF Value for display
-            const sizeLabel = t.built_up_sqft ? `${t.built_up_sqft.toLocaleString()} sqft (BU)` : (t.land_area_sqft ? `${t.land_area_sqft.toLocaleString()} sqft (LA)` : 'N/A')
-            const displayPsf = t.price / (t.built_up_sqft || t.land_area_sqft || 1)
-
-            const popupContent = `
-                <div class="p-1 min-w-[240px] font-sans">
-                    <!-- Header -->
-                    <div class="flex items-center justify-between mb-2">
-                         <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full shadow-sm" style="background-color: ${fillColor}"></span>
-                            <h3 class="font-bold text-gray-900 text-lg leading-none">${formatPrice(t.price)}</h3>
-                         </div>
-                         <span class="text-[10px] font-medium px-2 py-0.5 rounded bg-gray-100 text-gray-600 border border-gray-200">${dateStr}</span>
-                    </div>
-
-                    <!-- Address -->
-                    <p class="text-sm font-semibold text-gray-800 mb-3 leading-tight border-b pb-2">${t.address || 'Address not available'}</p>
-
-                    <!-- Details Grid -->
-                    <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-xs text-gray-600">
-                        <div>
-                            <span class="block text-[10px] text-gray-400 uppercase tracking-wider font-bold mb-0.5">Type</span>
-                            <span class="font-medium text-gray-900 truncate block" title="${t.property_type}">${t.property_type || '-'}</span>
-                        </div>
-                        <div>
-                            <span class="block text-[10px] text-gray-400 uppercase tracking-wider font-bold mb-0.5">Tenure</span>
-                            <span class="font-medium text-gray-900 truncate block">${t.tenure || '-'}</span>
-                        </div>
-                        <div>
-                            <span class="block text-[10px] text-gray-400 uppercase tracking-wider font-bold mb-0.5">Size</span>
-                            <span class="font-medium text-gray-900">${sizeLabel}</span>
-                        </div>
-                        <div>
-                            <span class="block text-[10px] text-gray-400 uppercase tracking-wider font-bold mb-0.5">Price/Sqft</span>
-                            <span class="font-medium text-gray-900">RM ${displayPsf.toFixed(0)} psf</span>
-                        </div>
-                        ${t.unit_level ? `
-                        <div class="col-span-2 pt-1 mt-1 border-t border-dashed">
-                             <div class="flex gap-2">
-                                <span class="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Level:</span>
-                                <span class="font-medium text-gray-900">${t.unit_level}</span>
-                             </div>
-                        </div>` : ''}
-                    </div>
-                </div>
-            `
-            // Click Handler instead of Popup
+            // Click Handler
             marker.on('click', (e: any) => {
-                // Prevent map click propagation if necessary
                 leaflet.DomEvent.stopPropagation(e)
-
-                // Zoom to location
-                map.flyTo(position, 17, {
-                    animate: true,
-                    duration: 1.5
-                })
-
+                // Zoom logic removed to keep it cleaner, or keep if preferred. Let's flyTo.
+                map.flyTo(position, 17, { animate: true, duration: 1.5 })
                 onSelectTransaction?.(t)
             })
 
@@ -367,28 +316,113 @@ export default function TransactionMap({
             marker.on('mouseover', () => {
                 onHover?.(t.id)
                 marker.setStyle({ radius: 9, weight: 3 })
-                // marker.bringToFront() // Not needed in cluster?
             })
             marker.on('mouseout', () => {
                 onHover?.(null)
                 marker.setStyle({ radius: 6, weight: 2 })
             })
 
-            // markersRef.current.set(t.id, marker) // No longer needed as markersRef is removed
             newMarkers.push(marker)
         })
 
-        // Add all markers to cluster group at once
         if (newMarkers.length > 0) {
             clusterGroupRef.current.addLayers(newMarkers)
         }
 
-    }, [transactions, leaflet, onHover, colorMode])
+    }, [transactions, leaflet, onHover, colorMode, showTransactions])
 
 
-    // Auto-zoom when searching
+    // Render Listings Layer
+    useEffect(() => {
+        if (!leaflet || !mapInstanceRef.current) return
 
+        const map = mapInstanceRef.current
 
+        // Initialize Cluster Group for Listings
+        if (!listingsClusterGroupRef.current && leaflet.markerClusterGroup) {
+            listingsClusterGroupRef.current = leaflet.markerClusterGroup({
+                chunkedLoading: true,
+                maxClusterRadius: 50,
+                spiderfyOnMaxZoom: true,
+                showCoverageOnHover: false,
+                zoomToBoundsOnClick: true,
+                iconCreateFunction: (cluster: any) => {
+                    return leaflet.divIcon({
+                        html: `<div class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-xs border-2 border-white shadow-md">${cluster.getChildCount()}</div>`,
+                        className: 'custom-listing-cluster-icon',
+                        iconSize: leaflet.point(32, 32)
+                    })
+                }
+            })
+            // Only add if visible
+            if (showListings) {
+                map.addLayer(listingsClusterGroupRef.current)
+            }
+        }
+
+        // Toggle Layer Visibility
+        if (listingsClusterGroupRef.current) {
+            if (showListings) {
+                if (!map.hasLayer(listingsClusterGroupRef.current)) {
+                    map.addLayer(listingsClusterGroupRef.current)
+                }
+            } else {
+                if (map.hasLayer(listingsClusterGroupRef.current)) {
+                    map.removeLayer(listingsClusterGroupRef.current)
+                }
+            }
+        }
+
+        if (!listingsClusterGroupRef.current) return;
+
+        listingsClusterGroupRef.current.clearLayers()
+
+        if (!showListings) return;
+
+        const validListings = listings.filter(l => l.latitude && l.longitude)
+
+        const newListings: any[] = []
+
+        validListings.forEach((l) => {
+            const position: [number, number] = [l.latitude!, l.longitude!]
+
+            // Listings always Blue for distinct visual
+            const fillColor = '#3b82f6' // blue-500
+
+            // Canvas-based Circle Marker (Square or Diamond for shape difference?)
+            // Leaflet CircleMarker is always circular. Can use simple Icon or DivIcon but CircleMarker is performant.
+            // Let's use CircleMarker with Blue color.
+            const marker = leaflet.circleMarker(position, {
+                radius: 7,
+                fillColor: fillColor,
+                color: 'white',
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 0.9,
+                className: 'listing-marker'
+            })
+
+            marker.on('click', (e: any) => {
+                leaflet.DomEvent.stopPropagation(e)
+                map.flyTo(position, 17, { animate: true, duration: 1.5 })
+                onSelectListing?.(l)
+            })
+
+            marker.on('mouseover', () => {
+                marker.setStyle({ radius: 10, weight: 3 })
+            })
+            marker.on('mouseout', () => {
+                marker.setStyle({ radius: 7, weight: 2 })
+            })
+
+            newListings.push(marker)
+        })
+
+        if (newListings.length > 0) {
+            listingsClusterGroupRef.current.addLayers(newListings)
+        }
+
+    }, [listings, leaflet, showListings])
 
 
     // Effect for Event Listeners
@@ -429,67 +463,108 @@ export default function TransactionMap({
         }
     }, [onBoundsChange])
 
-    const formatPrice = (price: number) => {
-        if (price >= 1000000) return `RM${(price / 1000000).toFixed(2)}M`
-        return `RM${(price / 1000).toFixed(0)}K`
-    }
 
     return (
         <div className={`relative w-full h-full ${className}`}>
             <div ref={mapRef} className="w-full h-full rounded-lg" />
 
-            {/* Map Legend Overlay */}
-            <div className="absolute bottom-6 right-6 bg-white/95 backdrop-blur-sm p-4 rounded-lg shadow-lg border border-gray-200 z-[1000] text-sm min-w-[200px]">
-                <div className="flex items-center justify-between mb-3 gap-3">
-                    <span className="font-bold text-gray-700 uppercase text-xs">Color By</span>
-                    <div className="flex bg-gray-100 rounded p-1">
-                        <button
-                            onClick={() => onColorModeChange?.('price')}
-                            className={`px-3 py-1 rounded text-xs font-medium transition-colors ${colorMode === 'price' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                        >
-                            Price
-                        </button>
-                        <button
-                            onClick={() => onColorModeChange?.('psf')}
-                            className={`px-3 py-1 rounded text-xs font-medium transition-colors ${colorMode === 'psf' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                        >
-                            PSF
-                        </button>
+            {/* Consolidated Map Controls (Bottom Right) */}
+            <div className="absolute bottom-6 right-6 bg-white/95 backdrop-blur-sm p-4 rounded-lg shadow-lg border border-gray-200 z-[1000] text-sm min-w-[220px]">
+
+                {/* Layers Section */}
+                <div className="mb-4">
+                    <span className="font-bold text-gray-900 uppercase text-xs tracking-wider block mb-2">Visible Layers</span>
+                    <div className="space-y-1">
+                        <label className="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-1.5 rounded transition-colors group">
+                            <div className="flex items-center gap-2">
+                                <span className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm ring-1 ring-red-100"></span>
+                                <span className="text-gray-700 font-medium group-hover:text-gray-900">Transactions</span>
+                            </div>
+                            <input
+                                type="checkbox"
+                                checked={showTransactions}
+                                onChange={(e) => setShowTransactions(e.target.checked)}
+                                className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-4 h-4 cursor-pointer"
+                            />
+                        </label>
+                        <label className="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-1.5 rounded transition-colors group">
+                            <div className="flex items-center gap-2">
+                                <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm ring-1 ring-blue-100"></span>
+                                <span className="text-gray-700 font-medium group-hover:text-gray-900">Listings</span>
+                            </div>
+                            <input
+                                type="checkbox"
+                                checked={showListings}
+                                onChange={(e) => setShowListings(e.target.checked)}
+                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
+                            />
+                        </label>
                     </div>
                 </div>
 
+                <div className="h-px bg-gray-100 my-3"></div>
+
+                {/* Color Mode Section */}
+                <div className="mb-3">
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="font-bold text-gray-900 uppercase text-xs tracking-wider">Legend</span>
+                        <div className="flex bg-gray-100 rounded p-1">
+                            <button
+                                onClick={() => onColorModeChange?.('price')}
+                                className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all ${colorMode === 'price' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                Price
+                            </button>
+                            <button
+                                onClick={() => onColorModeChange?.('psf')}
+                                className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all ${colorMode === 'psf' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                PSF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Legend Items */}
                 <div className="space-y-2">
                     {colorMode === 'price' ? (
                         <>
                             <div className="flex items-center gap-3">
-                                <span className="w-3 h-3 rounded-full bg-green-500 shadow-sm"></span>
-                                <span className="text-gray-700">&lt; RM 500k</span>
+                                <span className="w-3 h-3 rounded-full bg-green-500 shadow-sm ring-1 ring-white"></span>
+                                <span className="text-gray-600 text-xs">&lt; RM 500k</span>
                             </div>
                             <div className="flex items-center gap-3">
-                                <span className="w-3 h-3 rounded-full bg-yellow-500 shadow-sm"></span>
-                                <span className="text-gray-700">RM 500k - 1M</span>
+                                <span className="w-3 h-3 rounded-full bg-yellow-500 shadow-sm ring-1 ring-white"></span>
+                                <span className="text-gray-600 text-xs">RM 500k - 1M</span>
                             </div>
                             <div className="flex items-center gap-3">
-                                <span className="w-3 h-3 rounded-full bg-red-500 shadow-sm"></span>
-                                <span className="text-gray-700">&gt; RM 1M</span>
+                                <span className="w-3 h-3 rounded-full bg-red-500 shadow-sm ring-1 ring-white"></span>
+                                <span className="text-gray-600 text-xs">&gt; RM 1M</span>
                             </div>
                         </>
                     ) : (
                         <>
                             <div className="flex items-center gap-3">
-                                <span className="w-3 h-3 rounded-full bg-green-500 shadow-sm"></span>
-                                <span className="text-gray-700">&lt; RM 400 psf</span>
+                                <span className="w-3 h-3 rounded-full bg-green-500 shadow-sm ring-1 ring-white"></span>
+                                <span className="text-gray-600 text-xs">&lt; RM 400 psf</span>
                             </div>
                             <div className="flex items-center gap-3">
-                                <span className="w-3 h-3 rounded-full bg-yellow-500 shadow-sm"></span>
-                                <span className="text-gray-700">RM 400 - 800 psf</span>
+                                <span className="w-3 h-3 rounded-full bg-yellow-500 shadow-sm ring-1 ring-white"></span>
+                                <span className="text-gray-600 text-xs">RM 400 - 800 psf</span>
                             </div>
                             <div className="flex items-center gap-3">
-                                <span className="w-3 h-3 rounded-full bg-red-500 shadow-sm"></span>
-                                <span className="text-gray-700">&gt; RM 800 psf</span>
+                                <span className="w-3 h-3 rounded-full bg-red-500 shadow-sm ring-1 ring-white"></span>
+                                <span className="text-gray-600 text-xs">&gt; RM 800 psf</span>
                             </div>
                         </>
                     )}
+
+                    <div className="border-t border-gray-100 pt-2 mt-2">
+                        <div className="flex items-center gap-3">
+                            <span className="w-3 h-3 rounded-full bg-blue-500 shadow-sm ring-1 ring-white"></span>
+                            <span className="text-gray-600 text-xs">Active Listing</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -498,12 +573,6 @@ export default function TransactionMap({
                 .map-marker { display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
                 .map-marker-dot { width: 10px; height: 10px; background-color: #4F46E5; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
                 .map-marker-dot.colored-dot { width: 14px; height: 14px; border-width: 2px; }
-                .map-marker-dot.bg-green-500 { background-color: #22c55e; }
-                .map-marker-dot.bg-yellow-500 { background-color: #eab308; }
-                .map-marker-dot.bg-red-500 { background-color: #ef4444; }
-                .map-marker-label { display: none; margin-left: 4px; background: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; color: #333; box-shadow: 0 1px 3px rgba(0,0,0,0.1); opacity: 0.9; }
-                .map-marker.highlighted .map-marker-dot { transform: scale(1.5); }
-                .map-marker.highlighted .map-marker-label { display: block; }
             `}</style>
         </div>
     )
