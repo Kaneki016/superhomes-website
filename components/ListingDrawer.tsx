@@ -12,9 +12,9 @@ interface ListingDrawerProps {
 }
 
 export default function ListingDrawer({ listing, onClose, isOpen }: ListingDrawerProps) {
-    if (!listing) return null
-
     const [activeTab, setActiveTab] = useState<'details' | 'mortgage'>('details')
+
+    if (!listing) return null
 
     const formatDate = (dateString: string | null) => {
         if (!dateString) return 'N/A'

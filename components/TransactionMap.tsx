@@ -47,6 +47,22 @@ export default function TransactionMap({
     const drawHandlerRef = useRef<any>(null)
     const [leaflet, setLeaflet] = useState<any>(null)
 
+    // Refs for callbacks to avoid dependency cycles
+    const onDrawStopRef = useRef(onDrawStop)
+    const onPolygonCompleteRef = useRef(onPolygonComplete)
+    const onSelectTransactionRef = useRef(onSelectTransaction)
+    const onSelectListingRef = useRef(onSelectListing)
+    const onHoverRef = useRef(onHover)
+
+    // Update refs
+    useEffect(() => {
+        onDrawStopRef.current = onDrawStop
+        onPolygonCompleteRef.current = onPolygonComplete
+        onSelectTransactionRef.current = onSelectTransaction
+        onSelectListingRef.current = onSelectListing
+        onHoverRef.current = onHover
+    }, [onDrawStop, onPolygonComplete, onSelectTransaction, onSelectListing, onHover])
+
     // Layer Visibility State
     const [showTransactions, setShowTransactions] = useState(true)
     const [showListings, setShowListings] = useState(true)
@@ -188,14 +204,14 @@ export default function TransactionMap({
                             // Extract coordinates
                             const latlngs = layer.getLatLngs()[0]
                             const points = latlngs.map((p: any) => ({ lat: p.lat, lng: p.lng }))
-                            onPolygonComplete?.(points)
+                            onPolygonCompleteRef.current?.(points)
                         }
 
                         // Reset internal and external drawing state
                         if (drawHandlerRef.current) {
                             drawHandlerRef.current = null
                         }
-                        onDrawStop?.()
+                        onDrawStopRef.current?.()
                     })
 
                     // Handle Draw Stop (User cancelled or finished)
@@ -203,12 +219,12 @@ export default function TransactionMap({
                         if (drawHandlerRef.current) {
                             drawHandlerRef.current = null
                         }
-                        onDrawStop?.()
+                        onDrawStopRef.current?.()
                     })
 
                     // Handle Delete Event
                     map.on(L.Draw.Event.DELETED, () => {
-                        onPolygonComplete?.(null)
+                        onPolygonCompleteRef.current?.(null)
                     })
                 }
             })
@@ -309,16 +325,16 @@ export default function TransactionMap({
                 leaflet.DomEvent.stopPropagation(e)
                 // Zoom logic removed to keep it cleaner, or keep if preferred. Let's flyTo.
                 map.flyTo(position, 17, { animate: true, duration: 1.5 })
-                onSelectTransaction?.(t)
+                onSelectTransactionRef.current?.(t)
             })
 
             // Hover Events
             marker.on('mouseover', () => {
-                onHover?.(t.id)
+                onHoverRef.current?.(t.id)
                 marker.setStyle({ radius: 9, weight: 3 })
             })
             marker.on('mouseout', () => {
-                onHover?.(null)
+                onHoverRef.current?.(null)
                 marker.setStyle({ radius: 6, weight: 2 })
             })
 
@@ -405,7 +421,7 @@ export default function TransactionMap({
             marker.on('click', (e: any) => {
                 leaflet.DomEvent.stopPropagation(e)
                 map.flyTo(position, 17, { animate: true, duration: 1.5 })
-                onSelectListing?.(l)
+                onSelectListingRef.current?.(l)
             })
 
             marker.on('mouseover', () => {

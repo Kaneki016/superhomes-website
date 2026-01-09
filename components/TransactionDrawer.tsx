@@ -12,9 +12,9 @@ interface TransactionDrawerProps {
 }
 
 export default function TransactionDrawer({ transaction, onClose, isOpen }: TransactionDrawerProps) {
-    if (!transaction) return null
-
     const [activeTab, setActiveTab] = useState<'details' | 'mortgage'>('details')
+
+    if (!transaction) return null
 
     const formatDate = (dateString: string | null) => {
         if (!dateString) return 'N/A'
