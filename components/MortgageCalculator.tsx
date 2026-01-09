@@ -6,13 +6,14 @@ import { formatPrice } from '@/lib/utils'
 interface MortgageCalculatorProps {
     propertyPrice: number
     isRent?: boolean // Don't show for rental properties
+    defaultExpanded?: boolean
 }
 
-export default function MortgageCalculator({ propertyPrice, isRent = false }: MortgageCalculatorProps) {
+export default function MortgageCalculator({ propertyPrice, isRent = false, defaultExpanded = false }: MortgageCalculatorProps) {
     const [downPaymentPercent, setDownPaymentPercent] = useState(10)
     const [interestRate, setInterestRate] = useState(4.5)
     const [loanTermYears, setLoanTermYears] = useState(30)
-    const [isExpanded, setIsExpanded] = useState(false)
+    const [isExpanded, setIsExpanded] = useState(defaultExpanded)
 
     // Calculate mortgage details - must be called before any early returns
     const calculations = useMemo(() => {
