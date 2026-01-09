@@ -1,5 +1,30 @@
 import { supabase, Property, Agent, Transaction, Contact, Listing, ListingSaleDetails, ListingRentDetails, ListingProjectDetails } from './supabase'
 
+// Simple in-memory cache for frequently accessed data
+interface CacheEntry<T> {
+    data: T
+    expiry: number
+}
+
+const cache: Record<string, CacheEntry<any>> = {}
+
+function getCached<T>(key: string): T | null {
+    const entry = cache[key]
+    if (!entry) return null
+    if (Date.now() > entry.expiry) {
+        delete cache[key]
+        return null
+    }
+    return entry.data
+}
+
+function setCache<T>(key: string, data: T, ttlSeconds: number = 300): void {
+    cache[key] = {
+        data,
+        expiry: Date.now() + (ttlSeconds * 1000)
+    }
+}
+
 // Helper function to transform listing data from Supabase joins to Property type
 function transformListingToProperty(listing: any): Property {
     const property: Property = {
@@ -498,29 +523,39 @@ const MALAYSIAN_STATES = [
     'Terengganu'
 ]
 
-// Get distinct states from the database
+// Get distinct states from the database (cached for 5 minutes)
 export async function getDistinctStates(): Promise<string[]> {
-    // Query for each Malaysian state to see which ones have active listings
-    // This avoids the Supabase 1000 row limit issue
-    const statesWithListings: string[] = []
+    // Check cache first
+    const cached = getCached<string[]>('distinct_states')
+    if (cached) return cached
 
-    for (const state of MALAYSIAN_STATES) {
+    // Query all states in parallel instead of sequentially
+    const statePromises = MALAYSIAN_STATES.map(async (state) => {
         const { count, error } = await supabase
             .from('listings')
             .select('id', { count: 'exact', head: true })
             .eq('is_active', true)
             .ilike('state', state)
 
-        if (!error && count && count > 0) {
-            statesWithListings.push(state)
-        }
-    }
+        return (!error && count && count > 0) ? state : null
+    })
 
-    return statesWithListings.sort()
+    const results = await Promise.all(statePromises)
+    const statesWithListings = results.filter((s): s is string => s !== null).sort()
+
+    // Cache for 5 minutes
+    setCache('distinct_states', statesWithListings, 300)
+
+    return statesWithListings
 }
 
 // Fetch featured properties with optional limit (only sale properties with agents)
+// Cached for 2 minutes (only if we get results)
 export async function getFeaturedProperties(limit: number = 8): Promise<Property[]> {
+    const cacheKey = `featured_properties_${limit}`
+    const cached = getCached<Property[]>(cacheKey)
+    if (cached && cached.length > 0) return cached
+
     // Fetch more to account for filtering out properties without agents
     const { data, error } = await supabase
         .from('listings')
@@ -544,7 +579,14 @@ export async function getFeaturedProperties(limit: number = 8): Promise<Property
         return agentName && agentName !== 'unknown'
     })
 
-    return propertiesWithAgents.slice(0, limit)
+    const result = propertiesWithAgents.slice(0, limit)
+
+    // Only cache if we got results
+    if (result.length > 0) {
+        setCache(cacheKey, result, 120)
+    }
+
+    return result
 }
 
 // Fetch handpicked properties (Premium/Luxury listings - highest price)
@@ -741,70 +783,66 @@ export async function searchProperties(filters: {
 }
 
 // Get similar properties
-export async function getSimilarProperties(propertyId: string, propertyType: string, state?: string | null): Promise<Property[]> {
-    if (state) {
-        const { data: sameStateAndType, error: error1 } = await supabase
+export async function getSimilarProperties(propertyId: string, propertyType: string, state?: string | null, listingType?: string, district?: string | null): Promise<Property[]> {
+    let similarProps: any[] = []
+    const LIMIT = 3
+
+    // 1. Strict Match: District + Property Type + Listing Type
+    if (district) {
+        let query1 = supabase
+            .from('listings')
+            .select(LISTING_SELECT_QUERY)
+            .eq('property_type', propertyType)
+            .ilike('district', `%${district}%`)
+            .neq('id', propertyId)
+            .eq('is_active', true)
+
+        if (listingType) {
+            query1 = query1.eq('listing_type', listingType)
+        }
+
+        if (state) {
+            query1 = query1.ilike('state', `%${state}%`) // Ensure strict state match too if district name is ambiguous
+        }
+
+        const { data, error } = await query1.limit(LIMIT)
+        if (!error && data) {
+            similarProps = [...data]
+        }
+    }
+
+    // 2. Fallback: State + Property Type + Listing Type
+    if (similarProps.length < LIMIT && state) {
+        let query2 = supabase
             .from('listings')
             .select(LISTING_SELECT_QUERY)
             .eq('property_type', propertyType)
             .ilike('state', `%${state}%`)
             .neq('id', propertyId)
             .eq('is_active', true)
-            .limit(3)
 
-        if (!error1 && sameStateAndType && sameStateAndType.length >= 3) {
-            return sameStateAndType.map(transformListingToProperty)
+        if (listingType) {
+            query2 = query2.eq('listing_type', listingType)
         }
 
-        const { data: sameState, error: error2 } = await supabase
-            .from('listings')
-            .select(LISTING_SELECT_QUERY)
-            .ilike('state', `%${state}%`)
-            .neq('id', propertyId)
-            .eq('is_active', true)
-            .limit(3)
-
-        if (!error2 && sameState && sameState.length >= 3) {
-            return sameState.map(transformListingToProperty)
+        // Exclude already found IDs
+        if (similarProps.length > 0) {
+            query2 = query2.not('id', 'in', `(${similarProps.map(p => p.id).join(',')})`)
         }
 
-        // Combine
-        const existingIds = new Set((sameState || []).map(p => p.id))
-        const needed = 3 - (sameState?.length || 0)
-
-        if (needed > 0) {
-            const { data: sameType, error: error3 } = await supabase
-                .from('listings')
-                .select(LISTING_SELECT_QUERY)
-                .eq('property_type', propertyType)
-                .neq('id', propertyId)
-                .eq('is_active', true)
-                .limit(needed + 5)
-
-            if (!error3 && sameType) {
-                const additional = sameType.filter(p => !existingIds.has(p.id)).slice(0, needed)
-                const combined = [...(sameState || []), ...additional].slice(0, 3)
-                return combined.map(transformListingToProperty)
-            }
+        const { data, error } = await query2.limit(LIMIT - similarProps.length)
+        if (!error && data) {
+            similarProps = [...similarProps, ...data]
         }
-
-        return (sameState || []).map(transformListingToProperty)
     }
 
-    const { data, error } = await supabase
-        .from('listings')
-        .select(LISTING_SELECT_QUERY)
-        .eq('property_type', propertyType)
-        .neq('id', propertyId)
-        .eq('is_active', true)
-        .limit(3)
+    // 3. Fallback: Just Listing Type + Property Type (if still desperate)
+    /* 
+    // Commented out to keep relevance high (User request was specific about geo-match)
+    // If we wanted to show ANY 4-storey house regardless of location, we would uncomment this.
+    */
 
-    if (error) {
-        console.error('Error fetching similar properties:', error)
-        return []
-    }
-
-    return (data || []).map(transformListingToProperty)
+    return similarProps.slice(0, LIMIT).map(transformListingToProperty)
 }
 
 // Property types and locations (static for now)
@@ -848,13 +886,17 @@ export async function getFavoriteProperties(buyerId: string): Promise<Property[]
     return (properties || []).map(transformListingToProperty)
 }
 
-// Get distinct property types from the database
+// Get distinct property types from the database (cached for 5 minutes)
 export async function getDistinctPropertyTypes(): Promise<string[]> {
+    const cached = getCached<string[]>('distinct_property_types')
+    if (cached) return cached
+
     const { data, error } = await supabase
         .from('listings')
         .select('property_type')
         .eq('is_active', true)
         .not('property_type', 'is', null)
+        .limit(1000)
 
     if (error) {
         console.error('Error fetching property types:', error)
@@ -862,8 +904,10 @@ export async function getDistinctPropertyTypes(): Promise<string[]> {
     }
 
     const types = data?.map(d => d.property_type).filter(Boolean) || []
-    const uniqueTypes = [...new Set(types)]
-    return uniqueTypes.sort()
+    const uniqueTypes = [...new Set(types)].sort()
+
+    setCache('distinct_property_types', uniqueTypes, 300)
+    return uniqueTypes
 }
 
 // Get distinct locations
@@ -1098,6 +1142,7 @@ export async function getNewProjects(filters?: {
     bedrooms?: string
     state?: string
     tenure?: string
+    location?: string
 }): Promise<Property[]> {
     let query = supabase
         .from('listings')
@@ -1113,6 +1158,9 @@ export async function getNewProjects(filters?: {
     }
     if (filters?.bedrooms) {
         query = query.eq('total_bedrooms', parseInt(filters.bedrooms))
+    }
+    if (filters?.location) {
+        query = query.or(`title.ilike.%${filters.location}%,address.ilike.%${filters.location}%,state.ilike.%${filters.location}%`)
     }
 
     const { data, error } = await query.order('scraped_at', { ascending: false })
@@ -1366,6 +1414,22 @@ export async function getTransactions(
     }
 
     return (data as any) || []
+}
+
+// Fetch single transaction by ID
+export async function getTransactionById(id: string): Promise<Transaction | null> {
+    const { data, error } = await supabase
+        .from('transactions')
+        .select('*') // Select all fields to ensure we have full details
+        .eq('id', id)
+        .single()
+
+    if (error) {
+        console.error('Error fetching transaction:', error)
+        return null
+    }
+
+    return data
 }
 
 // Get distinct neighborhoods for filtering

@@ -7,8 +7,10 @@ import Footer from '@/components/Footer'
 import PropertyCard from '@/components/PropertyCard'
 import Pagination from '@/components/Pagination'
 import SearchInput from '@/components/SearchInput'
+import FilterChips from '@/components/FilterChips'
+import FilterModal from '@/components/FilterModal'
 import { Property } from '@/lib/supabase'
-import { getPropertiesPaginated, getDistinctStates } from '@/lib/database'
+import { getPropertiesPaginated, getDistinctStates, getFilterOptions } from '@/lib/database'
 import { ListSkeleton } from '@/components/SkeletonLoader'
 
 const ITEMS_PER_PAGE = 12
@@ -48,10 +50,17 @@ function RentPageContent() {
         maxPrice: '',
         bedrooms: '',
         state: '',
-        furnishing: '',
+
     })
     const [openDropdown, setOpenDropdown] = useState<string | null>(null)
     const [currentPage, setCurrentPage] = useState(1)
+    const [filterModalOpen, setFilterModalOpen] = useState(false)
+    const [filterOptions, setFilterOptions] = useState<{
+        propertyTypes: string[]
+        locations: string[]
+        bedrooms: number[]
+        priceRange: { min: number; max: number }
+    } | null>(null)
     const dropdownRef = useRef<HTMLDivElement>(null)
 
     // Update view mode handler to persist to URL
@@ -106,6 +115,12 @@ function RentPageContent() {
                     const states = await getDistinctStates()
                     setStateOptions(states)
                 }
+
+                // Load filter options for modal
+                if (!filterOptions) {
+                    const options = await getFilterOptions()
+                    setFilterOptions(options)
+                }
             } catch (error) {
                 console.error('Error loading rent listings:', error)
             } finally {
@@ -128,8 +143,8 @@ function RentPageContent() {
         return () => document.removeEventListener('click', handleClickOutside)
     }, [])
 
-    const propertyTypes = ['Condominium', 'Service Residence', 'Apartment', 'Terraced House', 'Semi-D', 'Bungalow', 'Studio', 'Flat']
-    const furnishingOptions = ['Fully Furnished', 'Partially Furnished', 'Unfurnished']
+    const propertyTypes = filterOptions?.propertyTypes || []
+
     const bedroomOptions = ['Studio', '1', '2', '3', '4', '5+']
     const priceRanges = [
         { label: 'Under RM 1,000', min: '', max: '1000' },
@@ -157,7 +172,7 @@ function RentPageContent() {
             maxPrice: '',
             bedrooms: '',
             state: '',
-            furnishing: '',
+
         })
     }
 
@@ -180,12 +195,12 @@ function RentPageContent() {
                                 className="flex-1"
                             />
                             <button
-                                className="flex items-center gap-2 px-5 py-3 border border-gray-200 rounded-xl bg-white hover:border-primary-400 hover:bg-primary-50 transition-colors"
+                                className="flex items-center gap-2 px-6 py-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl transition-colors shadow-sm"
                             >
-                                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
-                                <span className="font-medium text-gray-700 hidden sm:inline">Save Search</span>
+                                <span className="font-medium hidden sm:inline">Search</span>
                             </button>
                         </div>
 
@@ -193,6 +208,7 @@ function RentPageContent() {
                         <div ref={dropdownRef} className="flex items-center gap-3 flex-wrap">
                             {/* Filters Button */}
                             <button
+                                onClick={() => setFilterModalOpen(true)}
                                 className={`filter-pill ${activeFilterCount > 0 ? 'active' : ''}`}
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -207,7 +223,7 @@ function RentPageContent() {
                             </button>
 
                             {/* Property Type Pill */}
-                            <div className="relative">
+                            <div className="filter-dropdown relative">
                                 <button
                                     onClick={() => setOpenDropdown(openDropdown === 'type' ? null : 'type')}
                                     className={`filter-pill ${filters.propertyType ? 'active' : ''}`}
@@ -479,43 +495,7 @@ function RentPageContent() {
                                 )}
                             </div>
 
-                            {/* Furnishing */}
-                            <div className="filter-dropdown relative">
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                        setOpenDropdown(openDropdown === 'furnishing' ? null : 'furnishing')
-                                    }}
-                                    className={`filter-pill ${filters.furnishing ? 'active' : ''}`}
-                                >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                    </svg>
-                                    <span>{filters.furnishing || 'Furnishing'}</span>
-                                    <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === 'furnishing' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </button>
-                                {openDropdown === 'furnishing' && (
-                                    <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
-                                        <button
-                                            onClick={() => handleFilterChange('furnishing', '')}
-                                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${!filters.furnishing ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
-                                        >
-                                            Any Furnishing
-                                        </button>
-                                        {furnishingOptions.map(opt => (
-                                            <button
-                                                key={opt}
-                                                onClick={() => handleFilterChange('furnishing', opt)}
-                                                className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${filters.furnishing === opt ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
-                                            >
-                                                {opt}
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
+
 
                             {/* Clear Filters */}
                             {activeFilterCount > 0 && (
@@ -527,6 +507,38 @@ function RentPageContent() {
                                 </button>
                             )}
                         </div>
+                    </div>
+
+                    {/* Active Filter Chips */}
+                    <div className="container-custom">
+                        <FilterChips
+                            filters={[
+                                searchQuery ? { key: 'search', label: 'Search', value: searchQuery } : null,
+                                filters.state ? { key: 'state', label: 'State', value: filters.state } : null,
+                                filters.propertyType ? { key: 'propertyType', label: 'Type', value: filters.propertyType } : null,
+                                filters.minPrice || filters.maxPrice ? {
+                                    key: 'price',
+                                    label: 'Rent',
+                                    value: filters.minPrice && filters.maxPrice
+                                        ? `RM${parseInt(filters.minPrice).toLocaleString()} - RM${parseInt(filters.maxPrice).toLocaleString()}/mo`
+                                        : filters.minPrice
+                                            ? `Above RM${parseInt(filters.minPrice).toLocaleString()}/mo`
+                                            : `Under RM${parseInt(filters.maxPrice).toLocaleString()}/mo`
+                                } : null,
+                                filters.bedrooms ? { key: 'bedrooms', label: 'Bedrooms', value: `${filters.bedrooms}` } : null,
+
+                            ].filter(Boolean) as { key: string; label: string; value: string }[]}
+                            onRemove={(key) => {
+                                if (key === 'search') {
+                                    setSearchQuery('')
+                                } else if (key === 'price') {
+                                    setFilters({ ...filters, minPrice: '', maxPrice: '' })
+                                } else {
+                                    setFilters({ ...filters, [key]: '' })
+                                }
+                            }}
+                            onClearAll={resetFilters}
+                        />
                     </div>
                 </div>
 
@@ -628,7 +640,46 @@ function RentPageContent() {
                         </>
                     )}
                 </div>
-            </main >
+            </main>
+
+            {/* Filter Modal */}
+            {filterOptions && (
+                <FilterModal
+                    isOpen={filterModalOpen}
+                    onClose={() => setFilterModalOpen(false)}
+                    filters={{
+                        propertyType: filters.propertyType,
+                        minPrice: filters.minPrice,
+                        maxPrice: filters.maxPrice,
+                        bedrooms: filters.bedrooms,
+                        location: searchQuery,
+                        state: filters.state,
+
+                    }}
+                    onApply={(newFilters) => {
+                        setFilters({
+                            ...filters,
+                            propertyType: newFilters.propertyType,
+                            minPrice: newFilters.minPrice,
+                            maxPrice: newFilters.maxPrice,
+                            bedrooms: newFilters.bedrooms,
+                            state: newFilters.state,
+
+                        })
+                        setSearchQuery(newFilters.location)
+                        setFilterModalOpen(false)
+                    }}
+                    filterOptions={filterOptions}
+                    stateOptions={stateOptions}
+                    tabLabels={{
+                        propertyType: 'All Residential',
+                        price: 'Monthly Rent',
+                        bedroom: 'Bedroom',
+                        state: 'State'
+                    }}
+                />
+            )}
+
             <Footer />
         </>
     )

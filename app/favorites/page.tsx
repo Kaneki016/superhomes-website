@@ -49,17 +49,30 @@ export default function FavoritesPage() {
             // Fetch properties for the favorited IDs
             setLoadingProperties(true)
             try {
+                // Query from 'listings' table (the correct table) with joined details
                 const { data, error } = await supabase
-                    .from('dup_properties')
-                    .select('*')
+                    .from('listings')
+                    .select(`
+                        *,
+                        listing_sale_details (*),
+                        listing_rent_details (*)
+                    `)
                     .in('id', favorites)
-                    .order('created_at', { ascending: false })
+                    .order('scraped_at', { ascending: false })
 
                 if (error) {
-                    console.error('Error fetching favorite properties:', error)
+                    console.error('Error fetching favorite properties:', JSON.stringify(error, null, 2))
                     setProperties([])
                 } else {
-                    setProperties(data || [])
+                    // Transform to Property format
+                    const transformed = (data || []).map((listing: any) => ({
+                        ...listing,
+                        sale_details: listing.listing_sale_details,
+                        rent_details: listing.listing_rent_details,
+                        price: listing.listing_sale_details?.price || listing.listing_rent_details?.monthly_rent,
+                        price_per_sqft: listing.listing_sale_details?.price_per_sqft,
+                    }))
+                    setProperties(transformed)
                 }
             } catch (error) {
                 console.error('Error fetching favorite properties:', error)

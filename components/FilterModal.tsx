@@ -13,6 +13,7 @@ interface FilterModalProps {
         bedrooms: string
         location: string
         state: string
+
     }
     onApply: (filters: {
         propertyType: string
@@ -21,6 +22,7 @@ interface FilterModalProps {
         bedrooms: string
         location: string
         state: string
+
     }) => void
     filterOptions: {
         propertyTypes: string[]
@@ -28,11 +30,17 @@ interface FilterModalProps {
         priceRange: { min: number; max: number }
     }
     stateOptions?: string[] // Dynamic state options from database
+    tabLabels?: {
+        propertyType?: string
+        price?: string
+        bedroom?: string
+        state?: string
+    }
 }
 
 type TabType = 'propertyType' | 'price' | 'bedroom' | 'state'
 
-export default function FilterModal({ isOpen, onClose, filters, onApply, filterOptions, stateOptions = [] }: FilterModalProps) {
+export default function FilterModal({ isOpen, onClose, filters, onApply, filterOptions, stateOptions = [], tabLabels }: FilterModalProps) {
     const [activeTab, setActiveTab] = useState<TabType>('propertyType')
     const [localFilters, setLocalFilters] = useState(filters)
 
@@ -70,6 +78,7 @@ export default function FilterModal({ isOpen, onClose, filters, onApply, filterO
             bedrooms: '',
             location: '',
             state: '',
+
         })
     }
 
@@ -128,7 +137,7 @@ export default function FilterModal({ isOpen, onClose, filters, onApply, filterO
                             : 'text-gray-500 hover:text-gray-700'
                             }`}
                     >
-                        Property Type
+                        {tabLabels?.propertyType || 'Property Type'}
                         {activeTab === 'propertyType' && (
                             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-500" />
                         )}
@@ -140,7 +149,7 @@ export default function FilterModal({ isOpen, onClose, filters, onApply, filterO
                             : 'text-gray-500 hover:text-gray-700'
                             }`}
                     >
-                        Price
+                        {tabLabels?.price || 'Price'}
                         {activeTab === 'price' && (
                             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-500" />
                         )}
@@ -152,7 +161,7 @@ export default function FilterModal({ isOpen, onClose, filters, onApply, filterO
                             : 'text-gray-500 hover:text-gray-700'
                             }`}
                     >
-                        Bedroom
+                        {tabLabels?.bedroom || 'Bedroom'}
                         {activeTab === 'bedroom' && (
                             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-500" />
                         )}
@@ -164,11 +173,12 @@ export default function FilterModal({ isOpen, onClose, filters, onApply, filterO
                             : 'text-gray-500 hover:text-gray-700'
                             }`}
                     >
-                        State
+                        {tabLabels?.state || 'State'}
                         {activeTab === 'state' && (
                             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-500" />
                         )}
                     </button>
+
                 </div>
 
                 {/* Content */}
@@ -310,6 +320,8 @@ export default function FilterModal({ isOpen, onClose, filters, onApply, filterO
                             ))}
                         </div>
                     )}
+
+
                 </div>
 
                 {/* Footer */}

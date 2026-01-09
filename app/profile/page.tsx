@@ -5,15 +5,16 @@ import { useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { useAuth } from '@/contexts/AuthContext'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase-browser'
 
 export default function ProfilePage() {
-    const { user, profile, loading } = useAuth()
+    const { user, profile, loading, refreshProfile } = useAuth()
     const router = useRouter()
     const [formData, setFormData] = useState({
         name: '',
         phone: '',
     })
+    const [shouldRefresh, setShouldRefresh] = useState(false)
     const [saving, setSaving] = useState(false)
     const [saveMessage, setSaveMessage] = useState('')
 
@@ -30,7 +31,28 @@ export default function ProfilePage() {
                 phone: profile.phone || '',
             })
         }
-    }, [profile])
+    }, [user, profile])
+
+    // Effect to handle profile refresh
+    useEffect(() => {
+        let mounted = true
+
+        const doRefresh = async () => {
+            if (shouldRefresh && mounted) {
+                try {
+                    await refreshProfile()
+                } catch (error) {
+                    console.error('Error refreshing profile:', error)
+                } finally {
+                    if (mounted) setShouldRefresh(false)
+                }
+            }
+        }
+
+        doRefresh()
+
+        return () => { mounted = false }
+    }, [shouldRefresh, refreshProfile])
 
     const handleSave = async () => {
         if (!user || !profile) return
@@ -38,37 +60,43 @@ export default function ProfilePage() {
         setSaving(true)
         setSaveMessage('')
 
+        console.log('Profile save started for:', user.id)
+
         try {
             if (profile.user_type === 'buyer') {
-                // Update buyer profile
+                // Use upsert to handle both create and update in one call
+                // This avoids RLS issues with SELECT that might block reads
+                console.log('Upserting buyer profile...')
                 const { data, error } = await supabase
                     .from('buyers')
-                    .update({
+                    .upsert({
+                        id: profile.id, // Use the profile.id which should equal user.id
+                        auth_id: user.id,
+                        email: user.email,
+                        user_type: 'buyer',
                         name: formData.name || null,
                         phone: formData.phone || null,
                         updated_at: new Date().toISOString(),
+                    }, {
+                        onConflict: 'id'
                     })
-                    .eq('auth_id', user.id)
                     .select()
 
                 if (error) {
-                    console.error('Error updating profile:', error)
-                    setSaveMessage(`Failed to update profile: ${error.message}`)
-                } else if (!data || data.length === 0) {
-                    console.error('No buyer record found for auth_id:', user.id)
-                    setSaveMessage('Profile not found. Please try logging out and back in.')
+                    console.error('Error saving profile:', error)
+                    setSaveMessage(`Failed to save profile: ${error.message}`)
                 } else {
-                    setSaveMessage('Profile updated successfully!')
-                    // Refresh the page after a brief delay to show updated data
-                    setTimeout(() => {
-                        window.location.reload()
-                    }, 800)
+                    console.log('Profile saved:', data)
+                    setSaveMessage('Profile saved successfully!')
+                    setShouldRefresh(true) // Trigger refresh safely via effect
+                    setTimeout(() => setSaveMessage(''), 3000)
                 }
             }
         } catch (error) {
             console.error('Error:', error)
             setSaveMessage('An error occurred. Please try again.')
         } finally {
+            console.log('Profile save finished, setting saving to false')
             setSaving(false)
         }
     }
@@ -96,9 +124,18 @@ export default function ProfilePage() {
                     <div className="glass p-8 rounded-2xl">
                         {/* Profile Header */}
                         <div className="flex items-center mb-8 pb-8 border-b border-gray-200">
-                            <div className="w-20 h-20 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold text-3xl">
-                                {user.email?.charAt(0).toUpperCase()}
-                            </div>
+                            {user.user_metadata?.avatar_url ? (
+                                <img
+                                    src={user.user_metadata.avatar_url}
+                                    alt="Profile"
+                                    className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg"
+                                    referrerPolicy="no-referrer"
+                                />
+                            ) : (
+                                <div className="w-20 h-20 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold text-3xl border-4 border-white shadow-lg">
+                                    {user.email?.charAt(0).toUpperCase()}
+                                </div>
+                            )}
                             <div className="ml-6">
                                 <h2 className="text-xl font-semibold text-gray-900">
                                     {profile?.name || user.email?.split('@')[0]}
@@ -143,13 +180,13 @@ export default function ProfilePage() {
                             {profile?.user_type === 'buyer' ? (
                                 <>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
                                         <input
                                             type="text"
                                             value={formData.name}
                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                             className="input-field"
-                                            placeholder="Enter your full name"
+                                            placeholder="Enter your username"
                                         />
                                     </div>
 

@@ -98,7 +98,7 @@ export default function Footer() {
                             </li>
                         </ul>
                         <a
-                            href="https://wa.me/60126791203"
+                            href="https://wa.me/60126791203?text=Hi%20SuperHomes%2C%20I%20would%20like%20to%20enquire%20about%20your%20services."
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"

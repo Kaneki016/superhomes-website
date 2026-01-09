@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef, Suspense } from 'react'
+import { useState, useEffect, useCallback, useRef, Suspense, useMemo } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
@@ -11,7 +11,7 @@ import FilterModal from '@/components/FilterModal'
 import FilterChips from '@/components/FilterChips'
 import { ListSkeleton } from '@/components/SkeletonLoader'
 import EmptyState from '@/components/EmptyState'
-import PropertyMap from '@/components/PropertyMap'
+import PropertyMap, { MapBounds } from '@/components/PropertyMap'
 import MapPropertyCard from '@/components/MapPropertyCard'
 import SearchInput from '@/components/SearchInput'
 import { getPropertiesPaginated, getFilterOptions, searchAgents, getPropertiesByAgentIds, getDistinctStates } from '@/lib/database'
@@ -81,6 +81,7 @@ function PropertiesPageContent() {
     const [mapView, setMapView] = useState(false)
     const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null)
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+    const [visibleMapPropertyIds, setVisibleMapPropertyIds] = useState<string[] | null>(null) // null = show all
     // ...
 
     // Update view mode handler to persist to URL
@@ -126,6 +127,15 @@ function PropertiesPageContent() {
     const [stateOptions, setStateOptions] = useState<string[]>([])
     const dropdownRef = useRef<HTMLDivElement>(null)
     const initialLoadDone = useRef(false)
+
+    // Handler for map bounds changes - separate to prevent map re-renders
+    const handleMapBoundsChange = useCallback((bounds: MapBounds, visibleIds: string[]) => {
+        setVisibleMapPropertyIds(visibleIds)
+    }, [])
+
+    const handlePropertySelect = useCallback((id: string) => {
+        router.push(`/properties/${id}`)
+    }, [router])
 
     const loadProperties = useCallback(async (page: number, resetList: boolean = false, overrideFilters?: typeof filters) => {
         const activeFilters = overrideFilters || filters
@@ -345,16 +355,18 @@ function PropertiesPageContent() {
     const totalPages = Math.ceil(totalCount / PROPERTIES_PER_PAGE)
 
     // Create a set of agent property IDs for deduplication
-    const agentPropertyIds = new Set(agentProperties.map(p => p.id))
+    const agentPropertyIds = useMemo(() => new Set(agentProperties.map(p => p.id)), [agentProperties])
 
     // Sort properties client-side and filter out those already shown in agent section
-    const sortedProperties = [...properties]
-        .filter(p => !agentPropertyIds.has(p.id)) // Remove duplicates
-        .sort((a, b) => {
-            if (sortBy === 'price-low') return (a.price || 0) - (b.price || 0)
-            if (sortBy === 'price-high') return (b.price || 0) - (a.price || 0)
-            return new Date(b.created_at || b.scraped_at || 0).getTime() - new Date(a.created_at || a.scraped_at || 0).getTime()
-        })
+    const sortedProperties = useMemo(() => {
+        return [...properties]
+            .filter(p => !agentPropertyIds.has(p.id)) // Remove duplicates
+            .sort((a, b) => {
+                if (sortBy === 'price-low') return (a.price || 0) - (b.price || 0)
+                if (sortBy === 'price-high') return (b.price || 0) - (a.price || 0)
+                return new Date(b.created_at || b.scraped_at || 0).getTime() - new Date(a.created_at || a.scraped_at || 0).getTime()
+            })
+    }, [properties, agentPropertyIds, sortBy])
 
     // Generate dynamic filter options from database
     const propertyTypeOptions = [
@@ -408,13 +420,13 @@ function PropertiesPageContent() {
                             className="flex-1"
                         />
                         <button
-                            onClick={handleSaveSearch}
-                            className="flex items-center gap-2 px-5 py-3 border border-gray-200 rounded-xl bg-white hover:border-primary-400 hover:bg-primary-50 transition-colors"
+                            onClick={handleApplyFilters}
+                            className="flex items-center gap-2 px-6 py-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl transition-colors shadow-sm"
                         >
-                            <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
-                            <span className="font-medium text-gray-700 hidden sm:inline">Save Search</span>
+                            <span className="font-medium hidden sm:inline">Search</span>
                         </button>
                     </div>
 
@@ -805,7 +817,14 @@ function PropertiesPageContent() {
                         <div className="map-toggle hidden md:flex">
                             <span className="text-sm text-gray-600 mr-2">Map View</span>
                             <button
-                                onClick={() => setMapView(!mapView)}
+                                onClick={() => {
+                                    const newMapView = !mapView
+                                    setMapView(newMapView)
+                                    // Reset visible property filter when exiting map view
+                                    if (!newMapView) {
+                                        setVisibleMapPropertyIds(null)
+                                    }
+                                }}
                                 className={`toggle-switch ${mapView ? 'active' : ''}`}
                             >
                                 <span className="toggle-switch-thumb" />
@@ -940,7 +959,9 @@ function PropertiesPageContent() {
                                 <div className={`map-sidebar transition-all duration-300 ${sidebarCollapsed ? 'w-0 min-w-0 opacity-0 overflow-hidden' : ''}`}>
                                     <div className="map-sidebar-header">
                                         <span className="map-sidebar-title">
-                                            {sortedProperties.length} Properties
+                                            {visibleMapPropertyIds !== null
+                                                ? `${visibleMapPropertyIds.length} of ${sortedProperties.length} Properties`
+                                                : `${sortedProperties.length} Properties`}
                                         </span>
                                         <button
                                             onClick={() => setSidebarCollapsed(true)}
@@ -954,7 +975,11 @@ function PropertiesPageContent() {
                                     </div>
                                     <div className="map-sidebar-list">
                                         <div className="map-sidebar-content">
-                                            {sortedProperties.map((property) => (
+                                            {/* Filter properties based on visible map bounds */}
+                                            {(visibleMapPropertyIds !== null
+                                                ? sortedProperties.filter(p => visibleMapPropertyIds.includes(p.id))
+                                                : sortedProperties
+                                            ).map((property) => (
                                                 <MapPropertyCard
                                                     key={property.id}
                                                     property={property}
@@ -963,6 +988,11 @@ function PropertiesPageContent() {
                                                     onClick={(id) => router.push(`/properties/${id}`)}
                                                 />
                                             ))}
+                                            {visibleMapPropertyIds !== null && visibleMapPropertyIds.length === 0 && (
+                                                <div className="p-4 text-center text-gray-500 text-sm">
+                                                    No properties in this area. Try zooming out or panning the map.
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -986,7 +1016,9 @@ function PropertiesPageContent() {
                                         properties={sortedProperties}
                                         hoveredPropertyId={hoveredPropertyId}
                                         onPropertyHover={setHoveredPropertyId}
-                                        onPropertySelect={(id) => router.push(`/properties/${id}`)}
+                                        onPropertySelect={handlePropertySelect}
+                                        onMarkerClick={handlePropertySelect}
+                                        onBoundsChange={handleMapBoundsChange}
                                         className="h-full"
                                         showControls={true}
                                     />

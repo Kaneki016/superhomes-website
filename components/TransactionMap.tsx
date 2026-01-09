@@ -46,11 +46,17 @@ export default function TransactionMap({
     useEffect(() => {
         if (!mapInstanceRef.current || !leaflet) return
 
+        let onTouchStart: ((e: TouchEvent) => void) | null = null
+
         // Cleanup function to disable any active drawer
         const cleanup = () => {
             if (drawHandlerRef.current) {
                 drawHandlerRef.current.disable()
                 drawHandlerRef.current = null
+            }
+            if (onTouchStart && mapInstanceRef.current) {
+                mapInstanceRef.current.getContainer().removeEventListener('touchstart', onTouchStart)
+                onTouchStart = null
             }
         }
 
@@ -76,6 +82,40 @@ export default function TransactionMap({
                 })
                 drawer.enable()
                 drawHandlerRef.current = drawer
+
+                // Fix for iOS/Touch devices: Leaflet Draw often fails to capture 'click' on touch
+                // So we manually listen for touchstart and add a vertex
+                if (leaflet.Browser.touch) {
+                    onTouchStart = (e: TouchEvent) => {
+                        // Only handle single-finger touches for drawing
+                        if (e.touches.length !== 1) return
+
+                        // Prevent default to stop map panning (optional, but good for precise drawing)
+                        // Note: User might validly want to pan. Leaflet Draw usually allows panning (?)
+                        // But typically if you tap, you mean to draw.
+                        // e.preventDefault() // Try without first, or might interfere with other gestures?
+                        // Actually, if we want to ensure the point is added, let's just add it.
+                        // If we prevent default, we might block scrolling the page or panning map.
+                        // Let's rely on just adding the vertex. 'click' simulation by browser might fire later but 
+                        // drawer.addVertex handles deduplication usually or depends.
+                        // Better: stop propagation to map if we handled it?
+                        // Map touch events are handled by Leaflet. 
+
+                        const touch = e.touches[0]
+                        const containerPoint = map.mouseEventToContainerPoint({
+                            clientX: touch.clientX,
+                            clientY: touch.clientY
+                        } as any)
+                        const latlng = map.containerPointToLatLng(containerPoint)
+
+                        drawer.addVertex(latlng)
+                    }
+
+                    // Use capture=true or just invalidation? 
+                    // Add via native DOM listener
+                    map.getContainer().addEventListener('touchstart', onTouchStart, { passive: false })
+                }
+
             } else {
                 console.warn('Leaflet Draw not found')
             }

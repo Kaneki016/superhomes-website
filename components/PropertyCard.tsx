@@ -71,19 +71,26 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
     }
 
     const handleFavoriteClick = async (e: React.MouseEvent) => {
+        console.log('PropertyCard: Favorite button clicked for property:', property.id)
         e.preventDefault()
         e.stopPropagation()
 
         if (!user) {
+            console.log('PropertyCard: No user found, redirecting to login')
             router.push('/login')
             return
         }
 
-        if (isToggling) return
+        if (isToggling) {
+            console.log('PropertyCard: Already toggling, ignoring click')
+            return
+        }
 
+        console.log('PropertyCard: Triggering toggleFavorite')
         setIsToggling(true)
         await toggleFavorite(property.id)
         setIsToggling(false)
+        console.log('PropertyCard: ToggleFavorite complete')
     }
 
     const handleContactClick = (e: React.MouseEvent) => {
@@ -451,9 +458,11 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
                         )}
                     </div>
                 </div>
+            </Link>
 
-                {/* Card Content */}
-                <div className="property-card-content">
+            {/* Card Content */}
+            <div className="property-card-content">
+                <Link href={`/properties/${property.id}`} className="block">
                     {/* Price Section */}
                     <div className="price-section">
                         <div className="price-main">{getDisplayPrice()}</div>
@@ -516,63 +525,63 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
                             </>
                         )}
                     </div>
+                </Link>
 
-                    {/* Footer: Recency & Actions */}
-                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
-                        <div className="property-recency">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                {/* Footer: Recency & Actions */}
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                    <div className="property-recency">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Listed {getTimeAgo(property.created_at || property.scraped_at)}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2 relative z-10">
+                        {/* Compare Button */}
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                if (isInCompare(property.id)) {
+                                    removeFromCompare(property.id)
+                                } else {
+                                    addToCompare(property)
+                                }
+                            }}
+                            disabled={!canAddMore && !isInCompare(property.id)}
+                            className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer ${isInCompare(property.id) ? 'bg-primary-50 text-primary-600' : 'text-gray-400 hover:bg-gray-100 hover:text-primary-500'} ${!canAddMore && !isInCompare(property.id) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            aria-label={isInCompare(property.id) ? 'Remove from compare' : 'Add to compare'}
+                            title={isInCompare(property.id) ? 'Remove from compare' : canAddMore ? 'Add to compare' : 'Compare list full (max 3)'}
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                             </svg>
-                            <span>Listed {getTimeAgo(property.created_at || property.scraped_at)}</span>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            {/* Compare Button */}
-                            <button
-                                onClick={(e) => {
-                                    e.preventDefault()
-                                    e.stopPropagation()
-                                    if (isInCompare(property.id)) {
-                                        removeFromCompare(property.id)
-                                    } else {
-                                        addToCompare(property)
-                                    }
-                                }}
-                                disabled={!canAddMore && !isInCompare(property.id)}
-                                className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isInCompare(property.id) ? 'bg-primary-50 text-primary-600' : 'text-gray-400 hover:bg-gray-100 hover:text-primary-500'} ${!canAddMore && !isInCompare(property.id) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                aria-label={isInCompare(property.id) ? 'Remove from compare' : 'Add to compare'}
-                                title={isInCompare(property.id) ? 'Remove from compare' : canAddMore ? 'Add to compare' : 'Compare list full (max 3)'}
+                        </button>
+                        {/* Favorite Button */}
+                        <button
+                            onClick={handleFavoriteClick}
+                            disabled={isToggling}
+                            className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer relative z-20 ${favorited ? 'text-red-500 bg-red-50' : 'text-gray-400 hover:bg-gray-100 hover:text-red-500'}`}
+                            aria-label={favorited ? 'Remove from favorites' : 'Add to favorites'}
+                        >
+                            <svg
+                                className="w-5 h-5"
+                                fill={favorited ? 'currentColor' : 'none'}
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
                             >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                                </svg>
-                            </button>
-                            {/* Favorite Button */}
-                            <button
-                                onClick={handleFavoriteClick}
-                                disabled={isToggling}
-                                className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${favorited ? 'text-red-500 bg-red-50' : 'text-gray-400 hover:bg-gray-100 hover:text-red-500'}`}
-                                aria-label={favorited ? 'Remove from favorites' : 'Add to favorites'}
-                            >
-                                <svg
-                                    className="w-5 h-5"
-                                    fill={favorited ? 'currentColor' : 'none'}
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                                />
+                            </svg>
+                        </button>
                     </div>
                 </div>
-            </Link>
-        </div>
+            </div >
+        </div >
     )
 }
 

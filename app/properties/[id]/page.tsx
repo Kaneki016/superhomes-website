@@ -2,24 +2,42 @@
 
 import { use, useEffect, useState } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { notFound, useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import PropertyCard from '@/components/PropertyCard'
 import PropertyDescription from '@/components/PropertyDescription'
 import ImageGallery from '@/components/ImageGallery'
-import SinglePropertyMap from '@/components/SinglePropertyMap'
 import { getPropertyById, getAgentByAgentId, getSimilarProperties } from '@/lib/database'
 import { Property, Agent } from '@/lib/supabase'
 import { useFavorites } from '@/contexts/FavoritesContext'
+import { useAuth } from '@/contexts/AuthContext'
 import ShareButton from '@/components/ShareButton'
-import NearbyAmenities from '@/components/NearbyAmenities'
-import MortgageCalculator from '@/components/MortgageCalculator'
 import MobileContactBar from '@/components/MobileContactBar'
 import { formatPrice } from '@/lib/utils'
 
+// Lazy load heavy components - only loaded when scrolled into view
+const SinglePropertyMap = dynamic(() => import('@/components/SinglePropertyMap'), {
+    loading: () => <div className="h-64 bg-gray-100 rounded-xl animate-pulse flex items-center justify-center"><span className="text-gray-400">Loading map...</span></div>,
+    ssr: false
+})
+
+const NearbyAmenities = dynamic(() => import('@/components/NearbyAmenities'), {
+    loading: () => <div className="h-32 bg-gray-100 rounded-xl animate-pulse" />,
+    ssr: false
+})
+
+const MortgageCalculator = dynamic(() => import('@/components/MortgageCalculator'), {
+    loading: () => <div className="h-48 bg-gray-100 rounded-xl animate-pulse" />
+})
+
+
+
 export default function PropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params)
+    const { user } = useAuth()
+    const router = useRouter()
     const { isFavorite, toggleFavorite } = useFavorites()
     const [property, setProperty] = useState<Property | null>(null)
     const [agent, setAgent] = useState<Agent | null>(null)
@@ -41,7 +59,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                 }
 
                 agentData = await getAgentByAgentId(propertyData.agent_id || '')
-                similar = await getSimilarProperties(id, propertyData.property_type || '', propertyData.state)
+                similar = await getSimilarProperties(id, propertyData.property_type || '', propertyData.state, propertyData.listing_type, propertyData.district)
 
                 setProperty(propertyData)
                 setAgent(agentData)
@@ -153,61 +171,68 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
 
                             {/* Property Info */}
                             <div className="glass p-8 rounded-2xl mb-6">
-                                <div className="flex items-start justify-between mb-6">
-                                    <div className="flex-1">
-                                        <div className="flex items-start justify-between">
-                                            <div>
-                                                <span className="inline-block bg-primary-100 text-primary-600 px-3 py-1 rounded-full text-sm font-semibold mb-3">
-                                                    {property.property_type || 'Property'}
-                                                </span>
-                                                {property.listing_type && (
-                                                    <span className={`inline-block ml-2 px-3 py-1 rounded-full text-sm font-semibold mb-3 ${property.listing_type === 'sale' ? 'bg-green-100 text-green-600' :
-                                                        property.listing_type === 'rent' ? 'bg-blue-100 text-blue-600' :
-                                                            'bg-purple-100 text-purple-600'
-                                                        }`}>
-                                                        {property.listing_type === 'sale' ? 'For Sale' :
-                                                            property.listing_type === 'rent' ? 'For Rent' : 'New Project'}
-                                                    </span>
-                                                )}
-                                                <h1 className="font-heading font-bold text-3xl text-gray-900 mb-2">{propertyName}</h1>
-                                            </div>
-                                            {/* Action Buttons */}
-                                            <div className="flex items-center gap-2">
-                                                {/* Share Button */}
-                                                <ShareButton
-                                                    url={typeof window !== 'undefined' ? window.location.href : ''}
-                                                    title={`Check out ${propertyName}`}
-                                                    className="p-3 border-0 shadow-sm"
-                                                />
-                                                {/* Favorite Button */}
-                                                <button
-                                                    onClick={() => toggleFavorite(property.id)}
-                                                    className="p-3 rounded-full hover:bg-gray-100 transition-colors group"
-                                                    title={isFavorite(property.id) ? 'Remove from favorites' : 'Add to favorites'}
-                                                >
-                                                    {isFavorite(property.id) ? (
-                                                        <svg className="w-7 h-7 text-red-500" fill="currentColor" viewBox="0 0 24 24">
-                                                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                                                        </svg>
-                                                    ) : (
-                                                        <svg className="w-7 h-7 text-gray-400 group-hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                                        </svg>
-                                                    )}
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center text-gray-600">
-                                            <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                            </svg>
-                                            <span>{property.address}</span>
-                                        </div>
+                                {/* Badges Row */}
+                                <div className="mb-3">
+                                    <span className="inline-block bg-primary-100 text-primary-600 px-3 py-1 rounded-full text-sm font-semibold">
+                                        {property.property_type || 'Property'}
+                                    </span>
+                                    {property.listing_type && (
+                                        <span className={`inline-block ml-2 px-3 py-1 rounded-full text-sm font-semibold ${property.listing_type === 'sale' ? 'bg-green-100 text-green-600' :
+                                            property.listing_type === 'rent' ? 'bg-blue-100 text-blue-600' :
+                                                'bg-purple-100 text-purple-600'
+                                            }`}>
+                                            {property.listing_type === 'sale' ? 'For Sale' :
+                                                property.listing_type === 'rent' ? 'For Rent' : 'New Project'}
+                                        </span>
+                                    )}
+                                </div>
+
+                                {/* Title + Price Row - Aligned */}
+                                <div className="flex items-start justify-between mb-3">
+                                    <h1 className="font-heading font-bold text-3xl text-gray-900">{propertyName}</h1>
+                                    <p className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent whitespace-nowrap ml-4">
+                                        {formatPrice(property.price, property.listing_type === 'rent')}
+                                    </p>
+                                </div>
+
+                                {/* Address + Action Buttons Row */}
+                                <div className="flex items-center justify-between mb-6">
+                                    <div className="flex items-center text-gray-600">
+                                        <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        </svg>
+                                        <span>{property.address}</span>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                                            {formatPrice(property.price, property.listing_type === 'rent')}
-                                        </p>
+                                    {/* Action Buttons */}
+                                    <div className="flex items-center gap-3">
+                                        {/* Share Button */}
+                                        <ShareButton
+                                            url={typeof window !== 'undefined' ? window.location.href : ''}
+                                            title={`Check out ${propertyName}`}
+                                            className="p-3 border-0 shadow-sm"
+                                        />
+                                        {/* Favorite Button - Bigger */}
+                                        <button
+                                            onClick={() => {
+                                                if (!user) {
+                                                    router.push('/login')
+                                                    return
+                                                }
+                                                toggleFavorite(property.id)
+                                            }}
+                                            className="p-4 rounded-full bg-gray-100 hover:bg-red-50 transition-colors group"
+                                            title={isFavorite(property.id) ? 'Remove from favorites' : 'Add to favorites'}
+                                        >
+                                            {isFavorite(property.id) ? (
+                                                <svg className="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                                                </svg>
+                                            ) : (
+                                                <svg className="w-8 h-8 text-gray-400 group-hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                                </svg>
+                                            )}
+                                        </button>
                                     </div>
                                 </div>
 
