@@ -125,6 +125,7 @@ function PropertiesPageContent() {
     const [openDropdown, setOpenDropdown] = useState<string | null>(null)
     const [filterModalOpen, setFilterModalOpen] = useState(false)
     const [stateOptions, setStateOptions] = useState<string[]>([])
+    const [mobileSearchExpanded, setMobileSearchExpanded] = useState(true)
     const dropdownRef = useRef<HTMLDivElement>(null)
     const initialLoadDone = useRef(false)
 
@@ -406,7 +407,35 @@ function PropertiesPageContent() {
 
             {/* Search Filters Bar - PropertyGuru Style */}
             <div className="sticky top-20 z-40 bg-white border-b border-gray-200 shadow-sm">
-                <div className="container-custom py-4">
+                {/* Mobile Toggle Button */}
+                <button
+                    onClick={() => setMobileSearchExpanded(!mobileSearchExpanded)}
+                    className="md:hidden w-full flex items-center justify-center gap-2 py-3 px-4 bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+                >
+                    {mobileSearchExpanded ? (
+                        <>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                            </svg>
+                            Hide Search & Filters
+                        </>
+                    ) : (
+                        <>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            Show Search & Filters
+                            {activeFilterCount > 0 && (
+                                <span className="w-5 h-5 bg-primary-500 text-white text-xs rounded-full flex items-center justify-center">
+                                    {activeFilterCount}
+                                </span>
+                            )}
+                        </>
+                    )}
+                </button>
+
+                {/* Collapsible Search Section - Always visible on desktop, toggleable on mobile */}
+                <div className={`container-custom py-4 ${!mobileSearchExpanded ? 'hidden md:block' : ''}`}>
                     {/* Search Input + Save Search */}
                     <div className="flex gap-4 mb-4">
                         <SearchInput
@@ -765,7 +794,7 @@ function PropertiesPageContent() {
                 </div> */}
 
                 {/* Active Filter Chips */}
-                <div className="container-custom">
+                <div className={`container-custom ${!mobileSearchExpanded ? 'hidden md:block' : ''}`}>
                     <FilterChips
                         filters={[
                             filters.location ? { key: 'location', label: 'Location', value: filters.location } : null,

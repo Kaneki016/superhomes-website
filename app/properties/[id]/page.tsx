@@ -196,15 +196,15 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                                 </div>
 
                                 {/* Address + Action Buttons Row */}
-                                <div className="flex items-center justify-between mb-6">
-                                    <div className="flex items-center text-gray-600">
-                                        <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                                    <div className="flex items-center text-gray-600 min-w-0">
+                                        <svg className="w-5 h-5 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                         </svg>
-                                        <span>{property.address}</span>
+                                        <span className="truncate">{property.address}</span>
                                     </div>
                                     {/* Action Buttons */}
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-3 flex-shrink-0">
                                         {/* Share Button */}
                                         <ShareButton
                                             url={typeof window !== 'undefined' ? window.location.href : ''}
