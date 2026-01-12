@@ -57,7 +57,10 @@ export default function Navbar() {
                         </Link>
                         */}
                         <Link href="/transaction-map" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                            Transaction Map
+                            Map
+                        </Link>
+                        <Link href="/resources" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                            Resources
                         </Link>
                     </div>
 
@@ -207,7 +210,10 @@ export default function Navbar() {
                             </Link>
                             */}
                             <Link href="/transaction-map" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                                Transaction Map
+                                Map
+                            </Link>
+                            <Link href="/resources" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                                Resources
                             </Link>
                             <div className="pt-4 border-t border-gray-200 flex flex-col space-y-2">
                                 {user ? (

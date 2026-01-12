@@ -77,7 +77,7 @@ function RentPageContent() {
         if (viewFromUrl && viewFromUrl !== viewMode) {
             setViewMode(viewFromUrl)
         }
-    }, [searchParams])
+    }, [searchParams, viewMode])
 
     // Pagination calculations
     const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)

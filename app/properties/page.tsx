@@ -98,7 +98,7 @@ function PropertiesPageContent() {
         if (viewFromUrl && viewFromUrl !== viewMode) {
             setViewMode(viewFromUrl)
         }
-    }, [searchParams])
+    }, [searchParams, viewMode])
 
     // ... rest of component logic ...
 

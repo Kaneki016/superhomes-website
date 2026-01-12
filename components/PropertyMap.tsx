@@ -39,14 +39,23 @@ export default function PropertyMap({
     const mapRef = useRef<HTMLDivElement>(null)
     const mapInstanceRef = useRef<any>(null)
     const markersRef = useRef<Map<string, any>>(new Map())
-    const propertiesRef = useRef<Property[]>(properties) // Keep ref to properties for event handlers
+    const propertiesRef = useRef<Property[]>(properties)
+
+    // Refs for callbacks to avoid dependency cycles
+    const onPropertySelectRef = useRef(onPropertySelect)
+    const onMarkerClickRef = useRef(onMarkerClick)
+    const onPropertyHoverRef = useRef(onPropertyHover)
+
     const [noValidCoordinates, setNoValidCoordinates] = useState(false)
     const [leaflet, setLeaflet] = useState<any>(null)
 
-    // Update properties ref when properties change
+    // Update refs
     useEffect(() => {
         propertiesRef.current = properties
-    }, [properties])
+        onPropertySelectRef.current = onPropertySelect
+        onMarkerClickRef.current = onMarkerClick
+        onPropertyHoverRef.current = onPropertyHover
+    }, [properties, onPropertySelect, onMarkerClick, onPropertyHover])
 
     // Function to notify parent about visible properties within bounds
     const notifyBoundsChange = useCallback(() => {
@@ -193,16 +202,16 @@ export default function PropertyMap({
 
                 // Event handlers
                 marker.on('click', () => {
-                    if (onPropertySelect) onPropertySelect(property.id)
-                    if (onMarkerClick) onMarkerClick(property.id)
+                    if (onPropertySelectRef.current) onPropertySelectRef.current(property.id)
+                    if (onMarkerClickRef.current) onMarkerClickRef.current(property.id)
                 })
 
                 marker.on('mouseover', () => {
-                    if (onPropertyHover) onPropertyHover(property.id)
+                    if (onPropertyHoverRef.current) onPropertyHoverRef.current(property.id)
                 })
 
                 marker.on('mouseout', () => {
-                    if (onPropertyHover) onPropertyHover(null)
+                    if (onPropertyHoverRef.current) onPropertyHoverRef.current(null)
                 })
 
                 markersRef.current.set(property.id, marker)
@@ -211,15 +220,12 @@ export default function PropertyMap({
 
         // Fit bounds
         if (bounds.length > 0 && !noValidCoordinates) {
-            // Only fit bounds if this is a significant property update (e.g. filter change)
-            // We can check if the map center is far off or just do it.
-            // For now, we'll keep it as is, but since we removed hover from deps, it won't happen on hover.
             mapInstanceRef.current!.fitBounds(bounds, {
                 padding: [50, 50],
                 maxZoom: 15
             })
         }
-    }, [properties, leaflet]) // Removed hover/select/callbacks from dependencies to prevent re-render loops
+    }, [properties, leaflet, noValidCoordinates, hoveredPropertyId, selectedPropertyId]) // Safely added dependencies
 
     // Update marker styles when hover changes
     useEffect(() => {
