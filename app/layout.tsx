@@ -7,7 +7,6 @@ import 'leaflet-draw/dist/leaflet.draw.css'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { FavoritesProvider } from '@/contexts/FavoritesContext'
 import { CompareProvider } from '@/contexts/CompareContext'
-import ScrollToTop from '@/components/ScrollToTop'
 import CompareBar from '@/components/CompareBar'
 
 export const metadata: Metadata = {
@@ -28,7 +27,6 @@ export default function RootLayout({
                     <FavoritesProvider>
                         <CompareProvider>
                             {children}
-                            <ScrollToTop />
                             <CompareBar />
                         </CompareProvider>
                     </FavoritesProvider>

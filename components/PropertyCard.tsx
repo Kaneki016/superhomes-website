@@ -97,6 +97,11 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
         e.preventDefault()
         e.stopPropagation()
 
+        if (!user) {
+            router.push('/login?redirect=' + encodeURIComponent(window.location.pathname))
+            return
+        }
+
         if (agent?.phone) {
             const phoneNumber = agent.phone.replace(/[^0-9]/g, '')
             const propertyImage = property.main_image_url || (property.images && property.images[0]) || ''

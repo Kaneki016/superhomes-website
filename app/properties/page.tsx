@@ -295,15 +295,36 @@ function PropertiesPageContent() {
         loadFilterOptions()
     }, [])
 
+    // Helper function to sync filters to URL for back button support
+    const syncFiltersToUrl = useCallback((filterState: typeof filters) => {
+        const params = new URLSearchParams()
+        if (filterState.state) params.set('state', filterState.state)
+        if (filterState.location) params.set('search', filterState.location)
+        if (filterState.propertyType) params.set('type', filterState.propertyType)
+        if (filterState.minPrice && filterState.maxPrice) {
+            params.set('price', `${filterState.minPrice}-${filterState.maxPrice}`)
+        } else if (filterState.minPrice) {
+            params.set('price', `${filterState.minPrice}+`)
+        } else if (filterState.maxPrice) {
+            params.set('price', `0-${filterState.maxPrice}`)
+        }
+        if (filterState.bedrooms) params.set('bedrooms', filterState.bedrooms)
+
+        const queryString = params.toString()
+        router.replace(`/properties${queryString ? `?${queryString}` : ''}`, { scroll: false })
+    }, [router])
+
     // Reload when filters change
-    const handleApplyFilters = () => {
+    const handleApplyFilters = (overrideFilters?: typeof filters) => {
+        const activeFilters = overrideFilters || filters
         setCurrentPage(1)
-        loadProperties(1, true)
+        loadProperties(1, true, activeFilters)
         setShowFilters(false)
+        syncFiltersToUrl(activeFilters)
 
         // Search for agents if there's a location/search query
-        if (filters.location && filters.location.trim().length >= 2) {
-            searchAgents(filters.location).then(agents => {
+        if (activeFilters.location && activeFilters.location.trim().length >= 2) {
+            searchAgents(activeFilters.location).then(agents => {
                 setMatchedAgents(agents)
             })
         } else {
@@ -442,14 +463,15 @@ function PropertiesPageContent() {
                             value={filters.location}
                             onChange={(val) => setFilters({ ...filters, location: val })}
                             onSearch={(val) => {
-                                setFilters({ ...filters, location: val })
-                                handleApplyFilters()
+                                const newFilters = { ...filters, location: val }
+                                setFilters(newFilters)
+                                handleApplyFilters(newFilters)
                             }}
                             placeholder="Search location, project, or area..."
                             className="flex-1"
                         />
                         <button
-                            onClick={handleApplyFilters}
+                            onClick={() => handleApplyFilters()}
                             className="flex items-center gap-2 px-6 py-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl transition-colors shadow-sm"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -544,17 +566,33 @@ function PropertiesPageContent() {
                                         {/* Min Input with Dropdown */}
                                         <div className="relative">
                                             <div
-                                                className="flex items-center border border-gray-300 rounded-lg px-3 py-2.5 bg-white cursor-pointer hover:border-gray-400 transition-colors"
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    setOpenDropdown(openDropdown === 'priceMin' ? 'price' : 'priceMin')
-                                                }}
+                                                className="flex items-center border border-gray-300 rounded-lg px-3 py-2.5 bg-white hover:border-gray-400 transition-colors"
                                             >
                                                 <span className="text-gray-500 mr-2 text-sm font-medium">RM</span>
-                                                <span className="flex-1 text-gray-700 text-sm">
-                                                    {filters.minPrice ? parseInt(filters.minPrice).toLocaleString() : 'Min'}
-                                                </span>
-                                                <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === 'priceMin' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Min"
+                                                    value={filters.minPrice ? parseInt(filters.minPrice).toLocaleString() : ''}
+                                                    onChange={(e) => {
+                                                        const value = e.target.value.replace(/,/g, '').replace(/\D/g, '')
+                                                        setFilters({ ...filters, minPrice: value })
+                                                    }}
+                                                    onFocus={(e) => {
+                                                        e.stopPropagation()
+                                                        setOpenDropdown('priceMin')
+                                                    }}
+                                                    className="flex-1 text-gray-700 text-sm bg-transparent outline-none w-full"
+                                                />
+                                                <svg
+                                                    className={`w-4 h-4 text-gray-400 transition-transform cursor-pointer ${openDropdown === 'priceMin' ? 'rotate-180' : ''}`}
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        setOpenDropdown(openDropdown === 'priceMin' ? 'price' : 'priceMin')
+                                                    }}
+                                                >
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                                 </svg>
                                             </div>
@@ -598,17 +636,33 @@ function PropertiesPageContent() {
                                         {/* Max Input with Dropdown */}
                                         <div className="relative">
                                             <div
-                                                className="flex items-center border border-gray-300 rounded-lg px-3 py-2.5 bg-white cursor-pointer hover:border-gray-400 transition-colors"
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    setOpenDropdown(openDropdown === 'priceMax' ? 'price' : 'priceMax')
-                                                }}
+                                                className="flex items-center border border-gray-300 rounded-lg px-3 py-2.5 bg-white hover:border-gray-400 transition-colors"
                                             >
                                                 <span className="text-gray-500 mr-2 text-sm font-medium">RM</span>
-                                                <span className="flex-1 text-gray-700 text-sm">
-                                                    {filters.maxPrice ? parseInt(filters.maxPrice).toLocaleString() : 'Max'}
-                                                </span>
-                                                <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === 'priceMax' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Max"
+                                                    value={filters.maxPrice ? parseInt(filters.maxPrice).toLocaleString() : ''}
+                                                    onChange={(e) => {
+                                                        const value = e.target.value.replace(/,/g, '').replace(/\D/g, '')
+                                                        setFilters({ ...filters, maxPrice: value })
+                                                    }}
+                                                    onFocus={(e) => {
+                                                        e.stopPropagation()
+                                                        setOpenDropdown('priceMax')
+                                                    }}
+                                                    className="flex-1 text-gray-700 text-sm bg-transparent outline-none w-full"
+                                                />
+                                                <svg
+                                                    className={`w-4 h-4 text-gray-400 transition-transform cursor-pointer ${openDropdown === 'priceMax' ? 'rotate-180' : ''}`}
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        setOpenDropdown(openDropdown === 'priceMax' ? 'price' : 'priceMax')
+                                                    }}
+                                                >
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                                 </svg>
                                             </div>
@@ -667,6 +721,7 @@ function PropertiesPageContent() {
                                             onClick={() => {
                                                 setOpenDropdown(null)
                                                 loadProperties(1, true, filters)
+                                                syncFiltersToUrl(filters)
                                             }}
                                             className="py-2.5 px-4 bg-primary-600 hover:bg-primary-700 rounded-full text-sm font-medium text-white transition-colors"
                                         >
@@ -701,6 +756,7 @@ function PropertiesPageContent() {
                                                 setFilters(newFilters)
                                                 setOpenDropdown(null)
                                                 loadProperties(1, true, newFilters)
+                                                syncFiltersToUrl(newFilters)
                                             }}
                                             className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${filters.bedrooms === opt.value ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
                                         >
@@ -734,6 +790,7 @@ function PropertiesPageContent() {
                                             setFilters(newFilters)
                                             setOpenDropdown(null)
                                             loadProperties(1, true, newFilters)
+                                            syncFiltersToUrl(newFilters)
                                         }}
                                         className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${!filters.state ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
                                     >
@@ -747,6 +804,7 @@ function PropertiesPageContent() {
                                                 setFilters(newFilters)
                                                 setOpenDropdown(null)
                                                 loadProperties(1, true, newFilters)
+                                                syncFiltersToUrl(newFilters)
                                             }}
                                             className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${filters.state === state ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
                                         >
@@ -793,38 +851,6 @@ function PropertiesPageContent() {
                     </div>
                 </div> */}
 
-                {/* Active Filter Chips */}
-                <div className={`container-custom ${!mobileSearchExpanded ? 'hidden md:block' : ''}`}>
-                    <FilterChips
-                        filters={[
-                            filters.location ? { key: 'location', label: 'Location', value: filters.location } : null,
-                            filters.state ? { key: 'state', label: 'State', value: filters.state } : null,
-                            filters.propertyType ? { key: 'propertyType', label: 'Type', value: filters.propertyType } : null,
-                            filters.minPrice || filters.maxPrice ? {
-                                key: 'price',
-                                label: 'Price',
-                                value: filters.minPrice && filters.maxPrice
-                                    ? `RM${(parseInt(filters.minPrice) / 1000)}k - RM${(parseInt(filters.maxPrice) / 1000)}k`
-                                    : filters.minPrice
-                                        ? `Above RM${(parseInt(filters.minPrice) / 1000)}k`
-                                        : `Under RM${(parseInt(filters.maxPrice) / 1000)}k`
-                            } : null,
-                            filters.bedrooms ? { key: 'bedrooms', label: 'Bedrooms', value: `${filters.bedrooms}+` } : null,
-                        ].filter(Boolean) as { key: string; label: string; value: string }[]}
-                        onRemove={(key) => {
-                            const newFilters = { ...filters }
-                            if (key === 'price') {
-                                newFilters.minPrice = ''
-                                newFilters.maxPrice = ''
-                            } else {
-                                newFilters[key as keyof typeof filters] = ''
-                            }
-                            setFilters(newFilters)
-                            loadProperties(1, true, newFilters)
-                        }}
-                        onClearAll={handleResetFilters}
-                    />
-                </div>
             </div>
 
             <div className="container-custom py-6">
@@ -835,9 +861,61 @@ function PropertiesPageContent() {
                             {loading ? 'Loading...' : `${totalCount.toLocaleString()} Properties for Sale`}
                         </h1>
                         {!loading && (
-                            <p className="page-subtitle">
-                                Showing {properties.length} of {totalCount.toLocaleString()} results
-                            </p>
+                            <>
+                                {/* Filter Summary - shows when any filter is active */}
+                                {(filters.propertyType || filters.minPrice || filters.maxPrice || filters.bedrooms || filters.location || filters.state) && (
+                                    <div className="mt-1 sm:mt-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-primary-50 border-l-3 sm:border-l-4 border-primary-500 rounded-r-md sm:rounded-r-lg">
+                                        <p className="text-gray-700 text-sm sm:text-base font-medium leading-snug">
+                                            {(() => {
+                                                const summaryParts = []
+
+                                                // Property type (if selected)
+                                                if (filters.propertyType) {
+                                                    summaryParts.push(filters.propertyType)
+                                                }
+
+                                                // Price range
+                                                if (filters.minPrice && filters.maxPrice) {
+                                                    const minK = parseInt(filters.minPrice) >= 1000000
+                                                        ? `RM ${(parseInt(filters.minPrice) / 1000000).toFixed(1)}M`
+                                                        : `RM ${(parseInt(filters.minPrice) / 1000).toFixed(0)}K`
+                                                    const maxK = parseInt(filters.maxPrice) >= 1000000
+                                                        ? `RM ${(parseInt(filters.maxPrice) / 1000000).toFixed(1)}M`
+                                                        : `RM ${(parseInt(filters.maxPrice) / 1000).toFixed(0)}K`
+                                                    summaryParts.push(`Between ${minK} and ${maxK}`)
+                                                } else if (filters.minPrice) {
+                                                    const minK = parseInt(filters.minPrice) >= 1000000
+                                                        ? `RM ${(parseInt(filters.minPrice) / 1000000).toFixed(1)}M`
+                                                        : `RM ${(parseInt(filters.minPrice) / 1000).toFixed(0)}K`
+                                                    summaryParts.push(`Above ${minK}`)
+                                                } else if (filters.maxPrice) {
+                                                    const maxK = parseInt(filters.maxPrice) >= 1000000
+                                                        ? `RM ${(parseInt(filters.maxPrice) / 1000000).toFixed(1)}M`
+                                                        : `RM ${(parseInt(filters.maxPrice) / 1000).toFixed(0)}K`
+                                                    summaryParts.push(`Under ${maxK}`)
+                                                }
+
+                                                // Bedrooms
+                                                if (filters.bedrooms) {
+                                                    summaryParts.push(`${filters.bedrooms}+ Bedrooms`)
+                                                }
+
+                                                // Location/State
+                                                if (filters.location) {
+                                                    summaryParts.push(`in ${filters.location}`)
+                                                } else if (filters.state) {
+                                                    summaryParts.push(`in ${filters.state}`)
+                                                }
+
+                                                return summaryParts.length > 0 ? summaryParts.join(' • ') : ''
+                                            })()}
+                                        </p>
+                                    </div>
+                                )}
+                                <p className="page-subtitle">
+                                    Showing {properties.length} of {totalCount.toLocaleString()} results
+                                </p>
+                            </>
                         )}
                     </div>
 
@@ -1113,6 +1191,7 @@ function PropertiesPageContent() {
                 onApply={(newFilters) => {
                     setFilters(newFilters)
                     loadProperties(1, true, newFilters)
+                    syncFiltersToUrl(newFilters)
                 }}
                 filterOptions={filterOptions}
                 stateOptions={stateOptions}

@@ -590,7 +590,17 @@ export async function getFeaturedProperties(limit: number = 8): Promise<Property
 }
 
 // Fetch handpicked properties (Premium/Luxury listings - highest price)
-export async function getHandpickedProperties(limit: number = 8, state?: string): Promise<Property[]> {
+// Now supports dynamic filtering to be "Handpicked for You" based on preferences
+export async function getHandpickedProperties(
+    limit: number = 8,
+    state?: string,
+    filters?: {
+        propertyType?: string
+        minPrice?: string
+        maxPrice?: string
+        bedrooms?: string
+    }
+): Promise<Property[]> {
     // Fetch a pool of recent listings to select from
     let query = supabase
         .from('listings')
@@ -598,13 +608,23 @@ export async function getHandpickedProperties(limit: number = 8, state?: string)
         .eq('is_active', true)
         .eq('listing_type', 'sale')
 
+    // Apply Filters
     if (state) {
         query = query.ilike('state', `%${state}%`)
     }
+    if (filters?.propertyType) {
+        query = query.ilike('property_type', `%${filters.propertyType}%`)
+    }
+    if (filters?.bedrooms && filters.bedrooms !== '') {
+        query = query.eq('total_bedrooms', filters.bedrooms)
+    }
+
+    // Note: Price filtering happens AFTER transformation because it's in a joined table logic
+    // But we sort by price descending anyway, so we just filter the results
 
     const { data, error } = await query
         .order('scraped_at', { ascending: false })
-        .limit(50) // Fetch 50 candidates
+        .limit(100) // Increase fetch pool to ensure we have enough after filtering
 
     if (error) {
         console.error('Error fetching handpicked properties:', error)
@@ -616,20 +636,23 @@ export async function getHandpickedProperties(limit: number = 8, state?: string)
     // Transform to properties
     let properties = data.map(transformListingToProperty)
 
-    // Filter to ensure valid data
+    // Filter to ensure valid data and apply price limits
     properties = properties.filter(p => {
+        // Basic validity
         if (!p.price) return false
-        // Ensure valid agent
         if (!p.contacts || p.contacts.length === 0) return false
         const agentName = p.contacts[0]?.name?.toLowerCase().trim()
-        return agentName && agentName !== 'unknown'
+        if (!agentName || agentName === 'unknown') return false
+
+        // Price Filter
+        if (filters?.minPrice && p.price < parseInt(filters.minPrice)) return false
+        if (filters?.maxPrice && p.price > parseInt(filters.maxPrice)) return false
+
+        return true
     })
 
     // Sort by price descending (Highest Price first) for "Premium" selection
     properties.sort((a, b) => (b.price || 0) - (a.price || 0))
-
-    // Reduce strict agent diversity to allow best properties, but maybe limit 2 per agent?
-    // Let's just return the top expensive ones for now as differentiation.
 
     return properties.slice(0, limit)
 }

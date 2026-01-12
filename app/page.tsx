@@ -44,16 +44,25 @@ export default function HomePage() {
             try {
                 // Fetch Featured (4 newest) and Handpicked (12 from diverse agents) separately
                 // Featured is always global/newest
-                // Handpicked is now location-aware (if state selected)
+                // Handpicked is now personalized based on user filters
                 const [featured, diverse] = await Promise.all([
                     getFeaturedProperties(4),
-                    getHandpickedProperties(12, selectedState || undefined)
+                    getHandpickedProperties(12, selectedState || undefined, {
+                        propertyType,
+                        minPrice,
+                        maxPrice,
+                        bedrooms
+                    })
                 ])
 
                 setFeaturedProperties(featured)
+
                 // Filter out any properties already in featured
                 const featuredIds = new Set(featured.map(p => p.id))
                 const uniqueHandpicked = diverse.filter(p => !featuredIds.has(p.id))
+
+                // If personalized result is too small (e.g. strict filters), we might want to show empty or generic?
+                // For now, showing whatever matches high-end criteria
                 setHandpickedProperties(uniqueHandpicked.slice(0, 12))
             } catch (error) {
                 console.error('Error loading properties:', error)
@@ -64,7 +73,7 @@ export default function HomePage() {
             }
         }
         loadProperties()
-    }, [selectedState])
+    }, [selectedState, propertyType, minPrice, maxPrice, bedrooms])
 
     // Load preferred state from localStorage on mount
     useEffect(() => {

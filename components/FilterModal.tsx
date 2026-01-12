@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import RangeSlider from './RangeSlider'
 
 interface FilterModalProps {
     isOpen: boolean
@@ -43,6 +42,7 @@ type TabType = 'propertyType' | 'price' | 'bedroom' | 'state'
 export default function FilterModal({ isOpen, onClose, filters, onApply, filterOptions, stateOptions = [], tabLabels }: FilterModalProps) {
     const [activeTab, setActiveTab] = useState<TabType>('propertyType')
     const [localFilters, setLocalFilters] = useState(filters)
+    const [openPriceDropdown, setOpenPriceDropdown] = useState<'min' | 'max' | null>(null)
 
     // Sync local filters when modal opens
     useEffect(() => {
@@ -99,11 +99,6 @@ export default function FilterModal({ isOpen, onClose, filters, onApply, filterO
         { label: 'All Residential', value: '' },
         ...filterOptions.propertyTypes.map(type => ({ label: type, value: type }))
     ]
-
-    const formatPriceDisplay = (value: string) => {
-        if (!value) return ''
-        return Number(value).toLocaleString()
-    }
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -208,67 +203,143 @@ export default function FilterModal({ isOpen, onClose, filters, onApply, filterO
 
                     {/* Price Tab */}
                     {activeTab === 'price' && (
-                        <div className="space-y-6">
-                            {/* Min/Max Input Row */}
+                        <div className="space-y-4 min-h-[300px]">
+                            {/* Labels Row */}
                             <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Minimum</label>
-                                    <div className="relative">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium text-sm">RM</span>
-                                        <input
-                                            type="text"
-                                            placeholder="Min"
-                                            value={formatPriceDisplay(localFilters.minPrice)}
-                                            onChange={(e) => {
-                                                const value = e.target.value.replace(/,/g, '').replace(/\D/g, '')
-                                                setLocalFilters({ ...localFilters, minPrice: value })
-                                            }}
-                                            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent"
-                                        />
-                                    </div>
+                                <label className="text-sm font-medium text-gray-900">Minimum</label>
+                                <label className="text-sm font-medium text-gray-900">Maximum</label>
+                            </div>
+
+                            {/* Input Fields Row */}
+                            <div className="grid grid-cols-2 gap-4">
+                                {/* Min Price Input */}
+                                <div
+                                    className={`flex items-center border rounded-lg px-3 py-2.5 bg-white transition-colors ${openPriceDropdown === 'min' ? 'border-primary-500 ring-2 ring-primary-200' : 'border-gray-300 hover:border-gray-400'}`}
+                                >
+                                    <span className="text-gray-500 mr-2 text-sm font-medium">RM</span>
+                                    <input
+                                        type="text"
+                                        placeholder="Min"
+                                        value={localFilters.minPrice ? parseInt(localFilters.minPrice).toLocaleString() : ''}
+                                        onChange={(e) => {
+                                            const value = e.target.value.replace(/,/g, '').replace(/\D/g, '')
+                                            setLocalFilters({ ...localFilters, minPrice: value })
+                                        }}
+                                        onFocus={() => setOpenPriceDropdown('min')}
+                                        className="flex-1 text-gray-700 text-sm bg-transparent outline-none w-full"
+                                    />
+                                    <svg
+                                        className={`w-4 h-4 text-gray-400 transition-transform cursor-pointer ${openPriceDropdown === 'min' ? 'rotate-180' : ''}`}
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                        onClick={() => setOpenPriceDropdown(openPriceDropdown === 'min' ? null : 'min')}
+                                    >
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Maximum</label>
-                                    <div className="relative">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium text-sm">RM</span>
-                                        <input
-                                            type="text"
-                                            placeholder="Max"
-                                            value={formatPriceDisplay(localFilters.maxPrice)}
-                                            onChange={(e) => {
-                                                const value = e.target.value.replace(/,/g, '').replace(/\D/g, '')
-                                                setLocalFilters({ ...localFilters, maxPrice: value })
-                                            }}
-                                            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent"
-                                        />
-                                    </div>
+
+                                {/* Max Price Input */}
+                                <div
+                                    className={`flex items-center border rounded-lg px-3 py-2.5 bg-white transition-colors ${openPriceDropdown === 'max' ? 'border-primary-500 ring-2 ring-primary-200' : 'border-gray-300 hover:border-gray-400'}`}
+                                >
+                                    <span className="text-gray-500 mr-2 text-sm font-medium">RM</span>
+                                    <input
+                                        type="text"
+                                        placeholder="Max"
+                                        value={localFilters.maxPrice ? parseInt(localFilters.maxPrice).toLocaleString() : ''}
+                                        onChange={(e) => {
+                                            const value = e.target.value.replace(/,/g, '').replace(/\D/g, '')
+                                            setLocalFilters({ ...localFilters, maxPrice: value })
+                                        }}
+                                        onFocus={() => setOpenPriceDropdown('max')}
+                                        className="flex-1 text-gray-700 text-sm bg-transparent outline-none w-full"
+                                    />
+                                    <svg
+                                        className={`w-4 h-4 text-gray-400 transition-transform cursor-pointer ${openPriceDropdown === 'max' ? 'rotate-180' : ''}`}
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                        onClick={() => setOpenPriceDropdown(openPriceDropdown === 'max' ? null : 'max')}
+                                    >
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
                                 </div>
                             </div>
 
-                            {/* Range Slider */}
-                            <div className="px-2 pt-2 pb-6">
-                                <RangeSlider
-                                    min={0}
-                                    max={5000000}
-                                    step={50000}
-                                    value={[
-                                        Number(localFilters.minPrice.replace(/,/g, '')) || 0,
-                                        Number(localFilters.maxPrice.replace(/,/g, '')) || 5000000
-                                    ]}
-                                    onChange={([min, max]) => {
-                                        setLocalFilters({
-                                            ...localFilters,
-                                            minPrice: min.toString(),
-                                            maxPrice: max.toString()
-                                        })
-                                    }}
-                                />
-                                <div className="flex justify-between mt-2 text-xs text-gray-400 font-medium">
-                                    <span>RM 0</span>
-                                    <span>RM 5M+</span>
+                            {/* Min Price Options - shown inline when active */}
+                            {openPriceDropdown === 'min' && (
+                                <div className="space-y-2">
+                                    {[
+                                        { label: 'No Min', value: '' },
+                                        { label: '200,000', value: '200000' },
+                                        { label: '300,000', value: '300000' },
+                                        { label: '400,000', value: '400000' },
+                                        { label: '500,000', value: '500000' },
+                                        { label: '600,000', value: '600000' },
+                                        { label: '800,000', value: '800000' },
+                                        { label: '1,000,000', value: '1000000' },
+                                        { label: '1,500,000', value: '1500000' },
+                                        { label: '2,000,000', value: '2000000' },
+                                        { label: '3,000,000', value: '3000000' },
+                                        { label: '5,000,000', value: '5000000' },
+                                    ].map((opt) => (
+                                        <label
+                                            key={opt.value}
+                                            className={`flex items-center gap-3 px-3 py-2 rounded-lg border cursor-pointer transition-colors ${localFilters.minPrice === opt.value ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-primary-300 hover:bg-primary-50/50'}`}
+                                        >
+                                            <input
+                                                type="radio"
+                                                name="minPrice"
+                                                checked={localFilters.minPrice === opt.value}
+                                                onChange={() => {
+                                                    setLocalFilters({ ...localFilters, minPrice: opt.value })
+                                                    setOpenPriceDropdown(null)
+                                                }}
+                                                className="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500"
+                                            />
+                                            <span className="text-sm text-gray-700">{opt.label}</span>
+                                        </label>
+                                    ))}
                                 </div>
-                            </div>
+                            )}
 
+                            {/* Max Price Options - shown inline when active */}
+                            {openPriceDropdown === 'max' && (
+                                <div className="space-y-2">
+                                    {[
+                                        { label: 'No Max', value: '' },
+                                        { label: '300,000', value: '300000' },
+                                        { label: '400,000', value: '400000' },
+                                        { label: '500,000', value: '500000' },
+                                        { label: '600,000', value: '600000' },
+                                        { label: '800,000', value: '800000' },
+                                        { label: '1,000,000', value: '1000000' },
+                                        { label: '1,500,000', value: '1500000' },
+                                        { label: '2,000,000', value: '2000000' },
+                                        { label: '3,000,000', value: '3000000' },
+                                        { label: '5,000,000', value: '5000000' },
+                                        { label: '10,000,000', value: '10000000' },
+                                    ].map((opt) => (
+                                        <label
+                                            key={opt.value}
+                                            className={`flex items-center gap-3 px-3 py-2 rounded-lg border cursor-pointer transition-colors ${localFilters.maxPrice === opt.value ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-primary-300 hover:bg-primary-50/50'}`}
+                                        >
+                                            <input
+                                                type="radio"
+                                                name="maxPrice"
+                                                checked={localFilters.maxPrice === opt.value}
+                                                onChange={() => {
+                                                    setLocalFilters({ ...localFilters, maxPrice: opt.value })
+                                                    setOpenPriceDropdown(null)
+                                                }}
+                                                className="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500"
+                                            />
+                                            <span className="text-sm text-gray-700">{opt.label}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     )}
 

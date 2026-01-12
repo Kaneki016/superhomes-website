@@ -87,7 +87,7 @@ export default function ImageLightbox({ images, initialIndex = 0, isOpen, onClos
 
             {/* Main image */}
             <div
-                className="relative max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center p-4"
+                className="relative w-full h-full flex items-center justify-center p-0 md:p-4"
                 onClick={(e) => e.stopPropagation()}
             >
                 {isLoading && (
