@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Property } from '@/lib/supabase'
 import MortgageCalculator from './MortgageCalculator'
 import ShareButton from './ShareButton'
+import { generatePropertyUrl } from '@/lib/slugUtils'
 
 interface ListingDrawerProps {
     listing: Property | null
@@ -70,7 +71,7 @@ export default function ListingDrawer({ listing, onClose, isOpen }: ListingDrawe
                             {listing.listing_type === 'rent' ? 'For Rent' : 'For Sale'}
                         </span>
                         <ShareButton
-                            url={`${typeof window !== 'undefined' ? window.location.origin : ''}/properties/${listing.id}`}
+                            url={`${typeof window !== 'undefined' ? window.location.origin : ''}${generatePropertyUrl(listing)}`}
                             title={`Check out ${listing.title}`}
                             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                         />
@@ -186,7 +187,7 @@ export default function ListingDrawer({ listing, onClose, isOpen }: ListingDrawe
                             </h3>
                             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex-grow flex flex-col gap-4">
                                 <Link
-                                    href={`/properties/${listing.id}`}
+                                    href={generatePropertyUrl(listing)}
                                     className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors shadow-md flex items-center justify-center gap-2"
                                 >
                                     <span>View Property Details</span>

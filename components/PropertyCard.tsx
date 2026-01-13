@@ -10,6 +10,7 @@ import { useFavorites } from '@/contexts/FavoritesContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { useCompare } from '@/contexts/CompareContext'
 import { formatPrice, formatPricePerSqft, getTimeAgo } from '@/lib/utils'
+import { generatePropertyUrl } from '@/lib/slugUtils'
 
 interface PropertyCardProps {
     property: Property
@@ -120,7 +121,7 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
                 property.listing_type ? `*Listing:* For ${property.listing_type === 'sale' ? 'Sale' : property.listing_type === 'rent' ? 'Rent' : 'New Project'}` : null,
                 ``,
                 `View full details:`,
-                `${typeof window !== 'undefined' ? `${window.location.origin}/properties/${property.id}` : ''}`,
+                `${typeof window !== 'undefined' ? `${window.location.origin}${generatePropertyUrl(property)}` : ''}`,
                 ``,
                 propertyImage ? `Property Image:` : null,
                 propertyImage || null,
@@ -182,7 +183,7 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
             <div className="property-card-v2 group flex flex-col md:flex-row h-auto md:h-64 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 active:scale-[0.98] touch-manipulation">
                 {/* Image Section - Left (Desktop) / Top (Mobile) */}
                 <div className="w-full md:w-2/5 h-48 md:h-full relative overflow-hidden shrink-0">
-                    <Link href={`/properties/${property.id}`} className="block w-full h-full">
+                    <Link href={generatePropertyUrl(property)} className="block w-full h-full">
                         {images.length > 0 && !imageError ? (
                             <img
                                 src={images[currentImageIndex]}
@@ -223,7 +224,7 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
                         <div className="flex justify-between items-start mb-2 gap-4">
                             <div className="min-w-0 flex-1">
                                 <h3 className="text-lg md:text-xl font-bold text-gray-900 truncate group-hover:text-primary-600 transition-colors" title={propertyName}>
-                                    <Link href={`/properties/${property.id}`}>
+                                    <Link href={generatePropertyUrl(property)}>
                                         {propertyName}
                                     </Link>
                                 </h3>
@@ -368,7 +369,7 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
                 </div>
             )}
 
-            <Link href={`/properties/${property.id}`} className="block">
+            <Link href={generatePropertyUrl(property)} className="block">
                 {/* Image Gallery */}
                 <div
                     className="property-card-gallery"
@@ -467,7 +468,7 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
 
             {/* Card Content */}
             <div className="property-card-content">
-                <Link href={`/properties/${property.id}`} className="block">
+                <Link href={generatePropertyUrl(property)} className="block">
                     {/* Price Section */}
                     <div className="price-section">
                         <div className="price-main">{getDisplayPrice()}</div>

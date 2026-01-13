@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { formatPrice, formatPricePerSqft } from '@/lib/utils'
+import { generatePropertyUrl } from '@/lib/slugUtils'
 
 export default function ComparePage() {
     const { compareList, removeFromCompare, clearCompare } = useCompare()
@@ -75,7 +76,7 @@ export default function ComparePage() {
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                                     </svg>
                                                 </button>
-                                                <Link href={`/properties/${property.id}`} className="block">
+                                                <Link href={generatePropertyUrl(property)} className="block">
                                                     <img
                                                         src={property.main_image_url || property.images?.[0] || '/placeholder-property.jpg'}
                                                         alt={property.title || property.property_name || 'Property'}
@@ -205,7 +206,7 @@ export default function ComparePage() {
                                     {compareList.map(property => (
                                         <td key={property.id} className="p-4 text-center">
                                             <Link
-                                                href={`/properties/${property.id}`}
+                                                href={generatePropertyUrl(property)}
                                                 className="btn-primary py-2 px-4 text-sm"
                                             >
                                                 View Details

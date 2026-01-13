@@ -1,4 +1,5 @@
 import { supabase, Property, Agent, Transaction, Contact, Listing, ListingSaleDetails, ListingRentDetails, ListingProjectDetails } from './supabase'
+import { extractSearchTermsFromSlug, extractIdFromSlug } from './slugUtils'
 
 // Simple in-memory cache for frequently accessed data
 interface CacheEntry<T> {
@@ -499,8 +500,109 @@ export async function getPropertyById(id: string): Promise<Property | null> {
     if (error) {
         return null
     }
-
     return transformListingToProperty(data)
+}
+
+// Optimized property fetch using slug (Title Search + Short ID Check)
+// This is much faster than getPropertyByShortId because it uses the Title to filter via ILIKE (indexed-ish)
+export async function getPropertyBySlug(slug: string): Promise<Property | null> {
+    const shortId = extractIdFromSlug(slug)
+    const searchTerms = extractSearchTermsFromSlug(slug)
+
+    // Strategy 1: Try finding by Title + Short ID match (Fastest)
+    if (searchTerms && searchTerms.length > 2) {
+        // Create a specific pattern from all valid terms (e.g. "leisure farm" -> "%leisure%farm%")
+        const tokens = searchTerms.split(' ').filter(t => t.length > 2 && !STOPWORDS.has(t.toLowerCase()))
+
+        if (tokens.length > 0) {
+            const pattern = `%${tokens.join('%')}%`
+
+            const { data, error } = await supabase
+                .from('listings')
+                .select('id') // Fetch IDs only
+                .ilike('title', pattern)
+                .limit(1000) // 1000 IDs is lightweight (~30KB), covers almost all name collisions
+
+            if (!error && data && data.length > 0) {
+                // Check for ID match
+                const match = data.find((item: any) =>
+                    item.id && item.id.toLowerCase().endsWith(shortId.toLowerCase())
+                )
+
+                if (match) {
+                    return getPropertyById(match.id)
+                }
+            }
+        }
+    }
+
+    // Strategy 2: Fallback to slow scan if title mismatch (e.g. title changed)
+    return getPropertyByShortId(shortId)
+}
+
+// Fetch a property by the last 8 characters of its ID (for SEO-friendly slug URLs)
+// Uses a two-step approach: fetch only IDs first (lightweight), then fetch full property by UUID
+export async function getPropertyByShortId(shortId: string): Promise<Property | null> {
+    if (!shortId || shortId.length < 6) {
+        console.log('Invalid short ID:', shortId)
+        return null
+    }
+
+    const shortIdLower = shortId.toLowerCase()
+
+    // Step 1: Fetch only IDs (very lightweight - no joins, minimal data)
+    // Supabase default limit is 1000 rows, so we use that as our page size
+    let matchedId: string | null = null
+    let page = 0
+    const pageSize = 1000
+
+    while (!matchedId) {
+        const { data, error } = await supabase
+            .from('listings')
+            .select('id')
+            .range(page * pageSize, (page + 1) * pageSize - 1)
+
+        if (error) {
+            console.error('Error fetching property IDs:', error)
+            break
+        }
+
+        if (!data || data.length === 0) {
+            break
+        }
+
+        // Find matching ID in this batch
+        const match = data.find((item: { id: string }) =>
+            item.id && item.id.toLowerCase().endsWith(shortIdLower)
+        )
+
+        if (match) {
+            matchedId = match.id
+            break
+        }
+
+        // If we got less than pageSize, we've reached the end
+        if (data.length < pageSize) {
+            break
+        }
+
+        page++
+
+        // Safety limit (50 pages * 1000 = 50,000 properties max)
+        if (page > 50) {
+            console.log('Reached pagination limit while searching for short ID')
+            break
+        }
+    }
+
+    if (!matchedId) {
+        console.log('No property found with short ID:', shortId)
+        return null
+    }
+
+    // Step 2: Fetch the full property by exact UUID (single record, with all joins)
+    console.log('Found matching UUID:', matchedId, 'for short ID:', shortId)
+    return getPropertyById(matchedId)
 }
 
 // All Malaysian states and federal territories
@@ -1313,15 +1415,15 @@ export async function getProperties_OLD(): Promise<Property[]> {
         .from('dup_properties')
         .select('*')
         .order('created_at', { ascending: false })
-
+ 
     if (error) {
         console.error('Error fetching properties:', error)
         return []
     }
-
+ 
     return data || []
 }
-
+ 
 // OLD: Fetch agent by ID from dup_agents
 export async function getAgentById_OLD(id: string): Promise<Agent | null> {
     const { data, error } = await supabase
@@ -1329,12 +1431,12 @@ export async function getAgentById_OLD(id: string): Promise<Agent | null> {
         .select('*')
         .eq('id', id)
         .single()
-
+ 
     if (error) {
         console.error('Error fetching agent:', error)
         return null
     }
-
+ 
     return data
 }
 */

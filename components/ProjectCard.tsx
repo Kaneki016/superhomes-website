@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Property } from '@/lib/supabase'
+import { generatePropertyUrl } from '@/lib/slugUtils'
 
 interface ProjectCardProps {
     property: Property
@@ -48,7 +49,7 @@ export default function ProjectCard({ property }: ProjectCardProps) {
     }
 
     return (
-        <Link href={`/properties/${property.id}`}>
+        <Link href={generatePropertyUrl(property)}>
             <article className="group bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                 {/* Image */}
                 <div className="relative aspect-[4/3] overflow-hidden">

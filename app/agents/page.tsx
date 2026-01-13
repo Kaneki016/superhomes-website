@@ -276,9 +276,9 @@ function AgentsPageContent() {
                                                 {agent.name}
                                             </h3>
                                             <p className="text-gray-500 text-sm mt-1 line-clamp-1">{agent.agency || 'Independent Agent'}</p>
-                                            {agent.ren_number && (
+                                            {agent.agency_reg_no && (
                                                 <span className="inline-block mt-2 text-[10px] px-2 py-0.5 bg-gray-50 text-gray-400 border border-gray-200 rounded-full font-medium tracking-wide">
-                                                    {agent.ren_number}
+                                                    {agent.agency_reg_no}
                                                 </span>
                                             )}
                                         </div>

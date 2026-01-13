@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Property } from '@/lib/supabase'
+import { generatePropertyUrl } from '@/lib/slugUtils'
 
 interface MapPropertyCardProps {
     property: Property
@@ -83,7 +84,7 @@ export default function MapPropertyCard({
             onClick={() => onClick?.(property.id)}
             data-property-id={property.id}
         >
-            <Link href={`/properties/${property.id}`} className="flex gap-3 w-full p-2">
+            <Link href={generatePropertyUrl(property)} className="flex gap-3 w-full p-2">
                 {/* Image Thumbnail */}
                 <div className="map-card-image">
                     <img

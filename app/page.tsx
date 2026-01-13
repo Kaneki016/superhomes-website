@@ -598,7 +598,7 @@ export default function HomePage() {
                             </h2>
                             <div className="space-y-4">
                                 {/* Property Guides Card */}
-                                <Link href="/properties" className="group block">
+                                <Link href="/resources" className="group block">
                                     <div className="relative bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg hover:border-rose-200 transition-all">
                                         <div className="flex items-center">
                                             <div className="w-1/3 h-32 relative overflow-hidden">
@@ -628,7 +628,7 @@ export default function HomePage() {
                                         <div className="flex items-center">
                                             <div className="w-1/3 h-32 relative overflow-hidden">
                                                 <img
-                                                    src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=300&fit=crop"
+                                                    src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=400&h=300&crop=faces"
                                                     alt="Find Agents"
                                                     className="w-full h-full object-cover"
                                                 />

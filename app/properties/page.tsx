@@ -14,9 +14,10 @@ import EmptyState from '@/components/EmptyState'
 import PropertyMap, { MapBounds } from '@/components/PropertyMap'
 import MapPropertyCard from '@/components/MapPropertyCard'
 import SearchInput from '@/components/SearchInput'
-import { getPropertiesPaginated, getFilterOptions, searchAgents, getPropertiesByAgentIds, getDistinctStates } from '@/lib/database'
+import { getPropertiesPaginated, getFilterOptions, searchAgents, getPropertiesByAgentIds, getDistinctStates, getPropertyById } from '@/lib/database'
 import { Property, Agent } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
+import { generatePropertyUrl } from '@/lib/slugUtils'
 
 const PROPERTIES_PER_PAGE = 12
 
@@ -134,8 +135,15 @@ function PropertiesPageContent() {
         setVisibleMapPropertyIds(visibleIds)
     }, [])
 
-    const handlePropertySelect = useCallback((id: string) => {
-        router.push(`/properties/${id}`)
+    const handlePropertySelect = useCallback(async (id: string) => {
+        // Fetch property to generate slug URL 
+        const property = await getPropertyById(id)
+        if (property) {
+            router.push(generatePropertyUrl(property))
+        } else {
+            // Fallback to old URL if property not found
+            router.push(`/properties/${id}`)
+        }
     }, [router])
 
     const loadProperties = useCallback(async (page: number, resetList: boolean = false, overrideFilters?: typeof filters) => {
