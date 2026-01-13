@@ -12,10 +12,7 @@ interface ProjectCardProps {
 export default function ProjectCard({ property }: ProjectCardProps) {
     const formatPrice = (price: number | null | undefined) => {
         if (!price) return 'Price on Request'
-        if (price >= 1000000) {
-            return `RM ${(price / 1000000).toFixed(1)}M`
-        }
-        return `RM ${(price / 1000).toFixed(0)}K`
+        return `RM ${price.toLocaleString('en-MY')}`
     }
 
     // Extract bedrooms display

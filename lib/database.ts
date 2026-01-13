@@ -82,22 +82,65 @@ function transformListingToProperty(listing: any): Property {
         ? listing.listing_project_details[0]
         : listing.listing_project_details
 
-    if (saleDetails && saleDetails.price !== undefined) {
+    // Prioritize details based on listing_type
+    if (listing.listing_type === 'project' && projectDetails) {
+        property.project_details = projectDetails
+        const rawPrice = projectDetails.price || projectDetails.min_price
+
+        if (typeof rawPrice === 'number') {
+            property.price = rawPrice
+        } else if (typeof rawPrice === 'string') {
+            const cleaned = rawPrice.replace(/[^0-9.]/g, '')
+            const parsed = parseFloat(cleaned)
+            property.price = isNaN(parsed) ? null : parsed
+        } else {
+            property.price = null
+        }
+
+        // Debug
+        console.log(`[ProjectPrimary] ID: ${listing.id}, Raw: ${rawPrice}, Parsed: ${property.price}`)
+
+        if (projectDetails.tenure) property.tenure = projectDetails.tenure
+
+        // Use project-specific main image if available
+        if (projectDetails.main_image_url) {
+            property.main_image_url = projectDetails.main_image_url
+        }
+    } else if (listing.listing_type === 'sale' && saleDetails && saleDetails.price !== undefined) {
         property.sale_details = saleDetails
         property.price = saleDetails.price
         property.price_per_sqft = saleDetails.price_per_sqft
         property.tenure = saleDetails.tenure
         property.built_year = saleDetails.year_built
         property.listed_date = saleDetails.listing_date
-    } else if (rentDetails && rentDetails.monthly_rent !== undefined) {
+    } else if (listing.listing_type === 'rent' && rentDetails && rentDetails.monthly_rent !== undefined) {
         property.rent_details = rentDetails
+        property.property_type = property.property_type || 'Rental' // Ensure type is set
         property.price = rentDetails.monthly_rent // Use monthly_rent as price for display
         property.listed_date = rentDetails.listing_date
-    } else if (projectDetails) {
-        property.project_details = projectDetails
-    }
+    } else {
+        // Fallback for mixed/legacy data
+        if (saleDetails && saleDetails.price !== undefined) {
+            property.sale_details = saleDetails
+            property.price = saleDetails.price
+            property.tenure = saleDetails.tenure
+        } else if (rentDetails && rentDetails.monthly_rent !== undefined) {
+            property.rent_details = rentDetails
+            property.price = rentDetails.monthly_rent
+        } else if (projectDetails) {
+            property.project_details = projectDetails
+            const rawPrice = projectDetails.price || projectDetails.min_price
 
-    // Add contacts
+            if (typeof rawPrice === 'number') {
+                property.price = rawPrice
+            } else if (typeof rawPrice === 'string') {
+                const cleaned = rawPrice.replace(/[^0-9.]/g, '')
+                const parsed = parseFloat(cleaned)
+                property.price = isNaN(parsed) ? null : parsed
+            }
+            console.log(`[ProjectTransform] ID: ${listing.id}, Raw: ${rawPrice}, Final: ${property.price}`)
+        }
+    }                // Add contacts
     if (listing.listing_contacts && listing.listing_contacts.length > 0) {
         property.contacts = listing.listing_contacts
             .filter((lc: any) => lc.contacts)
@@ -186,7 +229,8 @@ export async function getPropertiesPaginated(
         maxPrice?: number
         bedrooms?: number
         state?: string
-        listingType?: 'sale' | 'rent' | 'project' // New filter for listing type
+        listingType?: 'sale' | 'rent' | 'project'
+        tenure?: string
     }
 ): Promise<{
     properties: Property[]
@@ -232,7 +276,7 @@ export async function getPropertiesPaginated(
         const { data, error } = await dataQuery
             .order('latitude', { ascending: false, nullsFirst: false })
             .order('scraped_at', { ascending: false })
-            .limit(500)
+            .limit(5000)
 
         if (error) {
             console.error('Error fetching properties:', error)
@@ -246,12 +290,16 @@ export async function getPropertiesPaginated(
         // Transform data
         let properties = data.map(transformListingToProperty)
 
-        // Filter by price if needed (after transformation since price comes from details)
+        // Filter by price if needed
         if (filters?.minPrice) {
             properties = properties.filter(p => (p.price || 0) >= filters.minPrice!)
         }
         if (filters?.maxPrice) {
             properties = properties.filter(p => (p.price || 0) <= filters.maxPrice!)
+        }
+        // Filter by tenure
+        if (filters?.tenure) {
+            properties = properties.filter(p => p.tenure && p.tenure.toLowerCase().includes(filters.tenure!.toLowerCase()))
         }
 
         // Filter by all keywords
@@ -279,16 +327,16 @@ export async function getPropertiesPaginated(
     }
 
     // Standard single-word or no location search
-    // When price filter is active, we need to fetch all matching records first,
-    // then filter by price, then paginate (since price is in a related table)
-    const hasPriceFilter = filters?.minPrice || filters?.maxPrice
+    // When price or tenure filter is active, we need to fetch all matching records first,
+    // then filter client-side (since these fields might be in related tables)
+    const hasPostFilter = filters?.minPrice || filters?.maxPrice || filters?.tenure
 
     let dataQuery = supabase
         .from('listings')
         .select(LISTING_SELECT_QUERY)
         .eq('is_active', true)
 
-    // Apply filters at database level (except price)
+    // Apply filters at database level
     if (filters?.location && words.length === 1) {
         const searchTerm = words[0]
         dataQuery = dataQuery.or(`title.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%,state.ilike.%${searchTerm}%,property_type.ilike.%${searchTerm}%`)
@@ -306,12 +354,12 @@ export async function getPropertiesPaginated(
         dataQuery = dataQuery.eq('total_bedrooms', filters.bedrooms)
     }
 
-    // If price filter is active, fetch more data and filter/paginate client-side
-    if (hasPriceFilter) {
+    // If post-fetch filter is active, fetch more data and filter/paginate client-side
+    if (hasPostFilter) {
         const { data, error } = await dataQuery
             .order('latitude', { ascending: false, nullsFirst: false })
             .order('scraped_at', { ascending: false })
-            .limit(2000) // Fetch more to allow for price filtering
+            .limit(5000) // Increase limit to capture more candidates
 
         if (error) {
             console.error('Error fetching properties:', error)
@@ -327,6 +375,10 @@ export async function getPropertiesPaginated(
         }
         if (filters?.maxPrice) {
             properties = properties.filter(p => (p.price || 0) <= filters.maxPrice!)
+        }
+        // Filter by tenure
+        if (filters?.tenure) {
+            properties = properties.filter(p => p.tenure && p.tenure.toLowerCase().includes(filters.tenure!.toLowerCase()))
         }
 
         // Paginate the filtered results

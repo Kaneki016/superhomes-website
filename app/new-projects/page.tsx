@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import ProjectCard from '@/components/ProjectCard'
@@ -9,14 +10,31 @@ import SearchInput from '@/components/SearchInput'
 import FilterChips from '@/components/FilterChips'
 import FilterModal from '@/components/FilterModal'
 import { Property } from '@/lib/supabase'
-import { getNewProjects, getDistinctStates, getFilterOptions } from '@/lib/database'
+import { getPropertiesPaginated, getDistinctStates, getFilterOptions } from '@/lib/database'
 import { ListSkeleton } from '@/components/SkeletonLoader'
 
 const ITEMS_PER_PAGE = 12
 
 export default function NewProjectsPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gray-50">
+                <Navbar />
+                <div className="container-custom py-6">
+                    <ListSkeleton count={8} type="property" />
+                </div>
+                <Footer />
+            </div>
+        }>
+            <NewProjectsContent />
+        </Suspense>
+    )
+}
+
+function NewProjectsContent() {
     const [projects, setProjects] = useState<Property[]>([])
     const [loading, setLoading] = useState(true)
+    const [totalCount, setTotalCount] = useState(0)
     const [stateOptions, setStateOptions] = useState<string[]>([])
     const [searchQuery, setSearchQuery] = useState('')
     const [filters, setFilters] = useState({
@@ -39,11 +57,7 @@ export default function NewProjectsPage() {
     const dropdownRef = useRef<HTMLDivElement>(null)
 
     // Pagination calculations
-    const totalPages = Math.ceil(projects.length / ITEMS_PER_PAGE)
-    const paginatedProjects = projects.slice(
-        (currentPage - 1) * ITEMS_PER_PAGE,
-        currentPage * ITEMS_PER_PAGE
-    )
+    const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
 
     // Reset to page 1 when filters change
     useEffect(() => {
@@ -55,8 +69,24 @@ export default function NewProjectsPage() {
         async function loadData() {
             setLoading(true)
             try {
-                const projectsData = await getNewProjects({ ...filters, location: searchQuery })
+                // Fetch paginated projects
+                const { properties: projectsData, totalCount: count } = await getPropertiesPaginated(
+                    currentPage,
+                    ITEMS_PER_PAGE,
+                    {
+                        location: searchQuery,
+                        propertyType: filters.propertyType,
+                        minPrice: filters.minPrice ? parseInt(filters.minPrice) : undefined,
+                        maxPrice: filters.maxPrice ? parseInt(filters.maxPrice) : undefined,
+                        bedrooms: filters.bedrooms ? parseInt(filters.bedrooms) : undefined,
+                        state: filters.state,
+                        tenure: filters.tenure,
+                        listingType: 'project'
+                    }
+                )
+
                 setProjects(projectsData)
+                setTotalCount(count)
 
                 if (stateOptions.length === 0) {
                     const states = await getDistinctStates()
@@ -76,7 +106,7 @@ export default function NewProjectsPage() {
         }
         loadData()
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [JSON.stringify(filters), searchQuery])
+    }, [currentPage, filters, searchQuery])
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -473,9 +503,9 @@ export default function NewProjectsPage() {
                 <div className="container-custom py-6">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                         <div>
-                            <h1 className="page-title">{loading ? 'Loading...' : `${projects.length} New Projects`}</h1>
+                            <h1 className="page-title">{loading ? 'Loading...' : `${totalCount} New Projects`}</h1>
                             <p className="page-subtitle">
-                                {!loading && `Showing ${Math.min(currentPage * ITEMS_PER_PAGE, projects.length)} of ${projects.length} results`}
+                                {!loading && `Showing ${projects.length > 0 ? (currentPage - 1) * ITEMS_PER_PAGE + 1 : 0} - ${(currentPage - 1) * ITEMS_PER_PAGE + projects.length} of ${totalCount} results`}
                             </p>
                         </div>
                     </div>
@@ -522,7 +552,7 @@ export default function NewProjectsPage() {
                     ) : (
                         <>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {paginatedProjects.map(project => (
+                                {projects.map(project => (
                                     <ProjectCard key={project.id} property={project} />
                                 ))}
                             </div>

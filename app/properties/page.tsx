@@ -1100,7 +1100,7 @@ function PropertiesPageContent() {
                                                     property={property}
                                                     isHovered={hoveredPropertyId === property.id}
                                                     onHover={setHoveredPropertyId}
-                                                    onClick={(id) => router.push(`/properties/${id}`)}
+                                                    onClick={(id) => handlePropertySelect(id)}
                                                 />
                                             ))}
                                             {visibleMapPropertyIds !== null && visibleMapPropertyIds.length === 0 && (
