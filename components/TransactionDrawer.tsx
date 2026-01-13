@@ -53,7 +53,8 @@ export default function TransactionDrawer({ transaction, onClose, isOpen }: Tran
                         <ShareButton
                             url={`${window.location.origin}/transaction-map?transaction_id=${transaction.id}`}
                             title={`Check out this property at ${transaction.address}`}
-                            className="!py-1.5 !px-3 !text-xs !bg-gray-100 !border-transparent hover:!bg-gray-200"
+                            variant="icon"
+                            className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
                         />
                         <button
                             onClick={onClose}

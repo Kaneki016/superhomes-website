@@ -1,14 +1,21 @@
 'use client'
 
 import { useState } from 'react'
+import { Check, Share2, Link as LinkIcon } from 'lucide-react'
 
 interface ShareButtonProps {
     url: string
     title?: string
     className?: string
+    variant?: 'default' | 'icon'
 }
 
-export default function ShareButton({ url, title = 'Check out this property', className = '' }: ShareButtonProps) {
+export default function ShareButton({
+    url,
+    title = 'Check out this property',
+    className = '',
+    variant = 'default'
+}: ShareButtonProps) {
     const [copied, setCopied] = useState(false)
 
     const handleShare = async () => {
@@ -34,6 +41,18 @@ export default function ShareButton({ url, title = 'Check out this property', cl
         }
     }
 
+    if (variant === 'icon') {
+        return (
+            <button
+                onClick={handleShare}
+                className={`flex items-center justify-center transition-all ${className}`}
+                title={copied ? 'Line Copied' : 'Share'}
+            >
+                {copied ? <Check size={20} className="text-green-600" /> : <Share2 size={20} />}
+            </button>
+        )
+    }
+
     return (
         <button
             onClick={handleShare}
@@ -41,16 +60,12 @@ export default function ShareButton({ url, title = 'Check out this property', cl
         >
             {copied ? (
                 <>
-                    <svg className="w-5 h-5" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
+                    <Check size={18} />
                     <span>Link Copied!</span>
                 </>
             ) : (
                 <>
-                    <svg className="w-5 h-5" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                    </svg>
+                    <Share2 size={18} />
                     <span>Share</span>
                 </>
             )}
