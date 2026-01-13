@@ -341,10 +341,10 @@ export async function getPropertiesPaginated(
         }
     }
 
-    // No price filter - use standard pagination at database level
+    // standard pagination
     const countQuery = supabase
         .from('listings')
-        .select('*', { count: 'exact', head: true })
+        .select('*', { count: 'estimated', head: true })
         .eq('is_active', true)
 
     // Apply same filters to count query
@@ -827,7 +827,7 @@ export async function getAgentsPaginated(page: number = 1, limit: number = 12): 
 
     const { count, error: countError } = await supabase
         .from('contacts')
-        .select('*', { count: 'exact', head: true })
+        .select('*', { count: 'estimated', head: true })
         .eq('contact_type', 'agent')
 
     if (countError) {
@@ -1117,6 +1117,15 @@ export async function getFilterOptions(): Promise<{
     bedrooms: number[]
     priceRange: { min: number; max: number }
 }> {
+    const cached = getCached<{
+        propertyTypes: string[]
+        locations: string[]
+        bedrooms: number[]
+        priceRange: { min: number; max: number }
+    }>('filter_options')
+
+    if (cached) return cached
+
     const { data, error } = await supabase
         .from('listings')
         .select('property_type, address, total_bedrooms')
@@ -1152,12 +1161,15 @@ export async function getFilterOptions(): Promise<{
 
     const priceRange = await getPriceRange()
 
-    return {
+    const result = {
         propertyTypes: [...propertyTypeSet].sort(),
         locations: [...locationSet].sort(),
         bedrooms: [...bedroomSet].sort((a, b) => a - b),
         priceRange
     }
+
+    setCache('filter_options', result, 300)
+    return result
 }
 
 // ============================================
@@ -1167,7 +1179,7 @@ export async function getFilterOptions(): Promise<{
 export async function getPropertyCount(): Promise<number> {
     const { count, error } = await supabase
         .from('listings')
-        .select('*', { count: 'exact', head: true })
+        .select('*', { count: 'estimated', head: true })
         .eq('is_active', true)
 
     if (error) {
@@ -1181,7 +1193,7 @@ export async function getPropertyCount(): Promise<number> {
 export async function getAgentCount(): Promise<number> {
     const { count, error } = await supabase
         .from('contacts')
-        .select('*', { count: 'exact', head: true })
+        .select('*', { count: 'estimated', head: true })
         .eq('contact_type', 'agent')
 
     if (error) {
@@ -1226,7 +1238,7 @@ export async function getRecentActivityCount(): Promise<number> {
 
     const { count, error } = await supabase
         .from('listings')
-        .select('*', { count: 'exact', head: true })
+        .select('*', { count: 'estimated', head: true })
         .eq('is_active', true)
         .gte('scraped_at', thirtyDaysAgo.toISOString())
 
