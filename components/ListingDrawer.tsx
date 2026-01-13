@@ -72,7 +72,8 @@ export default function ListingDrawer({ listing, onClose, isOpen }: ListingDrawe
                         <ShareButton
                             url={`${typeof window !== 'undefined' ? window.location.origin : ''}/properties/${listing.id}`}
                             title={`Check out ${listing.title}`}
-                            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                            variant="icon"
+                            className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
                         />
                         <button
                             onClick={onClose}

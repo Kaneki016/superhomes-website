@@ -26,6 +26,7 @@ export default function TransactionMapPage() {
     const [currentBounds, setCurrentBounds] = useState<{ minLat: number, maxLat: number, minLng: number, maxLng: number } | undefined>(undefined)
     const [polygonFilter, setPolygonFilter] = useState<{ lat: number, lng: number }[] | null>(null)
     const [isDrawing, setIsDrawing] = useState(false)
+    const [showTip, setShowTip] = useState(true) // Tip visibility state
     const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
     const [selectedListing, setSelectedListing] = useState<Property | null>(null) // Selected Listing State
 
@@ -285,8 +286,8 @@ export default function TransactionMapPage() {
                     <button
                         onClick={() => setShowMobileFilters(true)}
                         className={`flex items-center justify-center w-10 h-10 rounded-lg border transition-all ${(filters.minPrice > 0 || filters.maxPrice < 5000000 || filters.propertyType.length > 0)
-                                ? 'bg-primary-50 border-primary-200 text-primary-700'
-                                : 'bg-white border-gray-200 text-gray-700'
+                            ? 'bg-primary-50 border-primary-200 text-primary-700'
+                            : 'bg-white border-gray-200 text-gray-700'
                             }`}
                         title="Filters"
                     >
@@ -541,9 +542,17 @@ export default function TransactionMapPage() {
                         <span>✏️ Click on map to draw points. Click first point to finish.</span>
                         <button onClick={() => setIsDrawing(false)} className="ml-2 hover:bg-white/20 p-1 rounded-full"><X size={14} /></button>
                     </div>
-                ) : !polygonFilter && (
-                    <div className="absolute top-24 left-1/2 -translate-x-1/2 z-[1000] bg-white/90 text-gray-700 px-4 py-2 rounded-full backdrop-blur-sm shadow-md border border-gray-200 text-xs font-medium flex items-center gap-2 animate-in fade-in slide-in-from-top-4 pointer-events-none select-none">
-                        <span>💡 Tip: Use the <b>Draw Area</b> tool to filter properties</span>
+                ) : (!polygonFilter && showTip) && ( // Check showTip
+                    <div className="absolute top-24 left-1/2 -translate-x-1/2 z-[1000] bg-white/90 text-gray-700 px-4 py-2.5 rounded-full backdrop-blur-sm shadow-md border border-gray-200 text-xs font-medium flex items-center gap-3 animate-in fade-in slide-in-from-top-4 selection:bg-transparent">
+                        <div className="flex items-center gap-2">
+                            <span>💡 Tip: Use the <b>Draw Area</b> tool to filter properties</span>
+                        </div>
+                        <button
+                            onClick={() => setShowTip(false)}
+                            className="text-gray-400 hover:text-gray-600 p-0.5 rounded-full hover:bg-gray-100 transition-colors"
+                        >
+                            <X size={14} />
+                        </button>
                     </div>
                 )}
             </main>
@@ -573,7 +582,7 @@ export default function TransactionMapPage() {
                     ></div>
 
                     {/* Drawer Content */}
-                    <div className="absolute inset-x-0 bottom-0 bg-white rounded-t-2xl shadow-xl h-[80vh] flex flex-col animate-in slide-in-from-bottom duration-300">
+                    <div className="absolute inset-x-0 bottom-0 bg-white rounded-t-2xl shadow-xl h-[85vh] flex flex-col animate-in slide-in-from-bottom duration-300">
                         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                             <h2 className="text-lg font-bold text-gray-900">Filters</h2>
                             <button
@@ -610,8 +619,8 @@ export default function TransactionMapPage() {
                                 <div className="grid grid-cols-2 gap-2">
                                     {propertyTypes.map(type => (
                                         <label key={type} className={`flex items-center justify-center px-3 py-2 rounded-lg border text-sm cursor-pointer transition-all ${filters.propertyType.includes(type)
-                                                ? 'bg-primary-50 border-primary-200 text-primary-700 font-medium'
-                                                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                                            ? 'bg-primary-50 border-primary-200 text-primary-700 font-medium'
+                                            : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
                                             }`}>
                                             <input
                                                 type="checkbox"
@@ -641,8 +650,8 @@ export default function TransactionMapPage() {
                                                     else if (label === 'Last 5 Years') setRecency(label, 2020, 2024);
                                                 }}
                                                 className={`px-3 py-2 rounded-lg border text-sm transition-all ${isActive
-                                                        ? 'bg-primary-50 border-primary-200 text-primary-700 font-medium'
-                                                        : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                                                    ? 'bg-primary-50 border-primary-200 text-primary-700 font-medium'
+                                                    : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
                                                     }`}
                                             >
                                                 {label}
@@ -652,8 +661,8 @@ export default function TransactionMapPage() {
                                     <button
                                         onClick={() => setRecency('Date')}
                                         className={`px-3 py-2 rounded-lg border text-sm transition-all ${filters.recencyLabel === 'Date'
-                                                ? 'bg-primary-50 border-primary-200 text-primary-700 font-medium'
-                                                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                                            ? 'bg-primary-50 border-primary-200 text-primary-700 font-medium'
+                                            : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
                                             }`}
                                     >
                                         All Time

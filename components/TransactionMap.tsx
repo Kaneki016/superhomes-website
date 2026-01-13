@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { Transaction, Property } from '@/lib/supabase'
-import { Layers } from 'lucide-react'
+import { Layers, Plus, Minus, X } from 'lucide-react'
 
 
 interface TransactionMapProps {
@@ -487,22 +487,75 @@ export default function TransactionMap({
         <div className={`relative w-full h-full ${className}`}>
             <div ref={mapRef} className="w-full h-full rounded-lg" />
 
-            {/* Consolidated Map Controls (Bottom Right) */}
-            <div className={`absolute bottom-24 right-4 md:bottom-6 md:right-6 z-[1000] flex flex-col items-end gap-2`}>
+            {/* Mobile Controls Backdrop */}
+            {showControls && (
+                <div
+                    className="md:hidden fixed inset-0 z-[1000] bg-black/20 backdrop-blur-sm"
+                    onClick={() => setShowControls(false)}
+                ></div>
+            )}
 
-                {/* Mobile Toggle Button */}
+            {/* Consolidated Map Controls (Bottom Right) */}
+            <div className={`absolute bottom-24 right-4 md:bottom-6 md:right-6 z-[1000] flex flex-col items-end gap-3 pointer-events-none`}>
+
+                {/* Zoom Controls (Pointer Events Enable) */}
+                <div className="flex flex-col gap-1 pointer-events-auto shadow-lg rounded-lg border border-gray-200 bg-white overflow-hidden">
+                    <button
+                        onClick={() => mapInstanceRef.current?.zoomIn()}
+                        className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 text-gray-700 transition-colors border-b border-gray-100"
+                        title="Zoom In"
+                    >
+                        <Plus size={20} />
+                    </button>
+                    <button
+                        onClick={() => mapInstanceRef.current?.zoomOut()}
+                        className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 text-gray-700 transition-colors"
+                        title="Zoom Out"
+                    >
+                        <Minus size={20} />
+                    </button>
+                </div>
+
+                {/* Mobile Toggle Button (Pointer Events Enable) */}
                 <button
                     onClick={() => setShowControls(!showControls)}
-                    className="md:hidden w-10 h-10 bg-white rounded-full shadow-lg border border-gray-200 flex items-center justify-center text-gray-700"
+                    className="pointer-events-auto md:hidden w-10 h-10 bg-white rounded-lg shadow-lg border border-gray-200 flex items-center justify-center text-gray-700 active:scale-95 transition-transform"
                 >
                     <Layers size={20} />
                 </button>
 
-                {/* Controls Container */}
-                <div className={`${showControls ? 'block' : 'hidden'} md:block bg-white/95 backdrop-blur-sm p-4 rounded-lg shadow-lg border border-gray-200 text-sm min-w-[220px] transition-all origin-bottom-right animate-in fade-in slide-in-from-bottom-2`}>
+                {/* Controls Container (Layer & Legend) */}
+                {/* Mobile: Bottom Sheet | Desktop: Popover */}
+                <div className={`
+                    pointer-events-auto
+                    transition-all duration-300 ease-out
+                    
+                    /* Mobile Styles (Bottom Sheet) */
+                    ${showControls ? 'fixed bottom-0 left-0 right-0 translate-y-0 rounded-t-2xl' : 'fixed bottom-0 left-0 right-0 translate-y-full rounded-t-2xl'}
+                    md:static md:translate-y-0 md:rounded-lg
+                    
+                    /* Desktop Styles - Always Visible */
+                    md:opacity-100 md:scale-100 md:block
+                    
+                    bg-white/95 backdrop-blur-md md:backdrop-blur-sm 
+                    p-5 md:p-4 
+                    shadow-2xl md:shadow-lg 
+                    border-t md:border border-gray-200 
+                    text-sm 
+                    w-full md:w-auto md:min-w-[220px]
+                    z-[1100] md:z-auto
+                `}>
+
+                    {/* Mobile Sheet Header */}
+                    <div className="md:hidden flex justify-between items-center mb-6">
+                        <h3 className="font-bold text-gray-900 text-lg">Map Layers</h3>
+                        <button onClick={() => setShowControls(false)} className="p-1 rounded-full hover:bg-gray-100">
+                            <X size={20} className="text-gray-500" />
+                        </button>
+                    </div>
 
                     {/* Layers Section */}
-                    <div className="mb-4">
+                    <div className="mb-6 md:mb-4">
                         <span className="font-bold text-gray-900 uppercase text-xs tracking-wider block mb-2">Visible Layers</span>
                         <div className="space-y-1">
                             <label className="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-1.5 rounded transition-colors group">
@@ -556,43 +609,43 @@ export default function TransactionMap({
                     </div>
 
                     {/* Legend Items */}
-                    <div className="space-y-2">
+                    <div className="space-y-3 md:space-y-2 pb-safe md:pb-0"> {/* Added pb-safe for mobile home bar */}
                         {colorMode === 'price' ? (
                             <>
                                 <div className="flex items-center gap-3">
                                     <span className="w-3 h-3 rounded-full bg-green-500 shadow-sm ring-1 ring-white"></span>
-                                    <span className="text-gray-600 text-xs">&lt; RM 500k</span>
+                                    <span className="text-gray-600 text-sm md:text-xs">&lt; RM 500k</span>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <span className="w-3 h-3 rounded-full bg-yellow-500 shadow-sm ring-1 ring-white"></span>
-                                    <span className="text-gray-600 text-xs">RM 500k - 1M</span>
+                                    <span className="text-gray-600 text-sm md:text-xs">RM 500k - 1M</span>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <span className="w-3 h-3 rounded-full bg-red-500 shadow-sm ring-1 ring-white"></span>
-                                    <span className="text-gray-600 text-xs">&gt; RM 1M</span>
+                                    <span className="text-gray-600 text-sm md:text-xs">&gt; RM 1M</span>
                                 </div>
                             </>
                         ) : (
                             <>
                                 <div className="flex items-center gap-3">
                                     <span className="w-3 h-3 rounded-full bg-green-500 shadow-sm ring-1 ring-white"></span>
-                                    <span className="text-gray-600 text-xs">&lt; RM 400 psf</span>
+                                    <span className="text-gray-600 text-sm md:text-xs">&lt; RM 400 psf</span>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <span className="w-3 h-3 rounded-full bg-yellow-500 shadow-sm ring-1 ring-white"></span>
-                                    <span className="text-gray-600 text-xs">RM 400 - 800 psf</span>
+                                    <span className="text-gray-600 text-sm md:text-xs">RM 400 - 800 psf</span>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <span className="w-3 h-3 rounded-full bg-red-500 shadow-sm ring-1 ring-white"></span>
-                                    <span className="text-gray-600 text-xs">&gt; RM 800 psf</span>
+                                    <span className="text-gray-600 text-sm md:text-xs">&gt; RM 800 psf</span>
                                 </div>
                             </>
                         )}
 
-                        <div className="border-t border-gray-100 pt-2 mt-2">
+                        <div className="border-t border-gray-100 pt-3 md:pt-2 mt-2">
                             <div className="flex items-center gap-3">
                                 <span className="w-3 h-3 rounded-full bg-blue-500 shadow-sm ring-1 ring-white"></span>
-                                <span className="text-gray-600 text-xs">Active Listing</span>
+                                <span className="text-gray-600 text-sm md:text-xs">Active Listing</span>
                             </div>
                         </div>
                     </div>
