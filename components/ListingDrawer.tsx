@@ -120,16 +120,12 @@ export default function ListingDrawer({ listing, onClose, isOpen }: ListingDrawe
                                     <span>{psf > 0 ? `RM ${psf.toFixed(0)} per sqft` : 'Price on Ask'}</span>
                                 </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 gap-3">
                                 <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
                                     <span className="block text-[10px] uppercase text-gray-400 font-bold mb-1">Listed Date</span>
                                     <span className="font-semibold text-gray-900 text-sm">
                                         {listing.scraped_at ? formatDate(listing.scraped_at) : 'Recently'}
                                     </span>
-                                </div>
-                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                                    <span className="block text-[10px] uppercase text-gray-400 font-bold mb-1">Source</span>
-                                    <span className="font-semibold text-gray-900 text-sm uppercase tracking-tight">PropertyGuru</span>
                                 </div>
                             </div>
                         </div>
