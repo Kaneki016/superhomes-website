@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Property } from '@/lib/supabase'
 import { formatPrice } from '@/lib/utils'
+import { generatePropertyUrl } from '@/lib/slugUtils'
 
 interface PropertyMarkerPopupProps {
     property: Property
@@ -16,7 +17,7 @@ export default function PropertyMarkerPopup({ property }: PropertyMarkerPopupPro
 
     return (
         <Link
-            href={`/properties/${property.id}`}
+            href={generatePropertyUrl(property)}
             className="block w-64 hover:bg-gray-50 transition-colors rounded-lg overflow-hidden"
         >
             {/* Property Image */}

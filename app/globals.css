@@ -91,7 +91,7 @@
   }
 
   .property-card-avatar {
-    @apply w-9 h-9 rounded-full bg-gradient-primary flex-shrink-0 overflow-hidden flex items-center justify-center;
+    @apply relative w-9 h-9 rounded-full bg-gradient-primary flex-shrink-0 overflow-hidden flex items-center justify-center;
   }
 
   .contact-btn {

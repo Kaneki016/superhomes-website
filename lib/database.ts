@@ -1,4 +1,5 @@
 import { supabase, Property, Agent, Transaction, Contact, Listing, ListingSaleDetails, ListingRentDetails, ListingProjectDetails } from './supabase'
+import { extractSearchTermsFromSlug, extractIdFromSlug } from './slugUtils'
 
 // Simple in-memory cache for frequently accessed data
 interface CacheEntry<T> {
@@ -81,22 +82,62 @@ function transformListingToProperty(listing: any): Property {
         ? listing.listing_project_details[0]
         : listing.listing_project_details
 
-    if (saleDetails && saleDetails.price !== undefined) {
+    // Prioritize details based on listing_type
+    if (listing.listing_type === 'project' && projectDetails) {
+        property.project_details = projectDetails
+        const rawPrice = projectDetails.price || projectDetails.min_price
+
+        if (typeof rawPrice === 'number') {
+            property.price = rawPrice
+        } else if (typeof rawPrice === 'string') {
+            const cleaned = rawPrice.replace(/[^0-9.]/g, '')
+            const parsed = parseFloat(cleaned)
+            property.price = isNaN(parsed) ? null : parsed
+        } else {
+            property.price = null
+        }
+
+
+        if (projectDetails.tenure) property.tenure = projectDetails.tenure
+
+        // Use project-specific main image if available
+        if (projectDetails.main_image_url) {
+            property.main_image_url = projectDetails.main_image_url
+        }
+    } else if (listing.listing_type === 'sale' && saleDetails && saleDetails.price !== undefined) {
         property.sale_details = saleDetails
         property.price = saleDetails.price
         property.price_per_sqft = saleDetails.price_per_sqft
         property.tenure = saleDetails.tenure
         property.built_year = saleDetails.year_built
         property.listed_date = saleDetails.listing_date
-    } else if (rentDetails && rentDetails.monthly_rent !== undefined) {
+    } else if (listing.listing_type === 'rent' && rentDetails && rentDetails.monthly_rent !== undefined) {
         property.rent_details = rentDetails
+        property.property_type = property.property_type || 'Rental' // Ensure type is set
         property.price = rentDetails.monthly_rent // Use monthly_rent as price for display
         property.listed_date = rentDetails.listing_date
-    } else if (projectDetails) {
-        property.project_details = projectDetails
-    }
+    } else {
+        // Fallback for mixed/legacy data
+        if (saleDetails && saleDetails.price !== undefined) {
+            property.sale_details = saleDetails
+            property.price = saleDetails.price
+            property.tenure = saleDetails.tenure
+        } else if (rentDetails && rentDetails.monthly_rent !== undefined) {
+            property.rent_details = rentDetails
+            property.price = rentDetails.monthly_rent
+        } else if (projectDetails) {
+            property.project_details = projectDetails
+            const rawPrice = projectDetails.price || projectDetails.min_price
 
-    // Add contacts
+            if (typeof rawPrice === 'number') {
+                property.price = rawPrice
+            } else if (typeof rawPrice === 'string') {
+                const cleaned = rawPrice.replace(/[^0-9.]/g, '')
+                const parsed = parseFloat(cleaned)
+                property.price = isNaN(parsed) ? null : parsed
+            }
+        }
+    }                // Add contacts
     if (listing.listing_contacts && listing.listing_contacts.length > 0) {
         property.contacts = listing.listing_contacts
             .filter((lc: any) => lc.contacts)
@@ -185,7 +226,8 @@ export async function getPropertiesPaginated(
         maxPrice?: number
         bedrooms?: number
         state?: string
-        listingType?: 'sale' | 'rent' | 'project' // New filter for listing type
+        listingType?: 'sale' | 'rent' | 'project'
+        tenure?: string
     }
 ): Promise<{
     properties: Property[]
@@ -231,7 +273,7 @@ export async function getPropertiesPaginated(
         const { data, error } = await dataQuery
             .order('latitude', { ascending: false, nullsFirst: false })
             .order('scraped_at', { ascending: false })
-            .limit(500)
+            .limit(5000)
 
         if (error) {
             console.error('Error fetching properties:', error)
@@ -245,12 +287,16 @@ export async function getPropertiesPaginated(
         // Transform data
         let properties = data.map(transformListingToProperty)
 
-        // Filter by price if needed (after transformation since price comes from details)
+        // Filter by price if needed
         if (filters?.minPrice) {
             properties = properties.filter(p => (p.price || 0) >= filters.minPrice!)
         }
         if (filters?.maxPrice) {
             properties = properties.filter(p => (p.price || 0) <= filters.maxPrice!)
+        }
+        // Filter by tenure
+        if (filters?.tenure) {
+            properties = properties.filter(p => p.tenure && p.tenure.toLowerCase().includes(filters.tenure!.toLowerCase()))
         }
 
         // Filter by all keywords
@@ -278,16 +324,16 @@ export async function getPropertiesPaginated(
     }
 
     // Standard single-word or no location search
-    // When price filter is active, we need to fetch all matching records first,
-    // then filter by price, then paginate (since price is in a related table)
-    const hasPriceFilter = filters?.minPrice || filters?.maxPrice
+    // When price or tenure filter is active, we need to fetch all matching records first,
+    // then filter client-side (since these fields might be in related tables)
+    const hasPostFilter = filters?.minPrice || filters?.maxPrice || filters?.tenure
 
     let dataQuery = supabase
         .from('listings')
         .select(LISTING_SELECT_QUERY)
         .eq('is_active', true)
 
-    // Apply filters at database level (except price)
+    // Apply filters at database level
     if (filters?.location && words.length === 1) {
         const searchTerm = words[0]
         dataQuery = dataQuery.or(`title.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%,state.ilike.%${searchTerm}%,property_type.ilike.%${searchTerm}%`)
@@ -305,12 +351,12 @@ export async function getPropertiesPaginated(
         dataQuery = dataQuery.eq('total_bedrooms', filters.bedrooms)
     }
 
-    // If price filter is active, fetch more data and filter/paginate client-side
-    if (hasPriceFilter) {
+    // If post-fetch filter is active, fetch more data and filter/paginate client-side
+    if (hasPostFilter) {
         const { data, error } = await dataQuery
             .order('latitude', { ascending: false, nullsFirst: false })
             .order('scraped_at', { ascending: false })
-            .limit(2000) // Fetch more to allow for price filtering
+            .limit(5000) // Increase limit to capture more candidates
 
         if (error) {
             console.error('Error fetching properties:', error)
@@ -327,6 +373,10 @@ export async function getPropertiesPaginated(
         if (filters?.maxPrice) {
             properties = properties.filter(p => (p.price || 0) <= filters.maxPrice!)
         }
+        // Filter by tenure
+        if (filters?.tenure) {
+            properties = properties.filter(p => p.tenure && p.tenure.toLowerCase().includes(filters.tenure!.toLowerCase()))
+        }
 
         // Paginate the filtered results
         const totalCount = properties.length
@@ -340,10 +390,10 @@ export async function getPropertiesPaginated(
         }
     }
 
-    // No price filter - use standard pagination at database level
+    // standard pagination
     const countQuery = supabase
         .from('listings')
-        .select('*', { count: 'exact', head: true })
+        .select('*', { count: 'estimated', head: true })
         .eq('is_active', true)
 
     // Apply same filters to count query
@@ -499,8 +549,109 @@ export async function getPropertyById(id: string): Promise<Property | null> {
     if (error) {
         return null
     }
-
     return transformListingToProperty(data)
+}
+
+// Optimized property fetch using slug (Title Search + Short ID Check)
+// This is much faster than getPropertyByShortId because it uses the Title to filter via ILIKE (indexed-ish)
+export async function getPropertyBySlug(slug: string): Promise<Property | null> {
+    const shortId = extractIdFromSlug(slug)
+    const searchTerms = extractSearchTermsFromSlug(slug)
+
+    // Strategy 1: Try finding by Title + Short ID match (Fastest)
+    if (searchTerms && searchTerms.length > 2) {
+        // Create a specific pattern from all valid terms (e.g. "leisure farm" -> "%leisure%farm%")
+        const tokens = searchTerms.split(' ').filter(t => t.length > 2 && !STOPWORDS.has(t.toLowerCase()))
+
+        if (tokens.length > 0) {
+            const pattern = `%${tokens.join('%')}%`
+
+            const { data, error } = await supabase
+                .from('listings')
+                .select('id') // Fetch IDs only
+                .ilike('title', pattern)
+                .limit(1000) // 1000 IDs is lightweight (~30KB), covers almost all name collisions
+
+            if (!error && data && data.length > 0) {
+                // Check for ID match
+                const match = data.find((item: any) =>
+                    item.id && item.id.toLowerCase().endsWith(shortId.toLowerCase())
+                )
+
+                if (match) {
+                    return getPropertyById(match.id)
+                }
+            }
+        }
+    }
+
+    // Strategy 2: Fallback to slow scan if title mismatch (e.g. title changed)
+    return getPropertyByShortId(shortId)
+}
+
+// Fetch a property by the last 8 characters of its ID (for SEO-friendly slug URLs)
+// Uses a two-step approach: fetch only IDs first (lightweight), then fetch full property by UUID
+export async function getPropertyByShortId(shortId: string): Promise<Property | null> {
+    if (!shortId || shortId.length < 6) {
+        console.log('Invalid short ID:', shortId)
+        return null
+    }
+
+    const shortIdLower = shortId.toLowerCase()
+
+    // Step 1: Fetch only IDs (very lightweight - no joins, minimal data)
+    // Supabase default limit is 1000 rows, so we use that as our page size
+    let matchedId: string | null = null
+    let page = 0
+    const pageSize = 1000
+
+    while (!matchedId) {
+        const { data, error } = await supabase
+            .from('listings')
+            .select('id')
+            .range(page * pageSize, (page + 1) * pageSize - 1)
+
+        if (error) {
+            console.error('Error fetching property IDs:', error)
+            break
+        }
+
+        if (!data || data.length === 0) {
+            break
+        }
+
+        // Find matching ID in this batch
+        const match = data.find((item: { id: string }) =>
+            item.id && item.id.toLowerCase().endsWith(shortIdLower)
+        )
+
+        if (match) {
+            matchedId = match.id
+            break
+        }
+
+        // If we got less than pageSize, we've reached the end
+        if (data.length < pageSize) {
+            break
+        }
+
+        page++
+
+        // Safety limit (50 pages * 1000 = 50,000 properties max)
+        if (page > 50) {
+            console.log('Reached pagination limit while searching for short ID')
+            break
+        }
+    }
+
+    if (!matchedId) {
+        console.log('No property found with short ID:', shortId)
+        return null
+    }
+
+    // Step 2: Fetch the full property by exact UUID (single record, with all joins)
+    console.log('Found matching UUID:', matchedId, 'for short ID:', shortId)
+    return getPropertyById(matchedId)
 }
 
 // All Malaysian states and federal territories
@@ -725,7 +876,7 @@ export async function getAgentsPaginated(page: number = 1, limit: number = 12): 
 
     const { count, error: countError } = await supabase
         .from('contacts')
-        .select('*', { count: 'exact', head: true })
+        .select('*', { count: 'estimated', head: true })
         .eq('contact_type', 'agent')
 
     if (countError) {
@@ -1015,6 +1166,15 @@ export async function getFilterOptions(): Promise<{
     bedrooms: number[]
     priceRange: { min: number; max: number }
 }> {
+    const cached = getCached<{
+        propertyTypes: string[]
+        locations: string[]
+        bedrooms: number[]
+        priceRange: { min: number; max: number }
+    }>('filter_options')
+
+    if (cached) return cached
+
     const { data, error } = await supabase
         .from('listings')
         .select('property_type, address, total_bedrooms')
@@ -1050,12 +1210,15 @@ export async function getFilterOptions(): Promise<{
 
     const priceRange = await getPriceRange()
 
-    return {
+    const result = {
         propertyTypes: [...propertyTypeSet].sort(),
         locations: [...locationSet].sort(),
         bedrooms: [...bedroomSet].sort((a, b) => a - b),
         priceRange
     }
+
+    setCache('filter_options', result, 300)
+    return result
 }
 
 // ============================================
@@ -1065,7 +1228,7 @@ export async function getFilterOptions(): Promise<{
 export async function getPropertyCount(): Promise<number> {
     const { count, error } = await supabase
         .from('listings')
-        .select('*', { count: 'exact', head: true })
+        .select('*', { count: 'estimated', head: true })
         .eq('is_active', true)
 
     if (error) {
@@ -1079,7 +1242,7 @@ export async function getPropertyCount(): Promise<number> {
 export async function getAgentCount(): Promise<number> {
     const { count, error } = await supabase
         .from('contacts')
-        .select('*', { count: 'exact', head: true })
+        .select('*', { count: 'estimated', head: true })
         .eq('contact_type', 'agent')
 
     if (error) {
@@ -1124,7 +1287,7 @@ export async function getRecentActivityCount(): Promise<number> {
 
     const { count, error } = await supabase
         .from('listings')
-        .select('*', { count: 'exact', head: true })
+        .select('*', { count: 'estimated', head: true })
         .eq('is_active', true)
         .gte('scraped_at', thirtyDaysAgo.toISOString())
 
@@ -1313,15 +1476,15 @@ export async function getProperties_OLD(): Promise<Property[]> {
         .from('dup_properties')
         .select('*')
         .order('created_at', { ascending: false })
-
+ 
     if (error) {
         console.error('Error fetching properties:', error)
         return []
     }
-
+ 
     return data || []
 }
-
+ 
 // OLD: Fetch agent by ID from dup_agents
 export async function getAgentById_OLD(id: string): Promise<Agent | null> {
     const { data, error } = await supabase
@@ -1329,12 +1492,12 @@ export async function getAgentById_OLD(id: string): Promise<Agent | null> {
         .select('*')
         .eq('id', id)
         .single()
-
+ 
     if (error) {
         console.error('Error fetching agent:', error)
         return null
     }
-
+ 
     return data
 }
 */

@@ -82,6 +82,14 @@ export interface ListingProjectDetails {
     storeys: number | null
     unit_types: string[] | null
     status: string | null
+    min_price: number | null
+    max_price: number | null
+    price: number | null // Added per user request
+    tenure: string | null
+    project_name: string | null
+    developer_name: string | null
+    project_url: string | null
+    main_image_url: string | null // Added per user request
 }
 
 // Contact (agent/developer) - replaces Agent

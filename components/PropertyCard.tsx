@@ -2,14 +2,15 @@
 
 import { useState, useEffect, memo } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Property } from '@/lib/supabase'
-import { getAgentByAgentId } from '@/lib/database'
 import { Agent } from '@/lib/supabase'
 import { useFavorites } from '@/contexts/FavoritesContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { useCompare } from '@/contexts/CompareContext'
 import { formatPrice, formatPricePerSqft, getTimeAgo } from '@/lib/utils'
+import { generatePropertyUrl } from '@/lib/slugUtils'
 
 interface PropertyCardProps {
     property: Property
@@ -51,15 +52,10 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
             return
         }
 
-        // Fallback: fetch agent by ID
-        async function loadAgent() {
-            if (property.agent_id) {
-                const agentData = await getAgentByAgentId(property.agent_id)
-                setAgent(agentData)
-            }
-        }
-        loadAgent()
-    }, [property.agent_id, property.contacts, providedAgent])
+        // No fallback fetch - agent info is optional
+        // Cards render without agent header if not available
+        // This prevents N+1 queries when listing multiple properties
+    }, [property.contacts, providedAgent])
 
     // Get display price based on listing type
     const getDisplayPrice = () => {
@@ -120,7 +116,7 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
                 property.listing_type ? `*Listing:* For ${property.listing_type === 'sale' ? 'Sale' : property.listing_type === 'rent' ? 'Rent' : 'New Project'}` : null,
                 ``,
                 `View full details:`,
-                `${typeof window !== 'undefined' ? `${window.location.origin}/properties/${property.id}` : ''}`,
+                `${typeof window !== 'undefined' ? `${window.location.origin}${generatePropertyUrl(property)}` : ''}`,
                 ``,
                 propertyImage ? `Property Image:` : null,
                 propertyImage || null,
@@ -182,15 +178,17 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
             <div className="property-card-v2 group flex flex-col md:flex-row h-auto md:h-64 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 active:scale-[0.98] touch-manipulation">
                 {/* Image Section - Left (Desktop) / Top (Mobile) */}
                 <div className="w-full md:w-2/5 h-48 md:h-full relative overflow-hidden shrink-0">
-                    <Link href={`/properties/${property.id}`} className="block w-full h-full">
+                    <Link href={generatePropertyUrl(property)} className="block w-full h-full">
                         {images.length > 0 && !imageError ? (
-                            <img
+                            <Image
                                 src={images[currentImageIndex]}
                                 alt={propertyName}
-                                loading="lazy"
-                                className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-500 ${!imageLoaded ? 'blur-md scale-110' : 'blur-0 scale-100'}`}
+                                fill
+                                sizes="(max-width: 768px) 100vw, 50vw"
+                                className={`object-cover group-hover:scale-105 transition-all duration-500 ${!imageLoaded ? 'blur-md scale-110' : 'blur-0 scale-100'}`}
                                 onLoad={() => setImageLoaded(true)}
                                 onError={() => setImageError(true)}
+                                unoptimized
                             />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-100 to-primary-50">
@@ -223,7 +221,7 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
                         <div className="flex justify-between items-start mb-2 gap-4">
                             <div className="min-w-0 flex-1">
                                 <h3 className="text-lg md:text-xl font-bold text-gray-900 truncate group-hover:text-primary-600 transition-colors" title={propertyName}>
-                                    <Link href={`/properties/${property.id}`}>
+                                    <Link href={generatePropertyUrl(property)}>
                                         {propertyName}
                                     </Link>
                                 </h3>
@@ -279,9 +277,9 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
                     <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
                         {agent ? (
                             <Link href={`/agents/${agent.id || agent.agent_id}`} className="flex items-center gap-2 group/agent">
-                                <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200">
+                                <div className="relative w-8 h-8 rounded-full overflow-hidden bg-gray-200">
                                     {agent.photo_url ? (
-                                        <img src={agent.photo_url} alt={agent.name} className="w-full h-full object-cover" />
+                                        <Image src={agent.photo_url} alt={agent.name} fill className="object-cover" unoptimized />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center bg-primary-100 text-primary-600 text-xs font-bold">
                                             {agent.name.charAt(0)}
@@ -342,16 +340,14 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
             {agent && (
                 <div className="property-card-header">
                     <Link href={`/agents/${agent.id || agent.agent_id}`} className="flex items-center gap-3 flex-1 min-w-0 group">
-                        <div className="property-card-avatar group-hover:ring-2 group-hover:ring-primary-300 transition-all">
+                        <div className="relative property-card-avatar group-hover:ring-2 group-hover:ring-primary-300 transition-all">
                             {agent.photo_url ? (
-                                <img
+                                <Image
                                     src={agent.photo_url}
                                     alt={agent.name}
-                                    className="w-full h-full object-cover"
-                                    onError={(e) => {
-                                        e.currentTarget.style.display = 'none'
-                                        e.currentTarget.parentElement!.innerHTML = `<span class="text-white font-semibold text-sm">${agent.name.charAt(0)}</span>`
-                                    }}
+                                    fill
+                                    className="object-cover"
+                                    unoptimized
                                 />
                             ) : (
                                 <span className="text-white font-semibold text-sm">{agent.name.charAt(0)}</span>
@@ -368,7 +364,7 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
                 </div>
             )}
 
-            <Link href={`/properties/${property.id}`} className="block">
+            <Link href={generatePropertyUrl(property)} className="block">
                 {/* Image Gallery */}
                 <div
                     className="property-card-gallery"
@@ -376,13 +372,15 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
                     {/* Main Image */}
                     {images.length > 0 && !imageError ? (
                         <>
-                            <img
+                            <Image
                                 src={images[currentImageIndex]}
                                 alt={propertyName}
-                                loading="lazy"
-                                className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-500 ${!imageLoaded ? 'blur-md scale-110' : 'blur-0 scale-100'}`}
+                                fill
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                className={`object-cover group-hover:scale-105 transition-all duration-500 ${!imageLoaded ? 'blur-md scale-110' : 'blur-0 scale-100'}`}
                                 onLoad={() => setImageLoaded(true)}
                                 onError={() => setImageError(true)}
+                                unoptimized
                             />
                             {!imageLoaded && (
                                 <div className="absolute inset-0 bg-gray-200 animate-pulse" />
@@ -467,7 +465,7 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
 
             {/* Card Content */}
             <div className="property-card-content">
-                <Link href={`/properties/${property.id}`} className="block">
+                <Link href={generatePropertyUrl(property)} className="block">
                     {/* Price Section */}
                     <div className="price-section">
                         <div className="price-main">{getDisplayPrice()}</div>
