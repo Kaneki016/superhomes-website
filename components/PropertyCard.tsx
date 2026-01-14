@@ -277,7 +277,7 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
                     <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
                         {agent ? (
                             <Link href={`/agents/${agent.id || agent.agent_id}`} className="flex items-center gap-2 group/agent">
-                                <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200">
+                                <div className="relative w-8 h-8 rounded-full overflow-hidden bg-gray-200">
                                     {agent.photo_url ? (
                                         <Image src={agent.photo_url} alt={agent.name} fill className="object-cover" unoptimized />
                                     ) : (
@@ -340,7 +340,7 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
             {agent && (
                 <div className="property-card-header">
                     <Link href={`/agents/${agent.id || agent.agent_id}`} className="flex items-center gap-3 flex-1 min-w-0 group">
-                        <div className="property-card-avatar group-hover:ring-2 group-hover:ring-primary-300 transition-all">
+                        <div className="relative property-card-avatar group-hover:ring-2 group-hover:ring-primary-300 transition-all">
                             {agent.photo_url ? (
                                 <Image
                                     src={agent.photo_url}
