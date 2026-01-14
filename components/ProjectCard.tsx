@@ -1,15 +1,21 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Property } from '@/lib/supabase'
 import { generatePropertyUrl } from '@/lib/slugUtils'
+
+// Reliable placeholder image for new projects
+const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=600&fit=crop'
 
 interface ProjectCardProps {
     property: Property
 }
 
 export default function ProjectCard({ property }: ProjectCardProps) {
+    const [imageError, setImageError] = useState(false)
+
     const formatPrice = (price: number | null | undefined) => {
         if (!price) return 'Price on Request'
         return `RM ${price.toLocaleString('en-MY')}`
@@ -45,17 +51,34 @@ export default function ProjectCard({ property }: ProjectCardProps) {
         return shortNames[type] || type.split(' ')[0]
     }
 
+    // Get valid image URL
+    const getImageUrl = () => {
+        if (imageError) return PLACEHOLDER_IMAGE
+        return property.main_image_url || property.images?.[0] || PLACEHOLDER_IMAGE
+    }
+
     return (
         <Link href={generatePropertyUrl(property)}>
             <article className="group bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                 {/* Image */}
-                <div className="relative aspect-[4/3] overflow-hidden">
-                    <Image
-                        src={property.main_image_url || property.images?.[0] || '/placeholder-property.jpg'}
-                        alt={propertyName}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
+                <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
+                    {!imageError ? (
+                        <Image
+                            src={getImageUrl()}
+                            alt={propertyName}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                            onError={() => setImageError(true)}
+                            unoptimized
+                        />
+                    ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100">
+                            <svg className="w-16 h-16 text-primary-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                            <span className="text-primary-400 text-sm font-medium">New Project</span>
+                        </div>
+                    )}
                     {/* Gradient overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
