@@ -4,6 +4,7 @@ import { Transaction } from '@/lib/supabase'
 import MortgageCalculator from './MortgageCalculator'
 import NearbyAmenities from './NearbyAmenities'
 import ShareButton from './ShareButton'
+import { formatPriceFull } from '@/lib/utils'
 
 interface TransactionDrawerProps {
     transaction: Transaction | null
@@ -23,14 +24,6 @@ export default function TransactionDrawer({ transaction, onClose, isOpen }: Tran
             month: 'long',
             day: 'numeric'
         })
-    }
-
-    const formatPrice = (price: number) => {
-        return new Intl.NumberFormat('en-MY', {
-            style: 'currency',
-            currency: 'MYR',
-            maximumFractionDigits: 0
-        }).format(price)
     }
 
     const psf = transaction.price / (transaction.built_up_sqft || transaction.land_area_sqft || 1)
@@ -93,7 +86,7 @@ export default function TransactionDrawer({ transaction, onClose, isOpen }: Tran
                         <div className="space-y-4">
                             <div className="bg-primary-50 rounded-xl p-5 border border-primary-100">
                                 <span className="text-primary-600 text-xs font-bold uppercase tracking-wider mb-1 block">Transacted Price</span>
-                                <div className="text-3xl font-extrabold text-gray-900 mb-1">{formatPrice(transaction.price)}</div>
+                                <div className="text-3xl font-extrabold text-gray-900 mb-1">{formatPriceFull(transaction.price)}</div>
                                 <div className="flex items-center gap-2 text-primary-700 font-medium text-sm">
                                     <DollarSign size={14} />
                                     <span>RM {psf.toFixed(0)} per sqft</span>

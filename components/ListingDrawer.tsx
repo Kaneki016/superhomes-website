@@ -5,6 +5,7 @@ import { Property } from '@/lib/supabase'
 import MortgageCalculator from './MortgageCalculator'
 import ShareButton from './ShareButton'
 import { generatePropertyUrl } from '@/lib/slugUtils'
+import { formatPriceFull } from '@/lib/utils'
 
 interface ListingDrawerProps {
     listing: Property | null
@@ -24,15 +25,6 @@ export default function ListingDrawer({ listing, onClose, isOpen }: ListingDrawe
             month: 'long',
             day: 'numeric'
         })
-    }
-
-    const formatPrice = (price?: number | null) => {
-        if (!price) return 'Price on Ask'
-        return new Intl.NumberFormat('en-MY', {
-            style: 'currency',
-            currency: 'MYR',
-            maximumFractionDigits: 0
-        }).format(price)
     }
 
     // Use pre-calculated psf if available, else calculate
@@ -115,7 +107,7 @@ export default function ListingDrawer({ listing, onClose, isOpen }: ListingDrawe
                         <div className="space-y-4">
                             <div className="bg-primary-50 rounded-xl p-5 border border-primary-100">
                                 <span className="text-primary-600 text-xs font-bold uppercase tracking-wider mb-1 block">Listing Price</span>
-                                <div className="text-3xl font-extrabold text-gray-900 mb-1">{formatPrice(listing.price)}</div>
+                                <div className="text-3xl font-extrabold text-gray-900 mb-1">{formatPriceFull(listing.price)}</div>
                                 <div className="flex items-center gap-2 text-primary-700 font-medium text-sm">
                                     <DollarSign size={14} />
                                     <span>{psf > 0 ? `RM ${psf.toFixed(0)} per sqft` : 'Price on Ask'}</span>

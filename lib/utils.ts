@@ -62,3 +62,33 @@ export function formatNumber(num: number | null | undefined): string {
     if (num === null || num === undefined) return '-'
     return num.toLocaleString('en-MY')
 }
+
+/**
+ * Format a price in short format for map markers and badges
+ * @param price - The price to format
+ * @param isRent - Whether this is a rental price (adds /mo suffix)
+ * @returns Short formatted price string (e.g., "RM 1.2M", "RM 500K/mo")
+ */
+export function formatPriceShort(price: number | null | undefined, isRent: boolean = false): string {
+    if (!price) return isRent ? 'POA' : 'Price on Request'
+    const suffix = isRent ? '/mo' : ''
+    if (price >= 1000000) {
+        return `RM ${(price / 1000000).toFixed(1)}M${suffix}`
+    }
+    return `RM ${(price / 1000).toFixed(0)}K${suffix}`
+}
+
+/**
+ * Format a price for full currency display (e.g., "MYR 1,500,000")
+ * Used in transaction drawers and detailed views
+ * @param price - The price to format
+ * @returns Full formatted price string
+ */
+export function formatPriceFull(price: number | null | undefined): string {
+    if (!price) return 'Price on Ask'
+    return new Intl.NumberFormat('en-MY', {
+        style: 'currency',
+        currency: 'MYR',
+        maximumFractionDigits: 0
+    }).format(price)
+}

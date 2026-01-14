@@ -2,9 +2,9 @@
 
 import { useState, useEffect, memo } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Property } from '@/lib/supabase'
-import { getAgentByAgentId } from '@/lib/database'
 import { Agent } from '@/lib/supabase'
 import { useFavorites } from '@/contexts/FavoritesContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -52,15 +52,10 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
             return
         }
 
-        // Fallback: fetch agent by ID
-        async function loadAgent() {
-            if (property.agent_id) {
-                const agentData = await getAgentByAgentId(property.agent_id)
-                setAgent(agentData)
-            }
-        }
-        loadAgent()
-    }, [property.agent_id, property.contacts, providedAgent])
+        // No fallback fetch - agent info is optional
+        // Cards render without agent header if not available
+        // This prevents N+1 queries when listing multiple properties
+    }, [property.contacts, providedAgent])
 
     // Get display price based on listing type
     const getDisplayPrice = () => {
@@ -185,13 +180,15 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
                 <div className="w-full md:w-2/5 h-48 md:h-full relative overflow-hidden shrink-0">
                     <Link href={generatePropertyUrl(property)} className="block w-full h-full">
                         {images.length > 0 && !imageError ? (
-                            <img
+                            <Image
                                 src={images[currentImageIndex]}
                                 alt={propertyName}
-                                loading="lazy"
-                                className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-500 ${!imageLoaded ? 'blur-md scale-110' : 'blur-0 scale-100'}`}
+                                fill
+                                sizes="(max-width: 768px) 100vw, 50vw"
+                                className={`object-cover group-hover:scale-105 transition-all duration-500 ${!imageLoaded ? 'blur-md scale-110' : 'blur-0 scale-100'}`}
                                 onLoad={() => setImageLoaded(true)}
                                 onError={() => setImageError(true)}
+                                unoptimized
                             />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-100 to-primary-50">
@@ -282,7 +279,7 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
                             <Link href={`/agents/${agent.id || agent.agent_id}`} className="flex items-center gap-2 group/agent">
                                 <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200">
                                     {agent.photo_url ? (
-                                        <img src={agent.photo_url} alt={agent.name} className="w-full h-full object-cover" />
+                                        <Image src={agent.photo_url} alt={agent.name} fill className="object-cover" unoptimized />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center bg-primary-100 text-primary-600 text-xs font-bold">
                                             {agent.name.charAt(0)}
@@ -345,14 +342,12 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
                     <Link href={`/agents/${agent.id || agent.agent_id}`} className="flex items-center gap-3 flex-1 min-w-0 group">
                         <div className="property-card-avatar group-hover:ring-2 group-hover:ring-primary-300 transition-all">
                             {agent.photo_url ? (
-                                <img
+                                <Image
                                     src={agent.photo_url}
                                     alt={agent.name}
-                                    className="w-full h-full object-cover"
-                                    onError={(e) => {
-                                        e.currentTarget.style.display = 'none'
-                                        e.currentTarget.parentElement!.innerHTML = `<span class="text-white font-semibold text-sm">${agent.name.charAt(0)}</span>`
-                                    }}
+                                    fill
+                                    className="object-cover"
+                                    unoptimized
                                 />
                             ) : (
                                 <span className="text-white font-semibold text-sm">{agent.name.charAt(0)}</span>
@@ -377,13 +372,15 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
                     {/* Main Image */}
                     {images.length > 0 && !imageError ? (
                         <>
-                            <img
+                            <Image
                                 src={images[currentImageIndex]}
                                 alt={propertyName}
-                                loading="lazy"
-                                className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-500 ${!imageLoaded ? 'blur-md scale-110' : 'blur-0 scale-100'}`}
+                                fill
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                className={`object-cover group-hover:scale-105 transition-all duration-500 ${!imageLoaded ? 'blur-md scale-110' : 'blur-0 scale-100'}`}
                                 onLoad={() => setImageLoaded(true)}
                                 onError={() => setImageError(true)}
+                                unoptimized
                             />
                             {!imageLoaded && (
                                 <div className="absolute inset-0 bg-gray-200 animate-pulse" />

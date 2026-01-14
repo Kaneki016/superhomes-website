@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, Suspense, useMemo } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
@@ -11,9 +12,33 @@ import FilterModal from '@/components/FilterModal'
 import FilterChips from '@/components/FilterChips'
 import { ListSkeleton } from '@/components/SkeletonLoader'
 import EmptyState from '@/components/EmptyState'
-import PropertyMap, { MapBounds } from '@/components/PropertyMap'
-import MapPropertyCard from '@/components/MapPropertyCard'
 import SearchInput from '@/components/SearchInput'
+
+// Dynamic imports for map components - only loaded when map view is active
+const PropertyMap = dynamic(
+    () => import('@/components/PropertyMap').then(mod => mod.default),
+    {
+        ssr: false,
+        loading: () => (
+            <div className="h-full w-full bg-gray-100 animate-pulse flex items-center justify-center">
+                <div className="text-center">
+                    <svg className="w-12 h-12 text-gray-400 mx-auto mb-2\" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                    </svg>
+                    <span className="text-gray-500 text-sm">Loading map...</span>
+                </div>
+            </div>
+        )
+    }
+)
+
+const MapPropertyCard = dynamic(
+    () => import('@/components/MapPropertyCard'),
+    { ssr: false }
+)
+
+// Type import for MapBounds (doesn't affect bundle)
+import type { MapBounds } from '@/components/PropertyMap'
 import { getPropertiesPaginated, getFilterOptions, searchAgents, getPropertiesByAgentIds, getDistinctStates, getPropertyById } from '@/lib/database'
 import { Property, Agent } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'

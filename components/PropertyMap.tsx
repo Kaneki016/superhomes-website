@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { renderToString } from 'react-dom/server'
 import { Property } from '@/lib/supabase'
 import PropertyMarkerPopup from './PropertyMarkerPopup'
+import { formatPriceShort } from '@/lib/utils'
 
 // Export bounds interface for parent components
 export interface MapBounds {
@@ -174,7 +175,7 @@ export default function PropertyMap({
                 const position: [number, number] = [property.latitude, property.longitude]
                 bounds.push(position)
 
-                const priceLabel = formatPrice(property.price)
+                const priceLabel = formatPriceShort(property.price)
                 const isHovered = hoveredPropertyId === property.id
                 const isSelected = selectedPropertyId === property.id
 
@@ -251,13 +252,7 @@ export default function PropertyMap({
         })
     }, [hoveredPropertyId, selectedPropertyId, leaflet])
 
-    const formatPrice = (price: number | null | undefined) => {
-        if (!price) return 'POA'
-        if (price >= 1000000) {
-            return `RM${(price / 1000000).toFixed(1)}M`
-        }
-        return `RM${(price / 1000).toFixed(0)}K`
-    }
+    // Using shared formatPriceShort from lib/utils.ts
 
     const handleZoomIn = useCallback(() => {
         if (mapInstanceRef.current) {

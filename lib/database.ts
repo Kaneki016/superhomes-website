@@ -97,8 +97,6 @@ function transformListingToProperty(listing: any): Property {
             property.price = null
         }
 
-        // Debug
-        console.log(`[ProjectPrimary] ID: ${listing.id}, Raw: ${rawPrice}, Parsed: ${property.price}`)
 
         if (projectDetails.tenure) property.tenure = projectDetails.tenure
 
@@ -138,7 +136,6 @@ function transformListingToProperty(listing: any): Property {
                 const parsed = parseFloat(cleaned)
                 property.price = isNaN(parsed) ? null : parsed
             }
-            console.log(`[ProjectTransform] ID: ${listing.id}, Raw: ${rawPrice}, Final: ${property.price}`)
         }
     }                // Add contacts
     if (listing.listing_contacts && listing.listing_contacts.length > 0) {

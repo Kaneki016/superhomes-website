@@ -1,8 +1,10 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { Property } from '@/lib/supabase'
 import { generatePropertyUrl } from '@/lib/slugUtils'
+import { formatPriceShort } from '@/lib/utils'
 
 interface MapPropertyCardProps {
     property: Property
@@ -19,13 +21,6 @@ export default function MapPropertyCard({
     onHover,
     onClick
 }: MapPropertyCardProps) {
-    const formatPrice = (price: number | null | undefined, isRent: boolean = false) => {
-        if (!price) return 'Price on Request'
-        if (price >= 1000000) {
-            return isRent ? `RM ${(price / 1000000).toFixed(2)}M/mo` : `RM ${(price / 1000000).toFixed(2)}M`
-        }
-        return isRent ? `RM ${(price / 1000).toFixed(0)}K/mo` : `RM ${(price / 1000).toFixed(0)}K`
-    }
 
     const propertyName = property.title || property.property_name || 'Property'
     const propertySize = property.floor_area_sqft || property.size
@@ -86,12 +81,14 @@ export default function MapPropertyCard({
         >
             <Link href={generatePropertyUrl(property)} className="flex gap-3 w-full p-2">
                 {/* Image Thumbnail */}
-                <div className="map-card-image">
-                    <img
+                <div className="map-card-image relative">
+                    <Image
                         src={getPropertyImage()}
                         alt={propertyName}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
+                        fill
+                        className="object-cover"
+                        sizes="80px"
+                        unoptimized
                     />
                     {getShortType() && (
                         <span className="map-card-badge">
@@ -104,7 +101,7 @@ export default function MapPropertyCard({
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
                     {/* Price */}
                     <div className="text-lg font-bold text-gray-900">
-                        {formatPrice(property.price, property.listing_type === 'rent')}
+                        {formatPriceShort(property.price, property.listing_type === 'rent')}
                     </div>
 
                     {/* Title/Address - truncated */}
