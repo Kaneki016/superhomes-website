@@ -1,7 +1,10 @@
 /**
  * Nearby Amenities Utility
  * Fetches nearby points of interest using OpenStreetMap Overpass API
+ * with persistent Supabase caching to reduce API calls
  */
+
+import { supabase } from './supabase'
 
 // Types
 export interface Amenity {
@@ -29,7 +32,43 @@ interface OverpassElement {
 
 // Simple in-memory cache (key: "lat,lng", value: amenities)
 const cache: Map<string, { data: Amenity[]; timestamp: number }> = new Map()
-const CACHE_TTL = 1000 * 60 * 60 // 1 hour
+const CACHE_TTL = 1000 * 60 * 60 // 1 hour (in-memory)
+
+/**
+ * Get cached amenities from Supabase database
+ * Cache is permanent - no expiration
+ */
+async function getCachedAmenities(coordKey: string): Promise<Amenity[] | null> {
+    try {
+        const { data, error } = await supabase
+            .from('cached_amenities')
+            .select('amenities')
+            .eq('coord_key', coordKey)
+            .single()
+
+        if (error || !data) return null
+
+        return data.amenities as Amenity[]
+    } catch {
+        return null
+    }
+}
+
+/**
+ * Store amenities in Supabase database cache (permanent)
+ */
+async function setCachedAmenities(coordKey: string, amenities: Amenity[]): Promise<void> {
+    try {
+        await supabase
+            .from('cached_amenities')
+            .upsert({
+                coord_key: coordKey,
+                amenities
+            }, { onConflict: 'coord_key' })
+    } catch {
+        // Silently fail - caching is not critical
+    }
+}
 
 /**
  * Calculate distance between two points using Haversine formula
@@ -153,11 +192,21 @@ export async function getNearbyAmenities(
 
     if (isNaN(latNum) || isNaN(lonNum)) return []
 
-    // Check cache first
+    // Generate cache key (rounded to 4 decimals = ~11m precision)
     const cacheKey = `${latNum.toFixed(4)},${lonNum.toFixed(4)}`
-    const cached = cache.get(cacheKey)
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-        return cached.data
+
+    // 1. Check in-memory cache first (fastest)
+    const memCached = cache.get(cacheKey)
+    if (memCached && Date.now() - memCached.timestamp < CACHE_TTL) {
+        return memCached.data
+    }
+
+    // 2. Check Supabase database cache (persistent across sessions)
+    const dbCached = await getCachedAmenities(cacheKey)
+    if (dbCached) {
+        // Also populate in-memory cache for faster subsequent access
+        cache.set(cacheKey, { data: dbCached, timestamp: Date.now() })
+        return dbCached
     }
 
     const radiusMeters = radiusKm * 1000
@@ -195,8 +244,11 @@ export async function getNearbyAmenities(
             const data = await response.json()
             const amenities = parseOverpassResponse(data.elements || [], latNum, lonNum)
 
-            // Cache the result
+            // Cache the result in memory
             cache.set(cacheKey, { data: amenities, timestamp: Date.now() })
+
+            // Also cache in Supabase for persistence (non-blocking)
+            setCachedAmenities(cacheKey, amenities)
 
             return amenities
         } catch (error) {

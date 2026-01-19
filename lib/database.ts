@@ -862,7 +862,67 @@ export async function searchAgents(query: string, limit: number = 5): Promise<Ag
         return []
     }
 
-    return (data || []).map(transformContactToAgent)
+    // Transform contacts to agents
+    const agents = (data || []).map(transformContactToAgent)
+
+    // Enrich with dynamic listing counts
+    return enrichAgentsWithListingCounts(agents)
+}
+
+/**
+ * Enrich agents with dynamic listing counts from the database
+ * Calculates actual sale/rent counts from active listings
+ */
+async function enrichAgentsWithListingCounts(agents: Agent[]): Promise<Agent[]> {
+    if (agents.length === 0) return agents
+
+    const enrichedAgents = await Promise.all(
+        agents.map(async (agent) => {
+            try {
+                // Get all listing IDs for this agent
+                const { data: listingContacts } = await supabase
+                    .from('listing_contacts')
+                    .select('listing_id')
+                    .eq('contact_id', agent.id)
+
+                if (!listingContacts || listingContacts.length === 0) {
+                    return {
+                        ...agent,
+                        listings_for_sale_count: 0,
+                        listings_for_rent_count: 0
+                    }
+                }
+
+                const listingIds = listingContacts.map(lc => lc.listing_id)
+
+                // Get active listings and their types
+                const { data: listings } = await supabase
+                    .from('listings')
+                    .select('listing_type')
+                    .in('id', listingIds)
+                    .eq('is_active', true)
+
+                const saleCount = listings?.filter(l => l.listing_type === 'sale').length || 0
+                const rentCount = listings?.filter(l => l.listing_type === 'rent').length || 0
+
+                return {
+                    ...agent,
+                    listings_for_sale_count: saleCount,
+                    listings_for_rent_count: rentCount
+                }
+            } catch (error) {
+                console.error(`Error enriching agent ${agent.id}:`, error)
+                // Return agent with zero counts on error
+                return {
+                    ...agent,
+                    listings_for_sale_count: 0,
+                    listings_for_rent_count: 0
+                }
+            }
+        })
+    )
+
+    return enrichedAgents
 }
 
 // Fetch agents with pagination
@@ -899,8 +959,14 @@ export async function getAgentsPaginated(page: number = 1, limit: number = 12): 
     const totalCount = count || 0
     const hasMore = (page * limit) < totalCount
 
+    // Transform contacts to agents
+    const agents = (data || []).map(transformContactToAgent)
+
+    // Enrich with dynamic listing counts
+    const enrichedAgents = await enrichAgentsWithListingCounts(agents)
+
     return {
-        agents: (data || []).map(transformContactToAgent),
+        agents: enrichedAgents,
         totalCount,
         hasMore
     }

@@ -13,6 +13,11 @@ export const metadata: Metadata = {
     title: 'SuperHomes - Your Premium Property Marketplace',
     description: 'Find your dream property with SuperHomes. Browse thousands of properties for sale including condos, landed properties, and commercial spaces.',
     keywords: 'property, real estate, homes for sale, condos, landed property, Malaysia property',
+    icons: {
+        icon: '/logo-icon.svg',
+        shortcut: '/logo-icon.svg',
+        apple: '/logo-icon.svg',
+    },
 }
 
 export default function RootLayout({
