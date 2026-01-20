@@ -950,90 +950,185 @@ export async function getAgentsPaginated(
     const from = (page - 1) * limit
     const to = from + limit - 1
 
-    // Determine which states to query
-    const statesToQuery = state ? [state] : PRIORITY_STATES
+    // If a specific state is selected, filter and rank by that state
+    if (state) {
+        // Get all active listings in the selected state with their agents
+        const { data: stateListings, error: listingsError } = await supabase
+            .from('listings')
+            .select('id, listing_type, state, listing_contacts(contact_id)')
+            .eq('is_active', true)
+            .ilike('state', `%${state}%`)
 
-    // Get all active listings in the target state(s) with their agents
-    let listingsQuery = supabase
+        if (listingsError) {
+            console.error('Error fetching state listings:', listingsError)
+            return { agents: [], totalCount: 0, hasMore: false }
+        }
+
+        // Group by contact_id and count listings
+        const agentCounts = new Map<string, { sale: number, rent: number, total: number }>()
+
+        stateListings?.forEach((listing: any) => {
+            const contactId = listing.listing_contacts?.[0]?.contact_id
+            if (!contactId) return
+
+            const counts = agentCounts.get(contactId) || { sale: 0, rent: 0, total: 0 }
+            if (listing.listing_type === 'sale') counts.sale++
+            if (listing.listing_type === 'rent') counts.rent++
+            counts.total++
+            agentCounts.set(contactId, counts)
+        })
+
+        // Sort agent IDs by total listing count (descending)
+        const sortedAgentIds = Array.from(agentCounts.entries())
+            .sort((a, b) => b[1].total - a[1].total)
+            .map(([id]) => id)
+
+        const totalCount = sortedAgentIds.length
+        const hasMore = (page * limit) < totalCount
+
+        // Paginate the sorted agent IDs
+        const paginatedIds = sortedAgentIds.slice(from, to + 1)
+
+        if (paginatedIds.length === 0) {
+            return { agents: [], totalCount: 0, hasMore: false }
+        }
+
+        // Fetch agent details for the paginated IDs
+        const { data, error } = await supabase
+            .from('contacts')
+            .select('*')
+            .in('id', paginatedIds)
+            .eq('contact_type', 'agent')
+
+        if (error) {
+            console.error('Error fetching agents:', error)
+            return { agents: [], totalCount, hasMore: false }
+        }
+
+        // Transform and maintain sort order
+        const agentsMap = new Map(
+            (data || []).map(contact => [contact.id, transformContactToAgent(contact)])
+        )
+
+        const agents = paginatedIds
+            .map(id => agentsMap.get(id))
+            .filter((agent): agent is Agent => agent !== undefined)
+
+        // Enrich with state-specific listing counts
+        const enrichedAgents = agents.map(agent => {
+            const counts = agentCounts.get(agent.id)
+            return {
+                ...agent,
+                listings_for_sale_count: counts?.sale || 0,
+                listings_for_rent_count: counts?.rent || 0
+            }
+        })
+
+        return {
+            agents: enrichedAgents,
+            totalCount,
+            hasMore
+        }
+    }
+
+    // No state selected: Show ALL 6,827 agents, prioritizing those with listings in priority states
+    // Get all agents first
+    const { data: allAgents, error: agentsError } = await supabase
+        .from('contacts')
+        .select('*')
+        .eq('contact_type', 'agent')
+
+    if (agentsError) {
+        console.error('Error fetching agents:', agentsError)
+        return { agents: [], totalCount: 0, hasMore: false }
+    }
+
+    // Get all active listings with their agents
+    const { data: allListings, error: listingsError } = await supabase
         .from('listings')
         .select('id, listing_type, state, listing_contacts(contact_id)')
         .eq('is_active', true)
 
-    // Apply state filter
-    if (state) {
-        listingsQuery = listingsQuery.ilike('state', `%${state}%`)
-    } else {
-        // For priority states, use OR condition
-        const stateConditions = PRIORITY_STATES.map(s => `state.ilike.%${s}%`).join(',')
-        listingsQuery = listingsQuery.or(stateConditions)
+    // Count listings per agent and track if they have priority state listings
+    const agentStats = new Map<string, {
+        sale: number,
+        rent: number,
+        total: number,
+        priorityCount: number // Count of listings in priority states
+    }>()
+
+    if (!listingsError && allListings) {
+        allListings.forEach((listing: any) => {
+            const contactId = listing.listing_contacts?.[0]?.contact_id
+            if (!contactId) return
+
+            const stats = agentStats.get(contactId) || { sale: 0, rent: 0, total: 0, priorityCount: 0 }
+            if (listing.listing_type === 'sale') stats.sale++
+            if (listing.listing_type === 'rent') stats.rent++
+            stats.total++
+
+            // Check if listing is in a priority state
+            const listingState = listing.state?.toLowerCase() || ''
+            const isPriority = PRIORITY_STATES.some(ps => listingState.includes(ps.toLowerCase()))
+            if (isPriority) stats.priorityCount++
+
+            agentStats.set(contactId, stats)
+        })
     }
 
-    const { data: stateListings, error: listingsError } = await listingsQuery
+    // Sort agents: 
+    // 1. Agents with priority state listings first (sorted by priority listing count)
+    // 2. Then agents with any listings (sorted by total listing count)
+    // 3. Then agents with no listings (sorted alphabetically by name)
+    const sortedAgents = allAgents
+        .map(contact => {
+            const stats = agentStats.get(contact.id) || { sale: 0, rent: 0, total: 0, priorityCount: 0 }
+            return {
+                agent: transformContactToAgent(contact),
+                stats
+            }
+        })
+        .sort((a, b) => {
+            // Group 1: Agents with priority state listings
+            const aHasPriority = a.stats.priorityCount > 0
+            const bHasPriority = b.stats.priorityCount > 0
 
-    if (listingsError) {
-        console.error('Error fetching state listings:', listingsError)
-        return { agents: [], totalCount: 0, hasMore: false }
-    }
+            if (aHasPriority && !bHasPriority) return -1
+            if (!aHasPriority && bHasPriority) return 1
 
-    // Group by contact_id and count listings
-    const agentCounts = new Map<string, { sale: number, rent: number, total: number }>()
+            // Within priority agents, sort by priority count
+            if (aHasPriority && bHasPriority) {
+                return b.stats.priorityCount - a.stats.priorityCount
+            }
 
-    stateListings?.forEach((listing: any) => {
-        const contactId = listing.listing_contacts?.[0]?.contact_id
-        if (!contactId) return
+            // Group 2: Agents with any listings (but not in priority states)
+            const aHasListings = a.stats.total > 0
+            const bHasListings = b.stats.total > 0
 
-        const counts = agentCounts.get(contactId) || { sale: 0, rent: 0, total: 0 }
-        if (listing.listing_type === 'sale') counts.sale++
-        if (listing.listing_type === 'rent') counts.rent++
-        counts.total++
-        agentCounts.set(contactId, counts)
-    })
+            if (aHasListings && !bHasListings) return -1
+            if (!aHasListings && bHasListings) return 1
 
-    // Sort agent IDs by total listing count (descending)
-    const sortedAgentIds = Array.from(agentCounts.entries())
-        .sort((a, b) => b[1].total - a[1].total)
-        .map(([id]) => id)
+            // Within agents with listings, sort by total count
+            if (aHasListings && bHasListings) {
+                return b.stats.total - a.stats.total
+            }
 
-    const totalCount = sortedAgentIds.length
+            // Group 3: Agents with no listings - sort alphabetically
+            return a.agent.name.localeCompare(b.agent.name)
+        })
+
+    const totalCount = sortedAgents.length
     const hasMore = (page * limit) < totalCount
 
-    // Paginate the sorted agent IDs
-    const paginatedIds = sortedAgentIds.slice(from, to + 1)
+    // Paginate
+    const paginatedAgents = sortedAgents.slice(from, to + 1)
 
-    if (paginatedIds.length === 0) {
-        return { agents: [], totalCount: 0, hasMore: false }
-    }
-
-    // Fetch agent details for the paginated IDs
-    const { data, error } = await supabase
-        .from('contacts')
-        .select('*')
-        .in('id', paginatedIds)
-        .eq('contact_type', 'agent')
-
-    if (error) {
-        console.error('Error fetching agents:', error)
-        return { agents: [], totalCount, hasMore: false }
-    }
-
-    // Transform and maintain sort order
-    const agentsMap = new Map(
-        (data || []).map(contact => [contact.id, transformContactToAgent(contact)])
-    )
-
-    const agents = paginatedIds
-        .map(id => agentsMap.get(id))
-        .filter((agent): agent is Agent => agent !== undefined)
-
-    // Enrich with state-specific listing counts
-    const enrichedAgents = agents.map(agent => {
-        const counts = agentCounts.get(agent.id)
-        return {
-            ...agent,
-            listings_for_sale_count: counts?.sale || 0,
-            listings_for_rent_count: counts?.rent || 0
-        }
-    })
+    // Enrich with listing counts
+    const enrichedAgents = paginatedAgents.map(({ agent, stats }) => ({
+        ...agent,
+        listings_for_sale_count: stats.sale,
+        listings_for_rent_count: stats.rent
+    }))
 
     return {
         agents: enrichedAgents,

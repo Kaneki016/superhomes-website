@@ -259,7 +259,7 @@ function AgentsPageContent() {
                                     }}
                                 >
                                     <option value="" className="bg-gray-900 text-white font-semibold py-3">
-                                        All States (Priority: KL, Selangor, Johor, Penang)
+                                        All States
                                     </option>
                                     <option disabled className="bg-gray-800 text-gray-500 text-xs py-1 font-normal">
                                         ── Select a specific state ──
