@@ -284,7 +284,7 @@ function AgentsPageContent() {
                         {/* Quick Stats */}
                         <div className="mt-8 flex justify-center gap-8 text-sm">
                             <div className="text-center">
-                                <div className="text-2xl font-bold">{totalCount.toLocaleString()}</div>
+                                <div className="text-2xl font-bold">{loading ? '...' : totalCount.toLocaleString()}</div>
                                 <div className="text-white/70">Property Agents</div>
                             </div>
                             <div className="w-px bg-white/20"></div>
@@ -294,8 +294,8 @@ function AgentsPageContent() {
                             </div>
                             <div className="w-px bg-white/20"></div>
                             <div className="text-center">
-                                <div className="text-2xl font-bold">Trusted</div>
-                                <div className="text-white/70">Verified Agents</div>
+                                <div className="text-2xl font-bold">Verified</div>
+                                <div className="text-white/70">Trusted Agents</div>
                             </div>
                         </div>
                     </div>
