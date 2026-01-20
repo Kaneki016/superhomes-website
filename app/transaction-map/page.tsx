@@ -9,8 +9,9 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import TransactionDrawer from '@/components/TransactionDrawer'
 import ListingDrawer from '@/components/ListingDrawer'
-import { Filter, Search, X, ChevronDown, Check, Map as MapIcon, Layers, Info, ArrowLeft } from 'lucide-react'
+import { Filter, Search, X, ChevronDown, Check, Map as MapIcon, Layers, Info, ArrowLeft, BarChart2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import TrendChart from '@/components/TrendChart'
 
 
 export default function TransactionMapPage() {
@@ -22,6 +23,7 @@ export default function TransactionMapPage() {
     const [tenures, setTenures] = useState<string[]>([])
 
     // Visualization State
+    const [viewMode, setViewMode] = useState<'map' | 'trends'>('map')
     const [colorMode, setColorMode] = useState<'price' | 'psf'>('price')
     const [currentBounds, setCurrentBounds] = useState<{ minLat: number, maxLat: number, minLng: number, maxLng: number } | undefined>(undefined)
     const [polygonFilter, setPolygonFilter] = useState<{ lat: number, lng: number }[] | null>(null)
@@ -453,11 +455,31 @@ export default function TransactionMapPage() {
                         {/* Draw Button */}
                         <button
                             onClick={() => setIsDrawing(!isDrawing)}
-                            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm border transition-all font-medium ${isDrawing ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'}`}
+                            className={`items-center gap-2 px-3 py-2 rounded-lg text-sm border transition-all font-medium ${viewMode === 'map' ? 'flex' : 'hidden'} ${isDrawing ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'}`}
                             title={polygonFilter ? "Redraw Area" : "Draw Search Area"}
                         >
                             <span>{isDrawing ? 'Drawing...' : (polygonFilter ? '✏️ Redraw' : '✏️ Draw Area')}</span>
                         </button>
+
+                        <div className="h-6 w-px bg-gray-300 mx-2 hidden md:block"></div>
+
+                        {/* View Mode Toggle */}
+                        <div className="flex bg-gray-100 p-1 rounded-lg border border-gray-200">
+                            <button
+                                onClick={() => setViewMode('map')}
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'map' ? 'bg-white shadow-sm text-primary-700' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                <MapIcon size={16} />
+                                <span>Map</span>
+                            </button>
+                            <button
+                                onClick={() => setViewMode('trends')}
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'trends' ? 'bg-white shadow-sm text-primary-700' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                <BarChart2 size={16} />
+                                <span>Trends</span>
+                            </button>
+                        </div>
                     </div>
 
                     <div className="flex-grow"></div>
@@ -503,59 +525,70 @@ export default function TransactionMapPage() {
                 </div>
 
                 {/* Map Area */}
-                <div className="flex-grow relative w-full h-full">
+                <div className="flex-grow relative w-full h-full overflow-hidden">
                     {loading && (
                         <div className="absolute top-4 right-4 z-[1000]">
                             <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-gray-200 flex items-center gap-2">
                                 <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary-600 border-t-transparent"></div>
-                                <span className="text-xs font-medium text-primary-700">Updating map...</span>
+                                <span className="text-xs font-medium text-primary-700">Updating data...</span>
                             </div>
                         </div>
                     )}
-                    <TransactionMap
-                        transactions={displayTransactions}
-                        listings={displayListings} // Pass filtered listings
-                        hoveredId={hoveredId}
-                        onHover={setHoveredId}
-                        colorMode={colorMode}
-                        onColorModeChange={setColorMode}
-                        onBoundsChange={setCurrentBounds}
-                        onPolygonComplete={setPolygonFilter}
-                        polygon={polygonFilter}
-                        isDrawing={isDrawing}
-                        onDrawStop={() => setIsDrawing(false)}
-                        onSelectTransaction={(transaction) => {
-                            setSelectedTransaction(transaction)
-                            setSelectedListing(null)
-                        }}
-                        onSelectListing={(listing) => {
-                            setSelectedListing(listing)
-                            setSelectedTransaction(null)
-                        }}
-                        className="w-full h-full"
-                    />
+
+                    <div className={`w-full h-full ${viewMode === 'map' ? 'block' : 'hidden'}`}>
+                        <TransactionMap
+                            transactions={displayTransactions}
+                            listings={displayListings} // Pass filtered listings
+                            hoveredId={hoveredId}
+                            onHover={setHoveredId}
+                            colorMode={colorMode}
+                            onColorModeChange={setColorMode}
+                            onBoundsChange={setCurrentBounds}
+                            onPolygonComplete={setPolygonFilter}
+                            polygon={polygonFilter}
+                            isDrawing={isDrawing}
+                            onDrawStop={() => setIsDrawing(false)}
+                            onSelectTransaction={(transaction) => {
+                                setSelectedTransaction(transaction)
+                                setSelectedListing(null)
+                            }}
+                            onSelectListing={(listing) => {
+                                setSelectedListing(listing)
+                                setSelectedTransaction(null)
+                            }}
+                            className="w-full h-full"
+                        />
+                    </div>
+                    {viewMode === 'trends' && (
+                        <TrendChart
+                            transactions={displayTransactions}
+                            className="w-full h-full"
+                        />
+                    )}
                 </div>
 
                 {/* Draw Control Hint Overlay */}
-                {isDrawing ? (
-                    <div className="absolute top-24 left-1/2 -translate-x-1/2 z-[2000] bg-gray-900/80 text-white px-4 py-2 rounded-full backdrop-blur-sm shadow-lg text-sm font-medium flex items-center gap-2 animate-in fade-in slide-in-from-top-4">
-                        <span>✏️ Click on map to draw points. Click first point to finish.</span>
-                        <button onClick={() => setIsDrawing(false)} className="ml-2 hover:bg-white/20 p-1 rounded-full"><X size={14} /></button>
-                    </div>
-                ) : (!polygonFilter && showTip) && ( // Check showTip
-                    <div className="absolute top-24 left-1/2 -translate-x-1/2 z-[1000] bg-white/90 text-gray-700 px-4 py-2.5 rounded-full backdrop-blur-sm shadow-md border border-gray-200 text-xs font-medium flex items-center gap-3 animate-in fade-in slide-in-from-top-4 selection:bg-transparent">
-                        <div className="flex items-center gap-2">
-                            <span>💡 Tip: Use the <b>Draw Area</b> tool to filter properties</span>
+                {
+                    viewMode === 'map' && isDrawing ? (
+                        <div className="absolute top-24 left-1/2 -translate-x-1/2 z-[2000] bg-gray-900/80 text-white px-4 py-2 rounded-full backdrop-blur-sm shadow-lg text-sm font-medium flex items-center gap-2 animate-in fade-in slide-in-from-top-4">
+                            <span>✏️ Click on map to draw points. Click first point to finish.</span>
+                            <button onClick={() => setIsDrawing(false)} className="ml-2 hover:bg-white/20 p-1 rounded-full"><X size={14} /></button>
                         </div>
-                        <button
-                            onClick={() => setShowTip(false)}
-                            className="text-gray-400 hover:text-gray-600 p-0.5 rounded-full hover:bg-gray-100 transition-colors"
-                        >
-                            <X size={14} />
-                        </button>
-                    </div>
-                )}
-            </main>
+                    ) : (viewMode === 'map' && !polygonFilter && showTip) && ( // Check showTip
+                        <div className="absolute top-24 left-1/2 -translate-x-1/2 z-[1000] bg-white/90 text-gray-700 px-4 py-2.5 rounded-full backdrop-blur-sm shadow-md border border-gray-200 text-xs font-medium flex items-center gap-3 animate-in fade-in slide-in-from-top-4 selection:bg-transparent">
+                            <div className="flex items-center gap-2">
+                                <span>💡 Tip: Use the <b>Draw Area</b> tool to filter properties</span>
+                            </div>
+                            <button
+                                onClick={() => setShowTip(false)}
+                                className="text-gray-400 hover:text-gray-600 p-0.5 rounded-full hover:bg-gray-100 transition-colors"
+                            >
+                                <X size={14} />
+                            </button>
+                        </div>
+                    )
+                }
+            </main >
 
             {/* Modals & Drawers */}
             {/* Calculator Modal Removed */}
@@ -573,118 +606,120 @@ export default function TransactionMapPage() {
             />
 
             {/* Mobile Filter Drawer */}
-            {showMobileFilters && (
-                <div className="fixed inset-0 z-[3000]">
-                    {/* Backdrop */}
-                    <div
-                        className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
-                        onClick={() => setShowMobileFilters(false)}
-                    ></div>
+            {
+                showMobileFilters && (
+                    <div className="fixed inset-0 z-[3000]">
+                        {/* Backdrop */}
+                        <div
+                            className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+                            onClick={() => setShowMobileFilters(false)}
+                        ></div>
 
-                    {/* Drawer Content */}
-                    <div className="absolute inset-x-0 bottom-0 bg-white rounded-t-2xl shadow-xl h-[85vh] flex flex-col animate-in slide-in-from-bottom duration-300">
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                            <h2 className="text-lg font-bold text-gray-900">Filters</h2>
-                            <button
-                                onClick={() => setShowMobileFilters(false)}
-                                className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
-                            >
-                                <X size={20} />
-                            </button>
-                        </div>
+                        {/* Drawer Content */}
+                        <div className="absolute inset-x-0 bottom-0 bg-white rounded-t-2xl shadow-xl h-[85vh] flex flex-col animate-in slide-in-from-bottom duration-300">
+                            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                                <h2 className="text-lg font-bold text-gray-900">Filters</h2>
+                                <button
+                                    onClick={() => setShowMobileFilters(false)}
+                                    className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
 
-                        <div className="flex-grow overflow-y-auto p-6 space-y-8">
-                            {/* Price Range */}
-                            <div>
-                                <h3 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide">Price Range</h3>
-                                <div className="space-y-4">
-                                    <div className="flex justify-between text-sm text-gray-600 mb-2">
-                                        <span>Min: RM {(filters.minPrice / 1000).toFixed(0)}k</span>
-                                        <span>Max: {filters.maxPrice >= 5000000 ? 'Any' : `RM ${(filters.maxPrice / 1000).toFixed(0)}k`}</span>
+                            <div className="flex-grow overflow-y-auto p-6 space-y-8">
+                                {/* Price Range */}
+                                <div>
+                                    <h3 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide">Price Range</h3>
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between text-sm text-gray-600 mb-2">
+                                            <span>Min: RM {(filters.minPrice / 1000).toFixed(0)}k</span>
+                                            <span>Max: {filters.maxPrice >= 5000000 ? 'Any' : `RM ${(filters.maxPrice / 1000).toFixed(0)}k`}</span>
+                                        </div>
+                                        <RangeSlider
+                                            min={0}
+                                            max={5000000}
+                                            step={50000}
+                                            value={[filters.minPrice, filters.maxPrice]}
+                                            onChange={([min, max]) => setFilters(prev => ({ ...prev, minPrice: min, maxPrice: max }))}
+                                            className="w-full"
+                                        />
                                     </div>
-                                    <RangeSlider
-                                        min={0}
-                                        max={5000000}
-                                        step={50000}
-                                        value={[filters.minPrice, filters.maxPrice]}
-                                        onChange={([min, max]) => setFilters(prev => ({ ...prev, minPrice: min, maxPrice: max }))}
-                                        className="w-full"
-                                    />
                                 </div>
+
+                                {/* Property Type */}
+                                <div>
+                                    <h3 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide">Property Type</h3>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {propertyTypes.map(type => (
+                                            <label key={type} className={`flex items-center justify-center px-3 py-2 rounded-lg border text-sm cursor-pointer transition-all ${filters.propertyType.includes(type)
+                                                ? 'bg-primary-50 border-primary-200 text-primary-700 font-medium'
+                                                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                                                }`}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={filters.propertyType.includes(type)}
+                                                    onChange={() => toggleFilter('propertyType', type)}
+                                                    className="hidden" // Hide default checkbox, use styling
+                                                />
+                                                <span>{type}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Recency */}
+                                <div>
+                                    <h3 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide">Recency</h3>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {['2024', '2023', 'Last 2 Years', 'Last 5 Years'].map((label) => {
+                                            const isActive = filters.recencyLabel === label;
+                                            return (
+                                                <button
+                                                    key={label}
+                                                    onClick={() => {
+                                                        if (label === '2024') setRecency(label, 2024, 2024);
+                                                        else if (label === '2023') setRecency(label, 2023, 2023);
+                                                        else if (label === 'Last 2 Years') setRecency(label, 2023, 2024);
+                                                        else if (label === 'Last 5 Years') setRecency(label, 2020, 2024);
+                                                    }}
+                                                    className={`px-3 py-2 rounded-lg border text-sm transition-all ${isActive
+                                                        ? 'bg-primary-50 border-primary-200 text-primary-700 font-medium'
+                                                        : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                                                        }`}
+                                                >
+                                                    {label}
+                                                </button>
+                                            )
+                                        })}
+                                        <button
+                                            onClick={() => setRecency('Date')}
+                                            className={`px-3 py-2 rounded-lg border text-sm transition-all ${filters.recencyLabel === 'Date'
+                                                ? 'bg-primary-50 border-primary-200 text-primary-700 font-medium'
+                                                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                                                }`}
+                                        >
+                                            All Time
+                                        </button>
+                                    </div>
+                                </div>
+
                             </div>
 
-                            {/* Property Type */}
-                            <div>
-                                <h3 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide">Property Type</h3>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {propertyTypes.map(type => (
-                                        <label key={type} className={`flex items-center justify-center px-3 py-2 rounded-lg border text-sm cursor-pointer transition-all ${filters.propertyType.includes(type)
-                                            ? 'bg-primary-50 border-primary-200 text-primary-700 font-medium'
-                                            : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
-                                            }`}>
-                                            <input
-                                                type="checkbox"
-                                                checked={filters.propertyType.includes(type)}
-                                                onChange={() => toggleFilter('propertyType', type)}
-                                                className="hidden" // Hide default checkbox, use styling
-                                            />
-                                            <span>{type}</span>
-                                        </label>
-                                    ))}
-                                </div>
+                            {/* Drawer Footer */}
+                            <div className="p-6 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
+                                <button
+                                    onClick={() => setShowMobileFilters(false)}
+                                    className="w-full bg-primary-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-primary-700 transition-transform active:scale-95"
+                                >
+                                    Show Results
+                                </button>
                             </div>
-
-                            {/* Recency */}
-                            <div>
-                                <h3 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide">Recency</h3>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {['2024', '2023', 'Last 2 Years', 'Last 5 Years'].map((label) => {
-                                        const isActive = filters.recencyLabel === label;
-                                        return (
-                                            <button
-                                                key={label}
-                                                onClick={() => {
-                                                    if (label === '2024') setRecency(label, 2024, 2024);
-                                                    else if (label === '2023') setRecency(label, 2023, 2023);
-                                                    else if (label === 'Last 2 Years') setRecency(label, 2023, 2024);
-                                                    else if (label === 'Last 5 Years') setRecency(label, 2020, 2024);
-                                                }}
-                                                className={`px-3 py-2 rounded-lg border text-sm transition-all ${isActive
-                                                    ? 'bg-primary-50 border-primary-200 text-primary-700 font-medium'
-                                                    : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
-                                                    }`}
-                                            >
-                                                {label}
-                                            </button>
-                                        )
-                                    })}
-                                    <button
-                                        onClick={() => setRecency('Date')}
-                                        className={`px-3 py-2 rounded-lg border text-sm transition-all ${filters.recencyLabel === 'Date'
-                                            ? 'bg-primary-50 border-primary-200 text-primary-700 font-medium'
-                                            : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
-                                            }`}
-                                    >
-                                        All Time
-                                    </button>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        {/* Drawer Footer */}
-                        <div className="p-6 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
-                            <button
-                                onClick={() => setShowMobileFilters(false)}
-                                className="w-full bg-primary-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-primary-700 transition-transform active:scale-95"
-                            >
-                                Show Results
-                            </button>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     )
 }
 

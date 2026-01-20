@@ -9,3 +9,6 @@ build
 
 # Local Netlify folder
 .netlify
+
+# Docker local overrides
+docker-compose.override.yml
