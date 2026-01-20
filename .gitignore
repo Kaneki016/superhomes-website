@@ -1,6 +1,7 @@
 node_modules
 .next
 .env*.local
+.env
 .vercel
 *.log
 .DS_Store
@@ -9,3 +10,6 @@ build
 
 # Local Netlify folder
 .netlify
+
+# Docker local overrides
+docker-compose.override.yml

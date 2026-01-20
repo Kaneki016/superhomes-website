@@ -9,10 +9,11 @@ import Footer from '@/components/Footer'
 import PropertyCard from '@/components/PropertyCard'
 import PropertyDescription from '@/components/PropertyDescription'
 import ImageGallery from '@/components/ImageGallery'
-import { getPropertyBySlug, getAgentByAgentId, getSimilarProperties } from '@/lib/database'
-import { Property, Agent } from '@/lib/supabase'
+import { Property, Agent, Transaction } from '@/lib/supabase'
 import { useFavorites } from '@/contexts/FavoritesContext'
 import { useAuth } from '@/contexts/AuthContext'
+import { getPropertyBySlug, getAgentByAgentId, getSimilarProperties, getTransactions } from '@/lib/database'
+import TrendChart from '@/components/TrendChart'
 import ShareButton from '@/components/ShareButton'
 import MobileContactBar from '@/components/MobileContactBar'
 import { formatPrice } from '@/lib/utils'
@@ -44,6 +45,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ slug:
     const [property, setProperty] = useState<Property | null>(null)
     const [agent, setAgent] = useState<Agent | null>(null)
     const [similarProperties, setSimilarProperties] = useState<Property[]>([])
+    const [historicalTransactions, setHistoricalTransactions] = useState<Transaction[]>([])
     const [loading, setLoading] = useState(true)
     const [notFoundState, setNotFoundState] = useState(false)
     const [showNumber, setShowNumber] = useState(false)
@@ -73,6 +75,27 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ slug:
                 setProperty(propertyData)
                 setAgent(agentData)
                 setSimilarProperties(similar)
+
+                // Fetch Historical Transactions for Trends via Bounds (Nearby)
+                if (propertyData.latitude && propertyData.longitude) {
+                    try {
+                        const buffer = 0.01 // Approx 1km radius
+                        const history = await getTransactions(1, 1000, {
+                            bounds: {
+                                minLat: propertyData.latitude - buffer,
+                                maxLat: propertyData.latitude + buffer,
+                                minLng: propertyData.longitude - buffer,
+                                maxLng: propertyData.longitude + buffer
+                            },
+                            // Optional: filter by property type for more relevance?
+                            // propertyType: propertyData.property_type ? [propertyData.property_type] : undefined 
+                        })
+                        setHistoricalTransactions(history)
+                    } catch (e) {
+                        console.error('Error fetching historical trends:', e)
+                    }
+                }
+
             } catch (error) {
                 console.error('Error loading property:', error)
                 setNotFoundState(true)
@@ -434,6 +457,21 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ slug:
                                         latitude={property.latitude}
                                         longitude={property.longitude}
                                     />
+                                )}
+
+                                {/* Market Trends Section */}
+                                {historicalTransactions.length > 0 && (
+                                    <div className="mb-8 mt-8 border-t border-gray-100 pt-8">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div>
+                                                <h2 className="font-heading font-bold text-xl text-gray-900">Market Trends</h2>
+                                                <p className="text-sm text-gray-500">Historical transaction trends within 1km radius</p>
+                                            </div>
+                                        </div>
+                                        <div className="h-[400px] bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                                            <TrendChart transactions={historicalTransactions} className="h-full" />
+                                        </div>
+                                    </div>
                                 )}
 
                                 {/* Mortgage Calculator - Only for Sale/Project properties */}
