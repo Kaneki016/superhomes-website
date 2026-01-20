@@ -1032,22 +1032,26 @@ export async function getAgentsPaginated(
     }
 
     // No state selected: Show ALL 6,827 agents, prioritizing those with listings in priority states
-    // Get all agents first
-    const { data: allAgents, error: agentsError } = await supabase
+    // Get all agents first (Supabase default limit is 1000, so we need to specify a higher limit)
+    const { data: allAgents, error: agentsError, count } = await supabase
         .from('contacts')
-        .select('*')
+        .select('*', { count: 'exact' })
         .eq('contact_type', 'agent')
+        .limit(10000) // Fetch up to 10,000 agents (well above current 6,827)
 
     if (agentsError) {
         console.error('Error fetching agents:', agentsError)
         return { agents: [], totalCount: 0, hasMore: false }
     }
 
+    console.log(`Fetched ${allAgents?.length} agents from database (total count: ${count})`)
+
     // Get all active listings with their agents
     const { data: allListings, error: listingsError } = await supabase
         .from('listings')
         .select('id, listing_type, state, listing_contacts(contact_id)')
         .eq('is_active', true)
+        .limit(50000) // Ensure we get all listings
 
     // Count listings per agent and track if they have priority state listings
     const agentStats = new Map<string, {
