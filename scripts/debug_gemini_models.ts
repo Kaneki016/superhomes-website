@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv'
-import fetch from 'node-fetch'
+
 
 dotenv.config({ path: '.env.local' })
 

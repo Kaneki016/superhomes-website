@@ -60,7 +60,7 @@ async function main() {
     }
 
     log('\n--- Sample Records with No Price ---')
-    noPriceRows.forEach((row, index) => {
+    noPriceRows.forEach((row: any, index: number) => {
         log(`\n[${index + 1}] ID: ${row.id}`)
         log(`    Date: ${row.transaction_date}`)
         log(`    Address: ${row.address}`)
