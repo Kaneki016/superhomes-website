@@ -12,7 +12,7 @@ async function main() {
     const logFile = 'scripts/zero_price_report.txt';
     const logStream = fs.createWriteStream(logFile, { flags: 'w' });
 
-    function log(message) {
+    function log(message: any) {
         console.log(message);
         // Ensure message is a string before writing
         logStream.write(String(message) + '\n');
