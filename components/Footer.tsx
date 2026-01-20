@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { getDistinctPropertyTypes } from '@/lib/database'
 
 // Malaysian states for footer navigation
 const MALAYSIAN_STATES = [
@@ -12,12 +13,22 @@ const MALAYSIAN_STATES = [
     'Sabah', 'Sarawak', 'Selangor', 'Terengganu'
 ]
 
-const PROPERTY_TYPES = ['Condo', 'Apartment', 'Landed', 'Terrace', 'Semi-D', 'Bungalow', 'Commercial', 'Industrial']
-
 export default function Footer() {
     const [showAllStates, setShowAllStates] = useState(false)
     const [showAllSaleTypes, setShowAllSaleTypes] = useState(false)
     const [showAllRentTypes, setShowAllRentTypes] = useState(false)
+    const [propertyTypes, setPropertyTypes] = useState<string[]>([])
+
+    useEffect(() => {
+        // Fetch property types from database
+        getDistinctPropertyTypes().then(types => {
+            setPropertyTypes(types)
+        }).catch(error => {
+            console.error('Error fetching property types:', error)
+            // Fallback to common types if fetch fails
+            setPropertyTypes(['Condo', 'Apartment', 'Landed', 'Terrace', 'Commercial'])
+        })
+    }, [])
 
     return (
         <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white mt-20 border-t border-gray-700">
@@ -115,7 +126,7 @@ export default function Footer() {
                     <div>
                         <h3 className="font-heading font-semibold text-lg mb-6 text-white">Properties for Sale</h3>
                         <ul className="space-y-3">
-                            {PROPERTY_TYPES.slice(0, showAllSaleTypes ? PROPERTY_TYPES.length : 5).map((type) => (
+                            {propertyTypes.slice(0, showAllSaleTypes ? propertyTypes.length : 5).map((type) => (
                                 <li key={type}>
                                     <Link
                                         href={`/properties?propertyType=${encodeURIComponent(type)}`}
@@ -129,7 +140,7 @@ export default function Footer() {
                                 </li>
                             ))}
                         </ul>
-                        {PROPERTY_TYPES.length > 5 && (
+                        {propertyTypes.length > 5 && (
                             <button
                                 onClick={() => setShowAllSaleTypes(!showAllSaleTypes)}
                                 className="mt-4 text-primary-400 hover:text-primary-300 text-sm font-medium flex items-center gap-2 transition-colors group"
@@ -157,7 +168,7 @@ export default function Footer() {
                     <div>
                         <h3 className="font-heading font-semibold text-lg mb-6 text-white">Properties for Rent</h3>
                         <ul className="space-y-3">
-                            {PROPERTY_TYPES.slice(0, showAllRentTypes ? PROPERTY_TYPES.length : 5).map((type) => (
+                            {propertyTypes.slice(0, showAllRentTypes ? propertyTypes.length : 5).map((type) => (
                                 <li key={type}>
                                     <Link
                                         href={`/rent?propertyType=${encodeURIComponent(type)}`}
@@ -171,7 +182,7 @@ export default function Footer() {
                                 </li>
                             ))}
                         </ul>
-                        {PROPERTY_TYPES.length > 5 && (
+                        {propertyTypes.length > 5 && (
                             <button
                                 onClick={() => setShowAllRentTypes(!showAllRentTypes)}
                                 className="mt-4 text-primary-400 hover:text-primary-300 text-sm font-medium flex items-center gap-2 transition-colors group"
