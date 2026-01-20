@@ -207,7 +207,7 @@ function AgentsPageContent() {
                         <p className="text-white/80 text-lg mb-8">
                             {selectedState
                                 ? `Ranked by active listings in ${selectedState}`
-                                : 'Ranked by active listings in priority states (KL, Selangor, Johor, Penang)'
+                                : 'All agents ranked by performance (priority states first)'
                             }
                         </p>
 
@@ -259,7 +259,7 @@ function AgentsPageContent() {
                                     }}
                                 >
                                     <option value="" className="bg-gray-900 text-white font-semibold py-3">
-                                        All Priority States (KL, Selangor, Johor, Penang)
+                                        All States (Priority: KL, Selangor, Johor, Penang)
                                     </option>
                                     <option disabled className="bg-gray-800 text-gray-500 text-xs py-1 font-normal">
                                         ── Select a specific state ──
@@ -277,7 +277,7 @@ function AgentsPageContent() {
 
                             {/* Helper text */}
                             <p className="text-white/60 text-sm text-center mt-3 font-medium">
-                                {selectedState ? `Showing top agents in ${selectedState}` : 'Showing top agents from priority states'}
+                                {selectedState ? `Showing top agents in ${selectedState}` : 'Showing all agents (priority states first)'}
                             </p>
                         </div>
 

@@ -103,7 +103,7 @@ export default function Footer() {
                     <div>
                         <h3 className="font-heading font-semibold text-lg mb-4">Browse by State</h3>
                         <ul className="space-y-2">
-                            {MALAYSIAN_STATES.slice(0, 8).map((state) => (
+                            {MALAYSIAN_STATES.map((state) => (
                                 <li key={state}>
                                     <Link
                                         href={`/properties?state=${encodeURIComponent(state)}`}
