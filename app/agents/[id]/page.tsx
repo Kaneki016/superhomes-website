@@ -27,6 +27,8 @@ export default function AgentDetailPage() {
     const [totalCount, setTotalCount] = useState(0)
     const [hasMore, setHasMore] = useState(false)
 
+    const [imageError, setImageError] = useState(false)
+
     // Load agent details
     useEffect(() => {
         async function loadAgent() {
@@ -133,18 +135,17 @@ export default function AgentDetailPage() {
                     <div className="flex flex-col lg:flex-row gap-8 items-start">
                         {/* Agent Photo */}
                         <div className="relative w-36 h-36 md:w-44 md:h-44 rounded-full overflow-hidden border-4 border-gray-700 shadow-2xl flex-shrink-0">
-                            {agent.photo_url ? (
+                            {agent.photo_url && !imageError && !agent.photo_url.includes('nophoto_agent') ? (
                                 <Image
                                     src={agent.photo_url}
                                     alt={agent.name}
                                     fill
                                     className="object-cover"
+                                    onError={() => setImageError(true)}
                                 />
                             ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
-                                    <span className="text-5xl font-bold text-white">
-                                        {agent.name.charAt(0).toUpperCase()}
-                                    </span>
+                                <div className="w-full h-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-6xl font-bold">
+                                    {agent.name.charAt(0).toUpperCase()}
                                 </div>
                             )}
                         </div>

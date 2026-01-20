@@ -872,8 +872,10 @@ export async function searchAgents(query: string, limit: number = 5): Promise<Ag
 /**
  * Enrich agents with dynamic listing counts from the database
  * Calculates actual sale/rent counts from active listings
+ * @param agents - Array of agents to enrich
+ * @param state - Optional state filter for counting only listings in specific state
  */
-async function enrichAgentsWithListingCounts(agents: Agent[]): Promise<Agent[]> {
+async function enrichAgentsWithListingCounts(agents: Agent[], state?: string): Promise<Agent[]> {
     if (agents.length === 0) return agents
 
     const enrichedAgents = await Promise.all(
@@ -896,11 +898,18 @@ async function enrichAgentsWithListingCounts(agents: Agent[]): Promise<Agent[]> 
                 const listingIds = listingContacts.map(lc => lc.listing_id)
 
                 // Get active listings and their types
-                const { data: listings } = await supabase
+                let listingsQuery = supabase
                     .from('listings')
-                    .select('listing_type')
+                    .select('listing_type, state')
                     .in('id', listingIds)
                     .eq('is_active', true)
+
+                // Filter by state if provided
+                if (state) {
+                    listingsQuery = listingsQuery.ilike('state', `%${state}%`)
+                }
+
+                const { data: listings } = await listingsQuery
 
                 const saleCount = listings?.filter(l => l.listing_type === 'sale').length || 0
                 const rentCount = listings?.filter(l => l.listing_type === 'rent').length || 0
@@ -925,8 +934,15 @@ async function enrichAgentsWithListingCounts(agents: Agent[]): Promise<Agent[]> 
     return enrichedAgents
 }
 
-// Fetch agents with pagination
-export async function getAgentsPaginated(page: number = 1, limit: number = 12): Promise<{
+// Priority states for default agent ranking
+const PRIORITY_STATES = ['Kuala Lumpur', 'Selangor', 'Johor', 'Penang']
+
+// Fetch agents with pagination, optionally filtered by state
+export async function getAgentsPaginated(
+    page: number = 1,
+    limit: number = 12,
+    state?: string
+): Promise<{
     agents: Agent[]
     totalCount: number
     hasMore: boolean
@@ -934,36 +950,90 @@ export async function getAgentsPaginated(page: number = 1, limit: number = 12): 
     const from = (page - 1) * limit
     const to = from + limit - 1
 
-    const { count, error: countError } = await supabase
-        .from('contacts')
-        .select('*', { count: 'estimated', head: true })
-        .eq('contact_type', 'agent')
+    // Determine which states to query
+    const statesToQuery = state ? [state] : PRIORITY_STATES
 
-    if (countError) {
-        console.error('Error counting agents:', countError)
+    // Get all active listings in the target state(s) with their agents
+    let listingsQuery = supabase
+        .from('listings')
+        .select('id, listing_type, state, listing_contacts(contact_id)')
+        .eq('is_active', true)
+
+    // Apply state filter
+    if (state) {
+        listingsQuery = listingsQuery.ilike('state', `%${state}%`)
+    } else {
+        // For priority states, use OR condition
+        const stateConditions = PRIORITY_STATES.map(s => `state.ilike.%${s}%`).join(',')
+        listingsQuery = listingsQuery.or(stateConditions)
+    }
+
+    const { data: stateListings, error: listingsError } = await listingsQuery
+
+    if (listingsError) {
+        console.error('Error fetching state listings:', listingsError)
         return { agents: [], totalCount: 0, hasMore: false }
     }
 
+    // Group by contact_id and count listings
+    const agentCounts = new Map<string, { sale: number, rent: number, total: number }>()
+
+    stateListings?.forEach((listing: any) => {
+        const contactId = listing.listing_contacts?.[0]?.contact_id
+        if (!contactId) return
+
+        const counts = agentCounts.get(contactId) || { sale: 0, rent: 0, total: 0 }
+        if (listing.listing_type === 'sale') counts.sale++
+        if (listing.listing_type === 'rent') counts.rent++
+        counts.total++
+        agentCounts.set(contactId, counts)
+    })
+
+    // Sort agent IDs by total listing count (descending)
+    const sortedAgentIds = Array.from(agentCounts.entries())
+        .sort((a, b) => b[1].total - a[1].total)
+        .map(([id]) => id)
+
+    const totalCount = sortedAgentIds.length
+    const hasMore = (page * limit) < totalCount
+
+    // Paginate the sorted agent IDs
+    const paginatedIds = sortedAgentIds.slice(from, to + 1)
+
+    if (paginatedIds.length === 0) {
+        return { agents: [], totalCount: 0, hasMore: false }
+    }
+
+    // Fetch agent details for the paginated IDs
     const { data, error } = await supabase
         .from('contacts')
         .select('*')
+        .in('id', paginatedIds)
         .eq('contact_type', 'agent')
-        .order('name', { ascending: true })
-        .range(from, to)
 
     if (error) {
         console.error('Error fetching agents:', error)
-        return { agents: [], totalCount: count || 0, hasMore: false }
+        return { agents: [], totalCount, hasMore: false }
     }
 
-    const totalCount = count || 0
-    const hasMore = (page * limit) < totalCount
+    // Transform and maintain sort order
+    const agentsMap = new Map(
+        (data || []).map(contact => [contact.id, transformContactToAgent(contact)])
+    )
 
-    // Transform contacts to agents
-    const agents = (data || []).map(transformContactToAgent)
+    const agents = paginatedIds
+        .map(id => agentsMap.get(id))
+        .filter((agent): agent is Agent => agent !== undefined)
 
-    // Enrich with dynamic listing counts
-    const enrichedAgents = await enrichAgentsWithListingCounts(agents)
+    // Enrich with state-specific listing counts
+    const enrichedAgents = agents.map(agent => {
+        const counts = agentCounts.get(agent.id)
+        return {
+            ...agent,
+            listings_for_sale_count: counts?.sale || 0,
+            listings_for_rent_count: counts?.rent || 0
+        }
+    })
 
     return {
         agents: enrichedAgents,

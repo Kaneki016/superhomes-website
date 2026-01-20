@@ -173,6 +173,8 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
     const bedroomCount = property.total_bedrooms || property.bedrooms_num || property.bedrooms
     const favorited = isFavorite(property.id)
 
+    const [agentImageError, setAgentImageError] = useState(false)
+
     if (variant === 'list') {
         return (
             <div className="property-card-v2 group flex flex-col md:flex-row h-auto md:h-64 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 active:scale-[0.98] touch-manipulation">
@@ -278,11 +280,18 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
                         {agent ? (
                             <Link href={`/agents/${agent.id || agent.agent_id}`} className="flex items-center gap-2 group/agent">
                                 <div className="relative w-8 h-8 rounded-full overflow-hidden bg-gray-200">
-                                    {agent.photo_url ? (
-                                        <Image src={agent.photo_url} alt={agent.name} fill className="object-cover" unoptimized />
+                                    {agent.photo_url && !agentImageError && !agent.photo_url.includes('nophoto_agent') ? (
+                                        <Image
+                                            src={agent.photo_url}
+                                            alt={agent.name}
+                                            fill
+                                            className="object-cover"
+                                            unoptimized
+                                            onError={() => setAgentImageError(true)}
+                                        />
                                     ) : (
-                                        <div className="w-full h-full flex items-center justify-center bg-primary-100 text-primary-600 text-xs font-bold">
-                                            {agent.name.charAt(0)}
+                                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-400 to-primary-600 text-white text-sm font-semibold">
+                                            {agent.name.charAt(0).toUpperCase()}
                                         </div>
                                     )}
                                 </div>
@@ -341,16 +350,19 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
                 <div className="property-card-header">
                     <Link href={`/agents/${agent.id || agent.agent_id}`} className="flex items-center gap-3 flex-1 min-w-0 group">
                         <div className="relative property-card-avatar group-hover:ring-2 group-hover:ring-primary-300 transition-all">
-                            {agent.photo_url ? (
+                            {agent.photo_url && !agentImageError && !agent.photo_url.includes('nophoto_agent') ? (
                                 <Image
                                     src={agent.photo_url}
                                     alt={agent.name}
                                     fill
                                     className="object-cover"
                                     unoptimized
+                                    onError={() => setAgentImageError(true)}
                                 />
                             ) : (
-                                <span className="text-white font-semibold text-sm">{agent.name.charAt(0)}</span>
+                                <div className="w-full h-full flex items-center justify-center text-white text-sm font-semibold">
+                                    {agent.name.charAt(0).toUpperCase()}
+                                </div>
                             )}
                         </div>
                         <span className="text-sm font-medium text-gray-900 truncate group-hover:text-primary-600 transition-colors">{agent.name}</span>

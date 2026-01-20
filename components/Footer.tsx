@@ -1,11 +1,31 @@
 import Link from 'next/link'
 import Image from 'next/image'
 
+// Malaysian states for footer navigation
+const MALAYSIAN_STATES = [
+    'Johor',
+    'Kedah',
+    'Kelantan',
+    'Kuala Lumpur',
+    'Labuan',
+    'Melaka',
+    'Negeri Sembilan',
+    'Pahang',
+    'Penang',
+    'Perak',
+    'Perlis',
+    'Putrajaya',
+    'Sabah',
+    'Sarawak',
+    'Selangor',
+    'Terengganu'
+]
+
 export default function Footer() {
     return (
         <footer className="bg-gray-900 text-white mt-20">
             <div className="container-custom py-12">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
                     {/* Company Info */}
                     <div className="col-span-1">
                         <div className="flex items-center space-x-2 mb-4">
@@ -76,6 +96,23 @@ export default function Footer() {
                                     Commercial
                                 </Link>
                             </li>
+                        </ul>
+                    </div>
+
+                    {/* Browse by State - NEW */}
+                    <div>
+                        <h3 className="font-heading font-semibold text-lg mb-4">Browse by State</h3>
+                        <ul className="space-y-2">
+                            {MALAYSIAN_STATES.slice(0, 8).map((state) => (
+                                <li key={state}>
+                                    <Link
+                                        href={`/properties?state=${encodeURIComponent(state)}`}
+                                        className="text-gray-400 hover:text-white transition-colors text-sm"
+                                    >
+                                        {state}
+                                    </Link>
+                                </li>
+                            ))}
                         </ul>
                     </div>
 
