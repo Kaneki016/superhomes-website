@@ -50,7 +50,7 @@ export default function Footer() {
                             </span>
                         </div>
                         <p className="text-gray-400 text-sm leading-relaxed mb-6">
-                            Malaysia's premier property marketplace. Discover your dream home with our extensive listings and expert agents.
+                            Malaysia&apos;s premier property marketplace. Discover your dream home with our extensive listings and expert agents.
                         </p>
                         <div className="space-y-3 mb-6">
                             <div className="flex items-center gap-3 text-gray-400 text-sm">
