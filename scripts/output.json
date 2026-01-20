@@ -1,0 +1,42 @@
+[
+  {
+    "date": "2025-07-01",
+    "price": 420000,
+    "sqft": "1151.7373",
+    "land": 2924.55163,
+    "type": "1 - 1 1/2 Storey Semi-Detached",
+    "level": "    "
+  },
+  {
+    "date": "2024-09-01",
+    "price": 380000,
+    "sqft": "807.2925",
+    "land": 3659.726,
+    "type": "1 - 1 1/2 Storey Terraced",
+    "level": "    "
+  },
+  {
+    "date": "2023-09-01",
+    "price": 130000,
+    "sqft": "570.4866999999999",
+    "land": 1184.029,
+    "type": "Low-Cost House",
+    "level": "    "
+  },
+  {
+    "date": "2021-11-01",
+    "price": 1000000,
+    "sqft": "1689.9323",
+    "land": 2368.058,
+    "type": "Cluster House",
+    "level": "    "
+  },
+  {
+    "date": "2021-11-01",
+    "price": 435000,
+    "sqft": "1184.029",
+    "land": 3157.912982,
+    "type": "1 - 1 1/2 Storey Semi-Detached",
+    "level": "    "
+  }
+]

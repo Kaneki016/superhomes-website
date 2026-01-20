@@ -1,0 +1,7 @@
+🕵️  Investigating Transactions with No Price...
+
+Total Transactions: 163444
+Total No-Price Records: 23068
+  - Junk Records (No Source URL): 23068
+  - Potential Real Listings (With Source URL but No Price): 0
+Great! found NO listings with a Source URL but missing price. All no-price records are definitely junk.

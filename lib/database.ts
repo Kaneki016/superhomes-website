@@ -1512,6 +1512,7 @@ export async function getTransactions(
     limit: number = 500,
     filters?: {
         neighborhood?: string
+        address?: string  // NEW: Exact address filter
         minPrice?: number
         maxPrice?: number
         propertyType?: string[]
@@ -1547,6 +1548,10 @@ export async function getTransactions(
 
     if (filters?.neighborhood) {
         query = query.eq('neighborhood', filters.neighborhood)
+    }
+
+    if (filters?.address) {
+        query = query.eq('address', filters.address)
     }
 
     if (filters?.minYear) {
