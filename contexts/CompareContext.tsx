@@ -1,16 +1,18 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { Property } from '@/lib/supabase'
+import { Property, Transaction } from '@/lib/supabase'
 
 const MAX_COMPARE = 3
 const STORAGE_KEY = 'superhomes_compare'
 
+export type ComparableItem = Property | Transaction
+
 interface CompareContextType {
-    compareList: Property[]
-    addToCompare: (property: Property) => boolean
-    removeFromCompare: (propertyId: string) => void
-    isInCompare: (propertyId: string) => boolean
+    compareList: ComparableItem[]
+    addToCompare: (item: ComparableItem) => string | null
+    removeFromCompare: (itemId: string) => void
+    isInCompare: (itemId: string) => boolean
     clearCompare: () => void
     canAddMore: boolean
 }
@@ -18,7 +20,7 @@ interface CompareContextType {
 const CompareContext = createContext<CompareContextType | undefined>(undefined)
 
 export function CompareProvider({ children }: { children: ReactNode }) {
-    const [compareList, setCompareList] = useState<Property[]>([])
+    const [compareList, setCompareList] = useState<ComparableItem[]>([])
     const [isLoaded, setIsLoaded] = useState(false)
 
     // Load from localStorage on mount
@@ -48,23 +50,38 @@ export function CompareProvider({ children }: { children: ReactNode }) {
         }
     }, [compareList, isLoaded])
 
-    const addToCompare = (property: Property): boolean => {
+    const addToCompare = (item: ComparableItem): string | null => {
+        // Check duplicate
+        if (compareList.some(p => p.id === item.id)) {
+            return "Item already in comparison."
+        }
+
+        // Check if list is full
         if (compareList.length >= MAX_COMPARE) {
-            return false
+            return `You can compare up to ${MAX_COMPARE} items.`
         }
-        if (compareList.some(p => p.id === property.id)) {
-            return false
+
+        // Check compatibility (Same Type)
+        if (compareList.length > 0) {
+            const firstItem = compareList[0]
+            const isFirstProperty = 'listing_type' in firstItem
+            const isItemProperty = 'listing_type' in item
+
+            if (isFirstProperty !== isItemProperty) {
+                return "You cannot compare Properties with Transactions. Please clear the list first."
+            }
         }
-        setCompareList(prev => [...prev, property])
-        return true
+
+        setCompareList(prev => [...prev, item])
+        return null // No error, success
     }
 
-    const removeFromCompare = (propertyId: string) => {
-        setCompareList(prev => prev.filter(p => p.id !== propertyId))
+    const removeFromCompare = (itemId: string) => {
+        setCompareList(prev => prev.filter(p => p.id !== itemId))
     }
 
-    const isInCompare = (propertyId: string): boolean => {
-        return compareList.some(p => p.id === propertyId)
+    const isInCompare = (itemId: string): boolean => {
+        return compareList.some(p => p.id === itemId)
     }
 
     const clearCompare = () => {

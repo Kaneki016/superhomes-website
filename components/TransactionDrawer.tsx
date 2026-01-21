@@ -143,37 +143,6 @@ export default function TransactionDrawer({ transaction, onClose, isOpen, isInCo
                                 </div>
                             </div>
 
-                            {/* Compare Button - Moved Here */}
-                            {onToggleComparison && (
-                                <button
-                                    onClick={onToggleComparison}
-                                    className={`
-                                        w-full py-2.5 rounded-lg text-sm font-bold border transition-all flex items-center justify-center gap-2 flex-shrink-0
-                                        ${isInComparison
-                                            ? 'bg-primary-50 border-primary-200 text-primary-700 hover:bg-red-50 hover:text-red-600 hover:border-red-200 group'
-                                            : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50 shadow-sm'
-                                        }
-                                    `}
-                                >
-                                    {isInComparison ? (
-                                        <>
-                                            <div className="flex items-center gap-2 group-hover:hidden">
-                                                <Check size={16} />
-                                                <span>Added to Comparison</span>
-                                            </div>
-                                            <div className="hidden group-hover:flex items-center gap-2">
-                                                <X size={16} />
-                                                <span>Remove from Comparison</span>
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Scale size={16} />
-                                            <span>Compare Transaction</span>
-                                        </>
-                                    )}
-                                </button>
-                            )}
 
                             {/* History (Moved Here) */}
                             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-0 overflow-hidden flex-grow flex flex-col min-h-[200px]">
