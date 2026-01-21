@@ -12,6 +12,8 @@ import ListingDrawer from '@/components/ListingDrawer'
 import { Filter, Search, X, ChevronDown, Check, Map as MapIcon, Layers, Info, ArrowLeft, BarChart2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import TrendChart from '@/components/TrendChart'
+import ComparisonBar from '@/components/ComparisonBar'
+import ComparisonModal from '@/components/ComparisonModal'
 
 
 export default function TransactionMapPage() {
@@ -32,6 +34,10 @@ export default function TransactionMapPage() {
     const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
     const [selectedListing, setSelectedListing] = useState<Property | null>(null) // Selected Listing State
 
+    // Comparison State
+    const [comparisonItems, setComparisonItems] = useState<(Transaction | Property)[]>([])
+    const [showComparison, setShowComparison] = useState(false)
+
     // Filters State
     const [openFilter, setOpenFilter] = useState<string | null>(null) // 'price' | 'type' | 'tenure' | 'recency' | null
     const [showMobileFilters, setShowMobileFilters] = useState(false) // Mobile Filter Drawer State
@@ -40,7 +46,7 @@ export default function TransactionMapPage() {
     const [filters, setFilters] = useState({
         neighborhood: '',
         minPrice: 0,
-        maxPrice: 5000000,
+        maxPrice: 5000000, // Static default max
         propertyType: [] as string[],
         tenure: [] as string[],
         minYear: undefined as number | undefined,
@@ -144,11 +150,12 @@ export default function TransactionMapPage() {
         const fetchData = async () => {
             setLoading(true)
             try {
+                const defaultMaxPrice = 5000000
                 // Check if filters are in default state (User hasn't interacted yet)
                 const isDefault =
                     !filters.neighborhood &&
                     filters.minPrice === 0 &&
-                    filters.maxPrice === 5000000 &&
+                    filters.maxPrice === defaultMaxPrice &&
                     filters.propertyType.length === 0 &&
                     filters.tenure.length === 0 &&
                     !filters.minYear &&
@@ -175,7 +182,7 @@ export default function TransactionMapPage() {
                 if (filters.neighborhood) apiFilters.neighborhood = filters.neighborhood
                 // if (filters.searchQuery) apiFilters.searchQuery = filters.searchQuery // Removed Search Query
                 if (filters.minPrice > 0) apiFilters.minPrice = filters.minPrice
-                if (filters.maxPrice < 5000000) apiFilters.maxPrice = filters.maxPrice
+                if (filters.maxPrice < defaultMaxPrice) apiFilters.maxPrice = filters.maxPrice
                 if (filters.propertyType.length > 0) apiFilters.propertyType = filters.propertyType
                 if (filters.tenure.length > 0) apiFilters.tenure = filters.tenure
 
@@ -205,10 +212,10 @@ export default function TransactionMapPage() {
                     // Currently searchProperties doesn't support bounds, so we might fetch too many or need to filter client side or add bounds support.
                     // For now, let's use the neighborhood as primary location filter if set.
                     minPrice: filters.minPrice > 0 ? filters.minPrice : undefined,
-                    maxPrice: filters.maxPrice < 5000000 ? filters.maxPrice : undefined,
+                    maxPrice: filters.maxPrice < defaultMaxPrice ? filters.maxPrice : undefined,
                     // propertyType: filters.propertyType.length > 0 ? filters.propertyType[0] : undefined, // searchProperties takes string, our filter is array. Pick first?
-                    // Listing type logic? For now fetch 'sale'
-                    listingType: 'sale'
+                    // Listing type logic - Removed to fetch all types
+                    // listingType: listingType
                 }
 
                 // Note: searchProperties logic in database.ts is mainly "location"-string based or exact matches.
@@ -239,7 +246,7 @@ export default function TransactionMapPage() {
 
         const debounceTimer = setTimeout(fetchData, 500)
         return () => clearTimeout(debounceTimer)
-    }, [filters, polygonFilter, currentBounds]) // Added currentBounds to trigger fetch on map move
+    }, [filters, polygonFilter, currentBounds]) // Removed listingType dependency
 
     const toggleFilterDropdown = (name: string) => {
         setOpenFilter(prev => prev === name ? null : name)
@@ -264,6 +271,28 @@ export default function TransactionMapPage() {
             return { ...prev, [category]: updated }
         })
     }
+
+    // Comparison Logic
+    const toggleComparison = (item: Transaction | Property) => {
+        setComparisonItems(prev => {
+            const exists = prev.some(i => i.id === item.id)
+            if (exists) {
+                return prev.filter(i => i.id !== item.id)
+            } else {
+                if (prev.length >= 4) {
+                    alert("You can compare up to 4 properties.")
+                    return prev
+                }
+                return [...prev, item]
+            }
+        })
+    }
+
+    const removeFromComparison = (id: string) => {
+        setComparisonItems(prev => prev.filter(i => i.id !== id))
+    }
+
+
 
     return (
         <div className="min-h-screen flex flex-col bg-gray-50 overflow-hidden">
@@ -331,6 +360,10 @@ export default function TransactionMapPage() {
 
                     {/* Filter Group: Left Aligned */}
                     <div className="flex items-center gap-2 flex-wrap">
+
+                        {/* Listing Type Toggle Removed */}
+
+                        <div className="h-6 w-px bg-gray-300 mx-1 hidden md:block"></div>
 
                         {/* Neighborhood Dropdown - Prominent */}
                         <div className="relative min-w-[200px]">
@@ -574,7 +607,7 @@ export default function TransactionMapPage() {
                             <span>✏️ Click on map to draw points. Click first point to finish.</span>
                             <button onClick={() => setIsDrawing(false)} className="ml-2 hover:bg-white/20 p-1 rounded-full"><X size={14} /></button>
                         </div>
-                    ) : (viewMode === 'map' && !polygonFilter && showTip) && ( // Check showTip
+                    ) : (viewMode === 'map' && !polygonFilter && showTip && comparisonItems.length === 0) && ( // Check showTip and no comparison
                         <div className="absolute top-24 left-1/2 -translate-x-1/2 z-[1000] bg-white/90 text-gray-700 px-4 py-2.5 rounded-full backdrop-blur-sm shadow-md border border-gray-200 text-xs font-medium flex items-center gap-3 animate-in fade-in slide-in-from-top-4 selection:bg-transparent">
                             <div className="flex items-center gap-2">
                                 <span>💡 Tip: Use the <b>Draw Area</b> tool to filter properties</span>
@@ -590,6 +623,20 @@ export default function TransactionMapPage() {
                 }
             </main >
 
+            {/* Comparison Logic */}
+            <ComparisonBar
+                count={comparisonItems.length}
+                onCompare={() => setShowComparison(true)}
+                onClear={() => setComparisonItems([])}
+            />
+
+            <ComparisonModal
+                items={comparisonItems}
+                isOpen={showComparison}
+                onClose={() => setShowComparison(false)}
+                onRemove={removeFromComparison}
+            />
+
             {/* Modals & Drawers */}
             {/* Calculator Modal Removed */}
 
@@ -597,12 +644,18 @@ export default function TransactionMapPage() {
                 transaction={selectedTransaction}
                 isOpen={!!selectedTransaction}
                 onClose={() => setSelectedTransaction(null)}
+                // Comparison Props
+                isInComparison={selectedTransaction ? comparisonItems.some(i => i.id === selectedTransaction.id) : false}
+                onToggleComparison={() => selectedTransaction && toggleComparison(selectedTransaction)}
             />
 
             <ListingDrawer
                 listing={selectedListing}
                 isOpen={!!selectedListing}
                 onClose={() => setSelectedListing(null)}
+                // Comparison Props
+                isInComparison={selectedListing ? comparisonItems.some(i => i.id === selectedListing.id) : false}
+                onToggleComparison={() => selectedListing && toggleComparison(selectedListing)}
             />
 
             {/* Mobile Filter Drawer */}
@@ -619,6 +672,9 @@ export default function TransactionMapPage() {
                         <div className="absolute inset-x-0 bottom-0 bg-white rounded-t-2xl shadow-xl h-[85vh] flex flex-col animate-in slide-in-from-bottom duration-300">
                             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                                 <h2 className="text-lg font-bold text-gray-900">Filters</h2>
+
+                                {/* Mobile Toggle Removed */}
+
                                 <button
                                     onClick={() => setShowMobileFilters(false)}
                                     className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
@@ -719,6 +775,7 @@ export default function TransactionMapPage() {
                     </div>
                 )
             }
+
         </div >
     )
 }

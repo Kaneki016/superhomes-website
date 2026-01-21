@@ -1,4 +1,4 @@
-import { X, Building2, Ruler, Calendar, DollarSign, MapPin, Layers, ExternalLink, User } from 'lucide-react'
+import { X, Building2, Ruler, Calendar, DollarSign, MapPin, Share2, Phone, MessageCircle, ExternalLink, Scale, Check, User } from 'lucide-react'
 import { useState } from 'react'
 import Link from 'next/link'
 import { Property } from '@/lib/supabase'
@@ -11,9 +11,11 @@ interface ListingDrawerProps {
     listing: Property | null
     onClose: () => void
     isOpen: boolean
+    isInComparison?: boolean
+    onToggleComparison?: () => void
 }
 
-export default function ListingDrawer({ listing, onClose, isOpen }: ListingDrawerProps) {
+export default function ListingDrawer({ listing, onClose, isOpen, isInComparison, onToggleComparison }: ListingDrawerProps) {
     const [activeTab, setActiveTab] = useState<'details' | 'mortgage'>('details')
 
     if (!listing) return null
@@ -62,6 +64,7 @@ export default function ListingDrawer({ listing, onClose, isOpen }: ListingDrawe
                         <span className={`px-2 py-1 text-xs font-bold rounded shadow-sm uppercase tracking-wide ${listing.listing_type === 'rent' ? 'bg-blue-100 text-blue-700' : 'bg-primary-100 text-primary-700'}`}>
                             {listing.listing_type === 'rent' ? 'For Rent' : 'For Sale'}
                         </span>
+
                         <ShareButton
                             url={`${typeof window !== 'undefined' ? window.location.origin : ''}${generatePropertyUrl(listing)}`}
                             title={`Check out ${listing.title}`}
@@ -77,25 +80,30 @@ export default function ListingDrawer({ listing, onClose, isOpen }: ListingDrawe
                     </div>
                 </div>
 
-                {/* Tabs */}
-                {listing.price && (
-                    <div className="flex px-6 gap-6">
+                {/* Tabs, hide for rent */}
+                {listing.price && listing.listing_type !== 'rent' && (
+                    <div className="flex px-6 gap-6 overflow-x-auto hide-scrollbar">
                         <button
                             onClick={() => setActiveTab('details')}
-                            className={`pb-3 text-sm font-medium transition-colors relative ${activeTab === 'details' ? 'text-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`pb-3 text-sm font-medium transition-colors relative whitespace-nowrap ${activeTab === 'details' ? 'text-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
                         >
-                            Details
+                            Property Details
                             {activeTab === 'details' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600 rounded-t-full"></div>}
                         </button>
-                        <button
-                            onClick={() => setActiveTab('mortgage')}
-                            className={`pb-3 text-sm font-medium transition-colors relative ${activeTab === 'mortgage' ? 'text-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
-                        >
-                            Mortgage Calculator
-                            {activeTab === 'mortgage' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600 rounded-t-full"></div>}
-                        </button>
+                        {/* Mortgage Calculator Tab */}
+                        {listing.price && (
+                            <button
+                                onClick={() => setActiveTab('mortgage')}
+                                className={`pb-3 text-sm font-medium transition-colors relative whitespace-nowrap ${activeTab === 'mortgage' ? 'text-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                Mortgage Calculator
+                                {activeTab === 'mortgage' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600 rounded-t-full"></div>}
+                            </button>
+                        )}
                     </div>
                 )}
+
+
             </div>
 
             {/* Content w/ Horizontal Layout */}
@@ -106,12 +114,16 @@ export default function ListingDrawer({ listing, onClose, isOpen }: ListingDrawe
                         {/* Column 1: Price & Key Metrics */}
                         <div className="space-y-4">
                             <div className="bg-primary-50 rounded-xl p-5 border border-primary-100">
-                                <span className="text-primary-600 text-xs font-bold uppercase tracking-wider mb-1 block">Listing Price</span>
+                                <span className="text-primary-600 text-xs font-bold uppercase tracking-wider mb-1 block">
+                                    {listing.listing_type === 'rent' ? 'Monthly Rent' : 'Listing Price'}
+                                </span>
                                 <div className="text-3xl font-extrabold text-gray-900 mb-1">{formatPriceFull(listing.price)}</div>
-                                <div className="flex items-center gap-2 text-primary-700 font-medium text-sm">
-                                    <DollarSign size={14} />
-                                    <span>{psf > 0 ? `RM ${psf.toFixed(0)} per sqft` : 'Price on Ask'}</span>
-                                </div>
+                                {listing.listing_type !== 'rent' && (
+                                    <div className="flex items-center gap-2 text-primary-700 font-medium text-sm">
+                                        <DollarSign size={14} />
+                                        <span>{psf > 0 ? `RM ${psf.toFixed(0)} per sqft` : 'Price on Ask'}</span>
+                                    </div>
+                                )}
                             </div>
                             <div className="grid grid-cols-1 gap-3">
                                 <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
@@ -120,6 +132,37 @@ export default function ListingDrawer({ listing, onClose, isOpen }: ListingDrawe
                                         {listing.scraped_at ? formatDate(listing.scraped_at) : 'Recently'}
                                     </span>
                                 </div>
+                                {/* Compare Button - Moved Here */}
+                                {onToggleComparison && (
+                                    <button
+                                        onClick={onToggleComparison}
+                                        className={`
+                                            w-full py-2.5 rounded-lg text-sm font-bold border transition-all flex items-center justify-center gap-2
+                                            ${isInComparison
+                                                ? 'bg-primary-50 border-primary-200 text-primary-700 hover:bg-red-50 hover:text-red-600 hover:border-red-200 group'
+                                                : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50 shadow-sm'
+                                            }
+                                        `}
+                                    >
+                                        {isInComparison ? (
+                                            <>
+                                                <div className="flex items-center gap-2 group-hover:hidden">
+                                                    <Check size={16} />
+                                                    <span>Added to Comparison</span>
+                                                </div>
+                                                <div className="hidden group-hover:flex items-center gap-2">
+                                                    <X size={16} />
+                                                    <span>Remove from Comparison</span>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Scale size={16} />
+                                                <span>Compare Property</span>
+                                            </>
+                                        )}
+                                    </button>
+                                )}
                             </div>
                         </div>
 
@@ -199,6 +242,6 @@ export default function ListingDrawer({ listing, onClose, isOpen }: ListingDrawe
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     )
 }

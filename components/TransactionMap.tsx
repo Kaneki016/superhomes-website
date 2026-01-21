@@ -405,12 +405,13 @@ export default function TransactionMap({
         validListings.forEach((l) => {
             const position: [number, number] = [l.latitude!, l.longitude!]
 
-            // Listings always Blue for distinct visual
-            const fillColor = '#3b82f6' // blue-500
+            // Determine Color based on listing type
+            let fillColor = '#3b82f6' // blue-500 default (Sale)
+            if (l.listing_type === 'rent') {
+                fillColor = '#a855f7' // purple-500 (Rent)
+            }
 
-            // Canvas-based Circle Marker (Square or Diamond for shape difference?)
-            // Leaflet CircleMarker is always circular. Can use simple Icon or DivIcon but CircleMarker is performant.
-            // Let's use CircleMarker with Blue color.
+            // Canvas-based Circle Marker
             const marker = leaflet.circleMarker(position, {
                 radius: 7,
                 fillColor: fillColor,
@@ -642,10 +643,14 @@ export default function TransactionMap({
                             </>
                         )}
 
-                        <div className="border-t border-gray-100 pt-3 md:pt-2 mt-2">
+                        <div className="border-t border-gray-100 pt-3 md:pt-2 mt-2 space-y-2">
                             <div className="flex items-center gap-3">
                                 <span className="w-3 h-3 rounded-full bg-blue-500 shadow-sm ring-1 ring-white"></span>
-                                <span className="text-gray-600 text-sm md:text-xs">Active Listing</span>
+                                <span className="text-gray-600 text-sm md:text-xs">For Sale</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <span className="w-3 h-3 rounded-full bg-purple-500 shadow-sm ring-1 ring-white"></span>
+                                <span className="text-gray-600 text-sm md:text-xs">For Rent</span>
                             </div>
                         </div>
                     </div>
