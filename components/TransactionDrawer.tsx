@@ -1,4 +1,4 @@
-import { X, Building2, Ruler, Calendar, DollarSign, MapPin, Layers, TrendingUp } from 'lucide-react'
+import { X, Building2, Ruler, Calendar, DollarSign, MapPin, Layers, TrendingUp, ArrowUpRight, History, Scale, Check, Plus } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { Transaction } from '@/lib/supabase'
 import MortgageCalculator from './MortgageCalculator'
@@ -12,10 +12,12 @@ interface TransactionDrawerProps {
     transaction: Transaction | null
     onClose: () => void
     isOpen: boolean
+    isInComparison?: boolean
+    onToggleComparison?: () => void
 }
 
-export default function TransactionDrawer({ transaction, onClose, isOpen }: TransactionDrawerProps) {
-    const [activeTab, setActiveTab] = useState<'details' | 'trends' | 'history' | 'mortgage'>('details')
+export default function TransactionDrawer({ transaction, onClose, isOpen, isInComparison, onToggleComparison }: TransactionDrawerProps) {
+    const [activeTab, setActiveTab] = useState<'details' | 'trends' | 'history'>('details')
     const [trendTransactions, setTrendTransactions] = useState<Transaction[]>([])
     const [propertyTransactions, setPropertyTransactions] = useState<Transaction[]>([]) // NEW: Specific property history
     const [loadingTrends, setLoadingTrends] = useState(false)
@@ -76,7 +78,8 @@ export default function TransactionDrawer({ transaction, onClose, isOpen }: Tran
                         </h2>
                         {transaction.address && <p className="text-xs text-gray-500 mt-0.5">Transaction ID: {String(transaction.id).slice(0, 8)}</p>}
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-shrink-0 ml-4">
+
                         <ShareButton
                             url={`${window.location.origin}/transaction-map?transaction_id=${transaction.id}`}
                             title={`Check out this property at ${transaction.address}`}
@@ -115,14 +118,9 @@ export default function TransactionDrawer({ transaction, onClose, isOpen }: Tran
                         History
                         {activeTab === 'history' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600 rounded-t-full"></div>}
                     </button>
-                    <button
-                        onClick={() => setActiveTab('mortgage')}
-                        className={`pb-3 text-sm font-medium transition-colors relative whitespace-nowrap ${activeTab === 'mortgage' ? 'text-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
-                    >
-                        Mortgage Calculator
-                        {activeTab === 'mortgage' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600 rounded-t-full"></div>}
-                    </button>
                 </div>
+
+
             </div>
 
             {/* Content */}
@@ -144,6 +142,38 @@ export default function TransactionDrawer({ transaction, onClose, isOpen }: Tran
                                     <span className="text-[10px] uppercase font-bold text-primary-400">NAPIC</span>
                                 </div>
                             </div>
+
+                            {/* Compare Button - Moved Here */}
+                            {onToggleComparison && (
+                                <button
+                                    onClick={onToggleComparison}
+                                    className={`
+                                        w-full py-2.5 rounded-lg text-sm font-bold border transition-all flex items-center justify-center gap-2 flex-shrink-0
+                                        ${isInComparison
+                                            ? 'bg-primary-50 border-primary-200 text-primary-700 hover:bg-red-50 hover:text-red-600 hover:border-red-200 group'
+                                            : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50 shadow-sm'
+                                        }
+                                    `}
+                                >
+                                    {isInComparison ? (
+                                        <>
+                                            <div className="flex items-center gap-2 group-hover:hidden">
+                                                <Check size={16} />
+                                                <span>Added to Comparison</span>
+                                            </div>
+                                            <div className="hidden group-hover:flex items-center gap-2">
+                                                <X size={16} />
+                                                <span>Remove from Comparison</span>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Scale size={16} />
+                                            <span>Compare Transaction</span>
+                                        </>
+                                    )}
+                                </button>
+                            )}
 
                             {/* History (Moved Here) */}
                             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-0 overflow-hidden flex-grow flex flex-col min-h-[200px]">
@@ -335,11 +365,7 @@ export default function TransactionDrawer({ transaction, onClose, isOpen }: Tran
                             </div>
                         )}
                     </div>
-                ) : (
-                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 max-w-2xl mx-auto">
-                        <MortgageCalculator propertyPrice={transaction.price} defaultExpanded={true} />
-                    </div>
-                )}
+                ) : null}
             </div>
         </div>
     )
