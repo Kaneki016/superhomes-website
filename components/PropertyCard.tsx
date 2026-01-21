@@ -311,7 +311,10 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
                                     e.preventDefault();
                                     e.stopPropagation();
                                     if (isInCompare(property.id)) removeFromCompare(property.id);
-                                    else addToCompare(property);
+                                    else {
+                                        const error = addToCompare(property)
+                                        if (error) alert(error)
+                                    }
                                 }}
                                 className={`p-2 rounded-full transition-colors ${isInCompare(property.id) ? 'text-primary-600 bg-primary-50' : 'text-gray-400 hover:text-primary-500 hover:bg-gray-50'}`}
                                 title="Compare"
@@ -560,7 +563,8 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
                                 if (isInCompare(property.id)) {
                                     removeFromCompare(property.id)
                                 } else {
-                                    addToCompare(property)
+                                    const error = addToCompare(property)
+                                    if (error) alert(error)
                                 }
                             }}
                             disabled={!canAddMore && !isInCompare(property.id)}

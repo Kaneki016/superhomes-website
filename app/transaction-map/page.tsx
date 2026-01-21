@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useCompare } from '@/contexts/CompareContext'
 import { getTransactions, getDistinctNeighborhoods, getTransactionMetrics, getTransactionPropertyTypes, getTransactionTenures, getTransactionById, searchProperties } from '@/lib/database'
 import { Transaction, Property } from '@/lib/supabase'
 import TransactionMap from '@/components/TransactionMap'
@@ -12,7 +13,7 @@ import ListingDrawer from '@/components/ListingDrawer'
 import { Filter, Search, X, ChevronDown, Check, Map as MapIcon, Layers, Info, ArrowLeft, BarChart2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import TrendChart from '@/components/TrendChart'
-import ComparisonBar from '@/components/ComparisonBar'
+import CompareBar from '@/components/CompareBar'
 import ComparisonModal from '@/components/ComparisonModal'
 
 
@@ -35,8 +36,8 @@ export default function TransactionMapPage() {
     const [selectedListing, setSelectedListing] = useState<Property | null>(null) // Selected Listing State
 
     // Comparison State
-    const [comparisonItems, setComparisonItems] = useState<(Transaction | Property)[]>([])
-    const [showComparison, setShowComparison] = useState(false)
+    const { compareList, addToCompare, removeFromCompare, isInCompare } = useCompare()
+    const [isComparisonOpen, setIsComparisonOpen] = useState(false) // Modal State
 
     // Filters State
     const [openFilter, setOpenFilter] = useState<string | null>(null) // 'price' | 'type' | 'tenure' | 'recency' | null
@@ -274,22 +275,14 @@ export default function TransactionMapPage() {
 
     // Comparison Logic
     const toggleComparison = (item: Transaction | Property) => {
-        setComparisonItems(prev => {
-            const exists = prev.some(i => i.id === item.id)
-            if (exists) {
-                return prev.filter(i => i.id !== item.id)
-            } else {
-                if (prev.length >= 4) {
-                    alert("You can compare up to 4 properties.")
-                    return prev
-                }
-                return [...prev, item]
+        if (isInCompare(item.id)) {
+            removeFromCompare(item.id)
+        } else {
+            const error = addToCompare(item)
+            if (error) {
+                alert(error)
             }
-        })
-    }
-
-    const removeFromComparison = (id: string) => {
-        setComparisonItems(prev => prev.filter(i => i.id !== id))
+        }
     }
 
 
@@ -607,7 +600,7 @@ export default function TransactionMapPage() {
                             <span>✏️ Click on map to draw points. Click first point to finish.</span>
                             <button onClick={() => setIsDrawing(false)} className="ml-2 hover:bg-white/20 p-1 rounded-full"><X size={14} /></button>
                         </div>
-                    ) : (viewMode === 'map' && !polygonFilter && showTip && comparisonItems.length === 0) && ( // Check showTip and no comparison
+                    ) : (viewMode === 'map' && !polygonFilter && showTip && compareList.length === 0) && ( // Check showTip and no comparison
                         <div className="absolute top-24 left-1/2 -translate-x-1/2 z-[1000] bg-white/90 text-gray-700 px-4 py-2.5 rounded-full backdrop-blur-sm shadow-md border border-gray-200 text-xs font-medium flex items-center gap-3 animate-in fade-in slide-in-from-top-4 selection:bg-transparent">
                             <div className="flex items-center gap-2">
                                 <span>💡 Tip: Use the <b>Draw Area</b> tool to filter properties</span>
@@ -624,18 +617,10 @@ export default function TransactionMapPage() {
             </main >
 
             {/* Comparison Logic */}
-            <ComparisonBar
-                count={comparisonItems.length}
-                onCompare={() => setShowComparison(true)}
-                onClear={() => setComparisonItems([])}
-            />
+            <CompareBar onCompareNow={() => setIsComparisonOpen(true)} />
+            <ComparisonModal isOpen={isComparisonOpen} onClose={() => setIsComparisonOpen(false)} />
 
-            <ComparisonModal
-                items={comparisonItems}
-                isOpen={showComparison}
-                onClose={() => setShowComparison(false)}
-                onRemove={removeFromComparison}
-            />
+            {/* Modals & Drawers */}
 
             {/* Modals & Drawers */}
             {/* Calculator Modal Removed */}
@@ -644,9 +629,6 @@ export default function TransactionMapPage() {
                 transaction={selectedTransaction}
                 isOpen={!!selectedTransaction}
                 onClose={() => setSelectedTransaction(null)}
-                // Comparison Props
-                isInComparison={selectedTransaction ? comparisonItems.some(i => i.id === selectedTransaction.id) : false}
-                onToggleComparison={() => selectedTransaction && toggleComparison(selectedTransaction)}
             />
 
             <ListingDrawer
@@ -654,7 +636,7 @@ export default function TransactionMapPage() {
                 isOpen={!!selectedListing}
                 onClose={() => setSelectedListing(null)}
                 // Comparison Props
-                isInComparison={selectedListing ? comparisonItems.some(i => i.id === selectedListing.id) : false}
+                isInComparison={selectedListing ? isInCompare(selectedListing.id) : false}
                 onToggleComparison={() => selectedListing && toggleComparison(selectedListing)}
             />
 
