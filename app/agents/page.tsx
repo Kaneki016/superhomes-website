@@ -11,6 +11,7 @@ import { ListSkeleton } from '@/components/SkeletonLoader'
 import { getAgentsPaginated, getPropertiesByAgentIds, searchAgents } from '@/lib/database'
 import { Agent, Property } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
+import ClaimAgentModal from '@/components/ClaimAgentModal'
 
 const AGENTS_PER_PAGE = 12
 
@@ -78,6 +79,8 @@ function AgentsPageContent() {
     const [filteredAgents, setFilteredAgents] = useState<Agent[]>([])
     const [agentProperties, setAgentProperties] = useState<Property[]>([])
     const [loadingProperties, setLoadingProperties] = useState(false)
+    const [isClaimModalOpen, setIsClaimModalOpen] = useState(false)
+    const [selectedAgentForClaim, setSelectedAgentForClaim] = useState<Agent | null>(null)
 
     useEffect(() => {
         loadAgents(initialPage, searchParams.get('state') || '')
@@ -405,6 +408,18 @@ function AgentsPageContent() {
                                         >
                                             View Full Profile
                                         </Link>
+
+                                        {!agent.auth_id && (
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedAgentForClaim(agent)
+                                                    setIsClaimModalOpen(true)
+                                                }}
+                                                className="mt-3 text-xs text-gray-500 hover:text-primary-600 font-medium underline decoration-dotted underline-offset-2 transition-colors"
+                                            >
+                                                Claim this account
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -515,6 +530,14 @@ function AgentsPageContent() {
             </div>
 
             <Footer />
+
+            {selectedAgentForClaim && (
+                <ClaimAgentModal
+                    isOpen={isClaimModalOpen}
+                    onClose={() => setIsClaimModalOpen(false)}
+                    agent={selectedAgentForClaim}
+                />
+            )}
         </div >
     )
 }

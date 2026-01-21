@@ -79,6 +79,46 @@ function RentPageContent() {
         }
     }, [searchParams, viewMode])
 
+    // Initialize filters from URL parameters
+    useEffect(() => {
+        const typeParam = searchParams.get('type')
+        const stateParam = searchParams.get('state')
+        const priceParam = searchParams.get('price')
+        const bedroomsParam = searchParams.get('bedrooms')
+        const searchParam = searchParams.get('search')
+
+        if (typeParam || stateParam || priceParam || bedroomsParam || searchParam) {
+            // Parse price range (e.g., "1000-2000" or "5000+")
+            let minPrice = ''
+            let maxPrice = ''
+            if (priceParam) {
+                if (priceParam.endsWith('+')) {
+                    minPrice = priceParam.slice(0, -1)
+                } else if (priceParam.includes('-')) {
+                    const [min, max] = priceParam.split('-')
+                    minPrice = min
+                    maxPrice = max
+                }
+            }
+
+            // Handle bedroom values (e.g., "5+" becomes "5")
+            const bedroomValue = bedroomsParam ? bedroomsParam.replace('+', '') : ''
+
+            setFilters(prev => ({
+                ...prev,
+                propertyType: typeParam || '',
+                state: stateParam || '',
+                minPrice: minPrice,
+                maxPrice: maxPrice,
+                bedrooms: bedroomValue,
+            }))
+
+            if (searchParam) {
+                setSearchQuery(searchParam)
+            }
+        }
+    }, [searchParams])
+
     // Pagination calculations
     const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
 

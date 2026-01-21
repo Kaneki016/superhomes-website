@@ -354,7 +354,6 @@ export async function getPropertiesPaginated(
     // If post-fetch filter is active, fetch more data and filter/paginate client-side
     if (hasPostFilter) {
         const { data, error } = await dataQuery
-            .order('latitude', { ascending: false, nullsFirst: false })
             .order('scraped_at', { ascending: false })
             .limit(5000) // Increase limit to capture more candidates
 
@@ -424,7 +423,6 @@ export async function getPropertiesPaginated(
 
     // Get paginated data
     const { data, error } = await dataQuery
-        .order('latitude', { ascending: false, nullsFirst: false })
         .order('scraped_at', { ascending: false })
         .range(from, to)
 
@@ -1031,113 +1029,161 @@ export async function getAgentsPaginated(
         }
     }
 
-    // No state selected: Show ALL 6,827 agents, prioritizing those with listings in priority states
-    // Get all agents first (Supabase default limit is 1000, so we need to specify a higher limit)
-    const { data: allAgents, error: agentsError, count } = await supabase
-        .from('contacts')
-        .select('*', { count: 'exact' })
-        .eq('contact_type', 'agent')
-        .limit(10000) // Fetch up to 10,000 agents (well above current 6,827)
+    // No state selected: Show ALL agents with optimized fetching
+    // Strategy:
+    // 1. Get total count of agents (fast)
+    // 2. Fetch all listing-agent relationships to identify active agents and their stats (lightweight)
+    // 3. Sort active agents by stats
+    // 4. If current page is within active agents range, use sorted active agents
+    // 5. If current page needs inactive agents, fetch them via offset
 
-    if (agentsError) {
-        console.error('Error fetching agents:', agentsError)
+    // 1. Get total count (fast)
+    const { count: totalAgentCount, error: countError } = await supabase
+        .from('contacts')
+        .select('*', { count: 'exact', head: true })
+        .eq('contact_type', 'agent')
+
+    if (countError) {
+        console.error('Error counting agents:', countError)
         return { agents: [], totalCount: 0, hasMore: false }
     }
 
-    console.log(`Fetched ${allAgents?.length} agents from database (total count: ${count})`)
+    // 2. Fetch all active listing relationships to rank agents (lightweight - only IDs)
+    // This allows us to sort by performance without fetching full profiles
+    const { data: listingContacts, error: lcError } = await supabase
+        .from('listing_contacts')
+        .select('contact_id, listings!inner(listing_type, state, is_active)')
+        .eq('listings.is_active', true)
 
-    // Get all active listings with their agents
-    const { data: allListings, error: listingsError } = await supabase
-        .from('listings')
-        .select('id, listing_type, state, listing_contacts(contact_id)')
-        .eq('is_active', true)
-        .limit(50000) // Ensure we get all listings
-
-    // Count listings per agent and track if they have priority state listings
-    const agentStats = new Map<string, {
-        sale: number,
-        rent: number,
-        total: number,
-        priorityCount: number // Count of listings in priority states
-    }>()
-
-    if (!listingsError && allListings) {
-        allListings.forEach((listing: any) => {
-            const contactId = listing.listing_contacts?.[0]?.contact_id
-            if (!contactId) return
-
-            const stats = agentStats.get(contactId) || { sale: 0, rent: 0, total: 0, priorityCount: 0 }
-            if (listing.listing_type === 'sale') stats.sale++
-            if (listing.listing_type === 'rent') stats.rent++
-            stats.total++
-
-            // Check if listing is in a priority state
-            const listingState = listing.state?.toLowerCase() || ''
-            const isPriority = PRIORITY_STATES.some(ps => listingState.includes(ps.toLowerCase()))
-            if (isPriority) stats.priorityCount++
-
-            agentStats.set(contactId, stats)
-        })
+    if (lcError) {
+        console.error('Error fetching listing contacts:', lcError)
+        // Fallback to simple pagination if optimization fails
+        const { data, error } = await supabase
+            .from('contacts')
+            .select('*')
+            .eq('contact_type', 'agent')
+            .range(from, to)
+        return { agents: (data || []).map(transformContactToAgent), totalCount: totalAgentCount || 0, hasMore: false }
     }
 
-    // Sort agents: 
-    // 1. Agents with priority state listings first (sorted by priority listing count)
-    // 2. Then agents with any listings (sorted by total listing count)
-    // 3. Then agents with no listings (sorted alphabetically by name)
-    const sortedAgents = allAgents
-        .map(contact => {
-            const stats = agentStats.get(contact.id) || { sale: 0, rent: 0, total: 0, priorityCount: 0 }
-            return {
-                agent: transformContactToAgent(contact),
-                stats
-            }
-        })
-        .sort((a, b) => {
-            // Group 1: Agents with priority state listings
-            const aHasPriority = a.stats.priorityCount > 0
-            const bHasPriority = b.stats.priorityCount > 0
+    // 3. Aggregate stats for active agents
+    const agentStats = new Map<string, { sale: number, rent: number, total: number, priorityCount: number }>()
 
+    listingContacts?.forEach((lc: any) => {
+        const contactId = lc.contact_id
+        const listing = lc.listings
+
+        if (!contactId || !listing) return
+
+        const stats = agentStats.get(contactId) || { sale: 0, rent: 0, total: 0, priorityCount: 0 }
+
+        if (listing.listing_type === 'sale') stats.sale++
+        if (listing.listing_type === 'rent') stats.rent++
+        stats.total++
+
+        // Check priority state
+        const listingState = listing.state?.toLowerCase() || ''
+        const isPriority = PRIORITY_STATES.some(ps => listingState.includes(ps.toLowerCase()))
+        if (isPriority) stats.priorityCount++
+
+        agentStats.set(contactId, stats)
+    })
+
+    // Sort active agent IDs by performance
+    const activeAgentIds = Array.from(agentStats.entries())
+        .sort((a, b) => {
+            // Priority 1: Priority state listings
+            const aHasPriority = a[1].priorityCount > 0
+            const bHasPriority = b[1].priorityCount > 0
             if (aHasPriority && !bHasPriority) return -1
             if (!aHasPriority && bHasPriority) return 1
+            if (aHasPriority && bHasPriority) return b[1].priorityCount - a[1].priorityCount
 
-            // Within priority agents, sort by priority count
-            if (aHasPriority && bHasPriority) {
-                return b.stats.priorityCount - a.stats.priorityCount
-            }
-
-            // Group 2: Agents with any listings (but not in priority states)
-            const aHasListings = a.stats.total > 0
-            const bHasListings = b.stats.total > 0
-
-            if (aHasListings && !bHasListings) return -1
-            if (!aHasListings && bHasListings) return 1
-
-            // Within agents with listings, sort by total count
-            if (aHasListings && bHasListings) {
-                return b.stats.total - a.stats.total
-            }
-
-            // Group 3: Agents with no listings - sort alphabetically
-            return a.agent.name.localeCompare(b.agent.name)
+            // Priority 2: Total listings
+            return b[1].total - a[1].total
         })
+        .map(([id]) => id)
 
-    const totalCount = sortedAgents.length
-    const hasMore = (page * limit) < totalCount
+    // 4. Determine which agents to show for current page
+    let targetIds: string[] = []
+    const totalActive = activeAgentIds.length
 
-    // Paginate
-    const paginatedAgents = sortedAgents.slice(from, to + 1)
+    if (from < totalActive) {
+        // Page includes active agents
+        targetIds = activeAgentIds.slice(from, to + 1)
+    }
 
-    // Enrich with listing counts
-    const enrichedAgents = paginatedAgents.map(({ agent, stats }) => ({
-        ...agent,
-        listings_for_sale_count: stats.sale,
-        listings_for_rent_count: stats.rent
-    }))
+    // If page needs more agents (inactive ones), fetch them
+    const slotsFilled = targetIds.length
+    const slotsNeeded = limit - slotsFilled
+
+    if (slotsNeeded > 0) {
+        // Calculate offset for inactive agents
+        // If we exhausted active agents in previous pages, offset is (from - totalActive)
+        // If we partially used active agents on this page, offset is 0 for inactive fetch
+        const inactiveOffset = Math.max(0, from - totalActive)
+
+        // Fetch inactive agents (those NOT in activeAgentIds)
+        // Note: 'not.in' with 6000 IDs might be slow, but active agents are usually fewer (~few hundreds/thousands)
+        // Optimized: Fetch page of agents, then filter out active ones? No, that breaks pagination consistency.
+        // Better: Since we only need IDs, we can fetch IDs and filter in DB if list is small, or use 'not.in'
+
+        // For performance with large datasets, we'll just fetch agents normally and exclude active ones
+        // But simpler approach for now to handle "stuck loading":
+        // Just fetch sorted by name for the rest
+
+        const { data: inactiveCandidates, error: inactiveError } = await supabase
+            .from('contacts')
+            .select('id')
+            .eq('contact_type', 'agent')
+            .not('id', 'in', `(${activeAgentIds.join(',')})`) // Exclude already ranked agents
+            .order('name', { ascending: true })
+            .range(inactiveOffset, inactiveOffset + slotsNeeded - 1)
+
+        if (!inactiveError && inactiveCandidates) {
+            targetIds.push(...inactiveCandidates.map(c => c.id))
+        }
+    }
+
+    if (targetIds.length === 0) {
+        return { agents: [], totalCount: totalAgentCount || 0, hasMore: false }
+    }
+
+    // 5. Fetch full details for the target IDs
+    const { data: agentsData, error: agentsDataError } = await supabase
+        .from('contacts')
+        .select('*')
+        .in('id', targetIds)
+        .eq('contact_type', 'agent')
+
+    if (agentsDataError) {
+        console.error('Error fetching agent details:', agentsDataError)
+        return { agents: [], totalCount: totalAgentCount || 0, hasMore: false }
+    }
+
+    // Transform and Re-sort (because .in() does not preserve order)
+    const agentsMap = new Map(
+        (agentsData || []).map(contact => [contact.id, transformContactToAgent(contact)])
+    )
+
+    const orderedAgents = targetIds
+        .map(id => agentsMap.get(id))
+        .filter((agent): agent is Agent => agent !== undefined)
+
+    // Enrich with stats
+    const enrichedAgents = orderedAgents.map(agent => {
+        const stats = agentStats.get(agent.id)
+        return {
+            ...agent,
+            listings_for_sale_count: stats?.sale || 0,
+            listings_for_rent_count: stats?.rent || 0
+        }
+    })
 
     return {
         agents: enrichedAgents,
-        totalCount,
-        hasMore
+        totalCount: totalAgentCount || 0,
+        hasMore: (page * limit) < (totalAgentCount || 0)
     }
 }
 
@@ -1313,9 +1359,59 @@ export async function getDistinctPropertyTypes(): Promise<string[]> {
     }
 
     const types = data?.map(d => d.property_type).filter(Boolean) || []
-    const uniqueTypes = [...new Set(types)].sort()
+    // Sort with general property types (without storey numbers) first,
+    // then storey-specific types (starting with numbers like "1-Storey", "1.5-Storey")
+    const uniqueTypes = [...new Set(types)].sort((a, b) => {
+        const aStartsWithNumber = /^[0-9]/.test(a)
+        const bStartsWithNumber = /^[0-9]/.test(b)
+
+        // General types (without numbers) come first
+        if (!aStartsWithNumber && bStartsWithNumber) return -1
+        if (aStartsWithNumber && !bStartsWithNumber) return 1
+
+        // Within same category, sort alphabetically
+        return a.localeCompare(b)
+    })
 
     setCache('distinct_property_types', uniqueTypes, 300)
+    return uniqueTypes
+}
+
+// Get distinct property types by listing type (sale or rent) - cached for 5 minutes
+export async function getDistinctPropertyTypesByListingType(listingType: 'sale' | 'rent'): Promise<string[]> {
+    const cacheKey = `distinct_property_types_${listingType}`
+    const cached = getCached<string[]>(cacheKey)
+    if (cached) return cached
+
+    const { data, error } = await supabase
+        .from('listings')
+        .select('property_type')
+        .eq('is_active', true)
+        .eq('listing_type', listingType)
+        .not('property_type', 'is', null)
+        .limit(1000)
+
+    if (error) {
+        console.error('Error fetching property types by listing type:', error)
+        return []
+    }
+
+    const types = data?.map(d => d.property_type).filter(Boolean) || []
+    // Sort with general property types (without storey numbers) first,
+    // then storey-specific types (starting with numbers like "1-Storey", "1.5-Storey")
+    const uniqueTypes = [...new Set(types)].sort((a, b) => {
+        const aStartsWithNumber = /^[0-9]/.test(a)
+        const bStartsWithNumber = /^[0-9]/.test(b)
+
+        // General types (without numbers) come first
+        if (!aStartsWithNumber && bStartsWithNumber) return -1
+        if (aStartsWithNumber && !bStartsWithNumber) return 1
+
+        // Within same category, sort alphabetically
+        return a.localeCompare(b)
+    })
+
+    setCache(cacheKey, uniqueTypes, 300)
     return uniqueTypes
 }
 
@@ -1446,7 +1542,19 @@ export async function getFilterOptions(): Promise<{
     const priceRange = await getPriceRange()
 
     const result = {
-        propertyTypes: [...propertyTypeSet].sort(),
+        // Sort with general property types (without storey numbers) first,
+        // then storey-specific types (starting with numbers like "1-Storey", "1.5-Storey")
+        propertyTypes: [...propertyTypeSet].sort((a, b) => {
+            const aStartsWithNumber = /^[0-9]/.test(a)
+            const bStartsWithNumber = /^[0-9]/.test(b)
+
+            // General types (without numbers) come first
+            if (!aStartsWithNumber && bStartsWithNumber) return -1
+            if (aStartsWithNumber && !bStartsWithNumber) return 1
+
+            // Within same category, sort alphabetically
+            return a.localeCompare(b)
+        }),
         locations: [...locationSet].sort(),
         bedrooms: [...bedroomSet].sort((a, b) => a - b),
         priceRange
