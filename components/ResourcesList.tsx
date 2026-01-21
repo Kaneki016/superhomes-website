@@ -28,9 +28,9 @@ export default function ResourcesList({ initialResources, categories }: Resource
     return (
         <div>
             {/* Filter Section */}
-            <div className="mb-12 space-y-4 md:space-y-0 md:flex md:items-center md:justify-between bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <div className="mb-12 space-y-6 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 {/* Search */}
-                <div className="relative flex-1 max-w-md">
+                <div className="relative w-full">
                     <input
                         type="text"
                         placeholder="Search articles..."
@@ -54,12 +54,12 @@ export default function ResourcesList({ initialResources, categories }: Resource
                 </div>
 
                 {/* Category Filter */}
-                <div className="flex items-center space-x-2 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
+                <div className="flex flex-wrap items-center gap-2 pb-2 md:pb-0">
                     <button
                         onClick={() => setSelectedCategory('')}
                         className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${!selectedCategory
-                                ? 'bg-rose-600 text-white shadow-md'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            ? 'bg-rose-600 text-white shadow-md'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }`}
                     >
                         All
@@ -69,8 +69,8 @@ export default function ResourcesList({ initialResources, categories }: Resource
                             key={category}
                             onClick={() => setSelectedCategory(category)}
                             className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${selectedCategory === category
-                                    ? 'bg-rose-600 text-white shadow-md'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                ? 'bg-rose-600 text-white shadow-md'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                 }`}
                         >
                             {category}
