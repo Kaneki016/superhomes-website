@@ -34,7 +34,7 @@ export default function TransactionDrawer({ transaction, onClose, isOpen, isInCo
                 .catch(err => console.error(err))
                 .finally(() => setLoadingTrends(false))
         }
-    }, [activeTab, transaction])
+    }, [activeTab, transaction, trendTransactions.length])
 
     // Fetch specific property history immediately when transaction changes
     useEffect(() => {

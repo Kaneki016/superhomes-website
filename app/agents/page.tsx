@@ -14,6 +14,26 @@ import { useAuth } from '@/contexts/AuthContext'
 
 const AGENTS_PER_PAGE = 12
 
+// Malaysian states for filter dropdown
+const MALAYSIAN_STATES = [
+    'Johor',
+    'Kedah',
+    'Kelantan',
+    'Kuala Lumpur',
+    'Labuan',
+    'Melaka',
+    'Negeri Sembilan',
+    'Pahang',
+    'Penang',
+    'Perak',
+    'Perlis',
+    'Putrajaya',
+    'Sabah',
+    'Sarawak',
+    'Selangor',
+    'Terengganu'
+]
+
 // Loading fallback for Suspense
 function AgentsPageLoading() {
     return (
@@ -54,12 +74,13 @@ function AgentsPageContent() {
     const [totalCount, setTotalCount] = useState(0)
     // Initialize search query directly from URL params
     const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '')
+    const [selectedState, setSelectedState] = useState(searchParams.get('state') || '')
     const [filteredAgents, setFilteredAgents] = useState<Agent[]>([])
     const [agentProperties, setAgentProperties] = useState<Property[]>([])
     const [loadingProperties, setLoadingProperties] = useState(false)
 
     useEffect(() => {
-        loadAgents(initialPage)
+        loadAgents(initialPage, searchParams.get('state') || '')
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []) // Only run on mount - initialPage is intentionally omitted to prevent refetch on page change
 
@@ -115,11 +136,11 @@ function AgentsPageContent() {
         return () => clearTimeout(timeoutId)
     }, [searchQuery, agents])
 
-    async function loadAgents(page: number) {
+    async function loadAgents(page: number, state?: string) {
         try {
             setLoading(true)
 
-            const result = await getAgentsPaginated(page, AGENTS_PER_PAGE)
+            const result = await getAgentsPaginated(page, AGENTS_PER_PAGE, state || undefined)
 
             setAgents(result.agents)
             setFilteredAgents(result.agents)
@@ -136,17 +157,37 @@ function AgentsPageContent() {
     }
 
     const handlePageChange = (page: number) => {
-        // Update URL with the new page number
+        // Update URL with the new page number and state
         const params = new URLSearchParams()
         if (page > 1) {
             params.set('page', page.toString())
         }
+        if (selectedState) {
+            params.set('state', selectedState)
+        }
         const queryString = params.toString()
         router.push(`/agents${queryString ? `?${queryString}` : ''}`, { scroll: false })
 
-        loadAgents(page)
+        loadAgents(page, selectedState)
         setSearchQuery('')
         // Scroll to top of results
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+
+    const handleStateChange = (state: string) => {
+        setSelectedState(state)
+
+        // Update URL
+        const params = new URLSearchParams()
+        if (state) {
+            params.set('state', state)
+        }
+        const queryString = params.toString()
+        router.push(`/agents${queryString ? `?${queryString}` : ''}`, { scroll: false })
+
+        // Reload agents with new state filter
+        loadAgents(1, state)
+        setSearchQuery('')
         window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
@@ -161,10 +202,13 @@ function AgentsPageContent() {
                 <div className="container-custom py-12 md:py-16">
                     <div className="text-center max-w-3xl mx-auto">
                         <h1 className="font-heading font-bold text-3xl md:text-4xl lg:text-5xl mb-4">
-                            Find Property Agents in Malaysia
+                            {selectedState ? `Top Property Agents in ${selectedState}` : 'Top Property Agents in Malaysia'}
                         </h1>
                         <p className="text-white/80 text-lg mb-8">
-                            Search by state, specialty, name, and agency to find real estate agent details, photo, and property listings.
+                            {selectedState
+                                ? `Ranked by active listings in ${selectedState}`
+                                : 'All agents ranked by performance (priority states first)'
+                            }
                         </p>
 
                         {/* Search Bar */}
@@ -191,10 +235,56 @@ function AgentsPageContent() {
                             </div>
                         </div>
 
+                        {/* State Filter Dropdown - Enhanced Design */}
+                        <div className="mt-6 max-w-md mx-auto">
+                            <div className="relative group">
+                                {/* Location Icon */}
+                                <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+                                    <svg className="w-5 h-5 text-white/80 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </div>
+
+                                {/* Dropdown */}
+                                <select
+                                    value={selectedState}
+                                    onChange={(e) => handleStateChange(e.target.value)}
+                                    className="w-full pl-12 pr-10 py-4 rounded-xl bg-white/10 backdrop-blur-md border-2 border-white/30 text-white font-medium text-base focus:outline-none focus:border-white/50 focus:bg-white/15 transition-all duration-200 cursor-pointer appearance-none shadow-lg hover:bg-white/15 hover:border-white/40"
+                                    style={{
+                                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white' opacity='0.8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                                        backgroundRepeat: 'no-repeat',
+                                        backgroundPosition: 'right 1rem center',
+                                        backgroundSize: '1.25rem'
+                                    }}
+                                >
+                                    <option value="" className="bg-gray-900 text-white font-semibold py-3">
+                                        All States
+                                    </option>
+                                    <option disabled className="bg-gray-800 text-gray-500 text-xs py-1 font-normal">
+                                        ── Select a specific state ──
+                                    </option>
+                                    {MALAYSIAN_STATES.map((state) => (
+                                        <option key={state} value={state} className="bg-gray-900 text-white py-3">
+                                            {state}
+                                        </option>
+                                    ))}
+                                </select>
+
+                                {/* Subtle glow effect */}
+                                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-400/0 via-primary-500/20 to-primary-600/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none -z-10 blur-xl"></div>
+                            </div>
+
+                            {/* Helper text */}
+                            <p className="text-white/60 text-sm text-center mt-3 font-medium">
+                                {selectedState ? `Showing top agents in ${selectedState}` : 'Showing all agents (priority states first)'}
+                            </p>
+                        </div>
+
                         {/* Quick Stats */}
                         <div className="mt-8 flex justify-center gap-8 text-sm">
                             <div className="text-center">
-                                <div className="text-2xl font-bold">{totalCount.toLocaleString()}</div>
+                                <div className="text-2xl font-bold">{loading ? '...' : totalCount.toLocaleString()}</div>
                                 <div className="text-white/70">Property Agents</div>
                             </div>
                             <div className="w-px bg-white/20"></div>
@@ -204,8 +294,8 @@ function AgentsPageContent() {
                             </div>
                             <div className="w-px bg-white/20"></div>
                             <div className="text-center">
-                                <div className="text-2xl font-bold">Trusted</div>
-                                <div className="text-white/70">Verified Agents</div>
+                                <div className="text-2xl font-bold">Verified</div>
+                                <div className="text-white/70">Trusted Agents</div>
                             </div>
                         </div>
                     </div>

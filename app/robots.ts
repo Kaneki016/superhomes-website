@@ -1,13 +1,13 @@
 import { MetadataRoute } from 'next'
 
 export default function robots(): MetadataRoute.Robots {
-    const baseUrl = 'https://superhomes.my' // Replace with actual domain if known, or keep generic
+    const baseUrl = 'https://superhomes.com.my' // Update with actual production URL
 
     return {
         rules: {
             userAgent: '*',
             allow: '/',
-            disallow: '/private/',
+            disallow: ['/api/', '/_next/'],
         },
         sitemap: `${baseUrl}/sitemap.xml`,
     }

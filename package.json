@@ -7,7 +7,8 @@
         "dev:netlify": "netlify dev",
         "build": "next build",
         "start": "next start",
-        "lint": "next lint"
+        "lint": "next lint",
+        "populate-amenities": "node scripts/populate_amenities_cache.js"
     },
     "dependencies": {
         "@google/generative-ai": "^0.24.1",

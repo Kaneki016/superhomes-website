@@ -190,8 +190,64 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ slug:
         }
     }
 
+    // Generate JSON-LD structured data for SEO
+    const structuredData = property ? {
+        "@context": "https://schema.org",
+        "@type": "RealEstateListing",
+        "name": propertyName,
+        "description": property.description || `${propertyName} - ${property.property_type} for ${property.listing_type}`,
+        "url": typeof window !== 'undefined' ? window.location.href : '',
+        "image": property.main_image_url || property.images?.[0] || '',
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": property.address,
+            "addressLocality": property.district || property.state,
+            "addressRegion": property.state,
+            "addressCountry": "MY"
+        },
+        "geo": property.latitude && property.longitude && property.latitude !== -99 ? {
+            "@type": "GeoCoordinates",
+            "latitude": property.latitude,
+            "longitude": property.longitude
+        } : undefined,
+        "offers": {
+            "@type": "Offer",
+            "price": property.price,
+            "priceCurrency": "MYR",
+            "availability": "https://schema.org/InStock",
+            "priceSpecification": {
+                "@type": "PriceSpecification",
+                "price": property.price,
+                "priceCurrency": "MYR"
+            }
+        },
+        "numberOfRooms": bedroomCount || undefined,
+        "numberOfBathroomsTotal": property.bathrooms || undefined,
+        "floorSize": {
+            "@type": "QuantitativeValue",
+            "value": propertySize ? parseFloat(propertySize.replace(/[^0-9.]/g, '')) : undefined,
+            "unitText": "sqft"
+        },
+        "datePosted": property.listed_date || property.scraped_at || undefined,
+        "agent": agent ? {
+            "@type": "RealEstateAgent",
+            "name": agent.name,
+            "telephone": agent.phone,
+            "image": agent.photo_url,
+            "url": typeof window !== 'undefined' ? `${window.location.origin}/agents/${agent.id || agent.agent_id}` : ''
+        } : undefined
+    } : null
+
     return (
         <>
+            {/* JSON-LD Structured Data for SEO */}
+            {structuredData && (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+                />
+            )}
+
             <div className="min-h-screen bg-gray-50">
                 <Navbar />
 
