@@ -82,7 +82,8 @@ function NewProjectsContent() {
                         state: filters.state,
                         tenure: filters.tenure,
                         listingType: 'project'
-                    }
+                    },
+                    true  // Enable priority state sorting for projects
                 )
 
                 setProjects(projectsData)
@@ -105,6 +106,11 @@ function NewProjectsContent() {
             }
         }
         loadData()
+
+        // Scroll to top when page changes (but not on initial mount)
+        if (currentPage > 1) {
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentPage, filters, searchQuery])
 

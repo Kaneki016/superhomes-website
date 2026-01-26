@@ -11,7 +11,8 @@ interface ClaimAgentModalProps {
 }
 
 export default function ClaimAgentModal({ isOpen, onClose, agent }: ClaimAgentModalProps) {
-    const [step, setStep] = useState<'confirm' | 'otp' | 'success'>('confirm')
+    const [step, setStep] = useState<'verify-phone' | 'otp' | 'success'>('verify-phone')
+    const [phoneInput, setPhoneInput] = useState('')
     const [otp, setOtp] = useState('')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
@@ -20,15 +21,30 @@ export default function ClaimAgentModal({ isOpen, onClose, agent }: ClaimAgentMo
 
     // Mask phone number for privacy/security display
     const maskedPhone = agent.phone
-        ? agent.phone.replace(/(\d{3})\d{4}(\d+)/, '$1****$2')
+        ? agent.phone.replace(/(\d{2})(\d+)(\d{4})/, '$1***$3')
         : 'Unknown Number'
 
-    const handleSendOtp = async () => {
+    // Normalize phone number for comparison (remove spaces, dashes, etc.)
+    const normalizePhone = (phone: string) => {
+        return phone.replace(/[\s\-\(\)]/g, '')
+    }
+
+    const handleVerifyPhone = async () => {
         if (!agent.phone) {
             setError('This agent profile does not have a phone number to verify.')
             return
         }
 
+        // Check if input phone matches stored phone
+        const normalizedInput = normalizePhone(phoneInput)
+        const normalizedStored = normalizePhone(agent.phone)
+
+        if (normalizedInput !== normalizedStored) {
+            setError('Phone number does not match. Please enter the correct phone number for this agent.')
+            return
+        }
+
+        // Phone verified, now send OTP
         setLoading(true)
         setError('')
 
@@ -113,19 +129,34 @@ export default function ClaimAgentModal({ isOpen, onClose, agent }: ClaimAgentMo
                     </div>
                 )}
 
-                {step === 'confirm' && (
+                {step === 'verify-phone' && (
                     <div>
-                        <p className="text-gray-600 text-sm mb-4 text-center">
-                            We will send a 6-digit verification code to the phone number associated with this profile:
-                            <br />
-                            <span className="font-mono font-bold text-gray-900 block mt-2 text-lg">{maskedPhone}</span>
+                        <p className="text-gray-600 text-sm mb-2 text-center">
+                            To verify you are the owner of this profile, please enter the phone number associated with:
                         </p>
+                        <p className="font-mono font-bold text-gray-900 text-center mb-4 text-sm">
+                            {maskedPhone}
+                        </p>
+
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                            <input
+                                type="tel"
+                                value={phoneInput}
+                                onChange={(e) => setPhoneInput(e.target.value)}
+                                placeholder="+60 12-345 6789"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all"
+                                autoFocus
+                            />
+                            <p className="text-xs text-gray-500 mt-2">Enter the full phone number to continue</p>
+                        </div>
+
                         <button
-                            onClick={handleSendOtp}
-                            disabled={loading || !agent.phone}
+                            onClick={handleVerifyPhone}
+                            disabled={loading || !phoneInput || phoneInput.length < 10}
                             className="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 rounded-xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {loading ? 'Sending...' : 'Send Verification Code'}
+                            {loading ? 'Verifying...' : 'Verify & Send OTP'}
                         </button>
                         <button
                             onClick={onClose}
@@ -157,8 +188,8 @@ export default function ClaimAgentModal({ isOpen, onClose, agent }: ClaimAgentMo
                             {loading ? 'Verifying...' : 'Verify Code'}
                         </button>
                         <div className="mt-4 flex justify-between items-center text-sm">
-                            <button onClick={() => setStep('confirm')} className="text-gray-500 hover:text-gray-700">Change Number</button>
-                            <button onClick={handleSendOtp} className="text-primary-600 hover:text-primary-700 font-medium">Resend Code</button>
+                            <button onClick={() => { setPhoneInput(''); setOtp(''); setStep('verify-phone'); }} className="text-gray-500 hover:text-gray-700">Change Number</button>
+                            <button onClick={handleVerifyPhone} className="text-primary-600 hover:text-primary-700 font-medium">Resend Code</button>
                         </div>
                     </div>
                 )}

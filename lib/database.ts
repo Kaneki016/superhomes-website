@@ -228,7 +228,8 @@ export async function getPropertiesPaginated(
         state?: string
         listingType?: 'sale' | 'rent' | 'project'
         tenure?: string
-    }
+    },
+    prioritizeStates: boolean = false
 ): Promise<{
     properties: Property[]
     totalCount: number
@@ -431,7 +432,24 @@ export async function getPropertiesPaginated(
         return { properties: [], totalCount: count || 0, hasMore: false }
     }
 
-    const properties = (data || []).map(transformListingToProperty)
+    let properties = (data || []).map(transformListingToProperty)
+
+    // Apply priority state sorting if requested and no state filter is active
+    if (prioritizeStates && !filters?.state) {
+        properties = properties.sort((a, b) => {
+            const aIsPriority = a.state ? PRIORITY_STATES.includes(a.state) : false
+            const bIsPriority = b.state ? PRIORITY_STATES.includes(b.state) : false
+
+            // Priority states first
+            if (aIsPriority && !bIsPriority) return -1
+            if (!aIsPriority && bIsPriority) return 1
+
+            // Within same priority level, sort by date (newest first)
+            const aDate = new Date(a.scraped_at || 0).getTime()
+            const bDate = new Date(b.scraped_at || 0).getTime()
+            return bDate - aDate
+        })
+    }
 
     const totalCount = count || 0
     const hasMore = (page * limit) < totalCount
