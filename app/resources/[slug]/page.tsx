@@ -28,6 +28,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return {
         title: `${post.title} | SuperHomes Resources`,
         description: post.description,
+        keywords: post.keywords,
         openGraph: {
             title: post.title,
             description: post.description,
