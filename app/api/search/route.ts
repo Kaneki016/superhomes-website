@@ -28,33 +28,32 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        // For single keyword, use standard OR search across fields
+        let query = supabase
+            .from('listings')
+            .select(`
+                id,
+                title,
+                address,
+                state,
+                property_type,
+                listing_sale_details(price),
+                listing_rent_details(monthly_rent),
+                listing_project_details(price)
+            `)
+            .eq('is_active', true)
+
+        // Construct search filter
         if (words.length === 1) {
             const searchTerm = words[0]
-            const { data, error } = await supabase
-                .from('dup_properties')
-                .select('id, property_name, address, state, property_type, price')
-                .or(`property_name.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%,state.ilike.%${searchTerm}%,property_type.ilike.%${searchTerm}%`)
-                .limit(limit)
-                .order('created_at', { ascending: false })
-
-            if (error) {
-                console.error('Error searching properties:', error)
-                return NextResponse.json([])
-            }
-
-            return NextResponse.json(data || [])
+            query = query.or(`title.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%,state.ilike.%${searchTerm}%,property_type.ilike.%${searchTerm}%`)
+        } else {
+            const firstWord = words[0]
+            query = query.or(`title.ilike.%${firstWord}%,address.ilike.%${firstWord}%,state.ilike.%${firstWord}%,property_type.ilike.%${firstWord}%`)
         }
 
-        // For multiple keywords, fetch more candidates and filter client-side
-        // This ensures ALL keywords are matched across any combination of fields
-        const firstWord = words[0]
-        const { data, error } = await supabase
-            .from('dup_properties')
-            .select('id, property_name, address, state, property_type, price')
-            .or(`property_name.ilike.%${firstWord}%,address.ilike.%${firstWord}%,state.ilike.%${firstWord}%,property_type.ilike.%${firstWord}%`)
-            .limit(100) // Fetch more candidates for filtering
-            .order('created_at', { ascending: false })
+        const { data, error } = await query
+            .limit(100)
+            .order('scraped_at', { ascending: false })
 
         if (error) {
             console.error('Error searching properties:', error)
@@ -65,21 +64,43 @@ export async function GET(request: NextRequest) {
             return NextResponse.json([])
         }
 
-        // Filter properties that match ALL keywords across any field
-        const filteredResults = data.filter(property => {
-            // Combine all searchable fields into one string
-            const combinedText = [
-                property.property_name || '',
-                property.address || '',
-                property.state || '',
-                property.property_type || ''
-            ].join(' ').toLowerCase()
+        // Map and filter results
+        let results = data.map((item: any) => {
+            // Extract price from joined tables
+            let price = 0
+            if (item.listing_sale_details && item.listing_sale_details.length > 0) {
+                price = item.listing_sale_details[0].price
+            } else if (item.listing_rent_details && item.listing_rent_details.length > 0) {
+                price = item.listing_rent_details[0].monthly_rent
+            } else if (item.listing_project_details && item.listing_project_details.length > 0) {
+                price = item.listing_project_details[0].price
+            }
 
-            // Check if ALL keywords are present in the combined text
-            return words.every(word => combinedText.includes(word))
+            return {
+                id: item.id,
+                property_name: item.title, // Map title to property_name
+                address: item.address,
+                state: item.state,
+                property_type: item.property_type,
+                price: price
+            }
         })
 
-        return NextResponse.json(filteredResults.slice(0, limit))
+        // Client-side filtering for multiple keywords (if applicable)
+        if (words.length > 1) {
+            results = results.filter(property => {
+                const combinedText = [
+                    property.property_name || '',
+                    property.address || '',
+                    property.state || '',
+                    property.property_type || ''
+                ].join(' ').toLowerCase()
+
+                return words.every(word => combinedText.includes(word))
+            })
+        }
+
+        return NextResponse.json(results.slice(0, limit))
     } catch (error) {
         console.error('Search API error:', error)
         return NextResponse.json([])

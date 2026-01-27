@@ -19,7 +19,9 @@ export interface ResourcePost {
 
 export function getAllResources(): ResourcePost[] {
     // Check if directory exists
+    console.log('Checking resources directory:', resourcesDirectory)
     if (!fs.existsSync(resourcesDirectory)) {
+        console.log('Directory does not exist!')
         return []
     }
 
