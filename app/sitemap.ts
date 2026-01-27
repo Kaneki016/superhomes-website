@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next'
+import { getAllResources } from '@/lib/blog'
 
 // Malaysian states for sitemap
 const MALAYSIAN_STATES = [
@@ -22,6 +23,14 @@ const MALAYSIAN_STATES = [
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = 'https://superhomes.com.my' // Update with actual production URL
+    const resources = getAllResources()
+
+    const resourcesUrls = resources.map((post) => ({
+        url: `${baseUrl}/resources/${post.slug}`,
+        lastModified: new Date(post.date),
+        changeFrequency: 'monthly' as const,
+        priority: 0.7,
+    }))
 
     // Static pages
     const staticPages: MetadataRoute.Sitemap = [
@@ -67,6 +76,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             changeFrequency: 'weekly',
             priority: 0.6,
         },
+        {
+            url: `${baseUrl}/resources`,
+            lastModified: new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.8,
+        },
     ]
 
     // State-specific property pages
@@ -83,5 +98,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // However, this would require database access at build time
     // Consider using a dynamic sitemap route or generating during deployment
 
-    return [...staticPages, ...statePages]
+    return [...staticPages, ...statePages, ...resourcesUrls]
 }

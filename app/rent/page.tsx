@@ -131,6 +131,93 @@ function RentPageContent() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentPage, filters, searchQuery])
 
+    // Initialize filters from URL params
+    const initialLoadDone = useRef(false)
+    useEffect(() => {
+        if (initialLoadDone.current) return
+
+        const stateParam = searchParams.get('state')
+        const locationParam = searchParams.get('location')
+        const searchParam = searchParams.get('search')
+        const typeParam = searchParams.get('type')
+        const priceParam = searchParams.get('price')
+        const bedroomsParam = searchParams.get('bedrooms')
+
+        const hasAnyParam = stateParam || locationParam || searchParam || typeParam || priceParam || bedroomsParam
+
+        if (hasAnyParam) {
+            // Parse price range
+            let minPrice = ''
+            let maxPrice = ''
+            if (priceParam) {
+                if (priceParam.endsWith('+')) {
+                    minPrice = priceParam.slice(0, -1)
+                } else if (priceParam.includes('-')) {
+                    const [min, max] = priceParam.split('-')
+                    minPrice = min
+                    maxPrice = max
+                }
+            }
+
+            // Map property type values
+            const propertyTypeMap: { [key: string]: string } = {
+                'condo': 'Condominium',
+                'apartment': 'Apartment',
+                'terrace': 'Terrace House',
+                'semi-d': 'Semi-D',
+                'bungalow': 'Bungalow',
+                'townhouse': 'Townhouse',
+                'all': '',
+            }
+            const mappedPropertyType = typeParam ? (propertyTypeMap[typeParam] || typeParam) : ''
+
+            setFilters(prev => ({
+                ...prev,
+                state: stateParam || '',
+                propertyType: mappedPropertyType,
+                minPrice: minPrice,
+                maxPrice: maxPrice,
+                bedrooms: bedroomsParam || '',
+            }))
+
+            if (searchParam || locationParam) {
+                setSearchQuery(searchParam || locationParam || '')
+            }
+        }
+
+        initialLoadDone.current = true
+    }, [searchParams])
+
+    // Sync filters to URL
+    const syncFiltersToUrl = (filterState: typeof filters, search: string) => {
+        if (!initialLoadDone.current) return
+
+        const params = new URLSearchParams()
+        if (filterState.state) params.set('state', filterState.state)
+        if (filterState.propertyType) params.set('type', filterState.propertyType)
+        if (filterState.minPrice && filterState.maxPrice) {
+            params.set('price', `${filterState.minPrice}-${filterState.maxPrice}`)
+        } else if (filterState.minPrice) {
+            params.set('price', `${filterState.minPrice}+`)
+        } else if (filterState.maxPrice) {
+            params.set('price', `0-${filterState.maxPrice}`)
+        }
+        if (filterState.bedrooms) params.set('bedrooms', filterState.bedrooms)
+        if (search) params.set('search', search)
+        if (viewMode === 'list') params.set('view', 'list')
+
+        const queryString = params.toString()
+        router.replace(`/rent${queryString ? `?${queryString}` : ''}`, { scroll: false })
+    }
+
+    // Update sync effect
+    useEffect(() => {
+        if (initialLoadDone.current) {
+            syncFiltersToUrl(filters, searchQuery)
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filters, searchQuery])
+
     // Close dropdown when clicking outside
     useEffect(() => {
         function handleClickOutside(e: MouseEvent) {
