@@ -16,6 +16,7 @@ import TrendChart from '@/components/TrendChart'
 import CompareBar from '@/components/CompareBar'
 import ComparisonModal from '@/components/ComparisonModal'
 import MapOnboardingOverlay from '@/components/MapOnboardingOverlay'
+import SearchableSelect from '@/components/SearchableSelect'
 
 
 export default function TransactionMapPage() {
@@ -159,8 +160,8 @@ export default function TransactionMapPage() {
 
     // Handlers for Hierarchical Location Selection
     // Level 1: District
-    const handleDistrictChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const newDistrict = e.target.value
+    const handleDistrictChange = async (value: string) => {
+        const newDistrict = value
         setFilters(prev => ({ ...prev, district: newDistrict, mukim: '', neighborhood: '' }))
 
         if (newDistrict) {
@@ -174,8 +175,8 @@ export default function TransactionMapPage() {
     }
 
     // Level 2: Mukim
-    const handleMukimChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const newMukim = e.target.value
+    const handleMukimChange = async (value: string) => {
+        const newMukim = value
         setFilters(prev => ({ ...prev, mukim: newMukim, neighborhood: '' }))
 
         if (newMukim) {
@@ -188,8 +189,8 @@ export default function TransactionMapPage() {
     }
 
 
-    const handleNeighborhoodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setFilters(prev => ({ ...prev, neighborhood: e.target.value }))
+    const handleNeighborhoodChange = (value: string) => {
+        setFilters(prev => ({ ...prev, neighborhood: value }))
     }
 
     // Fetch data when filters or bounds change
@@ -209,6 +210,11 @@ export default function TransactionMapPage() {
                     !filters.maxYear &&
                     !polygonFilter &&
                     !currentBounds; // Added currentBounds check
+
+                const isFiltered = !isDefault
+                if (isFiltered && !hasSeenOnboarding) {
+                    setHasSeenOnboarding(true)
+                }
 
                 if (isDefault) {
                     setTransactions([])
@@ -342,46 +348,37 @@ export default function TransactionMapPage() {
                 {/* Mobile Top Bar */}
                 <div className="lg:hidden bg-white border-b shadow-sm z-[2000] px-3 py-2 flex items-center gap-2">
                     {/* District (Top Level) */}
-                    <div className="relative flex-grow">
-                        <select
+                    <div className="relative flex-grow min-w-[120px]">
+                        <SearchableSelect
                             value={filters.district}
                             onChange={handleDistrictChange}
-                            className="form-select w-full text-sm py-2 pl-3 pr-8 rounded-lg border-gray-300 bg-white hover:border-primary-500 focus:ring-primary-500 cursor-pointer font-medium text-gray-700 shadow-sm"
-                        >
-                            <option value="">District</option>
-                            {availableDistricts.map(s => (
-                                <option key={s} value={s}>{s}</option>
-                            ))}
-                        </select>
+                            options={availableDistricts}
+                            placeholder="District"
+                            searchPlaceholder="Search district..."
+                        />
                     </div>
                     {/* Mukim (if district selected) */}
                     {filters.district && (
-                        <div className="relative flex-grow">
-                            <select
+                        <div className="relative flex-grow min-w-[120px]">
+                            <SearchableSelect
                                 value={filters.mukim}
                                 onChange={handleMukimChange}
-                                className="form-select w-full text-sm py-2 pl-3 pr-8 rounded-lg border-gray-300 bg-white hover:border-primary-500 focus:ring-primary-500 cursor-pointer font-medium text-gray-700 shadow-sm"
-                            >
-                                <option value="">Mukim</option>
-                                {availableMukims.map(d => (
-                                    <option key={d} value={d}>{d}</option>
-                                ))}
-                            </select>
+                                options={availableMukims}
+                                placeholder="Mukim"
+                                searchPlaceholder="Search mukim..."
+                            />
                         </div>
                     )}
                     {/* Neighborhood (if mukim selected) */}
                     {filters.mukim && (
-                        <div className="relative flex-grow">
-                            <select
+                        <div className="relative flex-grow min-w-[120px]">
+                            <SearchableSelect
                                 value={filters.neighborhood}
                                 onChange={handleNeighborhoodChange}
-                                className="form-select w-full text-sm py-2 pl-3 pr-8 rounded-lg border-gray-300 bg-white hover:border-primary-500 focus:ring-primary-500 cursor-pointer font-medium text-gray-700 shadow-sm"
-                            >
-                                <option value="">Area</option>
-                                {availableNeighborhoods.map(n => (
-                                    <option key={n} value={n}>{n}</option>
-                                ))}
-                            </select>
+                                options={availableNeighborhoods}
+                                placeholder="Area"
+                                searchPlaceholder="Search area..."
+                            />
                         </div>
                     )}
                     <button
@@ -439,48 +436,39 @@ export default function TransactionMapPage() {
                         <div className="h-6 w-px bg-gray-300 mx-1 hidden lg:block"></div>
 
                         {/* District Dropdown */}
-                        <div className="relative min-w-[140px]">
-                            <select
+                        <div className="relative min-w-[140px] max-w-[200px]">
+                            <SearchableSelect
                                 value={filters.district}
                                 onChange={handleDistrictChange}
-                                className="form-select w-full text-sm py-2 pl-3 pr-8 rounded-lg border-gray-300 bg-white hover:border-primary-500 focus:ring-primary-500 cursor-pointer font-medium text-gray-700 shadow-sm"
-                            >
-                                <option value="">All Districts</option>
-                                {availableDistricts.map(s => (
-                                    <option key={s} value={s}>{s}</option>
-                                ))}
-                            </select>
+                                options={availableDistricts}
+                                placeholder="All Districts"
+                                searchPlaceholder="Search..."
+                            />
                         </div>
 
                         {/* Mukim Dropdown (Visible if District selected) */}
                         {filters.district && (
-                            <div className="relative min-w-[140px] animate-fade-in-left">
-                                <select
+                            <div className="relative min-w-[140px] max-w-[200px] animate-fade-in-left">
+                                <SearchableSelect
                                     value={filters.mukim}
                                     onChange={handleMukimChange}
-                                    className="form-select w-full text-sm py-2 pl-3 pr-8 rounded-lg border-gray-300 bg-white hover:border-primary-500 focus:ring-primary-500 cursor-pointer font-medium text-gray-700 shadow-sm"
-                                >
-                                    <option value="">All Mukims</option>
-                                    {availableMukims.map(d => (
-                                        <option key={d} value={d}>{d}</option>
-                                    ))}
-                                </select>
+                                    options={availableMukims}
+                                    placeholder="All Mukims"
+                                    searchPlaceholder="Search..."
+                                />
                             </div>
                         )}
 
                         {/* Neighborhood Dropdown (Visible if Mukim selected) */}
                         {filters.mukim && (
-                            <div className="relative min-w-[160px] animate-fade-in-left">
-                                <select
+                            <div className="relative min-w-[160px] max-w-[240px] animate-fade-in-left">
+                                <SearchableSelect
                                     value={filters.neighborhood}
                                     onChange={handleNeighborhoodChange}
-                                    className="form-select w-full text-sm py-2 pl-3 pr-8 rounded-lg border-gray-300 bg-white hover:border-primary-500 focus:ring-primary-500 cursor-pointer font-medium text-gray-700 shadow-sm"
-                                >
-                                    <option value="">All Areas</option>
-                                    {availableNeighborhoods.map(n => (
-                                        <option key={n} value={n}>{n}</option>
-                                    ))}
-                                </select>
+                                    options={availableNeighborhoods}
+                                    placeholder="All Areas"
+                                    searchPlaceholder="Search..."
+                                />
                             </div>
                         )}
 
