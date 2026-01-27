@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useCompare } from '@/contexts/CompareContext'
-import { getTransactions, getTransactionStates, getTransactionDistricts, getNeighborhoodsByDistrict, getTransactionMetrics, getTransactionPropertyTypes, getTransactionTenures, getTransactionById, searchProperties } from '@/lib/database'
+import { getTransactions, getTransactionDistricts, getTransactionMukims, getNeighborhoodsByMukim, getTransactionMetrics, getTransactionPropertyTypes, getTransactionTenures, getTransactionById, searchProperties } from '@/lib/database'
 import { Transaction, Property } from '@/lib/supabase'
 import TransactionMap from '@/components/TransactionMap'
 import RangeSlider from '@/components/RangeSlider'
@@ -45,11 +45,12 @@ export default function TransactionMapPage() {
 
     // Core Filter Logic
     const [filters, setFilters] = useState({
-        state: '',
-        district: '',
+        state: '', // Deprecated but kept for type compat if needed temporarily
+        district: '', // Now Top Level
+        mukim: '',    // New Level 2
         neighborhood: '',
         minPrice: 0,
-        maxPrice: 5000000, // Static default max
+        maxPrice: 5000000,
         propertyType: [] as string[],
         tenure: [] as string[],
         minYear: undefined as number | undefined,
@@ -132,21 +133,21 @@ export default function TransactionMapPage() {
     }, [])
 
     // Location Data State
-    const [availableStates, setAvailableStates] = useState<string[]>([])
     const [availableDistricts, setAvailableDistricts] = useState<string[]>([])
+    const [availableMukims, setAvailableMukims] = useState<string[]>([])
     const [availableNeighborhoods, setAvailableNeighborhoods] = useState<string[]>([])
 
-    // Fetch initial options
+    // Fetch initial options (Districts is now top level)
     useEffect(() => {
         const fetchOptions = async () => {
             console.log('🔄 Fetching filter options...')
             try {
-                const [states, p, t] = await Promise.all([
-                    getTransactionStates(),
+                const [districts, p, t] = await Promise.all([
+                    getTransactionDistricts(),
                     getTransactionPropertyTypes(),
                     getTransactionTenures()
                 ])
-                setAvailableStates(states)
+                setAvailableDistricts(districts)
                 setPropertyTypes(p)
                 setTenures(t)
             } catch (err) {
@@ -157,32 +158,35 @@ export default function TransactionMapPage() {
     }, [])
 
     // Handlers for Hierarchical Location Selection
-    const handleStateChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const newState = e.target.value
-        setFilters(prev => ({ ...prev, state: newState, district: '', neighborhood: '' }))
+    // Level 1: District
+    const handleDistrictChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newDistrict = e.target.value
+        setFilters(prev => ({ ...prev, district: newDistrict, mukim: '', neighborhood: '' }))
 
-        if (newState) {
-            const districts = await getTransactionDistricts(newState)
-            setAvailableDistricts(districts)
+        if (newDistrict) {
+            const mukims = await getTransactionMukims(newDistrict)
+            setAvailableMukims(mukims)
             setAvailableNeighborhoods([])
         } else {
-            setAvailableDistricts([])
+            setAvailableMukims([])
             setAvailableNeighborhoods([])
         }
     }
 
-    const handleDistrictChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const newDistrict = e.target.value
-        setFilters(prev => ({ ...prev, district: newDistrict, neighborhood: '' }))
+    // Level 2: Mukim
+    const handleMukimChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newMukim = e.target.value
+        setFilters(prev => ({ ...prev, mukim: newMukim, neighborhood: '' }))
 
-        if (newDistrict) {
-            // Fetch neighborhoods for this district (and state)
-            const neighborhoods = await getNeighborhoodsByDistrict(filters.state, newDistrict)
+        if (newMukim) {
+            // Fetch neighborhoods for this mukim
+            const neighborhoods = await getNeighborhoodsByMukim(filters.district, newMukim)
             setAvailableNeighborhoods(neighborhoods)
         } else {
             setAvailableNeighborhoods([])
         }
     }
+
 
     const handleNeighborhoodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setFilters(prev => ({ ...prev, neighborhood: e.target.value }))
@@ -337,36 +341,36 @@ export default function TransactionMapPage() {
 
                 {/* Mobile Top Bar */}
                 <div className="lg:hidden bg-white border-b shadow-sm z-[2000] px-3 py-2 flex items-center gap-2">
-                    {/* State */}
+                    {/* District (Top Level) */}
                     <div className="relative flex-grow">
                         <select
-                            value={filters.state}
-                            onChange={handleStateChange}
+                            value={filters.district}
+                            onChange={handleDistrictChange}
                             className="form-select w-full text-sm py-2 pl-3 pr-8 rounded-lg border-gray-300 bg-white hover:border-primary-500 focus:ring-primary-500 cursor-pointer font-medium text-gray-700 shadow-sm"
                         >
-                            <option value="">State</option>
-                            {availableStates.map(s => (
+                            <option value="">District</option>
+                            {availableDistricts.map(s => (
                                 <option key={s} value={s}>{s}</option>
                             ))}
                         </select>
                     </div>
-                    {/* District (if state selected) */}
-                    {filters.state && (
+                    {/* Mukim (if district selected) */}
+                    {filters.district && (
                         <div className="relative flex-grow">
                             <select
-                                value={filters.district}
-                                onChange={handleDistrictChange}
+                                value={filters.mukim}
+                                onChange={handleMukimChange}
                                 className="form-select w-full text-sm py-2 pl-3 pr-8 rounded-lg border-gray-300 bg-white hover:border-primary-500 focus:ring-primary-500 cursor-pointer font-medium text-gray-700 shadow-sm"
                             >
-                                <option value="">District</option>
-                                {availableDistricts.map(d => (
+                                <option value="">Mukim</option>
+                                {availableMukims.map(d => (
                                     <option key={d} value={d}>{d}</option>
                                 ))}
                             </select>
                         </div>
                     )}
-                    {/* Neighborhood (if district selected) */}
-                    {filters.district && (
+                    {/* Neighborhood (if mukim selected) */}
+                    {filters.mukim && (
                         <div className="relative flex-grow">
                             <select
                                 value={filters.neighborhood}
@@ -402,6 +406,9 @@ export default function TransactionMapPage() {
                         <button
                             onClick={() => {
                                 setFilters({
+                                    state: '', // Keep for type compat
+                                    district: '',
+                                    mukim: '',
                                     neighborhood: '',
                                     minPrice: 0,
                                     maxPrice: 5000000,
@@ -431,38 +438,38 @@ export default function TransactionMapPage() {
 
                         <div className="h-6 w-px bg-gray-300 mx-1 hidden lg:block"></div>
 
-                        {/* State Dropdown */}
+                        {/* District Dropdown */}
                         <div className="relative min-w-[140px]">
                             <select
-                                value={filters.state}
-                                onChange={handleStateChange}
+                                value={filters.district}
+                                onChange={handleDistrictChange}
                                 className="form-select w-full text-sm py-2 pl-3 pr-8 rounded-lg border-gray-300 bg-white hover:border-primary-500 focus:ring-primary-500 cursor-pointer font-medium text-gray-700 shadow-sm"
                             >
-                                <option value="">All States</option>
-                                {availableStates.map(s => (
+                                <option value="">All Districts</option>
+                                {availableDistricts.map(s => (
                                     <option key={s} value={s}>{s}</option>
                                 ))}
                             </select>
                         </div>
 
-                        {/* District Dropdown (Visible if State selected) */}
-                        {filters.state && (
+                        {/* Mukim Dropdown (Visible if District selected) */}
+                        {filters.district && (
                             <div className="relative min-w-[140px] animate-fade-in-left">
                                 <select
-                                    value={filters.district}
-                                    onChange={handleDistrictChange}
+                                    value={filters.mukim}
+                                    onChange={handleMukimChange}
                                     className="form-select w-full text-sm py-2 pl-3 pr-8 rounded-lg border-gray-300 bg-white hover:border-primary-500 focus:ring-primary-500 cursor-pointer font-medium text-gray-700 shadow-sm"
                                 >
-                                    <option value="">All Districts</option>
-                                    {availableDistricts.map(d => (
+                                    <option value="">All Mukims</option>
+                                    {availableMukims.map(d => (
                                         <option key={d} value={d}>{d}</option>
                                     ))}
                                 </select>
                             </div>
                         )}
 
-                        {/* Neighborhood Dropdown (Visible if District selected) */}
-                        {filters.district && (
+                        {/* Neighborhood Dropdown (Visible if Mukim selected) */}
+                        {filters.mukim && (
                             <div className="relative min-w-[160px] animate-fade-in-left">
                                 <select
                                     value={filters.neighborhood}
@@ -636,6 +643,9 @@ export default function TransactionMapPage() {
                     <button
                         onClick={() => {
                             setFilters({
+                                state: '',
+                                district: '',
+                                mukim: '',
                                 neighborhood: '',
                                 // searchQuery: '',
                                 minPrice: 0,
