@@ -1992,6 +1992,11 @@ export async function getTransactionStates(): Promise<string[]> {
         .not('state', 'is', null)
 
     if (error) {
+        // Gracefully handle missing state column
+        if (error.code === '42703' || error.message?.includes('does not exist')) {
+            console.warn('Warning: state column missing in transactions table. Skipping state filter.')
+            return []
+        }
         console.error('Error fetching transaction states:', error)
         return []
     }
@@ -2000,12 +2005,11 @@ export async function getTransactionStates(): Promise<string[]> {
     return [...new Set(states)].sort()
 }
 
-// Get distinct districts for a specific state from transactions
-export async function getTransactionDistricts(state: string): Promise<string[]> {
+// Get distinct districts (Top level now)
+export async function getTransactionDistricts(): Promise<string[]> {
     const { data, error } = await supabase
         .from('transactions')
         .select('district')
-        .eq('state', state)
         .not('district', 'is', null)
 
     if (error) {
@@ -2015,6 +2019,23 @@ export async function getTransactionDistricts(state: string): Promise<string[]> 
 
     const districts = data.map(d => d.district).filter(Boolean) as string[]
     return [...new Set(districts)].sort()
+}
+
+// Get distinct mukims for a specific district
+export async function getTransactionMukims(district: string): Promise<string[]> {
+    const { data, error } = await supabase
+        .from('transactions')
+        .select('mukim')
+        .eq('district', district)
+        .not('mukim', 'is', null)
+
+    if (error) {
+        console.error('Error fetching transaction mukims:', error)
+        return []
+    }
+
+    const mukims = data.map(d => d.mukim).filter(Boolean) as string[]
+    return [...new Set(mukims)].sort()
 }
 
 // Get distinct neighborhoods for filtering
@@ -2034,19 +2055,16 @@ export async function getDistinctNeighborhoods(): Promise<string[]> {
     return [...new Set(neighborhoods)].sort()
 }
 
-// Get neighborhoods filtered by state and district
-export async function getNeighborhoodsByDistrict(state?: string, district?: string): Promise<string[]> {
+// Get neighborhoods filtered by district and mukim
+export async function getNeighborhoodsByMukim(district: string, mukim?: string): Promise<string[]> {
     let query = supabase
         .from('transactions')
         .select('neighborhood')
+        .eq('district', district)
         .not('neighborhood', 'is', null)
 
-    if (state) {
-        query = query.eq('state', state)
-    }
-
-    if (district) {
-        query = query.eq('district', district)
+    if (mukim) {
+        query = query.eq('mukim', mukim)
     }
 
     const { data, error } = await query
