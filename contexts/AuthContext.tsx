@@ -11,6 +11,7 @@ interface UserProfile {
     user_type: 'buyer' | 'agent'
     name?: string
     phone?: string
+    photo_url?: string // Scraped photo URL
     agent_id?: string // For agents: their PropertyGuru agent ID
 }
 
@@ -20,7 +21,7 @@ interface AuthContextType {
     session: Session | null
     loading: boolean
     signIn: (email: string, password: string) => Promise<{ error: Error | null }>
-    signUp: (email: string, password: string, userData: { name: string; userType: 'buyer' | 'agent'; phone?: string; agency?: string }) => Promise<{ error: Error | null }>
+    signUp: (email: string, password: string, userData: { name: string; userType: 'buyer' | 'agent'; phone?: string; agency?: string; renNumber?: string }) => Promise<{ error: Error | null }>
     signOut: () => Promise<void>
     signInWithGoogle: () => Promise<{ error: Error | null }>
     refreshProfile: () => Promise<void>
@@ -38,7 +39,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const fetchProfile = useCallback(async (userId: string, userEmail: string) => {
         try {
             console.log('fetchProfile called for userId:', userId)
-            // First check if user is a buyer
+            // 1. Check if user is an agent (in contacts table) - PRIORITIZE AGENTS
+            const { data: agentData } = await supabase
+                .from('contacts')
+                .select('*')
+                .eq('auth_id', userId)
+                .eq('contact_type', 'agent')
+                .maybeSingle()
+
+            if (agentData) {
+                console.log('Setting profile with agent data:', agentData)
+                setProfile({
+                    id: agentData.id,
+                    email: agentData.email || userEmail,
+                    user_type: 'agent',
+                    name: agentData.name,
+                    phone: agentData.phone,
+                    photo_url: agentData.photo_url,
+                })
+                return
+            }
+
+            // 2. If not agent, check if user is a buyer
             const { data: buyerData, error: buyerError } = await supabase
                 .from('buyers')
                 .select('*')
@@ -59,95 +81,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 return
             }
 
-            // If not a buyer, check if user is an agent (in contacts table)
-            const { data: agentData } = await supabase
-                .from('contacts')
-                .select('*')
-                .eq('auth_id', userId)
-                .eq('contact_type', 'agent')
-                .maybeSingle()
+            // If neither exists, do NOT auto-create.
+            // This prevents "zombie" accounts from reappearing after database deletion.
+            // Profile creation should be handled explicitly by SignUp or a separate "Complete Profile" flow.
+            console.log('No existing profile found via fetchProfile. User is authenticated but has no profile row.')
 
-            if (agentData) {
-                setProfile({
-                    id: agentData.id,
-                    email: agentData.email || userEmail,
-                    user_type: 'agent',
-                    name: agentData.name,
-                    phone: agentData.phone,
-                })
-                return
-            }
-
-            // If neither exists, create a buyer profile (OAuth case)
-            // Use UPSERT to handle race conditions and RLS edge cases
-            console.log('No existing profile found. Attempting to create/update buyer profile for:', userId)
-
-            const { data: newBuyer, error: insertError } = await supabase
-                .from('buyers')
-                .upsert({
-                    id: userId,
-                    auth_id: userId,
-                    email: userEmail,
-                    user_type: 'buyer',
-                }, {
-                    onConflict: 'id',
-                    ignoreDuplicates: false
-                })
-                .select()
-                .maybeSingle()
-
-            if (insertError) {
-                // If duplicate key error (23505), try to fetch the existing record
-                if (insertError.code === '23505') {
-                    console.log('Record already exists, fetching existing buyer...')
-                    const { data: existingBuyer } = await supabase
-                        .from('buyers')
-                        .select('*')
-                        .eq('id', userId)
-                        .maybeSingle()
-
-                    if (existingBuyer) {
-                        console.log('Found existing buyer:', existingBuyer)
-                        setProfile({
-                            id: existingBuyer.id,
-                            email: existingBuyer.email,
-                            user_type: 'buyer',
-                            name: existingBuyer.name,
-                            phone: existingBuyer.phone,
-                        })
-                        return
-                    }
-                }
-                console.error('Error creating buyer profile (full):', JSON.stringify(insertError, null, 2))
-                console.error('Insert details:', { id: userId, auth_id: userId, email: userEmail })
-                // Don't show alert for handled errors
-            }
-
-            if (!insertError && newBuyer) {
-                console.log('Successfully created new buyer profile:', newBuyer)
-                setProfile({
-                    id: newBuyer.id,
-                    email: newBuyer.email,
-                    user_type: 'buyer',
-                })
-            } else {
-                // Fallback minimal profile (works even without database record)
-                // We use userId here, which matches the 'id' we tried to insert
-                console.log('Using fallback profile - database record may not exist yet or failed to create')
-                setProfile({
-                    id: userId,
-                    email: userEmail,
-                    user_type: 'buyer',
-                })
-            }
+            setProfile(null)
         } catch (error) {
             console.error('Error fetching profile:', error)
-            // Fallback minimal profile
-            setProfile({
-                id: userId,
-                email: userEmail,
-                user_type: 'buyer',
-            })
+            setProfile(null)
         }
     }, [])
 
@@ -161,21 +103,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         let mounted = true
 
-        // Get initial session
+        // Get initial session and validate with server
         const initAuth = async () => {
             try {
-                const { data: { session } } = await supabase.auth.getSession()
+                // Use getUser() instead of getSession() to validate against the server
+                // This prevents zombie sessions from deleted users persisting
+                const { data: { user }, error } = await supabase.auth.getUser()
 
                 if (!mounted) return
 
-                setSession(session)
-                setUser(session?.user ?? null)
-
-                if (session?.user) {
-                    await fetchProfile(session.user.id, session.user.email || '')
+                if (error || !user) {
+                    // Invalid session or no user - clear everything
+                    setSession(null)
+                    setUser(null)
+                    setProfile(null)
+                    setLoading(false)
+                    return
                 }
+
+                // Get the session object too (from local cache usually, but we know user is valid)
+                const { data: { session } } = await supabase.auth.getSession()
+
+                setSession(session)
+                setUser(user)
+
+                await fetchProfile(user.id, user.email || '')
             } catch (error) {
                 console.error('Auth init error:', error)
+                // On critical failure, assume logged out
+                setSession(null)
+                setUser(null)
+                setProfile(null)
             } finally {
                 if (mounted) {
                     setLoading(false)
@@ -227,7 +185,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const signUp = async (
         email: string,
         password: string,
-        userData: { name: string; userType: 'buyer' | 'agent'; phone?: string; agency?: string }
+        userData: { name: string; userType: 'buyer' | 'agent'; phone?: string; agency?: string; renNumber?: string }
     ) => {
         try {
             // 1. Create auth user
@@ -299,6 +257,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                             name: userData.name || existingAgent.name, // Keep existing name if not provided
                             phone: userData.phone || existingAgent.phone,
                             company_name: userData.agency || existingAgent.company_name,
+                            ren_number: userData.renNumber || existingAgent.ren_number,
+                            is_claimed: true, // IMPORTANT: Mark as claimed
                         })
                         .eq('id', existingAgent.id)
 
@@ -317,6 +277,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                             name: userData.name,
                             phone: userData.phone,
                             company_name: userData.agency,
+                            ren_number: userData.renNumber,
+                            is_claimed: true, // Mark new agents as claimed too
                         })
 
                     if (agentError) {

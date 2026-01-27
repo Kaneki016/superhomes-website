@@ -696,15 +696,17 @@ export async function getDistinctStates(): Promise<string[]> {
     const cached = getCached<string[]>('distinct_states')
     if (cached) return cached
 
-    // Query all states in parallel instead of sequentially
+    // Query all states in parallel but use limit(1) to avoid full table scans
+    // We only need to know if *at least one* property exists, not the exact count.
     const statePromises = MALAYSIAN_STATES.map(async (state) => {
-        const { count, error } = await supabase
+        const { data, error } = await supabase
             .from('listings')
-            .select('id', { count: 'exact', head: true })
+            .select('id')
             .eq('is_active', true)
             .ilike('state', state)
+            .limit(1)
 
-        return (!error && count && count > 0) ? state : null
+        return (!error && data && data.length > 0) ? state : null
     })
 
     const results = await Promise.all(statePromises)

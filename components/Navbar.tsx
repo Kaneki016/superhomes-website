@@ -74,16 +74,16 @@ export default function Navbar() {
                                     onClick={() => setUserMenuOpen(!userMenuOpen)}
                                     className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
                                 >
-                                    {user.user_metadata?.avatar_url ? (
+                                    {profile?.photo_url || user.user_metadata?.avatar_url ? (
                                         <img
-                                            src={user.user_metadata.avatar_url}
+                                            src={profile?.photo_url || user.user_metadata?.avatar_url || ''}
                                             alt="Profile"
                                             className="w-10 h-10 rounded-full object-cover"
                                             referrerPolicy="no-referrer"
                                         />
                                     ) : (
                                         <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold">
-                                            {user.email?.charAt(0).toUpperCase()}
+                                            {profile?.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
                                         </div>
                                     )}
                                     <span className="text-gray-700 font-medium">
@@ -219,16 +219,16 @@ export default function Navbar() {
                                 {user ? (
                                     <>
                                         <div className="flex items-center space-x-2 px-2 py-2">
-                                            {user.user_metadata?.avatar_url ? (
+                                            {profile?.photo_url || user.user_metadata?.avatar_url ? (
                                                 <img
-                                                    src={user.user_metadata.avatar_url}
+                                                    src={profile?.photo_url || user.user_metadata?.avatar_url || ''}
                                                     alt="Profile"
                                                     className="w-8 h-8 rounded-full object-cover"
                                                     referrerPolicy="no-referrer"
                                                 />
                                             ) : (
                                                 <div className="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold text-sm">
-                                                    {user.email?.charAt(0).toUpperCase()}
+                                                    {profile?.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
                                                 </div>
                                             )}
                                             <span className="text-gray-700 font-medium text-sm">

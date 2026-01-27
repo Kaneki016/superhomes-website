@@ -11,11 +11,74 @@ import { useAuth } from '@/contexts/AuthContext'
 export default function LoginPage() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    const [rememberMe, setRememberMe] = useState(true) // Default to true (always remember)
+    const [rememberMe, setRememberMe] = useState(true)
+
+    // Phone Auth State
+    const [loginMethod, setLoginMethod] = useState<'email' | 'phone'>('email')
+    const [phone, setPhone] = useState('')
+    const [otp, setOtp] = useState('')
+    const [otpSent, setOtpSent] = useState(false)
+
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
     const router = useRouter()
     const { signIn, signInWithGoogle } = useAuth()
+
+    // Import supabase client for direct auth calls in component
+    // (Ideally moves to AuthContext but keeping local for speed/simplicity as AuthContext is complex)
+    const { supabase } = require('@/lib/supabase-browser')
+
+    const handleSendOtp = async () => {
+        if (!phone || phone.length < 8) return
+        setLoading(true)
+        setError('')
+
+        // Auto-format phone
+        let phoneToSend = phone.replace(/\D/g, '')
+        if (phoneToSend.startsWith('0')) phoneToSend = '60' + phoneToSend.substring(1)
+        if (!phoneToSend.startsWith('60')) phoneToSend = '60' + phoneToSend // Default assumption
+        phoneToSend = '+' + phoneToSend
+
+        try {
+            const { error } = await supabase.auth.signInWithOtp({
+                phone: phoneToSend,
+            })
+            if (error) throw error
+            setOtpSent(true)
+        } catch (err: any) {
+            setError(err.message || 'Failed to send OTP')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleVerifyOtp = async () => {
+        if (!otp || otp.length < 6) return
+        setLoading(true)
+        setError('')
+
+        // Format phone again
+        let phoneToSend = phone.replace(/\D/g, '')
+        if (phoneToSend.startsWith('0')) phoneToSend = '60' + phoneToSend.substring(1)
+        if (!phoneToSend.startsWith('60')) phoneToSend = '60' + phoneToSend
+        phoneToSend = '+' + phoneToSend
+
+        try {
+            const { error } = await supabase.auth.verifyOtp({
+                phone: phoneToSend,
+                token: otp,
+                type: 'sms',
+            })
+
+            if (error) throw error
+
+            // Explicitly refresh page or check session since AuthContext listens to changes
+            router.push('/')
+        } catch (err: any) {
+            setError(err.message || 'Invalid code')
+            setLoading(false)
+        }
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -94,64 +157,168 @@ export default function LoginPage() {
                             </div>
                         </div>
 
-                        {/* Email Form (Secondary) */}
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="Enter your email"
-                                    className="input-field"
-                                    required
-                                    disabled={loading}
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                                <input
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="Enter your password"
-                                    className="input-field"
-                                    required
-                                    disabled={loading}
-                                />
-                            </div>
-
-                            <div className="flex items-center justify-between">
-                                <label className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        checked={rememberMe}
-                                        onChange={(e) => setRememberMe(e.target.checked)}
-                                        className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                                    />
-                                    <span className="ml-2 text-sm text-gray-600">Remember me</span>
-                                </label>
-                                <Link href="/forgot-password" className="text-sm text-primary-600 hover:text-primary-700">
-                                    Forgot password?
-                                </Link>
-                            </div>
-
+                        {/* Login Method Toggle */}
+                        <div className="flex mb-8 bg-gray-100 rounded-lg p-1">
                             <button
-                                type="submit"
-                                className="btn-primary w-full flex items-center justify-center"
-                                disabled={loading}
+                                type="button"
+                                onClick={() => { setLoginMethod('email'); setError(''); }}
+                                className={`flex-1 py-3 rounded-lg font-medium transition-all ${loginMethod === 'email'
+                                    ? 'bg-white text-primary-600 shadow-md'
+                                    : 'text-gray-600 hover:text-gray-900'
+                                    }`}
                             >
-                                {loading ? (
+                                Email
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => { setLoginMethod('phone'); setError(''); }}
+                                className={`flex-1 py-3 rounded-lg font-medium transition-all ${loginMethod === 'phone'
+                                    ? 'bg-white text-primary-600 shadow-md'
+                                    : 'text-gray-600 hover:text-gray-900'
+                                    }`}
+                            >
+                                Phone (Agents)
+                            </button>
+                        </div>
+
+                        {loginMethod === 'email' ? (
+                            /* Email Form */
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        placeholder="Enter your email"
+                                        className="input-field"
+                                        required
+                                        disabled={loading}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                                    <input
+                                        type="password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        placeholder="Enter your password"
+                                        className="input-field"
+                                        required
+                                        disabled={loading}
+                                    />
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                    <label className="flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={rememberMe}
+                                            onChange={(e) => setRememberMe(e.target.checked)}
+                                            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                        />
+                                        <span className="ml-2 text-sm text-gray-600">Remember me</span>
+                                    </label>
+                                    <Link href="/forgot-password" className="text-sm text-primary-600 hover:text-primary-700">
+                                        Forgot password?
+                                    </Link>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    className="btn-primary w-full flex items-center justify-center"
+                                    disabled={loading}
+                                >
+                                    {loading ? (
+                                        <>
+                                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                            Signing in...
+                                        </>
+                                    ) : (
+                                        'Sign In'
+                                    )}
+                                </button>
+                            </form>
+                        ) : (
+                            /* Phone Form */
+                            <div className="space-y-6">
+                                {/* Step 1: Request OTP */}
+                                {!otpSent ? (
                                     <>
-                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                                        Signing in...
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                                            <div className="relative">
+                                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                    <span className="text-gray-500 font-medium">+60</span>
+                                                </div>
+                                                <input
+                                                    type="tel"
+                                                    value={phone}
+                                                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                                                    placeholder="12 345 6789"
+                                                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all"
+                                                    autoFocus
+                                                />
+                                            </div>
+                                            <p className="text-xs text-gray-500 mt-2">Enter your registered phone number</p>
+                                        </div>
+
+                                        <button
+                                            onClick={handleSendOtp}
+                                            className="btn-primary w-full flex items-center justify-center"
+                                            disabled={loading || phone.length < 8}
+                                        >
+                                            {loading ? (
+                                                <>
+                                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                                    Sending OTP...
+                                                </>
+                                            ) : (
+                                                'Send Login Code'
+                                            )}
+                                        </button>
                                     </>
                                 ) : (
-                                    'Sign In'
+                                    /* Step 2: Verify OTP */
+                                    <>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Verification Code</label>
+                                            <input
+                                                type="text"
+                                                value={otp}
+                                                onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                                placeholder="123456"
+                                                className="w-full px-4 py-3 text-center text-2xl font-mono tracking-widest border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all"
+                                                autoFocus
+                                            />
+                                        </div>
+
+                                        <button
+                                            onClick={handleVerifyOtp}
+                                            className="btn-primary w-full flex items-center justify-center"
+                                            disabled={loading || otp.length < 6}
+                                        >
+                                            {loading ? (
+                                                <>
+                                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                                    Verifying...
+                                                </>
+                                            ) : (
+                                                'Verify & Login'
+                                            )}
+                                        </button>
+
+                                        <button
+                                            onClick={() => setOtpSent(false)}
+                                            className="w-full text-sm text-gray-500 hover:text-gray-700 mt-2"
+                                        >
+                                            Change Phone Number
+                                        </button>
+                                    </>
                                 )}
-                            </button>
-                        </form>
+                            </div>
+                        )}
 
                         {/* Agent Notice */}
                         <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">

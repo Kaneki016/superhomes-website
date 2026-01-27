@@ -12,6 +12,7 @@ import { getAgentsPaginated, getPropertiesByAgentIds, searchAgents } from '@/lib
 import { Agent, Property } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import ClaimAgentModal from '@/components/ClaimAgentModal'
+import RegisterAgentModal from '@/components/RegisterAgentModal'
 
 const AGENTS_PER_PAGE = 12
 
@@ -80,6 +81,7 @@ function AgentsPageContent() {
     const [agentProperties, setAgentProperties] = useState<Property[]>([])
     const [loadingProperties, setLoadingProperties] = useState(false)
     const [isClaimModalOpen, setIsClaimModalOpen] = useState(false)
+    const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false)
     const [selectedAgentForClaim, setSelectedAgentForClaim] = useState<Agent | null>(null)
 
     useEffect(() => {
@@ -525,15 +527,15 @@ function AgentsPageContent() {
                             <p className="text-white/80 mb-6">
                                 Join SuperHomes and reach thousands of potential buyers. List your properties and grow your business with us.
                             </p>
-                            <a
-                                href="/register"
+                            <button
+                                onClick={() => setIsRegisterModalOpen(true)}
                                 className="inline-flex items-center gap-2 bg-white text-primary-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold transition-colors"
                             >
-                                Register as Agent
+                                Join as New Agent
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                                 </svg>
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -548,6 +550,11 @@ function AgentsPageContent() {
                     agent={selectedAgentForClaim}
                 />
             )}
+
+            <RegisterAgentModal
+                isOpen={isRegisterModalOpen}
+                onClose={() => setIsRegisterModalOpen(false)}
+            />
         </div >
     )
 }
