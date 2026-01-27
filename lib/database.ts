@@ -1235,10 +1235,10 @@ export async function searchProperties(filters: {
         query = query.eq('total_bedrooms', filters.bedrooms)
     }
 
-    const { data, error } = await query.order('scraped_at', { ascending: false }).limit(500)
+    const { data, error } = await query.order('scraped_at', { ascending: false }).limit(100)
 
     if (error) {
-        console.error('Error searching properties:', error)
+        console.error('Error searching properties:', JSON.stringify(error, null, 2))
         return []
     }
 
