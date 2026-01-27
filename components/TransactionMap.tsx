@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { Transaction, Property } from '@/lib/supabase'
 import { Layers, Plus, Minus, X } from 'lucide-react'
 
@@ -73,17 +73,11 @@ export default function TransactionMap({
     useEffect(() => {
         if (!mapInstanceRef.current || !leaflet) return
 
-        let onTouchStart: ((e: TouchEvent) => void) | null = null
-
         // Cleanup function to disable any active drawer
         const cleanup = () => {
             if (drawHandlerRef.current) {
                 drawHandlerRef.current.disable()
                 drawHandlerRef.current = null
-            }
-            if (onTouchStart && mapInstanceRef.current) {
-                mapInstanceRef.current.getContainer().removeEventListener('touchstart', onTouchStart)
-                onTouchStart = null
             }
         }
 
@@ -93,44 +87,21 @@ export default function TransactionMap({
 
             const map = mapInstanceRef.current
 
-            // Robustly find the Polygon constructor
+            // Robustly find the Rectangle constructor
             // Check leaflet.Draw first, then fallback to window.L.Draw
-            const PolygonDrawer = (leaflet.Draw && leaflet.Draw.Polygon) ||
-                (window.L && (window.L as any).Draw && (window.L as any).Draw.Polygon)
+            const RectangleDrawer = (leaflet.Draw && leaflet.Draw.Rectangle) ||
+                (window.L && (window.L as any).Draw && (window.L as any).Draw.Rectangle)
 
-            if (PolygonDrawer) {
+            if (RectangleDrawer) {
                 // If there's an existing handler (even disabled), clean it up first
                 cleanup()
 
-                const drawer = new PolygonDrawer(map, {
-                    allowIntersection: false,
+                const drawer = new RectangleDrawer(map, {
                     showArea: true,
                     shapeOptions: { color: '#4F46E5', clickable: false } // clickable: false prevents self-clicks interference
                 })
                 drawer.enable()
                 drawHandlerRef.current = drawer
-
-                // Fix for iOS/Touch devices: Leaflet Draw often fails to capture 'click' on touch
-                // So we manually listen for touchstart and add a vertex
-                if (leaflet.Browser.touch) {
-                    onTouchStart = (e: TouchEvent) => {
-                        // Only handle single-finger touches for drawing
-                        if (e.touches.length !== 1) return
-
-                        const touch = e.touches[0]
-                        const containerPoint = map.mouseEventToContainerPoint({
-                            clientX: touch.clientX,
-                            clientY: touch.clientY
-                        } as any)
-                        const latlng = map.containerPointToLatLng(containerPoint)
-
-                        drawer.addVertex(latlng)
-                    }
-
-                    // Add via native DOM listener
-                    map.getContainer().addEventListener('touchstart', onTouchStart, { passive: false })
-                }
-
             } else {
                 console.warn('Leaflet Draw not found')
             }
@@ -208,6 +179,16 @@ export default function TransactionMap({
                             const latlngs = layer.getLatLngs()[0]
                             const points = latlngs.map((p: any) => ({ lat: p.lat, lng: p.lng }))
                             onPolygonCompleteRef.current?.(points)
+
+                            // Auto-zoom to fit the drawn bounds
+                            const bounds = layer.getBounds()
+                            map.fitBounds(bounds, {
+                                paddingTopLeft: [50, 50],
+                                paddingBottomRight: [550, 50], // Extra padding on right for drawer panel
+                                maxZoom: 16,
+                                animate: true,
+                                duration: 1
+                            })
                         }
 
                         // Reset internal and external drawing state
@@ -231,6 +212,8 @@ export default function TransactionMap({
                     })
                 }
             })
+        }).catch(error => {
+            console.error('Failed to load Leaflet map library:', error)
         })
 
         return () => {
@@ -241,6 +224,77 @@ export default function TransactionMap({
         }
     }, [])
 
+
+    // Memoize markers to avoid recalculating on unrelated renders (like tooltip hover)
+    const markers = useMemo(() => {
+        if (!leaflet) return []
+
+        const validTransactions = transactions.filter(t =>
+            t.latitude && t.longitude && t.latitude !== -99
+        )
+
+        return validTransactions.map((t) => {
+            const position: [number, number] = [t.latitude!, t.longitude!]
+
+            // Determine Color
+            let fillColor = '#ef4444' // red-500
+            if (colorMode === 'price') {
+                if (t.price < 500000) fillColor = '#22c55e' // green-500
+                else if (t.price < 1000000) fillColor = '#eab308' // yellow-500
+            } else {
+                // PSF Mode
+                const psf = t.price / (t.built_up_sqft || t.land_area_sqft || 1)
+                if (psf < 400) fillColor = '#22c55e'
+                else if (psf < 800) fillColor = '#eab308'
+                else fillColor = '#ef4444'
+            }
+
+            // Canvas-based Circle Marker
+            const marker = leaflet.circleMarker(position, {
+                radius: 6,
+                fillColor: fillColor,
+                color: 'white',
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 0.9,
+                className: 'transaction-marker'
+            })
+
+            // Click Handler
+            marker.on('click', (e: any) => {
+                leaflet.DomEvent.stopPropagation(e)
+                // Zoom to the clicked marker location with offset for drawer panel
+                if (mapInstanceRef.current) {
+                    // Calculate offset to center in visible area (accounting for ~500px drawer)
+                    const map = mapInstanceRef.current
+                    const targetPoint = map.project(position, 17)
+                    const targetLatLng = map.unproject(targetPoint.subtract([125, 0]), 17) // Offset left by 125px (half of 250px visible shift)
+
+                    map.flyTo(targetLatLng, 17, {
+                        animate: true,
+                        duration: 1.5
+                    })
+                }
+                // Use ref for callback to avoid stale closures if effect re-runs
+                onSelectTransactionRef.current?.(t)
+            })
+
+            // Hover Events
+            marker.on('mouseover', () => {
+                onHoverRef.current?.(t.id)
+                marker.setStyle({ radius: 9, weight: 3 })
+            })
+            marker.on('mouseout', () => {
+                onHoverRef.current?.(null)
+                marker.setStyle({ radius: 6, weight: 2 })
+            })
+
+            // Store original position for potential zoom logic if needed
+            // (marker as any)._origPos = position 
+
+            return marker
+        })
+    }, [transactions, colorMode, leaflet]) // Depends on data and visual mode only
 
     // Render Transactions Layer
     useEffect(() => {
@@ -285,70 +339,16 @@ export default function TransactionMap({
 
         if (!clusterGroupRef.current) return;
 
-        // Clear existing markers
-        clusterGroupRef.current.clearLayers()
-
-        if (!showTransactions) return; // Skip population if hidden
-
-        const validTransactions = transactions.filter(t =>
-            t.latitude && t.longitude && t.latitude !== -99
-        )
-
-        const newMarkers: any[] = []
-
-        validTransactions.forEach((t) => {
-            const position: [number, number] = [t.latitude!, t.longitude!]
-
-            // Determine Color
-            let fillColor = '#ef4444' // red-500
-            if (colorMode === 'price') {
-                if (t.price < 500000) fillColor = '#22c55e' // green-500
-                else if (t.price < 1000000) fillColor = '#eab308' // yellow-500
-            } else {
-                // PSF Mode
-                const psf = t.price / (t.built_up_sqft || t.land_area_sqft || 1)
-                if (psf < 400) fillColor = '#22c55e'
-                else if (psf < 800) fillColor = '#eab308'
-                else fillColor = '#ef4444'
+        // Efficiently update layers
+        // Only clear and re-add if we have new markers or visibility changed to true
+        if (showTransactions) {
+            clusterGroupRef.current.clearLayers()
+            if (markers.length > 0) {
+                clusterGroupRef.current.addLayers(markers)
             }
-
-            // Canvas-based Circle Marker
-            const marker = leaflet.circleMarker(position, {
-                radius: 6,
-                fillColor: fillColor,
-                color: 'white',
-                weight: 2,
-                opacity: 1,
-                fillOpacity: 0.9,
-                className: 'transaction-marker'
-            })
-
-            // Click Handler
-            marker.on('click', (e: any) => {
-                leaflet.DomEvent.stopPropagation(e)
-                // Zoom logic removed to keep it cleaner, or keep if preferred. Let's flyTo.
-                map.flyTo(position, 17, { animate: true, duration: 1.5 })
-                onSelectTransactionRef.current?.(t)
-            })
-
-            // Hover Events
-            marker.on('mouseover', () => {
-                onHoverRef.current?.(t.id)
-                marker.setStyle({ radius: 9, weight: 3 })
-            })
-            marker.on('mouseout', () => {
-                onHoverRef.current?.(null)
-                marker.setStyle({ radius: 6, weight: 2 })
-            })
-
-            newMarkers.push(marker)
-        })
-
-        if (newMarkers.length > 0) {
-            clusterGroupRef.current.addLayers(newMarkers)
         }
 
-    }, [transactions, leaflet, onHover, colorMode, showTransactions])
+    }, [markers, leaflet, showTransactions]) // Dependency on markers (memoized), not raw transactions/callbacks
 
 
     // Render Listings Layer
@@ -491,13 +491,13 @@ export default function TransactionMap({
             {/* Mobile Controls Backdrop */}
             {showControls && (
                 <div
-                    className="md:hidden fixed inset-0 z-[1000] bg-black/20 backdrop-blur-sm"
+                    className="lg:hidden fixed inset-0 z-[1000] bg-black/20 backdrop-blur-sm"
                     onClick={() => setShowControls(false)}
                 ></div>
             )}
 
             {/* Consolidated Map Controls (Bottom Right) */}
-            <div className={`absolute bottom-24 right-4 md:bottom-6 md:right-6 z-[1000] flex flex-col items-end gap-3 pointer-events-none`}>
+            <div className={`absolute bottom-24 right-4 lg:bottom-6 lg:right-6 z-[1000] flex flex-col items-end gap-3 pointer-events-none`}>
 
                 {/* Zoom Controls (Pointer Events Enable) */}
                 <div className="flex flex-col gap-1 pointer-events-auto shadow-lg rounded-lg border border-gray-200 bg-white overflow-hidden">
@@ -520,7 +520,7 @@ export default function TransactionMap({
                 {/* Mobile Toggle Button (Pointer Events Enable) */}
                 <button
                     onClick={() => setShowControls(!showControls)}
-                    className="pointer-events-auto md:hidden w-10 h-10 bg-white rounded-lg shadow-lg border border-gray-200 flex items-center justify-center text-gray-700 active:scale-95 transition-transform"
+                    className="pointer-events-auto lg:hidden w-10 h-10 bg-white rounded-lg shadow-lg border border-gray-200 flex items-center justify-center text-gray-700 active:scale-95 transition-transform"
                 >
                     <Layers size={20} />
                 </button>
@@ -533,22 +533,22 @@ export default function TransactionMap({
                     
                     /* Mobile Styles (Bottom Sheet) */
                     ${showControls ? 'fixed bottom-0 left-0 right-0 translate-y-0 rounded-t-2xl' : 'fixed bottom-0 left-0 right-0 translate-y-full rounded-t-2xl'}
-                    md:static md:translate-y-0 md:rounded-lg
+                    lg:static lg:translate-y-0 lg:rounded-lg
                     
                     /* Desktop Styles - Always Visible */
-                    md:opacity-100 md:scale-100 md:block
+                    lg:opacity-100 lg:scale-100 lg:block
                     
-                    bg-white/95 backdrop-blur-md md:backdrop-blur-sm 
-                    p-5 md:p-4 
-                    shadow-2xl md:shadow-lg 
-                    border-t md:border border-gray-200 
+                    bg-white/95 backdrop-blur-md lg:backdrop-blur-sm 
+                    p-5 lg:p-4 
+                    shadow-2xl lg:shadow-lg 
+                    border-t lg:border border-gray-200 
                     text-sm 
-                    w-full md:w-auto md:min-w-[220px]
-                    z-[1100] md:z-auto
+                    w-full lg:w-auto lg:min-w-[220px]
+                    z-[1100] lg:z-auto
                 `}>
 
                     {/* Mobile Sheet Header */}
-                    <div className="md:hidden flex justify-between items-center mb-6">
+                    <div className="lg:hidden flex justify-between items-center mb-6">
                         <h3 className="font-bold text-gray-900 text-lg">Map Layers</h3>
                         <button onClick={() => setShowControls(false)} className="p-1 rounded-full hover:bg-gray-100">
                             <X size={20} className="text-gray-500" />
@@ -556,7 +556,7 @@ export default function TransactionMap({
                     </div>
 
                     {/* Layers Section */}
-                    <div className="mb-6 md:mb-4">
+                    <div className="mb-6 lg:mb-4">
                         <span className="font-bold text-gray-900 uppercase text-xs tracking-wider block mb-2">Visible Layers</span>
                         <div className="space-y-1">
                             <label className="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-1.5 rounded transition-colors group">
@@ -610,7 +610,7 @@ export default function TransactionMap({
                     </div>
 
                     {/* Legend Items */}
-                    <div className="space-y-3 md:space-y-2 pb-safe md:pb-0"> {/* Added pb-safe for mobile home bar */}
+                    <div className="space-y-3 lg:space-y-2 pb-safe lg:pb-0"> {/* Added pb-safe for mobile home bar */}
                         {colorMode === 'price' ? (
                             <>
                                 <div className="flex items-center gap-3">
@@ -643,7 +643,7 @@ export default function TransactionMap({
                             </>
                         )}
 
-                        <div className="border-t border-gray-100 pt-3 md:pt-2 mt-2 space-y-2">
+                        <div className="border-t border-gray-100 pt-3 lg:pt-2 mt-2 space-y-2">
                             <div className="flex items-center gap-3">
                                 <span className="w-3 h-3 rounded-full bg-blue-500 shadow-sm ring-1 ring-white"></span>
                                 <span className="text-gray-600 text-sm md:text-xs">For Sale</span>

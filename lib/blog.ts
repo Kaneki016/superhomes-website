@@ -14,6 +14,7 @@ export interface ResourcePost {
     image: string
     content: string
     neighborhoods?: string[]
+    keywords?: string[]
 }
 
 export function getAllResources(): ResourcePost[] {
@@ -33,7 +34,8 @@ export function getAllResources(): ResourcePost[] {
 
             return {
                 slug,
-                content,
+                content: stripSeoContent(content),
+                keywords: extractSeoKeywords(content),
                 ...(data as {
                     title: string
                     description: string
@@ -68,7 +70,8 @@ export function getResourceBySlug(slug: string): ResourcePost | null {
 
         return {
             slug,
-            content,
+            content: stripSeoContent(content),
+            keywords: extractSeoKeywords(content),
             ...(data as {
                 title: string
                 description: string
@@ -103,4 +106,34 @@ export function getAllCategories(): string[] {
     const resources = getAllResources()
     const categories = new Set(resources.map(post => post.category))
     return Array.from(categories).sort()
+}
+
+function stripSeoContent(content: string): string {
+    // Split by the SEO Keywords section header
+    // This will remove everything after (and including) the header
+    const parts = content.split('### SEO Keywords')
+    if (parts.length > 0) {
+        return parts[0].trim()
+    }
+    return content
+}
+
+function extractSeoKeywords(content: string): string[] {
+    const parts = content.split('### SEO Keywords')
+    if (parts.length < 2) {
+        return []
+    }
+
+    // Get the part after the header
+    const seoSection = parts[1].split('### Internal Link Suggestions')[0]
+
+    // Parse list items
+    const keywords = seoSection
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.startsWith('*') || line.startsWith('-'))
+        .map(line => line.replace(/^[\*\-]\s+/, '').trim())
+        .filter(k => k.length > 0)
+
+    return keywords
 }
