@@ -1237,10 +1237,10 @@ export async function searchProperties(filters: {
         query = query.eq('total_bedrooms', filters.bedrooms)
     }
 
-    const { data, error } = await query.order('scraped_at', { ascending: false }).limit(500)
+    const { data, error } = await query.order('scraped_at', { ascending: false }).limit(100)
 
     if (error) {
-        console.error('Error searching properties:', error)
+        console.error('Error searching properties:', JSON.stringify(error, null, 2))
         return []
     }
 
@@ -1986,6 +1986,61 @@ export async function getTransactionById(id: string): Promise<Transaction | null
     return data
 }
 
+// Get distinct states from transactions
+export async function getTransactionStates(): Promise<string[]> {
+    const { data, error } = await supabase
+        .from('transactions')
+        .select('state')
+        .not('state', 'is', null)
+
+    if (error) {
+        // Gracefully handle missing state column
+        if (error.code === '42703' || error.message?.includes('does not exist')) {
+            console.warn('Warning: state column missing in transactions table. Skipping state filter.')
+            return []
+        }
+        console.error('Error fetching transaction states:', error)
+        return []
+    }
+
+    const states = data.map(d => d.state).filter(Boolean) as string[]
+    return [...new Set(states)].sort()
+}
+
+// Get distinct districts (Top level now)
+export async function getTransactionDistricts(): Promise<string[]> {
+    const { data, error } = await supabase
+        .from('transactions')
+        .select('district')
+        .not('district', 'is', null)
+
+    if (error) {
+        console.error('Error fetching transaction districts:', error)
+        return []
+    }
+
+    const districts = data.map(d => d.district).filter(Boolean) as string[]
+    return [...new Set(districts)].sort()
+}
+
+// Get distinct mukims for a specific district
+export async function getTransactionMukims(district: string): Promise<string[]> {
+    const { data, error } = await supabase
+        .from('transactions')
+        .select('mukim')
+        .eq('district', district)
+        .not('mukim', 'is', null)
+
+    if (error) {
+        console.error('Error fetching transaction mukims:', error)
+        return []
+    }
+
+    const mukims = data.map(d => d.mukim).filter(Boolean) as string[]
+    return [...new Set(mukims)].sort()
+}
+
+// Get distinct neighborhoods for filtering
 // Get distinct neighborhoods for filtering
 export async function getDistinctNeighborhoods(): Promise<string[]> {
     const { data, error } = await supabase
@@ -1997,6 +2052,31 @@ export async function getDistinctNeighborhoods(): Promise<string[]> {
         console.error('Error fetching neighborhoods:', error)
         return []
     }
+
+    const neighborhoods = data.map(d => d.neighborhood).filter(Boolean) as string[]
+    return [...new Set(neighborhoods)].sort()
+}
+
+// Get neighborhoods filtered by district and mukim
+export async function getNeighborhoodsByMukim(district: string, mukim?: string): Promise<string[]> {
+    let query = supabase
+        .from('transactions')
+        .select('neighborhood')
+        .eq('district', district)
+        .not('neighborhood', 'is', null)
+
+    if (mukim) {
+        query = query.eq('mukim', mukim)
+    }
+
+    const { data, error } = await query
+
+    if (error) {
+        console.error('Error fetching filtered neighborhoods:', error)
+        return []
+    }
+
+    if (!data) return []
 
     const neighborhoods = data.map(d => d.neighborhood).filter(Boolean) as string[]
     return [...new Set(neighborhoods)].sort()

@@ -35,10 +35,13 @@ export default function ListingDrawer({ listing, onClose, isOpen, isInComparison
 
     return (
         <div
-            className={`fixed inset-x-0 bottom-0 z-[2001] w-full h-auto max-h-[85vh] bg-white shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.3)] transform transition-transform duration-300 ease-in-out rounded-t-2xl border-t border-gray-100 flex flex-col ${isOpen ? 'translate-y-0' : 'translate-y-full'}`}
+            className={`fixed z-[2001] bg-white shadow-xl transition-transform duration-300 ease-in-out
+                inset-x-0 bottom-0 w-full h-auto max-h-[85vh] rounded-t-2xl border-t border-gray-100 flex flex-col
+                lg:inset-y-0 lg:right-0 lg:w-1/2 lg:h-[calc(100vh-145px)] lg:left-auto lg:top-[145px] lg:rounded-none lg:rounded-l-2xl lg:border-l lg:border-t-0 lg:max-h-screen
+                ${isOpen ? 'translate-y-0 lg:translate-x-0' : 'translate-y-full lg:translate-x-full'}`}
         >
             {/* Header */}
-            <div className="bg-white sticky top-0 z-10 rounded-t-2xl border-b border-gray-100 flex-shrink-0">
+            < div className="bg-white sticky top-0 z-10 rounded-t-2xl border-b border-gray-100 flex-shrink-0" >
                 <div className="flex items-center justify-between px-6 py-4">
                     <div className="flex items-center gap-4 overflow-hidden">
                         {/* Thumbnail in Header */}
@@ -81,35 +84,37 @@ export default function ListingDrawer({ listing, onClose, isOpen, isInComparison
                 </div>
 
                 {/* Tabs, hide for rent */}
-                {listing.price && listing.listing_type !== 'rent' && (
-                    <div className="flex px-6 gap-6 overflow-x-auto hide-scrollbar">
-                        <button
-                            onClick={() => setActiveTab('details')}
-                            className={`pb-3 text-sm font-medium transition-colors relative whitespace-nowrap ${activeTab === 'details' ? 'text-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
-                        >
-                            Property Details
-                            {activeTab === 'details' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600 rounded-t-full"></div>}
-                        </button>
-                        {/* Mortgage Calculator Tab */}
-                        {listing.price && (
+                {
+                    listing.price && listing.listing_type !== 'rent' && (
+                        <div className="flex px-6 gap-6 overflow-x-auto hide-scrollbar">
                             <button
-                                onClick={() => setActiveTab('mortgage')}
-                                className={`pb-3 text-sm font-medium transition-colors relative whitespace-nowrap ${activeTab === 'mortgage' ? 'text-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
+                                onClick={() => setActiveTab('details')}
+                                className={`pb-3 text-sm font-medium transition-colors relative whitespace-nowrap ${activeTab === 'details' ? 'text-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
                             >
-                                Mortgage Calculator
-                                {activeTab === 'mortgage' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600 rounded-t-full"></div>}
+                                Property Details
+                                {activeTab === 'details' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600 rounded-t-full"></div>}
                             </button>
-                        )}
-                    </div>
-                )}
+                            {/* Mortgage Calculator Tab */}
+                            {listing.price && (
+                                <button
+                                    onClick={() => setActiveTab('mortgage')}
+                                    className={`pb-3 text-sm font-medium transition-colors relative whitespace-nowrap ${activeTab === 'mortgage' ? 'text-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
+                                >
+                                    Mortgage Calculator
+                                    {activeTab === 'mortgage' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600 rounded-t-full"></div>}
+                                </button>
+                            )}
+                        </div>
+                    )
+                }
 
 
-            </div>
+            </div >
 
             {/* Content w/ Horizontal Layout */}
-            <div className="overflow-y-auto px-6 py-6 pb-12">
+            < div className="overflow-y-auto px-6 py-6 pb-24 h-[calc(100vh-140px)]" >
                 {activeTab === 'details' ? (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300 h-full">
 
                         {/* Column 1: Price & Key Metrics */}
                         <div className="space-y-4">
@@ -241,7 +246,7 @@ export default function ListingDrawer({ listing, onClose, isOpen, isInComparison
                         {listing.price && <MortgageCalculator propertyPrice={listing.price} defaultExpanded={true} />}
                     </div>
                 )}
-            </div>
+            </div >
         </div >
     )
 }

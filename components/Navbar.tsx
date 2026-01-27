@@ -17,7 +17,7 @@ export default function Navbar() {
         await signOut()
     }
     return (
-        <nav className="glass sticky top-0 z-50">
+        <nav className="glass sticky top-0 z-[3000]">
             <div className="container-custom">
                 <div className="flex items-center justify-between h-20">
                     {/* Logo */}

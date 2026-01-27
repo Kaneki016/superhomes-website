@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useCompare } from '@/contexts/CompareContext'
-import { getTransactions, getDistinctNeighborhoods, getTransactionMetrics, getTransactionPropertyTypes, getTransactionTenures, getTransactionById, searchProperties } from '@/lib/database'
+import { getTransactions, getTransactionDistricts, getTransactionMukims, getNeighborhoodsByMukim, getTransactionMetrics, getTransactionPropertyTypes, getTransactionTenures, getTransactionById, searchProperties } from '@/lib/database'
 import { Transaction, Property } from '@/lib/supabase'
 import TransactionMap from '@/components/TransactionMap'
 import RangeSlider from '@/components/RangeSlider'
@@ -15,13 +15,14 @@ import { useRouter } from 'next/navigation'
 import TrendChart from '@/components/TrendChart'
 import CompareBar from '@/components/CompareBar'
 import ComparisonModal from '@/components/ComparisonModal'
+import MapOnboardingOverlay from '@/components/MapOnboardingOverlay'
+import SearchableSelect from '@/components/SearchableSelect'
 
 
 export default function TransactionMapPage() {
     const [transactions, setTransactions] = useState<Transaction[]>([])
     const [listings, setListings] = useState<Property[]>([]) // Listings State
     // Data State
-    const [neighborhoods, setNeighborhoods] = useState<string[]>([])
     const [propertyTypes, setPropertyTypes] = useState<string[]>([])
     const [tenures, setTenures] = useState<string[]>([])
 
@@ -45,15 +46,21 @@ export default function TransactionMapPage() {
 
     // Core Filter Logic
     const [filters, setFilters] = useState({
+        state: '', // Deprecated but kept for type compat if needed temporarily
+        district: '', // Now Top Level
+        mukim: '',    // New Level 2
         neighborhood: '',
         minPrice: 0,
-        maxPrice: 5000000, // Static default max
+        maxPrice: 5000000,
         propertyType: [] as string[],
         tenure: [] as string[],
         minYear: undefined as number | undefined,
         maxYear: undefined as number | undefined,
         recencyLabel: 'Date'
     })
+
+    // Onboarding State - shows on every visit until user interacts
+    const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false)
 
     const [loading, setLoading] = useState(true)
     const [hoveredId, setHoveredId] = useState<string | null>(null)
@@ -126,17 +133,22 @@ export default function TransactionMapPage() {
         }
     }, [])
 
-    // Fetch initial options
+    // Location Data State
+    const [availableDistricts, setAvailableDistricts] = useState<string[]>([])
+    const [availableMukims, setAvailableMukims] = useState<string[]>([])
+    const [availableNeighborhoods, setAvailableNeighborhoods] = useState<string[]>([])
+
+    // Fetch initial options (Districts is now top level)
     useEffect(() => {
         const fetchOptions = async () => {
             console.log('🔄 Fetching filter options...')
             try {
-                const [n, p, t] = await Promise.all([
-                    getDistinctNeighborhoods(),
+                const [districts, p, t] = await Promise.all([
+                    getTransactionDistricts(),
                     getTransactionPropertyTypes(),
                     getTransactionTenures()
                 ])
-                setNeighborhoods(n)
+                setAvailableDistricts(districts)
                 setPropertyTypes(p)
                 setTenures(t)
             } catch (err) {
@@ -145,6 +157,41 @@ export default function TransactionMapPage() {
         }
         fetchOptions()
     }, [])
+
+    // Handlers for Hierarchical Location Selection
+    // Level 1: District
+    const handleDistrictChange = async (value: string) => {
+        const newDistrict = value
+        setFilters(prev => ({ ...prev, district: newDistrict, mukim: '', neighborhood: '' }))
+
+        if (newDistrict) {
+            const mukims = await getTransactionMukims(newDistrict)
+            setAvailableMukims(mukims)
+            setAvailableNeighborhoods([])
+        } else {
+            setAvailableMukims([])
+            setAvailableNeighborhoods([])
+        }
+    }
+
+    // Level 2: Mukim
+    const handleMukimChange = async (value: string) => {
+        const newMukim = value
+        setFilters(prev => ({ ...prev, mukim: newMukim, neighborhood: '' }))
+
+        if (newMukim) {
+            // Fetch neighborhoods for this mukim
+            const neighborhoods = await getNeighborhoodsByMukim(filters.district, newMukim)
+            setAvailableNeighborhoods(neighborhoods)
+        } else {
+            setAvailableNeighborhoods([])
+        }
+    }
+
+
+    const handleNeighborhoodChange = (value: string) => {
+        setFilters(prev => ({ ...prev, neighborhood: value }))
+    }
 
     // Fetch data when filters or bounds change
     useEffect(() => {
@@ -163,6 +210,11 @@ export default function TransactionMapPage() {
                     !filters.maxYear &&
                     !polygonFilter &&
                     !currentBounds; // Added currentBounds check
+
+                const isFiltered = !isDefault
+                if (isFiltered && !hasSeenOnboarding) {
+                    setHasSeenOnboarding(true)
+                }
 
                 if (isDefault) {
                     setTransactions([])
@@ -294,19 +346,41 @@ export default function TransactionMapPage() {
             <main className="flex-grow flex flex-col h-[calc(100vh-80px)] relative">
 
                 {/* Mobile Top Bar */}
-                <div className="md:hidden bg-white border-b shadow-sm z-[2000] px-3 py-2 flex items-center gap-2">
-                    <div className="relative flex-grow">
-                        <select
-                            value={filters.neighborhood}
-                            onChange={(e) => setFilters(prev => ({ ...prev, neighborhood: e.target.value }))}
-                            className="form-select w-full text-sm py-2 pl-3 pr-8 rounded-lg border-gray-300 bg-white hover:border-primary-500 focus:ring-primary-500 cursor-pointer font-medium text-gray-700 shadow-sm"
-                        >
-                            <option value="">All Neighborhoods</option>
-                            {neighborhoods.map(n => (
-                                <option key={n} value={n}>{n}</option>
-                            ))}
-                        </select>
+                <div className="lg:hidden bg-white border-b shadow-sm z-[2000] px-3 py-2 flex items-center gap-2">
+                    {/* District (Top Level) */}
+                    <div className="relative flex-grow min-w-[120px]">
+                        <SearchableSelect
+                            value={filters.district}
+                            onChange={handleDistrictChange}
+                            options={availableDistricts}
+                            placeholder="District"
+                            searchPlaceholder="Search district..."
+                        />
                     </div>
+                    {/* Mukim (if district selected) */}
+                    {filters.district && (
+                        <div className="relative flex-grow min-w-[120px]">
+                            <SearchableSelect
+                                value={filters.mukim}
+                                onChange={handleMukimChange}
+                                options={availableMukims}
+                                placeholder="Mukim"
+                                searchPlaceholder="Search mukim..."
+                            />
+                        </div>
+                    )}
+                    {/* Neighborhood (if mukim selected) */}
+                    {filters.mukim && (
+                        <div className="relative flex-grow min-w-[120px]">
+                            <SearchableSelect
+                                value={filters.neighborhood}
+                                onChange={handleNeighborhoodChange}
+                                options={availableNeighborhoods}
+                                placeholder="Area"
+                                searchPlaceholder="Search area..."
+                            />
+                        </div>
+                    )}
                     <button
                         onClick={() => setShowMobileFilters(true)}
                         className={`flex items-center justify-center w-10 h-10 rounded-lg border transition-all ${(filters.minPrice > 0 || filters.maxPrice < 5000000 || filters.propertyType.length > 0)
@@ -329,6 +403,9 @@ export default function TransactionMapPage() {
                         <button
                             onClick={() => {
                                 setFilters({
+                                    state: '', // Keep for type compat
+                                    district: '',
+                                    mukim: '',
                                     neighborhood: '',
                                     minPrice: 0,
                                     maxPrice: 5000000,
@@ -349,30 +426,53 @@ export default function TransactionMapPage() {
                 </div>
 
                 {/* Desktop Top Filter Bar */}
-                <div className="hidden md:flex bg-white border-b shadow-sm z-[2000] px-4 py-3 items-center gap-3">
+                <div className="hidden lg:flex bg-white border-b shadow-sm z-[2002] px-4 py-3 items-center gap-3">
 
                     {/* Filter Group: Left Aligned */}
                     <div className="flex items-center gap-2 flex-wrap">
 
                         {/* Listing Type Toggle Removed */}
 
-                        <div className="h-6 w-px bg-gray-300 mx-1 hidden md:block"></div>
+                        <div className="h-6 w-px bg-gray-300 mx-1 hidden lg:block"></div>
 
-                        {/* Neighborhood Dropdown - Prominent */}
-                        <div className="relative min-w-[200px]">
-                            <select
-                                value={filters.neighborhood}
-                                onChange={(e) => setFilters(prev => ({ ...prev, neighborhood: e.target.value }))}
-                                className="form-select w-full text-sm py-2 pl-3 pr-8 rounded-lg border-gray-300 bg-white hover:border-primary-500 focus:ring-primary-500 cursor-pointer font-medium text-gray-700 shadow-sm"
-                            >
-                                <option value="">All Neighborhoods</option>
-                                {neighborhoods.map(n => (
-                                    <option key={n} value={n}>{n}</option>
-                                ))}
-                            </select>
+                        {/* District Dropdown */}
+                        <div className="relative min-w-[140px] max-w-[200px]">
+                            <SearchableSelect
+                                value={filters.district}
+                                onChange={handleDistrictChange}
+                                options={availableDistricts}
+                                placeholder="All Districts"
+                                searchPlaceholder="Search..."
+                            />
                         </div>
 
-                        <div className="h-6 w-px bg-gray-300 mx-2 hidden md:block"></div>
+                        {/* Mukim Dropdown (Visible if District selected) */}
+                        {filters.district && (
+                            <div className="relative min-w-[140px] max-w-[200px] animate-fade-in-left">
+                                <SearchableSelect
+                                    value={filters.mukim}
+                                    onChange={handleMukimChange}
+                                    options={availableMukims}
+                                    placeholder="All Mukims"
+                                    searchPlaceholder="Search..."
+                                />
+                            </div>
+                        )}
+
+                        {/* Neighborhood Dropdown (Visible if Mukim selected) */}
+                        {filters.mukim && (
+                            <div className="relative min-w-[160px] max-w-[240px] animate-fade-in-left">
+                                <SearchableSelect
+                                    value={filters.neighborhood}
+                                    onChange={handleNeighborhoodChange}
+                                    options={availableNeighborhoods}
+                                    placeholder="All Areas"
+                                    searchPlaceholder="Search..."
+                                />
+                            </div>
+                        )}
+
+                        <div className="h-6 w-px bg-gray-300 mx-2 hidden lg:block"></div>
 
                         {/* Recency Filter (New) */}
                         <div className="relative">
@@ -487,7 +587,7 @@ export default function TransactionMapPage() {
                             <span>{isDrawing ? 'Drawing...' : (polygonFilter ? '✏️ Redraw' : '✏️ Draw Area')}</span>
                         </button>
 
-                        <div className="h-6 w-px bg-gray-300 mx-2 hidden md:block"></div>
+                        <div className="h-6 w-px bg-gray-300 mx-2 hidden lg:block"></div>
 
                         {/* View Mode Toggle */}
                         <div className="flex bg-gray-100 p-1 rounded-lg border border-gray-200">
@@ -531,6 +631,9 @@ export default function TransactionMapPage() {
                     <button
                         onClick={() => {
                             setFilters({
+                                state: '',
+                                district: '',
+                                mukim: '',
                                 neighborhood: '',
                                 // searchQuery: '',
                                 minPrice: 0,
@@ -593,24 +696,22 @@ export default function TransactionMapPage() {
                     )}
                 </div>
 
-                {/* Draw Control Hint Overlay */}
+                {/* Onboarding Overlay */}
+                {viewMode === 'map' && !polygonFilter && !loading && !isDrawing && !hasSeenOnboarding && (
+                    <MapOnboardingOverlay
+                        onStartDrawing={() => {
+                            setIsDrawing(true)
+                            setHasSeenOnboarding(true)
+                        }}
+                    />
+                )}
+
+                {/* Draw Control Hint Overlay (Only when drawing or after drawing) */}
                 {
-                    viewMode === 'map' && isDrawing ? (
+                    viewMode === 'map' && isDrawing && (
                         <div className="absolute top-24 left-1/2 -translate-x-1/2 z-[2000] bg-gray-900/80 text-white px-4 py-2 rounded-full backdrop-blur-sm shadow-lg text-sm font-medium flex items-center gap-2 animate-in fade-in slide-in-from-top-4">
                             <span>✏️ Click on map to draw points. Click first point to finish.</span>
                             <button onClick={() => setIsDrawing(false)} className="ml-2 hover:bg-white/20 p-1 rounded-full"><X size={14} /></button>
-                        </div>
-                    ) : (viewMode === 'map' && !polygonFilter && showTip && compareList.length === 0) && ( // Check showTip and no comparison
-                        <div className="absolute top-24 left-1/2 -translate-x-1/2 z-[1000] bg-white/90 text-gray-700 px-4 py-2.5 rounded-full backdrop-blur-sm shadow-md border border-gray-200 text-xs font-medium flex items-center gap-3 animate-in fade-in slide-in-from-top-4 selection:bg-transparent">
-                            <div className="flex items-center gap-2">
-                                <span>💡 Tip: Use the <b>Draw Area</b> tool to filter properties</span>
-                            </div>
-                            <button
-                                onClick={() => setShowTip(false)}
-                                className="text-gray-400 hover:text-gray-600 p-0.5 rounded-full hover:bg-gray-100 transition-colors"
-                            >
-                                <X size={14} />
-                            </button>
                         </div>
                     )
                 }
