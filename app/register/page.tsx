@@ -220,7 +220,7 @@ export default function RegisterPage() {
                                 <strong>Seen your name/photo on SuperHomes?</strong><br />
                                 Search and <Link href="/agents" className="underline font-bold">Claim Your Profile</Link> to get access.
                                 <br />
-                                <span className="block mt-2 mb-1 text-xs text-blue-600">Don't see your profile?</span>
+                                <span className="block mt-2 mb-1 text-xs text-blue-600">Don&apos;t see your profile?</span>
                             </p>
                             <button
                                 onClick={() => setIsAgentModalOpen(true)}

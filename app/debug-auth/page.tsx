@@ -72,7 +72,7 @@ export default function DebugAuthPage() {
                         The agent account was never created.
                     </li>
                     <li>
-                        <strong>If Contacts has rows but Context Profile is Buyer:</strong> The `fetchProfile` priority fix wasn't applied or `fetchProfile` is erroring out.
+                        <strong>If Contacts has rows but Context Profile is Buyer:</strong> The `fetchProfile` priority fix wasn&apos;t applied or `fetchProfile` is erroring out.
                     </li>
                     <li>
                         <strong>If Contacts shows `[]` (empty) but you swore you inserted it:</strong> SELECT Policy is missing (RLS is hiding it).
