@@ -20,7 +20,7 @@ export default function DebugAuthPage() {
                 .select('*')
                 .eq('auth_id', user.id)
             setBuyers(bData || [])
-            if (bError) setErrors(prev => ({ ...prev, buyers: bError }))
+            if (bError) setErrors((prev: any) => ({ ...prev, buyers: bError }))
 
             // 2. Check Contacts (Agents)
             const { data: cData, error: cError } = await supabase
@@ -28,7 +28,7 @@ export default function DebugAuthPage() {
                 .select('*')
                 .eq('auth_id', user.id)
             setContacts(cData || [])
-            if (cError) setErrors(prev => ({ ...prev, contacts: cError }))
+            if (cError) setErrors((prev: any) => ({ ...prev, contacts: cError }))
         }
 
         checkData()
