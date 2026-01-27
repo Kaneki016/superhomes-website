@@ -113,3 +113,114 @@ export async function claimAgentProfile(agentId: string) {
 
     return { success: true }
 }
+
+interface RegisterAgentDetails {
+    name: string
+    agency: string
+    renNumber: string
+    email: string
+    phone: string
+}
+
+export async function registerOrClaimAgent(details: RegisterAgentDetails) {
+    const cookieStore = await cookies()
+
+    // 1. Verify User Session
+    const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+            cookies: {
+                getAll() {
+                    return cookieStore.getAll()
+                },
+                setAll(cookiesToSet) {
+                    // Ignored in server action
+                }
+            },
+        }
+    )
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+        return { success: false, error: 'Unauthorized. Please log in.' }
+    }
+
+    // 2. Check for existing agent profile by phone
+    // Normalize phone for searching
+    // Format: +60123456789
+    // But database might have 0123456789 or 6012...
+    // Let's use the provided phone which comes from getFormattedPhone (+60...)
+
+    // We search using admin client to bypass RLS
+    const { data: existingAgent, error: searchError } = await supabaseAdmin
+        .from('contacts')
+        .select('*')
+        .eq('phone', details.phone)
+        .maybeSingle()
+
+    if (searchError) {
+        console.error('Error searching for agent:', searchError)
+        return { success: false, error: 'Database error while checking profile.' }
+    }
+
+    const timestamp = new Date().toISOString()
+
+    try {
+        if (existingAgent) {
+            // CLAIM EXISTING
+            // Check if already claimed by someone else
+            if (existingAgent.auth_id && existingAgent.auth_id !== user.id) {
+                return { success: false, error: 'This phone number is already linked to another account.' }
+            }
+
+            const { error: updateError } = await supabaseAdmin
+                .from('contacts')
+                .update({
+                    auth_id: user.id,
+                    contact_type: 'agent',
+                    name: details.name, // Allow overwriting name with user preference
+                    company_name: details.agency,
+                    ren_number: details.renNumber,
+                    email: details.email,
+                    is_claimed: true,
+                    updated_at: timestamp
+                })
+                .eq('id', existingAgent.id)
+
+            if (updateError) throw updateError
+
+            return { success: true, mode: 'claimed' }
+
+        } else {
+            // CREATE NEW
+            const photoUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(details.name)}&background=random`
+
+            const payload = {
+                auth_id: user.id,
+                contact_type: 'agent',
+                name: details.name,
+                company_name: details.agency,
+                ren_number: details.renNumber,
+                email: details.email,
+                phone: details.phone,
+                is_claimed: true,
+                photo_url: photoUrl,
+                updated_at: timestamp,
+                scraped_at: timestamp
+            }
+
+            const { error: insertError } = await supabaseAdmin
+                .from('contacts')
+                .insert(payload)
+
+            if (insertError) throw insertError
+
+            return { success: true, mode: 'created' }
+        }
+    } catch (err: any) {
+        console.error('Error in registerOrClaimAgent:', err)
+        return { success: false, error: err.message || 'Failed to save agent profile.' }
+    }
+}

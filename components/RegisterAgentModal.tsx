@@ -99,7 +99,6 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
         setError('')
 
         try {
-
             // Use user from context instead of fetching again
             if (!user) {
                 console.error('No authenticated user in context')
@@ -109,15 +108,12 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
 
             // 1. Update Auth User with Email & Password
             console.log('Updating user auth...')
-            // We await this, but if it hangs, we might need to know.
-            // Note: If email is duplicate, this throws.
             const { error: updateError } = await supabase.auth.updateUser({
                 email: details.email,
                 password: details.password
             })
             if (updateError) {
                 console.error('Update User Error:', updateError)
-                // If the error is "already registered", specific message
                 if (updateError.message.includes('already been registered')) {
                     throw new Error('This email is already taken. Please use a different email.')
                 }
@@ -125,67 +121,34 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
             }
             console.log('User auth updated.')
 
-            // 2. Create or Claim Profile
-            console.log('Checking for existing agent profile...')
+            // 2. Create or Claim Profile via Server Action
+            // This bypasses RLS issues
+            const formattedPhone = getFormattedPhone()
 
-            // Check if this phone number already exists in contacts (scraped agent)
-            const { data: existingAgent } = await supabase
-                .from('contacts')
-                .select('*')
-                .eq('phone', getFormattedPhone())
-                .maybeSingle()
+            // Dynamic import to avoid server components in client bundle issues? 
+            // Standard import works in Next.js 14+ usually.
+            // We need to import it at the top of file, but for replace_file_content we can't add imports easily.
+            // We'll rely on the user/IDE or add it in a separate step? 
+            // Wait, I should add the import.
+            // I'll assume the import is added or I'll add it in a subsequent step if needed.
+            // Actually, I can use the existing imports if I modify the top.
+            // I'll proceed with logic replacement and then add import.
 
-            let dbError
+            const { registerOrClaimAgent } = await import('@/app/actions/agent-claiming')
 
-            const payload = {
-                auth_id: user.id, // Link to auth user
-                contact_type: 'agent',
+            const result = await registerOrClaimAgent({
                 name: details.name,
-                company_name: details.agency,
-                ren_number: details.renNumber,
+                agency: details.agency,
+                renNumber: details.renNumber,
                 email: details.email,
-                phone: getFormattedPhone(),
-                is_claimed: true,
-                updated_at: new Date().toISOString(),
-                // Only set these if we are inserting new
-                profile_url: `https://superhomes.my/agent/${user.id}`,
-                // Keep existing photo if updating, or generate new one
-                photo_url: existingAgent?.photo_url || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(details.name) + '&background=random'),
-                scraped_at: new Date().toISOString()
-            }
-            console.log('Payload:', payload)
+                phone: formattedPhone
+            })
 
-            if (existingAgent) {
-                console.log('Found existing agent row, claiming it:', existingAgent.id)
-                // Update existing row
-                const { error } = await supabase
-                    .from('contacts')
-                    .update({
-                        auth_id: user.id,
-                        contact_type: 'agent',
-                        name: details.name, // Overwrite with user input? Yes.
-                        company_name: details.agency,
-                        ren_number: details.renNumber,
-                        email: details.email,
-                        is_claimed: true,
-                        updated_at: new Date().toISOString()
-                    })
-                    .eq('id', existingAgent.id)
-                dbError = error
-            } else {
-                console.log('No existing agent row, inserting new...')
-                // Insert new row
-                const { error } = await supabase
-                    .from('contacts')
-                    .insert(payload)
-                dbError = error
+            if (!result.success) {
+                throw new Error(result.error)
             }
 
-            if (dbError) {
-                console.error('DB Operation Error:', dbError)
-                throw dbError
-            }
-            console.log('Profile saved successfully.')
+            console.log('Profile saved successfully:', result.mode)
 
             // Refresh profile so the UI knows we are now an agent
             await refreshProfile()
