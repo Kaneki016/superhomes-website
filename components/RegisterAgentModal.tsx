@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase-browser'
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -26,7 +26,16 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
 
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
-    const { user, signUp, refreshProfile } = useAuth()
+    const { user, signUp, refreshProfile, profile } = useAuth()
+
+    // Auto-advance to details if user is already logged in (Ghost state handling)
+    // or if they just verified OTP and the parent didn't unmount
+    useEffect(() => {
+        if (isOpen && user && !profile) {
+            console.log('User is authenticated but has no profile (Ghost). Advancing to details.')
+            setStep('details')
+        }
+    }, [isOpen, user, profile])
 
     if (!isOpen) return null
 
