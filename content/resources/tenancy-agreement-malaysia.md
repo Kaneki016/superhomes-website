@@ -2,7 +2,7 @@
 title: "Tenancy Agreement Malaysia: Complete Guide for Landlords & Tenants (2026)"
 description: "Everything you need to know about Tenancy Agreements in Malaysia. Costs, stamp duty, termination clauses, and what to look out for before signing."
 date: '2025-12-10'
-category: 'Renting Guide'
+category: 'Renting'
 image: '/images/resources/tenancy-agreement.jpg'
 neighborhoods:
   - 'Mont Kiara'
