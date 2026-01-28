@@ -2,7 +2,7 @@
 title: "Freehold vs. Leasehold vs. Bumi Lot: Decoding Malaysian Land Titles"
 description: "Confused about Freehold vs Leasehold? Understand the differences, ownership rights, and resale potential of Malaysian land titles."
 date: "2026-01-08"
-category: "Buying Guide"
+category: 'Buying'
 image: "/images/resources/land-titles.jpg"
 slug: "freehold-vs-leasehold-malaysia"
 ---

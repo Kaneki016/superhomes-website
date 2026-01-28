@@ -2,7 +2,7 @@
 title: "How to Sell Your House in Malaysia (Step-by-Step Guide 2026)"
 description: "Planning to sell your property? Learn about the process, Real Property Gains Tax (RPGT), legal fees, and how to get the best price."
 date: '2025-10-10'
-category: 'Selling Guide'
+category: 'Selling'
 image: '/images/resources/selling-property-guide.jpg'
 neighborhoods:
   - 'Bangsar'

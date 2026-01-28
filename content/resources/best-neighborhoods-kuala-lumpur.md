@@ -2,7 +2,7 @@
 title: "Most Desirable Neighborhoods in Malaysia to Live In"
 description: "Discover the top places to live in Malaysia. From the expat haven of Mont Kiara to the family-friendly Desa ParkCity, find your perfect neighborhood."
 date: '2025-10-15'
-category: 'Buying Guide'
+category: 'Buying'
 image: '/images/resources/best-neighborhoods.jpg'
 neighborhoods:
   - 'Mont Kiara'
