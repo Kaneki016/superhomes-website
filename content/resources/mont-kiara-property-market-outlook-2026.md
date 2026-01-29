@@ -1,5 +1,5 @@
 ---
-title: 'Is Mont Kiara a Good Place to Buy Property in 2026? Market Outlook'
+title: 'Mont Kiara Property Market Outlook 2026: Prices, Trends & Outlook'
 description: 'A data-driven analysis of Mont Kiara property market for 2026. We review price trends, rental yields, MRT3 impacts, and pros/cons for investors and homebuyers.'
 date: '2026-02-03'
 category: 'Market Insights'
@@ -8,7 +8,7 @@ neighborhoods: ['Mont Kiara', 'Dutamas', 'Sri Hartamas']
 slug: 'mont-kiara-property-market-outlook-2026'
 ---
 
-**Is Mont Kiara a Good Place to Buy Property in 2026?**
+**Mont Kiara Property Market Outlook 2026: Prices, Trends & Outlook**
 
 For decades, **Mont Kiara** has held the title of Kuala Lumpur’s "Beverly Hills"—a self-contained, affluent enclave favoured by expatriates and the local elite. As we approach 2026, the district is undergoing a significant transition from a purely residential suburb into a sophisticated urban centre, anchored by institutional-grade retail and upcoming infrastructure upgrades.
 
