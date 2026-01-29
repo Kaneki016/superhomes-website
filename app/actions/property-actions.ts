@@ -85,7 +85,7 @@ export async function getTransactionById(id: string) {
 }
 
 // General Property Helpers
-export async function searchProperties(query: string) { return await dbSearchProperties(query) }
+export async function searchProperties(filters: any) { return await dbSearchProperties(filters) }
 
 export async function getPropertiesPaginated(
     page: number = 1,

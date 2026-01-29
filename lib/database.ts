@@ -922,7 +922,13 @@ export async function getNeighborhoodsByMukim(mukim: string) {
 
 export async function getTransactionMetrics(filters: any) {
     // Placeholder
-    return { volume: 0, value: 0 }
+    return {
+        avgPrice: 0,
+        avgPsf: 0,
+        totalTransactions: 0,
+        minPrice: 0,
+        maxPrice: 0
+    }
 }
 
 export async function getTransactionPropertyTypes() {
