@@ -119,5 +119,11 @@ export async function getAgentsPaginated(
     return await dbGetAgentsPaginated(page, pageSize, state)
 }
 
-export async function getPropertiesByAgentId(agentId: string) { return await dbGetPropertiesByAgentId(agentId) }
+export async function getPropertiesByAgentId(
+    agentId: string,
+    page: number = 1,
+    limit: number = 12
+) {
+    return await dbGetPropertiesByAgentId(agentId, page, limit)
+}
 // Removed getPropertiesByAgent as it was a duplicate/typo
