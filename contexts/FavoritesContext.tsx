@@ -1,8 +1,8 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react'
-import { supabase } from '@/lib/supabase-browser'
 import { useAuth } from './AuthContext'
+import { getFavorites, addFavorite as addFavoriteAction, removeFavorite as removeFavoriteAction } from '@/app/actions/favorites'
 
 interface FavoritesContextType {
     favorites: string[] // Array of property IDs
@@ -16,7 +16,7 @@ interface FavoritesContextType {
 const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined)
 
 export function FavoritesProvider({ children }: { children: ReactNode }) {
-    const { user, profile } = useAuth()
+    const { user } = useAuth()
     const [favorites, setFavorites] = useState<string[]>([])
     const [loading, setLoading] = useState(true)
 
@@ -28,37 +28,17 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
             return
         }
 
-        // Wait for profile to be loaded
-        if (!profile) {
-            // Profile loading or not found yet, don't set loading false yet if we have a user
-            // allow a retry or wait? 
-            // For now, let's log
-            console.log('FavoritesContext: User present but profile missing, waiting...')
-            return
-        }
-
-        console.log('FavoritesContext: Fetching favorites for buyer:', profile.id)
-
         try {
-            const { data, error } = await supabase
-                .from('favorites')
-                .select('property_id')
-                .eq('buyer_id', profile.id)
-
-            if (error) {
-                console.error('Error fetching favorites:', error)
-                setFavorites([])
-            } else {
-                console.log('FavoritesContext: Fetched favorites:', data)
-                setFavorites(data?.map(f => f.property_id) || [])
-            }
+            const data = await getFavorites()
+            console.log('FavoritesContext: Fetched favorites:', data)
+            setFavorites(data)
         } catch (error) {
             console.error('Error fetching favorites:', error)
             setFavorites([])
         } finally {
             setLoading(false)
         }
-    }, [user, profile])
+    }, [user])
 
     // Fetch favorites when user changes
     useEffect(() => {
@@ -67,74 +47,52 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
     // Add a property to favorites
     const addFavorite = async (propertyId: string): Promise<boolean> => {
-        if (!user) {
-            // alert('Please logging in to save favorites.')
-            return false
-        }
-
-        if (!profile) {
-            console.log('FavoritesContext: Cannot add favorite, profile missing')
-            alert('Your profile is still loading. Please try again in a moment.')
-            return false
-        }
-
-        console.log('FavoritesContext: Adding favorite:', propertyId, 'for buyer:', profile.id)
+        if (!user) return false
 
         try {
-            const { error } = await supabase
-                .from('favorites')
-                .insert({
-                    buyer_id: profile.id,
-                    property_id: propertyId,
-                })
+            // Optimistic update
+            setFavorites(prev => [...prev, propertyId])
 
-            if (error) {
-                // If it's a duplicate, that's fine
-                if (error.code === '23505') {
-                    console.log('FavoritesContext: Favorite already exists')
-                    return true
-                }
-                console.error('Error adding favorite (full):', JSON.stringify(error, null, 2))
-                console.error('Error details:', { message: error.message, code: error.code, details: error.details, hint: error.hint })
-                alert(`Error saving favorite: ${error.message || 'Unknown error'}`)
+            const result = await addFavoriteAction(propertyId)
+
+            if (!result.success) {
+                console.error('Error adding favorite:', result.error)
+                // Revert optimistic update
+                setFavorites(prev => prev.filter(id => id !== propertyId))
                 return false
             }
 
-            console.log('FavoritesContext: Favorite added successfully')
-            // Update local state
-            setFavorites(prev => [...prev, propertyId])
             return true
         } catch (error: any) {
             console.error('Error adding favorite:', error)
-            alert(`Error saving favorite: ${error.message || error}`)
+            // Revert optimistic update
+            setFavorites(prev => prev.filter(id => id !== propertyId))
             return false
         }
     }
 
     // Remove a property from favorites
     const removeFavorite = async (propertyId: string): Promise<boolean> => {
-        if (!user || !profile) return false
-
-        console.log('FavoritesContext: Removing favorite:', propertyId)
+        if (!user) return false
 
         try {
-            const { error } = await supabase
-                .from('favorites')
-                .delete()
-                .eq('buyer_id', profile.id)
-                .eq('property_id', propertyId)
+            // Optimistic update
+            setFavorites(prev => prev.filter(id => id !== propertyId))
 
-            if (error) {
-                console.error('Error removing favorite:', error)
+            const result = await removeFavoriteAction(propertyId)
+
+            if (!result.success) {
+                console.error('Error removing favorite:', result.error)
+                // Revert optimistic update
+                setFavorites(prev => [...prev, propertyId])
                 return false
             }
 
-            console.log('FavoritesContext: Favorite removed successfully')
-            // Update local state
-            setFavorites(prev => prev.filter(id => id !== propertyId))
             return true
         } catch (error) {
             console.error('Error removing favorite:', error)
+            // Revert optimistic update
+            setFavorites(prev => [...prev, propertyId])
             return false
         }
     }

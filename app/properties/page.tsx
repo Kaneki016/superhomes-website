@@ -39,7 +39,7 @@ const MapPropertyCard = dynamic(
 
 // Type import for MapBounds (doesn't affect bundle)
 import type { MapBounds } from '@/components/PropertyMap'
-import { getPropertiesPaginated, getFilterOptions, searchAgents, getPropertiesByAgentIds, getDistinctStates, getPropertyById } from '@/lib/database'
+import { getPropertiesPaginated, getDistinctStates, getFilterOptions, searchAgents, getPropertiesByAgentIds, getPropertyById } from '@/app/actions/property-actions'
 import { Property, Agent } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { generatePropertyUrl } from '@/lib/slugUtils'

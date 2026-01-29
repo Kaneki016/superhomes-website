@@ -1,9 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { supabase } from '@/lib/supabase'
-import { Agent } from '@/lib/supabase'
-import { claimAgentProfile } from '@/app/actions/agent-claiming'
+import { Agent } from '@/lib/supabase' // Keep type definition
+import { useAuth } from '@/contexts/AuthContext'
 
 interface ClaimAgentModalProps {
     isOpen: boolean
@@ -12,6 +11,7 @@ interface ClaimAgentModalProps {
 }
 
 export default function ClaimAgentModal({ isOpen, onClose, agent }: ClaimAgentModalProps) {
+    const { sendOtp, signInWithOtp, signUp, refreshProfile } = useAuth()
     const [step, setStep] = useState<'verify-phone' | 'otp' | 'setup-credentials' | 'success'>('verify-phone')
     const [phoneInput, setPhoneInput] = useState('')
     const [otp, setOtp] = useState('')
@@ -81,13 +81,7 @@ export default function ClaimAgentModal({ isOpen, onClose, agent }: ClaimAgentMo
         // Actually, verifyOtp takes the phone number too.
 
         try {
-            console.log('Sending OTP to:', phoneToSend)
-            const { error } = await supabase.auth.signInWithOtp({
-                phone: phoneToSend,
-                options: {
-                    channel: useWhatsapp ? 'whatsapp' : 'sms'
-                }
-            })
+            const { error } = await sendOtp(phoneToSend)
 
             if (error) {
                 console.error('Error sending OTP:', error)
@@ -124,18 +118,13 @@ export default function ClaimAgentModal({ isOpen, onClose, agent }: ClaimAgentMo
         }
 
         try {
-            const { error, data } = await supabase.auth.verifyOtp({
-                phone: phoneToSend,
-                token: otp,
-                type: 'sms',
-            })
+            const { error } = await signInWithOtp(phoneToSend, otp)
 
             if (error) {
                 setError('Invalid code. Please try again.')
                 setLoading(false)
             } else {
                 // Auth successful
-                // Move to password setup step instead of claiming immediately
                 setStep('setup-credentials')
                 setLoading(false)
             }
@@ -160,29 +149,34 @@ export default function ClaimAgentModal({ isOpen, onClose, agent }: ClaimAgentMo
         setError('')
 
         try {
-            // Update the user with email and password
-            const { error: updateError } = await supabase.auth.updateUser({
-                email: credentials.email,
-                password: credentials.password
+            // Register/Claim via API (signUp handles this)
+            // No need to manually update user via Supabase anymore
+
+
+            // Now perform the claim via SignUp (which handles it backend side)
+            // SignUp accepts extra data for agent profile
+            let phoneToSend = agent.phone || ''
+            if (phoneToSend && !phoneToSend.startsWith('+')) {
+                if (phoneToSend.startsWith('0')) phoneToSend = '+60' + phoneToSend.substring(1)
+                else if (phoneToSend.startsWith('60')) phoneToSend = '+' + phoneToSend
+                else phoneToSend = '+' + phoneToSend
+            }
+
+            const { error: signUpError } = await signUp(credentials.email, credentials.password, {
+                name: agent.name,
+                userType: 'agent',
+                phone: phoneToSend,
+                agency: agent.agency
             })
 
-            if (updateError) throw updateError
-
-            // Now perform the claim
-            const result = await claimAgentProfile(agent.id)
-
-            if (result.success) {
-                // Also update the contact email in DB if it was empty
-                if (!agent.email) {
-                    await supabase
-                        .from('contacts')
-                        .update({ email: credentials.email })
-                        .eq('id', agent.id)
-                }
-                setStep('success')
-            } else {
-                setError(result.error || 'Failed to link account')
+            if (signUpError) {
+                // If user exists, we might need to handle it, but for now assume success flow or error
+                throw signUpError
             }
+
+            // Force profile refresh
+            await refreshProfile()
+            setStep('success')
         } catch (err: any) {
             console.error('Setup error:', err)
             setError(err.message || 'Failed to set credentials')

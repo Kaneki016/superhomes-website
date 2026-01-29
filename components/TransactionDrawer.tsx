@@ -6,7 +6,7 @@ import NearbyAmenities from './NearbyAmenities'
 import ShareButton from './ShareButton'
 import { formatPriceFull } from '@/lib/utils'
 import TrendChart from './TrendChart'
-import { getTransactions } from '@/lib/database'
+import { getTransactions } from '@/app/actions/property-actions'
 
 interface TransactionDrawerProps {
     transaction: Transaction | null

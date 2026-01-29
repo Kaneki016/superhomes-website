@@ -10,7 +10,7 @@ import SearchInput from '@/components/SearchInput'
 import FilterChips from '@/components/FilterChips'
 import FilterModal from '@/components/FilterModal'
 import { Property } from '@/lib/supabase'
-import { getPropertiesPaginated, getDistinctStates, getFilterOptions } from '@/lib/database'
+import { getPropertiesPaginated, getDistinctStates, getFilterOptions } from '@/app/actions/property-actions'
 import { ListSkeleton } from '@/components/SkeletonLoader'
 
 const ITEMS_PER_PAGE = 12

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useCompare } from '@/contexts/CompareContext'
-import { getTransactions, getTransactionDistricts, getTransactionMukims, getNeighborhoodsByMukim, getTransactionMetrics, getTransactionPropertyTypes, getTransactionTenures, getTransactionById, searchProperties } from '@/lib/database'
+import { getTransactions, getTransactionDistricts, getTransactionMukims, getNeighborhoodsByMukim, getTransactionMetrics, getTransactionPropertyTypes, getTransactionTenures, getTransactionById, searchProperties } from '@/app/actions/property-actions'
 import { Transaction, Property } from '@/lib/supabase'
 import TransactionMap from '@/components/TransactionMap'
 import RangeSlider from '@/components/RangeSlider'

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
-import { getDistinctPropertyTypesByListingType } from '@/lib/database'
+import { getDistinctPropertyTypesByListingType } from '@/app/actions/property-actions'
 
 // Malaysian states for footer navigation
 const MALAYSIAN_STATES = [

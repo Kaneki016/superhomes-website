@@ -22,11 +22,7 @@ export default function LoginPage() {
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
     const router = useRouter()
-    const { signIn, signInWithGoogle } = useAuth()
-
-    // Import supabase client for direct auth calls in component
-    // (Ideally moves to AuthContext but keeping local for speed/simplicity as AuthContext is complex)
-    const { supabase } = require('@/lib/supabase-browser')
+    const { signIn, signInWithGoogle, sendOtp, signInWithOtp } = useAuth()
 
     const handleSendOtp = async () => {
         if (!phone || phone.length < 8) return
@@ -40,9 +36,7 @@ export default function LoginPage() {
         phoneToSend = '+' + phoneToSend
 
         try {
-            const { error } = await supabase.auth.signInWithOtp({
-                phone: phoneToSend,
-            })
+            const { error } = await sendOtp(phoneToSend)
             if (error) throw error
             setOtpSent(true)
         } catch (err: any) {
@@ -64,15 +58,11 @@ export default function LoginPage() {
         phoneToSend = '+' + phoneToSend
 
         try {
-            const { error } = await supabase.auth.verifyOtp({
-                phone: phoneToSend,
-                token: otp,
-                type: 'sms',
-            })
+            const { error } = await signInWithOtp(phoneToSend, otp)
 
             if (error) throw error
 
-            // Explicitly refresh page or check session since AuthContext listens to changes
+            // Logged in successfully
             router.push('/')
         } catch (err: any) {
             setError(err.message || 'Invalid code')

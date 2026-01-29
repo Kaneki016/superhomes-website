@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase-browser'
 import { useAuth } from '@/contexts/AuthContext'
+import { registerOrClaimAgent } from '@/app/actions/agent-claiming'
+import { updateUserCredentials } from '@/app/actions/user-profile'
 
 interface RegisterAgentModalProps {
     isOpen: boolean
@@ -26,7 +27,7 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
 
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
-    const { user, signUp, refreshProfile, profile } = useAuth()
+    const { user, signUp, refreshProfile, profile, sendOtp, signInWithOtp } = useAuth()
 
     // Auto-advance to details if user is already logged in (Ghost state handling)
     // or if they just verified OTP and the parent didn't unmount
@@ -52,12 +53,9 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
         setLoading(true)
         setError('')
         try {
-            const { error } = await supabase.auth.signInWithOtp({
-                phone: getFormattedPhone() // Use default channel (SMS/WhatsApp based on settings) or force one?
-                // Let's expect the default provider settings or user choice?
-                // For simplicity, let's just call signInWithOtp.
-            })
-            if (error) throw error
+            // Use AuthContext sendOtp
+            const { error } = await sendOtp(getFormattedPhone())
+            if (error) throw new Error(error.message)
             setStep('otp')
         } catch (err: any) {
             console.error(err)
@@ -72,18 +70,12 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
         setLoading(true)
         setError('')
         try {
-            const { error } = await supabase.auth.verifyOtp({
-                phone: getFormattedPhone(),
-                token: otp,
-                type: 'sms'
-            })
-            if (error) throw error
+            // Use AuthContext signInWithOtp
+            const { error } = await signInWithOtp(getFormattedPhone(), otp)
 
-            // Should be logged in now?
-            // Verify session
-            const { data: { session } } = await supabase.auth.getSession()
-            if (!session) throw new Error('Login failed after verification')
+            if (error) throw new Error(error.message)
 
+            // AuthContext handles setting user/session state
             setStep('details')
         } catch (err: any) {
             console.error(err)
@@ -115,35 +107,20 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
             }
             console.log('User found in context:', user.id)
 
-            // 1. Update Auth User with Email & Password
-            console.log('Updating user auth...')
-            const { error: updateError } = await supabase.auth.updateUser({
-                email: details.email,
-                password: details.password
-            })
-            if (updateError) {
-                console.error('Update User Error:', updateError)
-                if (updateError.message.includes('already been registered')) {
+            // 1. Update Auth User with Email & Password via Server Action
+            console.log('Updating user credentials...')
+            const credResult = await updateUserCredentials(details.email, details.password)
+
+            if (!credResult.success) {
+                if (credResult.error?.includes('already in use')) {
                     throw new Error('This email is already taken. Please use a different email.')
                 }
-                throw updateError
+                throw new Error(credResult.error)
             }
             console.log('User auth updated.')
 
             // 2. Create or Claim Profile via Server Action
-            // This bypasses RLS issues
             const formattedPhone = getFormattedPhone()
-
-            // Dynamic import to avoid server components in client bundle issues? 
-            // Standard import works in Next.js 14+ usually.
-            // We need to import it at the top of file, but for replace_file_content we can't add imports easily.
-            // We'll rely on the user/IDE or add it in a separate step? 
-            // Wait, I should add the import.
-            // I'll assume the import is added or I'll add it in a subsequent step if needed.
-            // Actually, I can use the existing imports if I modify the top.
-            // I'll proceed with logic replacement and then add import.
-
-            const { registerOrClaimAgent } = await import('@/app/actions/agent-claiming')
 
             const result = await registerOrClaimAgent({
                 name: details.name,
@@ -322,11 +299,9 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
                             Your agent profile has been created successfully.
                         </p>
                         <div className="bg-blue-50 p-3 rounded-lg mb-6 text-sm text-blue-800">
-                            <strong>Check your inbox!</strong>
+                            <strong>Login Ready!</strong>
                             <br />
-                            We sent a verification link to <u>{details.email}</u>.
-                            <br />
-                            Please click it to activate your email login.
+                            You can now login with your email: <u>{details.email}</u>.
                         </div>
                         <button
                             onClick={() => window.location.href = '/dashboard'}
