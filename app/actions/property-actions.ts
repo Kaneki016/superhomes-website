@@ -96,7 +96,7 @@ export async function getPropertiesPaginated(
     return await dbGetPropertiesPaginated(page, pageSize, filters, prioritizeStates)
 }
 
-export async function searchAgents(query: string) { return await dbSearchAgents(query) }
+export async function searchAgents(query: string, limit?: number) { return await dbSearchAgents(query, limit) }
 export async function getPropertiesByAgentIds(agentIds: string[]) { return await dbGetPropertiesByAgentIds(agentIds) }
 export async function getPropertyById(id: string) { return await dbGetPropertyById(id) }
 export async function getPropertyBySlug(slug: string) { return await dbGetPropertyBySlug(slug) }
