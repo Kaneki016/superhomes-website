@@ -27,17 +27,18 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
     let historicalTransactionsPromise: Promise<Transaction[]> = Promise.resolve([])
     if (propertyData.latitude && propertyData.longitude) {
         const buffer = 0.01 // Approx 1km radius
-        historicalTransactionsPromise = getTransactions(1, 1000, {
+        historicalTransactionsPromise = getTransactions(1, {
             bounds: {
                 minLat: propertyData.latitude - buffer,
                 maxLat: propertyData.latitude + buffer,
                 minLng: propertyData.longitude - buffer,
                 maxLng: propertyData.longitude + buffer
             }
-        }).catch(e => {
-            console.error('Error fetching historical trends:', e)
-            return []
-        })
+        }).then(result => result.transactions as Transaction[])
+            .catch(e => {
+                console.error('Error fetching historical trends:', e)
+                return []
+            })
     }
 
     const [agentData, similarProperties, historicalTransactions] = await Promise.all([
