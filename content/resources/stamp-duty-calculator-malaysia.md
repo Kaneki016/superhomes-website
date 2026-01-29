@@ -2,7 +2,7 @@
 title: "Stamp Duty Calculation in Malaysia (2025 Guide)"
 description: "A 2025 guide to Stamp Duty in Malaysia. Learn how to calculate MOT and Loan Agreement stamp duties, and check if you qualify for i-Miliki exemptions."
 date: "2026-01-08"
-category: "Taxes & Fees"
+category: 'Finance & Legal'
 image: "/images/resources/stamp-duty-calculator.jpg"
 slug: "stamp-duty-calculator-malaysia"
 ---
