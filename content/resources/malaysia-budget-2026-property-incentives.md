@@ -110,7 +110,7 @@ The following table highlights the key differences and evolutions in property in
 ## Internal Linking Suggestions
 *   **See also:** Guide to [RPGT Rates and Exemptions in Malaysia](/resources/rpgt-rates-malaysia).
 *   **Related:** How to Apply for the [Housing Credit Guarantee Scheme (SJKP)](/resources/housing-credit-guarantee-scheme-sjkp-2026).
-*   **Read more:** [Top Green Building Features](/resources/green-building-features-malaysia) Adding Value to Malaysian Homes.
+*   **Read more:** [Top Green Building Features](/resources/green-buildings-malaysia-features-benefits) Adding Value to Malaysian Homes.
 
 ## Frequently Asked Questions (FAQ)
 
