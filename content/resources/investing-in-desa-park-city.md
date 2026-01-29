@@ -1,5 +1,5 @@
 ---
-title: 'Desa ParkCity Property Market 2025: Prices, Trends & Mont Kiara Comparison'
+title: 'Investing in Desa ParkCity: Rental Yield, Risks & Strategy'
 description: 'A comprehensive analysis of the Desa ParkCity property market. We analyze house prices, rental yields, and compare the township against Mont Kiara condo investment trends for 2025.'
 date: '2026-01-30'
 category: 'Market Insights'
@@ -8,7 +8,7 @@ neighborhoods: ['Desa ParkCity', 'Kepong', 'Mont Kiara', 'Manjalara']
 slug: 'investing-in-desa-park-city'
 ---
 
-**Desa ParkCity Property Market 2025: The Rise of Malaysia's Premier Township**
+**Investing in Desa ParkCity: Rental Yield, Risks & Strategy**
 
 **Desa ParkCity (DPC)** has evolved from a barren quarry mine into what is widely regarded as Kuala Lumpur's most liveable and successful master-planned community. Spanning 473 acres of freehold land in North-Western Kuala Lumpur, the township has pioneered the concept of "New Urbanism" in Southeast Asia, emphasizing walkability, community living, and placemaking.
 

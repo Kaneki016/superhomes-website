@@ -1,5 +1,5 @@
 ---
-title: 'Ampang Property Market Outlook 2025: Prices, Trends & Investment Analysis'
+title: 'Investing in Ampang: Rental Yield, Risks & Strategy'
 description: 'A data-driven guide to investing in Ampang. Analyze Ampang condo prices, landed property trends, KLCC comparisons, and affordable housing hotspots for 2025-2026.'
 date: '2026-01-28'
 category: 'Market Insights'
@@ -7,7 +7,7 @@ image: '/images/resources/investing-in-ampang.jpg'
 neighborhoods: ['Ampang', 'U-Thant', 'Ampang Jaya', 'Pandan Indah', 'Taman Melawati']
 ---
 
-**Comprehensive Guide to the Ampang Property Market (2025–2026)**
+**Investing in Ampang: Rental Yield, Risks & Strategy**
 
 Ampang occupies a unique position in the Malaysian real estate landscape, serving as both the diplomatic heart of the nation and a mature, sprawling residential suburb. Geographically, it bridges the hyper-urbanized **Kuala Lumpur City Centre (KLCC)** and the verdant fringes of **Selangor**. This duality creates a bifurcated market: the ultra-luxury **"Embassy Row"** (Ampang Hilir/Taman U-Thant) and the high-growth suburban corridors of **Ampang Jaya** and **Pandan Indah**.
 

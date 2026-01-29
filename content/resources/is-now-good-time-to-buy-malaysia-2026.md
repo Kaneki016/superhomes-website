@@ -57,7 +57,7 @@ Buyers looking for landed homes face stiff competition and rising prices due to 
 Infrastructure remains the primary catalyst for capital appreciation.
 
 *   **RTS Link (Johor-Singapore):** Scheduled for completion in late 2026/early 2027, this rail link is a game-changer. Properties within a 5km radius of the Bukit Chagar station have reportedly seen price increases of **18–20%** even before operations begin.
-*   **MRT3 (Circle Line):** As the "missing link" in the Klang Valley rail network, MRT3 is expected to boost property values in connected areas like [Mont Kiara](/resources/mont-kiara-property-market-outlook-2026) and [Petaling Jaya](/resources/petaling-jaya-property-market-outlook-2026). Properties near these stations could see price premiums of 15–25%.
+*   **MRT3 (Circle Line):** As the "missing link" in the Klang Valley rail network, MRT3 is expected to boost property values in connected areas like [Mont Kiara](/resources/mont-kiara-property-market-outlook-2026), [Desa ParkCity](/resources/desa-park-city-property-market-outlook-2026), and [Petaling Jaya](/resources/petaling-jaya-property-market-outlook-2026). Properties near these stations could see price premiums of 15–25%.
 
 ## Regional Analysis: Where is the Growth?
 
@@ -73,7 +73,7 @@ The market in Johor Bahru is particularly hot, with serviced apartment prices su
 
 Kuala Lumpur presents a different narrative. It remains the most expensive market with an average price of RM771,057, yet the index dropped **4.3%** year-on-year in Q3 2025.
 
-This correction is driven by a massive overhang of high-end high-rise units. For investors with holding power, this price dip offers an opportunity to acquire prime assets at a discount, though rental yields must be carefully calculated against the 8% foreign buyer stamp duty if applicable.
+This correction is driven by a massive overhang of high-end high-rise units. For investors with holding power, this price dip offers an opportunity to acquire prime assets at a discount, though rental yields must be carefully calculated against the 8% foreign buyer stamp duty if applicable. See our [Bangsar South Market Outlook](/resources/bangsar-south-property-market-outlook-2026) or [Mont Kiara Market Outlook](/resources/mont-kiara-property-market-outlook-2026) for specific area data.
 
 ### Selangor: The Stable Core
 
