@@ -25,7 +25,6 @@ import {
     getSimilarProperties as dbGetSimilarProperties,
     getAgentsPaginated as dbGetAgentsPaginated,
     getPropertiesByAgentId as dbGetPropertiesByAgentId,
-    getPropertiesByAgent as dbGetPropertiesByAgent
 } from '@/lib/database'
 
 export async function getFeaturedProperties(limit: number) {
@@ -102,7 +101,15 @@ export async function getPropertiesByAgentIds(agentIds: string[]) { return await
 export async function getPropertyById(id: string) { return await dbGetPropertyById(id) }
 export async function getPropertyBySlug(slug: string) { return await dbGetPropertyBySlug(slug) }
 export async function getAgentByAgentId(agentId: string) { return await dbGetAgentByAgentId(agentId) }
-export async function getSimilarProperties(propertyId: string) { return await dbGetSimilarProperties(propertyId) }
+export async function getSimilarProperties(
+    propertyId: string,
+    propertyType: string,
+    state?: string | null,
+    listingType?: string,
+    district?: string | null
+) {
+    return await dbGetSimilarProperties(propertyId, propertyType, state, listingType, district)
+}
 
 export async function getAgentsPaginated(
     page: number = 1,
