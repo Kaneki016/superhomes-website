@@ -30,7 +30,7 @@ export default function TransactionDrawer({ transaction, onClose, isOpen, isInCo
             getTransactions(1, 1000, {
                 neighborhood: transaction.neighborhood || undefined,
             })
-                .then(data => setTrendTransactions(data))
+                .then(data => setTrendTransactions(data.transactions as unknown as Transaction[]))
                 .catch(err => console.error(err))
                 .finally(() => setLoadingTrends(false))
         }
@@ -44,7 +44,7 @@ export default function TransactionDrawer({ transaction, onClose, isOpen, isInCo
                 // Ensure we don't just get the same one if possible, though ID filtering happens in render
                 // We want strictly this address
             })
-                .then(data => setPropertyTransactions(data))
+                .then(data => setPropertyTransactions(data.transactions as unknown as Transaction[]))
                 .catch(console.error)
         } else {
             setPropertyTransactions([])
