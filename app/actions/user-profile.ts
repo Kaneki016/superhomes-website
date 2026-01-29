@@ -26,7 +26,7 @@ export async function updateUserProfile(formData: { name?: string, phone?: strin
         if (buyer) {
             await sql`
                 UPDATE buyers 
-                SET name = ${name}, phone = ${phone}, updated_at = NOW()
+                SET name = ${name ?? null}, phone = ${phone ?? null}, updated_at = NOW()
                 WHERE auth_id = ${user.id}
             `
         } else {
@@ -35,7 +35,7 @@ export async function updateUserProfile(formData: { name?: string, phone?: strin
             if (agent) {
                 await sql`
                     UPDATE contacts
-                    SET name = ${name}, phone = ${phone}, updated_at = NOW()
+                    SET name = ${name ?? null}, phone = ${phone ?? null}, updated_at = NOW()
                     WHERE auth_id = ${user.id}
                  `
             } else {
@@ -44,7 +44,7 @@ export async function updateUserProfile(formData: { name?: string, phone?: strin
                 // Let's assume creates buyer profile for safety if missing
                 await sql`
                     INSERT INTO buyers (auth_id, email, user_type, name, phone, updated_at)
-                    VALUES (${user.id}, ${user.email}, 'buyer', ${name}, ${phone}, NOW())
+                    VALUES (${user.id}, ${user.email ?? null}, 'buyer', ${name ?? null}, ${phone ?? null}, NOW())
                   `
             }
         }
