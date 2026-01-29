@@ -42,7 +42,7 @@ export default function DashboardPage() {
                     ...prev,
                     totalProperties: result.totalCount || 0,
                     // calculate total views if available in property data, otherwise 0
-                    totalViews: properties.reduce((acc: number, p: Property) => acc + (p.view_count || 0), 0) || 0
+                    totalViews: properties.reduce((acc: number, p: Property) => acc + ((p as any).view_count || 0), 0) || 0
                 }))
             } catch (error) {
                 console.error('Error fetching properties:', error)
