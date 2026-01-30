@@ -233,32 +233,62 @@ export default function TransactionMap({
             t.latitude && t.longitude && t.latitude !== -99
         )
 
-        return validTransactions.map((t) => {
-            const position: [number, number] = [t.latitude!, t.longitude!]
+        // Group transactions by location to prevent stacking
+        const locations = new Map<string, Transaction[]>()
 
-            // Determine Color
+        validTransactions.forEach(t => {
+            const key = `${t.latitude},${t.longitude}`
+            if (!locations.has(key)) {
+                locations.set(key, [])
+            }
+            locations.get(key)!.push(t)
+        })
+
+        const markerArray: any[] = []
+
+        locations.forEach((group) => {
+            // distinct location group
+            // Use the most recent transaction as the representative
+            const representative = group.sort((a, b) =>
+                new Date(b.transaction_date || 0).getTime() - new Date(a.transaction_date || 0).getTime()
+            )[0]
+
+            const position: [number, number] = [representative.latitude!, representative.longitude!]
+            const count = group.length
+
+            // Determine Color based on representative
             let fillColor = '#ef4444' // red-500
             if (colorMode === 'price') {
-                if (t.price < 500000) fillColor = '#22c55e' // green-500
-                else if (t.price < 1000000) fillColor = '#eab308' // yellow-500
+                if (representative.price < 500000) fillColor = '#22c55e' // green-500
+                else if (representative.price < 1000000) fillColor = '#eab308' // yellow-500
             } else {
                 // PSF Mode
-                const psf = t.price / (t.built_up_sqft || t.land_area_sqft || 1)
+                const psf = representative.price / (representative.built_up_sqft || representative.land_area_sqft || 1)
                 if (psf < 400) fillColor = '#22c55e'
                 else if (psf < 800) fillColor = '#eab308'
                 else fillColor = '#ef4444'
             }
 
             // Canvas-based Circle Marker
+            // If it's a stack, maybe make it slightly larger or give it a border
             const marker = leaflet.circleMarker(position, {
-                radius: 6,
+                radius: count > 1 ? 8 : 6, // Slightly larger if multiple
                 fillColor: fillColor,
-                color: 'white',
-                weight: 2,
+                color: count > 1 ? 'white' : 'white', // Could differentiate border color
+                weight: count > 1 ? 3 : 2,
                 opacity: 1,
                 fillOpacity: 0.9,
                 className: 'transaction-marker'
             })
+
+            // Add tooltip if multiple
+            if (count > 1) {
+                marker.bindTooltip(`${count} transactions`, {
+                    direction: 'top',
+                    offset: [0, -5],
+                    opacity: 0.9
+                })
+            }
 
             // Click Handler
             marker.on('click', (e: any) => {
@@ -276,24 +306,24 @@ export default function TransactionMap({
                     })
                 }
                 // Use ref for callback to avoid stale closures if effect re-runs
-                onSelectTransactionRef.current?.(t)
+                // Pass the representative transaction - the drawer will fetch history for this address/location
+                onSelectTransactionRef.current?.(representative)
             })
 
             // Hover Events
             marker.on('mouseover', () => {
-                onHoverRef.current?.(t.id)
-                marker.setStyle({ radius: 9, weight: 3 })
+                onHoverRef.current?.(representative.id)
+                marker.setStyle({ radius: count > 1 ? 11 : 9, weight: 3 })
             })
             marker.on('mouseout', () => {
                 onHoverRef.current?.(null)
-                marker.setStyle({ radius: 6, weight: 2 })
+                marker.setStyle({ radius: count > 1 ? 8 : 6, weight: count > 1 ? 3 : 2 })
             })
 
-            // Store original position for potential zoom logic if needed
-            // (marker as any)._origPos = position 
-
-            return marker
+            markerArray.push(marker)
         })
+
+        return markerArray
     }, [transactions, colorMode, leaflet]) // Depends on data and visual mode only
 
     // Render Transactions Layer

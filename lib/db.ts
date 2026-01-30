@@ -12,15 +12,20 @@ const dbConfig = {
     ssl: process.env.DB_SSL === 'true' ? 'require' : undefined,
 }
 
-// Create the SQL connection
-// This handles connection pooling automatically
-const sql = postgres({
+// Global declaration to prevent multiple instances in dev
+const globalForPostgres = global as unknown as { sql: postgres.Sql }
+
+const sql = globalForPostgres.sql || postgres({
     ...dbConfig,
     ssl: dbConfig.ssl as any, // Cast to any to avoid complex type union issues with string vs boolean
     transform: {
         undefined: null, // Convert undefined to null for SQL
     },
     debug: process.env.NODE_ENV === 'development', // Log queries in dev
+    max: 10, // Limit max connections per instance
+    idle_timeout: 20, // Close idle connections after 20s
 })
+
+if (process.env.NODE_ENV !== 'production') globalForPostgres.sql = sql
 
 export default sql

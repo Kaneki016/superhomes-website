@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    output: 'standalone', // Enable standalone output for Docker
+    // output: 'standalone', // Enable standalone output for Docker
     images: {
         domains: ['localhost', 'my1-cdn.pgimgs.com', 'sg1-cdn.pgimgs.com', 'sg2-cdn.pgimgs.com'],
         remotePatterns: [

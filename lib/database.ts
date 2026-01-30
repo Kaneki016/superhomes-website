@@ -884,17 +884,89 @@ export async function getPlatformStats() {
     }
 }
 
+// Helper to build transaction conditions
+function buildTransactionConditions(filters: any) {
+    let conditions = sql`1 = 1`
+
+    if (filters?.neighborhood) {
+        conditions = sql`${conditions} AND neighborhood = ${filters.neighborhood}`
+    }
+    // New Hierarchy Filters
+    if (filters?.district) {
+        conditions = sql`${conditions} AND district = ${filters.district}`
+    }
+    if (filters?.mukim) {
+        conditions = sql`${conditions} AND mukim = ${filters.mukim}`
+    }
+
+    if (filters?.minPrice) {
+        conditions = sql`${conditions} AND price >= ${filters.minPrice}`
+    }
+    if (filters?.maxPrice) {
+        conditions = sql`${conditions} AND price <= ${filters.maxPrice}`
+    }
+    if (filters?.propertyType && filters.propertyType.length > 0) {
+        conditions = sql`${conditions} AND property_type IN ${sql(filters.propertyType)}`
+    }
+    if (filters?.tenure && filters.tenure.length > 0) {
+        // Tenure often needs partial matching (e.g. Freehold), but if exact strings used:
+        conditions = sql`${conditions} AND tenure IN ${sql(filters.tenure)}`
+    }
+
+    if (filters?.minYear) {
+        conditions = sql`${conditions} AND EXTRACT(YEAR FROM transaction_date::date) >= ${filters.minYear}`
+    }
+    if (filters?.maxYear) {
+        conditions = sql`${conditions} AND EXTRACT(YEAR FROM transaction_date::date) <= ${filters.maxYear}`
+    }
+
+    if (filters?.bounds) {
+        const { minLat, maxLat, minLng, maxLng } = filters.bounds
+        conditions = sql`${conditions} 
+            AND latitude BETWEEN ${minLat} AND ${maxLat}
+            AND longitude BETWEEN ${minLng} AND ${maxLng}`
+    }
+
+    // Exact Location Filter (for Drawer History/Trends)
+    if (filters?.exactLat && filters?.exactLng) {
+        // Use a small epsilon for float comparison just in case, or exact if sure.
+        // Given we group by lat/lng on client, exact match should be fine if data is consistent,
+        // but robust SQL suggests using a tiny range or exact equality if type is double.
+        conditions = sql`${conditions} AND latitude = ${filters.exactLat} AND longitude = ${filters.exactLng}`
+    }
+
+    return conditions
+}
+
 export async function getTransactions(page: number = 1, filters: any = {}) {
-    // Placeholder implementation for transactions
     try {
-        const limit = 20
+        const limit = 500 // Increased limit for map density, or use clustering strategy
+        // Note: For map view, we often want ALL points in bounds, not paginated.
+        // But if paginated:
         const offset = (page - 1) * limit
+
+        const conditions = buildTransactionConditions(filters)
+
         const data = await sql`
-            SELECT * FROM transactions 
+            SELECT 
+                *,
+                price::float as price,
+                built_up_sqft::float as built_up_sqft,
+                land_area_sqft::float as land_area_sqft,
+                latitude::float as latitude,
+                longitude::float as longitude
+            FROM transactions 
+            WHERE ${conditions}
+            ORDER BY transaction_date DESC
             LIMIT ${limit} OFFSET ${offset}
         `
+
+        // If we are filtering by bounds, we might want to return MORE data
+        // For now, respect limit to prevent browser crash
+
         return { transactions: data, hasMore: data.length === limit }
     } catch (e) {
+        console.error('Error fetching transactions:', e)
         return { transactions: [], hasMore: false }
     }
 }
@@ -921,13 +993,36 @@ export async function getNeighborhoodsByMukim(mukim: string) {
 }
 
 export async function getTransactionMetrics(filters: any) {
-    // Placeholder
-    return {
-        avgPrice: 0,
-        avgPsf: 0,
-        totalTransactions: 0,
-        minPrice: 0,
-        maxPrice: 0
+    try {
+        const conditions = buildTransactionConditions(filters)
+
+        const [stats] = await sql`
+            SELECT 
+                count(*) as total,
+                avg(price::float) as avg_price,
+                min(price::float) as min_price,
+                max(price::float) as max_price,
+                avg(price::float / NULLIF(COALESCE(built_up_sqft::float, land_area_sqft::float), 0)) as avg_psf
+            FROM transactions
+            WHERE ${conditions}
+        `
+
+        return {
+            avgPrice: parseFloat(stats.avg_price) || 0,
+            avgPsf: parseFloat(stats.avg_psf) || 0,
+            totalTransactions: parseInt(stats.total) || 0,
+            minPrice: parseFloat(stats.min_price) || 0,
+            maxPrice: parseFloat(stats.max_price) || 0
+        }
+    } catch (e) {
+        console.error('Error fetching transaction metrics:', e)
+        return {
+            avgPrice: 0,
+            avgPsf: 0,
+            totalTransactions: 0,
+            minPrice: 0,
+            maxPrice: 0
+        }
     }
 }
 

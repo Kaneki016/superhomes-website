@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getNearbyAmenities, groupAmenitiesByType, Amenity, AmenityType } from '@/lib/amenities'
+import { getNearbyAmenities } from '@/lib/amenities'
+import { groupAmenitiesByType, Amenity, AmenityType } from '@/lib/amenity-types'
 
 interface NearbyAmenitiesProps {
     latitude: number

@@ -22,13 +22,14 @@ export default function TransactionDrawer({ transaction, onClose, isOpen, isInCo
     const [propertyTransactions, setPropertyTransactions] = useState<Transaction[]>([]) // NEW: Specific property history
     const [loadingTrends, setLoadingTrends] = useState(false)
 
-    // Fetch trends/history when tab is activated
+    // Fetch trends/history when tab is activated (Use Exact Location for specific building trends/history)
     useEffect(() => {
         if ((activeTab === 'trends' || activeTab === 'history') && transaction && trendTransactions.length === 0) {
             setLoadingTrends(true)
-            // Filter by similar neighborhood and type
+            // Filter by exact location to show history for this specific building/project
             getTransactions(1, 1000, {
-                neighborhood: transaction.neighborhood || undefined,
+                exactLat: transaction.latitude,
+                exactLng: transaction.longitude
             })
                 .then(data => setTrendTransactions(data.transactions as unknown as Transaction[]))
                 .catch(err => console.error(err))
@@ -38,11 +39,10 @@ export default function TransactionDrawer({ transaction, onClose, isOpen, isInCo
 
     // Fetch specific property history immediately when transaction changes
     useEffect(() => {
-        if (transaction?.address) {
-            getTransactions(1, 20, {
-                address: transaction.address,
-                // Ensure we don't just get the same one if possible, though ID filtering happens in render
-                // We want strictly this address
+        if (transaction?.latitude && transaction?.longitude) {
+            getTransactions(1, 50, { // Increased limit slightly
+                exactLat: transaction.latitude,
+                exactLng: transaction.longitude
             })
                 .then(data => setPropertyTransactions(data.transactions as unknown as Transaction[]))
                 .catch(console.error)
@@ -291,8 +291,8 @@ export default function TransactionDrawer({ transaction, onClose, isOpen, isInCo
                 ) : activeTab === 'trends' ? (
                     <div className="h-full animate-in fade-in slide-in-from-bottom-2 duration-300">
                         <div className="mb-4">
-                            <h3 className="text-lg font-bold text-gray-900 mb-1">Market Trends: {transaction.neighborhood}</h3>
-                            <p className="text-sm text-gray-500">Historical performance based on {trendTransactions.length > 0 ? trendTransactions.length : '...'} transactions.</p>
+                            <h3 className="text-lg font-bold text-gray-900 mb-1">Market Trends: {transaction.address}</h3>
+                            <p className="text-sm text-gray-500">Historical performance based on {trendTransactions.length > 0 ? trendTransactions.length : '...'} transactions at this location.</p>
                         </div>
 
                         {loadingTrends ? (
