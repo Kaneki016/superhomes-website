@@ -8,9 +8,11 @@ import Footer from '@/components/Footer'
 import Pagination from '@/components/Pagination'
 import PropertyCard from '@/components/PropertyCard'
 import { ListSkeleton } from '@/components/SkeletonLoader'
-import { getAgentsPaginated, getPropertiesByAgentIds, searchAgents } from '@/lib/database'
+import { getAgentsPaginated, getPropertiesByAgentIds, searchAgents } from '@/app/actions/property-actions'
 import { Agent, Property } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
+import ClaimAgentModal from '@/components/ClaimAgentModal'
+import RegisterAgentModal from '@/components/RegisterAgentModal'
 
 const AGENTS_PER_PAGE = 12
 
@@ -78,6 +80,9 @@ function AgentsPageContent() {
     const [filteredAgents, setFilteredAgents] = useState<Agent[]>([])
     const [agentProperties, setAgentProperties] = useState<Property[]>([])
     const [loadingProperties, setLoadingProperties] = useState(false)
+    const [isClaimModalOpen, setIsClaimModalOpen] = useState(false)
+    const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false)
+    const [selectedAgentForClaim, setSelectedAgentForClaim] = useState<Agent | null>(null)
 
     useEffect(() => {
         loadAgents(initialPage, searchParams.get('state') || '')
@@ -366,6 +371,16 @@ function AgentsPageContent() {
                                                 {agent.name}
                                             </h3>
                                             <p className="text-gray-500 text-sm mt-1 line-clamp-1">{agent.agency || 'Independent Agent'}</p>
+
+                                            {agent.ren_number && (
+                                                <span className="inline-block mt-2 text-[10px] px-2.5 py-1 bg-green-50 text-green-700 border border-green-200 rounded-full font-semibold tracking-wide">
+                                                    <svg className="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                                    </svg>
+                                                    REN {agent.ren_number}
+                                                </span>
+                                            )}
+
                                             {agent.agency_reg_no && (
                                                 <span className="inline-block mt-2 text-[10px] px-2 py-0.5 bg-gray-50 text-gray-400 border border-gray-200 rounded-full font-medium tracking-wide">
                                                     {agent.agency_reg_no}
@@ -405,6 +420,18 @@ function AgentsPageContent() {
                                         >
                                             View Full Profile
                                         </Link>
+
+                                        {!agent.auth_id && (
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedAgentForClaim(agent)
+                                                    setIsClaimModalOpen(true)
+                                                }}
+                                                className="mt-3 text-xs text-gray-500 hover:text-primary-600 font-medium underline decoration-dotted underline-offset-2 transition-colors"
+                                            >
+                                                Claim this account
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -500,21 +527,34 @@ function AgentsPageContent() {
                             <p className="text-white/80 mb-6">
                                 Join SuperHomes and reach thousands of potential buyers. List your properties and grow your business with us.
                             </p>
-                            <a
-                                href="/register"
+                            <button
+                                onClick={() => setIsRegisterModalOpen(true)}
                                 className="inline-flex items-center gap-2 bg-white text-primary-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold transition-colors"
                             >
-                                Register as Agent
+                                Join as New Agent
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                                 </svg>
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
 
             <Footer />
+
+            {selectedAgentForClaim && (
+                <ClaimAgentModal
+                    isOpen={isClaimModalOpen}
+                    onClose={() => setIsClaimModalOpen(false)}
+                    agent={selectedAgentForClaim}
+                />
+            )}
+
+            <RegisterAgentModal
+                isOpen={isRegisterModalOpen}
+                onClose={() => setIsRegisterModalOpen(false)}
+            />
         </div >
     )
 }

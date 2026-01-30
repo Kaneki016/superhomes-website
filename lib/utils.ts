@@ -92,3 +92,40 @@ export function formatPriceFull(price: number | null | undefined): string {
         maximumFractionDigits: 0
     }).format(price)
 }
+
+/**
+ * Clean up scraped bio text by removing HTML entities, excess whitespace, and normalizing formatting
+ * @param bio - The raw bio text from scraping
+ * @returns Cleaned and formatted bio text
+ */
+export function cleanBioText(bio: string | null | undefined): string {
+    if (!bio) return ''
+
+    let cleaned = bio
+        // Remove HTML entities
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        // Remove HTML tags if any
+        .replace(/<[^>]*>/g, '')
+        // Remove common scraped prefixes
+        .replace(/^About:\s*/i, '')
+        .replace(/^Bio:\s*/i, '')
+        .replace(/^Description:\s*/i, '')
+        // Fix missing spaces after punctuation (e.g., "!Happy" -> "! Happy")
+        .replace(/([.!?])([A-Z])/g, '$1 $2')
+        // Format "Specialties & Services:" section nicely
+        .replace(/Specialties\s*&\s*Services:\s*/gi, '\n\nSpecialties: ')
+        .replace(/Specialties:\s*/gi, '\n\nSpecialties: ')
+        // Replace multiple spaces with single space
+        .replace(/  +/g, ' ')
+        // Replace multiple line breaks with double line break (paragraph spacing)
+        .replace(/\n\s*\n\s*\n+/g, '\n\n')
+        // Trim whitespace from start and end
+        .trim()
+
+    return cleaned
+}

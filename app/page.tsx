@@ -8,7 +8,7 @@ import PropertyCard from '@/components/PropertyCard'
 import PropertyCardSkeleton from '@/components/PropertyCardSkeleton'
 import SearchInput from '@/components/SearchInput'
 import FilterModal from '@/components/FilterModal'
-import { getFeaturedProperties, getHandpickedProperties, getFilterOptions, getDistinctStates } from '@/lib/database'
+import { getFeaturedProperties, getHandpickedProperties, getFilterOptions, getDistinctStates } from '@/app/actions/property-actions'
 import { Property } from '@/lib/supabase'
 
 export default function HomePage() {

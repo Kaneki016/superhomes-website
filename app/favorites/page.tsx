@@ -8,7 +8,8 @@ import Footer from '@/components/Footer'
 import PropertyCard from '@/components/PropertyCard'
 import { useAuth } from '@/contexts/AuthContext'
 import { useFavorites } from '@/contexts/FavoritesContext'
-import { supabase, Property } from '@/lib/supabase'
+import { Property } from '@/lib/supabase'
+import { getFavoriteProperties } from '@/app/actions/favorites'
 
 export default function FavoritesPage() {
     const { user, loading: authLoading } = useAuth()
@@ -46,34 +47,12 @@ export default function FavoritesPage() {
                 return
             }
 
-            // Fetch properties for the favorited IDs
+            // Fetch properties for the favorited IDs using Server Action
             setLoadingProperties(true)
             try {
-                // Query from 'listings' table (the correct table) with joined details
-                const { data, error } = await supabase
-                    .from('listings')
-                    .select(`
-                        *,
-                        listing_sale_details (*),
-                        listing_rent_details (*)
-                    `)
-                    .in('id', favorites)
-                    .order('scraped_at', { ascending: false })
-
-                if (error) {
-                    console.error('Error fetching favorite properties:', JSON.stringify(error, null, 2))
-                    setProperties([])
-                } else {
-                    // Transform to Property format
-                    const transformed = (data || []).map((listing: any) => ({
-                        ...listing,
-                        sale_details: listing.listing_sale_details,
-                        rent_details: listing.listing_rent_details,
-                        price: listing.listing_sale_details?.price || listing.listing_rent_details?.monthly_rent,
-                        price_per_sqft: listing.listing_sale_details?.price_per_sqft,
-                    }))
-                    setProperties(transformed)
-                }
+                const data = await getFavoriteProperties()
+                // Cast to Property[] (Assuming server action returns compatible shape)
+                setProperties(data as unknown as Property[])
             } catch (error) {
                 console.error('Error fetching favorite properties:', error)
                 setProperties([])

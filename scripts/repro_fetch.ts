@@ -11,10 +11,10 @@ async function run() {
             searchQuery: 'Jalan'
         }
         console.log('Calling with filters:', filters)
-        const data = await getTransactions(1, 100, filters)
-        console.log('Success! Data length:', data.length)
-        if (data.length > 0) {
-            console.log('Sample address:', data[0].address)
+        const { transactions } = await getTransactions(1, filters)
+        console.log('Success! Data length:', transactions.length)
+        if (transactions.length > 0) {
+            console.log('Sample address:', transactions[0].address)
         }
     } catch (err) {
         console.error('Caught error:', err)

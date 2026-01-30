@@ -6,7 +6,8 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import PropertyCard from '@/components/PropertyCard'
 import { useAuth } from '@/contexts/AuthContext'
-import { supabase, Property } from '@/lib/supabase'
+import { Property } from '@/lib/supabase'
+import { getPropertiesByAgentId } from '@/app/actions/property-actions'
 
 export default function DashboardPage() {
     const { user, profile, loading: authLoading } = useAuth()
@@ -29,27 +30,22 @@ export default function DashboardPage() {
     // Fetch agent's properties
     useEffect(() => {
         async function fetchAgentProperties() {
-            if (!profile || profile.user_type !== 'agent') return
+            if (!profile || profile.user_type !== 'agent' || !profile.agent_id) return
 
             try {
-                const { data, error } = await supabase
-                    .from('dup_properties')
-                    .select('*')
-                    .eq('agent_id', profile.agent_id)
-                    .order('created_at', { ascending: false })
+                // Use Server Action
+                const result = await getPropertiesByAgentId(profile.agent_id)
+                const properties = result.properties || []
 
-                if (error) {
-                    console.error('Error fetching properties:', error)
-                    setProperties([])
-                } else {
-                    setProperties(data || [])
-                    setStats(prev => ({
-                        ...prev,
-                        totalProperties: data?.length || 0
-                    }))
-                }
+                setProperties(properties)
+                setStats(prev => ({
+                    ...prev,
+                    totalProperties: result.totalCount || 0,
+                    // calculate total views if available in property data, otherwise 0
+                    totalViews: properties.reduce((acc: number, p: Property) => acc + ((p as any).view_count || 0), 0) || 0
+                }))
             } catch (error) {
-                console.error('Error:', error)
+                console.error('Error fetching properties:', error)
                 setProperties([])
             } finally {
                 setLoading(false)

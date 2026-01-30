@@ -8,13 +8,17 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { useAuth } from '@/contexts/AuthContext'
 
+import RegisterAgentModal from '@/components/RegisterAgentModal'
+
 export default function RegisterPage() {
-    const [userType, setUserType] = useState<'buyer' | 'agent'>('buyer')
+    const userType = 'buyer'
+    const [isAgentModalOpen, setIsAgentModalOpen] = useState(false)
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         phone: '',
         agency: '', // For agents
+        renNumber: '', // For agents
         password: '',
         confirmPassword: '',
     })
@@ -41,10 +45,7 @@ export default function RegisterPage() {
         }
 
         // Validate phone for agents
-        if (userType === 'agent' && !formData.phone) {
-            setError('Phone number is required for agents')
-            return
-        }
+
 
         setLoading(true)
 
@@ -53,6 +54,7 @@ export default function RegisterPage() {
             userType: userType,
             phone: formData.phone || undefined,
             agency: formData.agency || undefined,
+            renNumber: formData.renNumber || undefined,
         })
 
         if (error) {
@@ -122,30 +124,6 @@ export default function RegisterPage() {
                             </div>
                         )}
 
-                        {/* User Type Toggle */}
-                        <div className="flex mb-8 bg-gray-100 rounded-lg p-1">
-                            <button
-                                type="button"
-                                onClick={() => setUserType('buyer')}
-                                className={`flex-1 py-3 rounded-lg font-medium transition-all ${userType === 'buyer'
-                                    ? 'bg-white text-primary-600 shadow-md'
-                                    : 'text-gray-600 hover:text-gray-900'
-                                    }`}
-                            >
-                                Buyer
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setUserType('agent')}
-                                className={`flex-1 py-3 rounded-lg font-medium transition-all ${userType === 'agent'
-                                    ? 'bg-white text-primary-600 shadow-md'
-                                    : 'text-gray-600 hover:text-gray-900'
-                                    }`}
-                            >
-                                Agent
-                            </button>
-                        </div>
-
                         {/* Form */}
                         <form onSubmit={handleSubmit} className="space-y-5">
                             <div>
@@ -173,34 +151,6 @@ export default function RegisterPage() {
                                     disabled={loading}
                                 />
                             </div>
-
-                            {userType === 'agent' && (
-                                <>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Phone / WhatsApp</label>
-                                        <input
-                                            type="tel"
-                                            value={formData.phone}
-                                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                            placeholder="+60 12-345 6789"
-                                            className="input-field"
-                                            required
-                                            disabled={loading}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Agency (Optional)</label>
-                                        <input
-                                            type="text"
-                                            value={formData.agency}
-                                            onChange={(e) => setFormData({ ...formData, agency: e.target.value })}
-                                            placeholder="e.g., PropertyGuru, iProperty"
-                                            className="input-field"
-                                            disabled={loading}
-                                        />
-                                    </div>
-                                </>
-                            )}
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
@@ -262,11 +212,33 @@ export default function RegisterPage() {
                                 Sign in
                             </Link>
                         </p>
+
+                        {/* Agent Notice */}
+                        <div className="mt-6 p-5 bg-blue-50 border border-blue-200 rounded-xl text-center">
+                            <h3 className="font-bold text-blue-900 mb-2">Are you a property agent?</h3>
+                            <p className="text-sm text-blue-800 mb-4">
+                                <strong>Seen your name/photo on SuperHomes?</strong><br />
+                                Search and <Link href="/agents" className="underline font-bold">Claim Your Profile</Link> to get access.
+                                <br />
+                                <span className="block mt-2 mb-1 text-xs text-blue-600">Don&apos;t see your profile?</span>
+                            </p>
+                            <button
+                                onClick={() => setIsAgentModalOpen(true)}
+                                className="bg-white border border-blue-300 text-blue-700 hover:bg-blue-50 px-4 py-2 rounded-lg text-sm font-semibold shadow-sm transition-all active:scale-95"
+                            >
+                                Join as New Agent
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <Footer />
+
+            <RegisterAgentModal
+                isOpen={isAgentModalOpen}
+                onClose={() => setIsAgentModalOpen(false)}
+            />
         </div>
     )
 }

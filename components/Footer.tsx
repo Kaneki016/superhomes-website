@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
-import { getDistinctPropertyTypes } from '@/lib/database'
+import { getDistinctPropertyTypesByListingType } from '@/app/actions/property-actions'
 
 // Malaysian states for footer navigation
 const MALAYSIAN_STATES = [
@@ -17,16 +17,24 @@ export default function Footer() {
     const [showAllStates, setShowAllStates] = useState(false)
     const [showAllSaleTypes, setShowAllSaleTypes] = useState(false)
     const [showAllRentTypes, setShowAllRentTypes] = useState(false)
-    const [propertyTypes, setPropertyTypes] = useState<string[]>([])
+    const [salePropertyTypes, setSalePropertyTypes] = useState<string[]>([])
+    const [rentPropertyTypes, setRentPropertyTypes] = useState<string[]>([])
 
     useEffect(() => {
-        // Fetch property types from database
-        getDistinctPropertyTypes().then(types => {
-            setPropertyTypes(types)
+        // Fetch property types for sale listings
+        getDistinctPropertyTypesByListingType('sale').then(types => {
+            setSalePropertyTypes(types)
         }).catch(error => {
-            console.error('Error fetching property types:', error)
-            // Fallback to common types if fetch fails
-            setPropertyTypes(['Condo', 'Apartment', 'Landed', 'Terrace', 'Commercial'])
+            console.error('Error fetching sale property types:', error)
+            setSalePropertyTypes(['Apartment', 'Bungalow', 'Condominium', 'Terraced House'])
+        })
+
+        // Fetch property types for rent listings
+        getDistinctPropertyTypesByListingType('rent').then(types => {
+            setRentPropertyTypes(types)
+        }).catch(error => {
+            console.error('Error fetching rent property types:', error)
+            setRentPropertyTypes(['Apartment', 'Condominium', 'Studio'])
         })
     }, [])
 
@@ -126,10 +134,10 @@ export default function Footer() {
                     <div>
                         <h3 className="font-heading font-semibold text-lg mb-6 text-white">Properties for Sale</h3>
                         <ul className="space-y-3">
-                            {propertyTypes.slice(0, showAllSaleTypes ? propertyTypes.length : 5).map((type) => (
+                            {salePropertyTypes.slice(0, showAllSaleTypes ? salePropertyTypes.length : 5).map((type: string) => (
                                 <li key={type}>
                                     <Link
-                                        href={`/properties?propertyType=${encodeURIComponent(type)}`}
+                                        href={`/properties?type=${encodeURIComponent(type)}`}
                                         className="text-gray-400 hover:text-primary-400 transition-colors text-sm flex items-center gap-2 group"
                                     >
                                         <svg className="w-4 h-4 text-primary-500 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,7 +148,7 @@ export default function Footer() {
                                 </li>
                             ))}
                         </ul>
-                        {propertyTypes.length > 5 && (
+                        {salePropertyTypes.length > 5 && (
                             <button
                                 onClick={() => setShowAllSaleTypes(!showAllSaleTypes)}
                                 className="mt-4 text-primary-400 hover:text-primary-300 text-sm font-medium flex items-center gap-2 transition-colors group"
@@ -168,10 +176,10 @@ export default function Footer() {
                     <div>
                         <h3 className="font-heading font-semibold text-lg mb-6 text-white">Properties for Rent</h3>
                         <ul className="space-y-3">
-                            {propertyTypes.slice(0, showAllRentTypes ? propertyTypes.length : 5).map((type) => (
+                            {rentPropertyTypes.slice(0, showAllRentTypes ? rentPropertyTypes.length : 5).map((type: string) => (
                                 <li key={type}>
                                     <Link
-                                        href={`/rent?propertyType=${encodeURIComponent(type)}`}
+                                        href={`/rent?type=${encodeURIComponent(type)}`}
                                         className="text-gray-400 hover:text-primary-400 transition-colors text-sm flex items-center gap-2 group"
                                     >
                                         <svg className="w-4 h-4 text-primary-500 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -182,7 +190,7 @@ export default function Footer() {
                                 </li>
                             ))}
                         </ul>
-                        {propertyTypes.length > 5 && (
+                        {rentPropertyTypes.length > 5 && (
                             <button
                                 onClick={() => setShowAllRentTypes(!showAllRentTypes)}
                                 className="mt-4 text-primary-400 hover:text-primary-300 text-sm font-medium flex items-center gap-2 transition-colors group"

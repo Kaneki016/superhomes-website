@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getPlatformStats } from '@/lib/database'
+import { getPlatformStats } from '@/app/actions/property-actions'
 
 export default function StatsSection() {
     const [stats, setStats] = useState({

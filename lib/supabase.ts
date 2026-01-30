@@ -1,9 +1,16 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient as createJsClient } from '@supabase/supabase-js'
+import { createBrowserClient } from '@supabase/ssr'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Intelligent client creation:
+// - On the server: Create a new standard client
+// - On the client: Reuse the singleton browser client from @supabase/ssr
+// This prevents "Multiple GoTrueClient instances" warnings
+export const supabase = typeof window !== 'undefined'
+    ? createBrowserClient(supabaseUrl, supabaseAnonKey)
+    : createJsClient(supabaseUrl, supabaseAnonKey)
 
 // ============================================
 // NEW SCHEMA TYPES - Multi-Table Listings
