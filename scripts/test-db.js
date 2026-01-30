@@ -1,6 +1,14 @@
 require('dotenv').config({ path: '.env.local' });
 const postgres = require('postgres');
 
+// Mirroring lib/db.ts logic
+const options = {
+    // transform: { undefined: null }, // Not strictly needed for simple test
+    debug: true,
+    max: 10,
+    idle_timeout: 20,
+}
+
 const dbConfig = {
     host: process.env.DB_HOST,
     port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
@@ -8,15 +16,25 @@ const dbConfig = {
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     ssl: process.env.DB_SSL === 'true' ? 'require' : undefined,
-};
+}
 
-console.log('Connecting to DB with:', { ...dbConfig, password: '***' });
+console.log('Testing connection logic...');
 
-const sql = postgres({
-    ...dbConfig,
-    ssl: dbConfig.ssl,
-    connect_timeout: 5, // 5s timeout
-});
+let sql;
+if (process.env.DATABASE_URL) {
+    console.log('Using DATABASE_URL from env');
+    sql = postgres(process.env.DATABASE_URL, {
+        ...options,
+        ssl: 'require' // DO usually needs SSL
+    });
+} else {
+    console.log('Using individual DB vars');
+    sql = postgres({
+        ...options,
+        ...dbConfig,
+        ssl: dbConfig.ssl
+    });
+}
 
 async function test() {
     try {
