@@ -1,22 +1,13 @@
+'use server'
+
 /**
  * Nearby Amenities Utility
  * Fetches nearby points of interest using OpenStreetMap Overpass API
- * with persistent Supabase caching to reduce API calls
+ * with persistent Postgres caching to reduce API calls
  */
 
-import { supabase } from './supabase'
-
-// Types
-export interface Amenity {
-    id: number
-    name: string
-    type: AmenityType
-    lat: number
-    lon: number
-    distance: number // in km
-}
-
-export type AmenityType = 'school' | 'transit' | 'mall' | 'hospital'
+import sql from './db'
+import { Amenity, AmenityType } from './amenity-types'
 
 interface OverpassElement {
     type: string
@@ -35,37 +26,45 @@ const cache: Map<string, { data: Amenity[]; timestamp: number }> = new Map()
 const CACHE_TTL = 1000 * 60 * 60 // 1 hour (in-memory)
 
 /**
- * Get cached amenities from Supabase database
+ * Get cached amenities from Database
  * Cache is permanent - no expiration
  */
 async function getCachedAmenities(coordKey: string): Promise<Amenity[] | null> {
     try {
-        const { data, error } = await supabase
-            .from('cached_amenities')
-            .select('amenities')
-            .eq('coord_key', coordKey)
-            .single()
-
-        if (error || !data) return null
-
-        return data.amenities as Amenity[]
+        const [row] = await sql`
+            SELECT amenities FROM cached_amenities 
+            WHERE coord_key = ${coordKey} 
+            LIMIT 1
+        `
+        if (!row || !row.amenities) return null
+        return row.amenities as Amenity[]
     } catch {
         return null
     }
 }
 
 /**
- * Store amenities in Supabase database cache (permanent)
+ * Store amenities in Database cache (permanent)
  */
 async function setCachedAmenities(coordKey: string, amenities: Amenity[]): Promise<void> {
     try {
-        await supabase
-            .from('cached_amenities')
-            .upsert({
-                coord_key: coordKey,
-                amenities
-            }, { onConflict: 'coord_key' })
-    } catch {
+        // Ensure table exists (idempotent, lightweight check could be moved to migration but safe here for dev)
+        await sql`
+            CREATE TABLE IF NOT EXISTS cached_amenities (
+                coord_key TEXT PRIMARY KEY,
+                amenities JSONB,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+            )
+        `
+
+        await sql`
+            INSERT INTO cached_amenities (coord_key, amenities)
+            VALUES (${coordKey}, ${JSON.stringify(amenities)})
+            ON CONFLICT (coord_key) 
+            DO UPDATE SET amenities = EXCLUDED.amenities
+        `
+    } catch (e) {
+        console.error('Error Caching Amenities:', e)
         // Silently fail - caching is not critical
     }
 }
@@ -73,7 +72,7 @@ async function setCachedAmenities(coordKey: string, amenities: Amenity[]): Promi
 /**
  * Calculate distance between two points using Haversine formula
  */
-export function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+export async function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): Promise<number> {
     const R = 6371 // Earth's radius in km
     const dLat = toRad(lat2 - lat1)
     const dLon = toRad(lon2 - lon1)
@@ -147,7 +146,14 @@ function parseOverpassResponse(elements: OverpassElement[], originLat: number, o
         seen.add(dedupKey)
 
         // Calculate distance (store with 3 decimals for proper formatting)
-        const distance = calculateDistance(originLat, originLon, lat, lon)
+        // Note: we can't call exported async calculateDistance easily in loop without await
+        // So we allow inline math here or make helper sync
+        const R = 6371
+        const dLat = (lat - originLat) * (Math.PI / 180)
+        const dLon = (lon - originLon) * (Math.PI / 180)
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(originLat * (Math.PI / 180)) * Math.cos(lat * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+        const distance = R * c
 
         amenities.push({
             id: el.id,
@@ -201,7 +207,7 @@ export async function getNearbyAmenities(
         return memCached.data
     }
 
-    // 2. Check Supabase database cache (persistent across sessions)
+    // 2. Check Database cache (persistent across sessions)
     const dbCached = await getCachedAmenities(cacheKey)
     if (dbCached) {
         // Also populate in-memory cache for faster subsequent access
@@ -247,7 +253,7 @@ export async function getNearbyAmenities(
             // Cache the result in memory
             cache.set(cacheKey, { data: amenities, timestamp: Date.now() })
 
-            // Also cache in Supabase for persistence (non-blocking)
+            // Also cache in Database for persistence (non-blocking)
             setCachedAmenities(cacheKey, amenities)
 
             return amenities
@@ -266,27 +272,4 @@ export async function getNearbyAmenities(
     }
 
     return []
-}
-
-/**
- * Group amenities by type, limiting each category
- */
-export function groupAmenitiesByType(
-    amenities: Amenity[],
-    limitPerType: number = 3
-): Record<AmenityType, Amenity[]> {
-    const groups: Record<AmenityType, Amenity[]> = {
-        school: [],
-        transit: [],
-        mall: [],
-        hospital: []
-    }
-
-    for (const amenity of amenities) {
-        if (groups[amenity.type].length < limitPerType) {
-            groups[amenity.type].push(amenity)
-        }
-    }
-
-    return groups
 }

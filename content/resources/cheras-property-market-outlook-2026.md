@@ -14,6 +14,16 @@ As one of the Klang Valley’s most mature and densely populated suburbs, **Cher
 
 Heading into 2026, the Cheras property market outlook appears cautiously optimistic, buoyed by government incentives, infrastructure maturity, and a stabilizing price index. This comprehensive analysis evaluates the performance of the 2024–2025 market, forecasts price trends for 2026, and identifies the best areas for investment.
 
+## At a Glance: Cheras Market Profile 2026
+
+| Metric | Data |
+| :--- | :--- |
+| **Avg Price Range** | RM580k - RM705k (Landed) / RM400 - RM1,000 psf (High-Rise) |
+| **Rental Yield** | 4.0% - 5.5% |
+| **Buyer Profile** | Investors (KL), Families (Selangor) |
+| **Risk Level** | Medium (Congestion, Competition) |
+| **Growth Potential** | Moderate (MRT3 Catalyst) |
+
 ## 1. 2024–2025 Performance Recap: A Market in Calibration
 
 The years 2024 and 2025 marked a period of resilience and correction for the Klang Valley property outlook. Following the post-pandemic recovery, the market began to stabilize, moving away from speculative spikes toward sustainable growth.
@@ -79,7 +89,7 @@ Beyond rail, highway upgrades continue to improve accessibility. The **Sungai Be
 
 ## 6. Best Areas in Cheras to Invest in 2026
 
-Based on current trends and upcoming supply, the following areas represent the best opportunities for buyers and investors:
+Based on current trends and upcoming supply, the following areas represent the best opportunities for buyers and investors. Investors seeking a quieter, lower-density alternative to Cheras KL might prefer [Setiawangsa](/resources/setiawangsa-property-market-outlook-2026).
 
 ### 1. Taman Midah & Taman Pertama (Cheras KL)
 *   **Why:** Mature neighbourhoods with direct MRT access, undergoing rejuvenation with modern high-rises.
@@ -115,7 +125,28 @@ The Cheras property market 2026 offers a balanced landscape of opportunity and s
 
 **Final Verdict:** Cheras remains a resilient powerhouse in the Klang Valley property scene. However, success in 2026 will depend on strategic purchasing, focusing on connectivity and mature amenities.
 
+## Frequently Asked Questions (FAQ)
+
+**1. Is Cheras a good place to invest in property in 2026?**
+Yes, specifically for transit-oriented developments near the MRT. While older areas face congestion, the price gap between Cheras KL and Selangor offers opportunities. Yields are stable, but capital appreciation is moderate, driven by the MRT3 circle line connectivity.
+
+**2. What is the average house price in Cheras in 2026?**
+In Cheras KL, median terrace house prices hover around RM705,000, while in Cheras Selangor, they are more affordable at roughly RM580,000. High-rise units vary significantly, with new launches priced between RM400 and RM1,000 psf depending on proximity to transit.
+
+**3. Will property prices in Cheras go up in 2026?**
+Prices are expected to see stable appreciation, largely shielding against inflation. The mid-tier market (RM300k–RM600k) is most resilient. However, luxury high-rises may face slower growth due to competition. The MRT3 completion will be a key long-term catalyst.
+
+**4. Which part of Cheras is best for investment?**
+Taman Midah and Sunway Velocity/Maluri are top choices due to MRT connectivity and mature commercial hubs. For landed property seekers with a lower budget, Cheras South and Balakong offer better value for money and lifestyle amenities.
+
+**5. Does Cheras have good rental yield?**
+Yes, especially near MRT stations and universities like UCSI. Yields for high-rises can range from 4% to 5.5%. Student accommodation in Taman Connaught remains a strong niche, while fully furnished units in Maluri target professionals working in TRX.
+
+**6. Is purchasing property in Cheras KL better than Cheras Selangor?**
+Cheras KL offers better capital appreciation potential due to land scarcity and proximity to the city center. Cheras Selangor offers more space and lower entry costs, making it ideal for families. Investors generally prefer the KL side for rental demand.
+
 ## Related Resources
 *   **General Advice:** Check our [Property Buying Checklist](/resources/buying-property-checklist-malaysia) before you sign.
+*   **Compare Fringe Areas:** Read our [Setiawangsa Market Outlook](/resources/setiawangsa-property-market-outlook-2026).
 *   **Compare Areas:** See how [Bangsar South](/resources/bangsar-south-property-market-outlook-2026) compares for investment potential.
 *   **Find Listings:** Browse curated [Cheras Listings](/properties?search=Cheras) here.
