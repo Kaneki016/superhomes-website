@@ -8,23 +8,35 @@ const dbConfig = {
     database: process.env.DB_NAME,
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    // Cast necessary to satisfy strict types if needed, or ensure it matches
     ssl: process.env.DB_SSL === 'true' ? 'require' : undefined,
 }
 
 // Global declaration to prevent multiple instances in dev
 const globalForPostgres = global as unknown as { sql: postgres.Sql }
 
-const sql = globalForPostgres.sql || postgres({
-    ...dbConfig,
-    ssl: dbConfig.ssl as any, // Cast to any to avoid complex type union issues with string vs boolean
+// Common options
+const options = {
     transform: {
         undefined: null, // Convert undefined to null for SQL
     },
     debug: process.env.NODE_ENV === 'development', // Log queries in dev
     max: 10, // Limit max connections per instance
     idle_timeout: 20, // Close idle connections after 20s
-})
+}
+
+// Use DATABASE_URL if available (common in production/Netlify), otherwise use individual vars
+const sql = globalForPostgres.sql || (process.env.DATABASE_URL
+    ? postgres(process.env.DATABASE_URL, {
+        ...options,
+        // Ensure SSL is used if connecting to a remote DB via URL (usually requires SSL)
+        // Unless explicitly disabled or handled in the URL query params, but 'require' is safer for DO
+        ssl: 'require'
+    })
+    : postgres({
+        ...options,
+        ...dbConfig,
+        ssl: dbConfig.ssl as any,
+    }))
 
 if (process.env.NODE_ENV !== 'production') globalForPostgres.sql = sql
 
