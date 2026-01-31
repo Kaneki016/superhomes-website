@@ -9,7 +9,7 @@ import PropertyCardSkeleton from '@/components/PropertyCardSkeleton'
 import SearchInput from '@/components/SearchInput'
 import FilterModal from '@/components/FilterModal'
 import { getFeaturedProperties, getHandpickedProperties, getFilterOptions, getDistinctStates } from '@/app/actions/property-actions'
-import { Property } from '@/lib/supabase'
+import { Property } from '@/lib/types'
 
 export default function HomePage() {
     const [featuredProperties, setFeaturedProperties] = useState<Property[]>([])

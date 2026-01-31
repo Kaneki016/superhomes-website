@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { Property } from '@/lib/supabase'
+import { Property } from '@/lib/types'
 import { generatePropertyUrl } from '@/lib/slugUtils'
 import { formatPriceShort } from '@/lib/utils'
 

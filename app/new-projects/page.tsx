@@ -9,7 +9,7 @@ import Pagination from '@/components/Pagination'
 import SearchInput from '@/components/SearchInput'
 import FilterChips from '@/components/FilterChips'
 import FilterModal from '@/components/FilterModal'
-import { Property } from '@/lib/supabase'
+import { Property } from '@/lib/types'
 import { getPropertiesPaginated, getDistinctStates, getFilterOptions } from '@/app/actions/property-actions'
 import { ListSkeleton } from '@/components/SkeletonLoader'
 

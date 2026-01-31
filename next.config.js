@@ -24,6 +24,7 @@ const nextConfig = {
         // Use unoptimized for external images on Netlify (no built-in image optimization)
         unoptimized: true,
     },
+    productionBrowserSourceMaps: false,
 }
 
 module.exports = nextConfig

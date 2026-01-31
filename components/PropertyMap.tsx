@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { renderToString } from 'react-dom/server'
-import { Property } from '@/lib/supabase'
+import { Property } from '@/lib/types'
 import PropertyMarkerPopup from './PropertyMarkerPopup'
 import { formatPriceShort } from '@/lib/utils'
 

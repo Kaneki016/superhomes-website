@@ -7,7 +7,6 @@
  */
 
 import { config } from 'dotenv'
-import { config } from 'dotenv'
 import postgres from 'postgres'
 import { readFileSync } from 'fs'
 import { join } from 'path'

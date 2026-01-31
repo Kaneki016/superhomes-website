@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Property } from '@/lib/supabase'
+import { Property } from '@/lib/types'
 import { generatePropertyUrl } from '@/lib/slugUtils'
 
 // Reliable placeholder image for new projects
