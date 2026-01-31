@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
-import { Transaction, Property } from '@/lib/supabase'
+import { Transaction, Property } from '@/lib/types'
 import { Layers, Plus, Minus, X } from 'lucide-react'
 
 

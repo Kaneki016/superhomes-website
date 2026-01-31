@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { getPropertyBySlug, getAgentByAgentId, getSimilarProperties, getTransactions } from '@/lib/database'
 import PropertyDetailClient from '@/components/PropertyDetailClient'
-import { Property, Agent, Transaction } from '@/lib/supabase'
+import { Property, Agent, Transaction } from '@/lib/types'
 
 export default async function PropertyDetailPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params

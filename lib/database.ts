@@ -1,5 +1,5 @@
 import sql from './db'
-import { Property, Agent, Contact, Listing, ListingSaleDetails, ListingRentDetails, ListingProjectDetails } from './supabase'
+import { Property, Agent, Contact, Listing, ListingSaleDetails, ListingRentDetails, ListingProjectDetails } from './types'
 import { extractSearchTermsFromSlug, extractIdFromSlug } from './slugUtils'
 
 // Simple in-memory cache
@@ -211,6 +211,7 @@ export async function getPropertiesPaginated(
         state?: string
         listingType?: 'sale' | 'rent' | 'project'
         tenure?: string
+        districts?: string[]
     },
     prioritizeStates: boolean = false
 ): Promise<{
@@ -234,6 +235,9 @@ export async function getPropertiesPaginated(
     }
     if (filters?.bedrooms) {
         conditions = sql`${conditions} AND total_bedrooms = ${filters.bedrooms}`
+    }
+    if (filters?.districts && filters.districts.length > 0) {
+        conditions = sql`${conditions} AND district IN ${sql(filters.districts)}`
     }
 
     // Location search

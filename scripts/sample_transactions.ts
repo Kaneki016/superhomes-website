@@ -1,19 +1,33 @@
+import { config } from 'dotenv'
+import postgres from 'postgres'
 
-import { createClient } from '@supabase/supabase-js'
-import dotenv from 'dotenv'
+config({ path: '.env.local' })
 
-dotenv.config({ path: '.env.local' })
+const dbConfig = {
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
+    database: process.env.DB_NAME,
+    username: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    ssl: process.env.DB_SSL === 'true' ? 'require' : undefined,
+}
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const supabase = createClient(supabaseUrl, supabaseAnonKey)
+const sql = process.env.DATABASE_URL
+    ? postgres(process.env.DATABASE_URL, { ssl: 'require' })
+    : postgres(dbConfig as any)
 
 async function sample() {
-    const { data, error } = await supabase.from('transactions').select('neighborhood, district, mukim').limit(20)
-    if (error) {
-        console.error('Error:', error)
-    } else {
+    try {
+        const data = await sql`
+            SELECT neighborhood, district, mukim 
+            FROM transactions 
+            LIMIT 20
+        `
         console.log(JSON.stringify(data, null, 2))
+    } catch (error) {
+        console.error('Error:', error)
+    } finally {
+        await sql.end()
     }
 }
 

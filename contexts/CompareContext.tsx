@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { Property, Transaction } from '@/lib/supabase'
+import { Property, Transaction } from '@/lib/types'
 
 const MAX_COMPARE = 3
 const STORAGE_KEY = 'superhomes_compare'

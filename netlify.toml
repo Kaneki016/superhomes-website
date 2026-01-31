@@ -2,6 +2,19 @@
   command = "npm run build"
   publish = ".next"
 
+[build.environment]
+  SECRETS_SCAN_OMIT_KEYS = "DO_SPACES_FOLDER,NEXT_PUBLIC_APP_URL,DO_SPACES_REGION,DO_SPACES_ENDPOINT,DO_SPACES_BUCKET,GOOGLE_MAPS_API_KEY,DB_PORT,NEXT_PUBLIC_SUPABASE_ANON_KEY,DB_NAME,NEXTAUTH_URL"
+
 # Next.js plugin for Netlify - handles server-side rendering
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"

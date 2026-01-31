@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
     debug: process.env.NODE_ENV === 'development',
+    trustHost: true, // Required for Netlify/Vercel deployments
     secret: process.env.NEXTAUTH_SECRET,
     session: { strategy: "jwt" },
     providers: [
@@ -23,9 +24,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 const password = credentials.password as string
 
                 try {
+                    // console.log(`[Auth] Authorizing ${email}`)
                     const [user] = await sql`SELECT * FROM users WHERE email = ${email}`
+                    console.log(`[Auth] User found: ${!!user}`)
 
-                    if (!user || !user.password) return null
+                    if (!user || !user.password) {
+                        console.log('[Auth] User not found or no password')
+                        return null
+                    }
 
                     const isValid = await bcrypt.compare(password, user.password)
                     if (!isValid) return null
@@ -59,7 +65,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     const cleanPhone = (credentials.phone as string).trim()
                     const cleanCode = (credentials.code as string).trim()
 
-                    console.log(`[Auth] Verifying OTP for ${cleanPhone} with code ${cleanCode}`)
+                    // console.log(`[Auth] Verifying OTP`)
 
                     // 1. Verify OTP
                     const [token] = await sql`
@@ -116,6 +122,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     ],
     callbacks: {
         async jwt({ token, user }) {
+            console.log('[Auth] JWT Callback', { hasUser: !!user })
             if (user) {
                 token.id = user.id
                 // token.role = user.role // Add custom types later
@@ -123,6 +130,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             return token
         },
         async session({ session, token }) {
+            console.log('[Auth] Session Callback')
             if (session.user) {
                 session.user.id = token.id as string
                 // session.user.role = token.role 

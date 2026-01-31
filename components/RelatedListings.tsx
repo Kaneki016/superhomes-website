@@ -1,7 +1,7 @@
-import { supabase } from '@/lib/supabase'
+import { getPropertiesPaginated } from '@/lib/database'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Property } from '@/lib/supabase'
+import { Property } from '@/lib/types'
 
 interface RelatedListingsProps {
     neighborhoods: string[]
@@ -12,29 +12,16 @@ export default async function RelatedListings({ neighborhoods }: RelatedListings
         return null
     }
 
-    // Build query: find listings where district matches any of the neighborhoods
-    // OR address contains the neighborhood name.
-    // Since Supabase JS 'in' only works for exact matches, we start with that.
-
-    // Note: This is an OR logic approximation. 
-    // Ideally we'd use textSearch but let's stick to safe filters.
-    // For now we'll match 'district' exactly against the list.
-
-    const { data: listings } = await supabase
-        .from('listings')
-        .select(`
-            *,
-            sale_details(*),
-            rent_details(*)
-        `)
-        .in('district', neighborhoods)
-        .limit(6)
+    // Use centralized database function with new district filter
+    const { properties: listings } = await getPropertiesPaginated(1, 6, {
+        districts: neighborhoods
+    })
 
     if (!listings || listings.length === 0) {
         return null
     }
 
-    const typedListings = listings as unknown as Property[]
+    const typedListings = listings
 
     return (
         <div className="py-12 bg-white border-t border-gray-100">

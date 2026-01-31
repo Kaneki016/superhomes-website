@@ -1,3 +1,4 @@
+import 'server-only'
 import sql from '@/lib/db'
 
 export default async function TestDbPage() {
