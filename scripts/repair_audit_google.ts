@@ -7,14 +7,13 @@
  */
 
 import { config } from 'dotenv'
-import { createClient } from '@supabase/supabase-js'
+import { config } from 'dotenv'
+import postgres from 'postgres'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 
 config({ path: '.env.local' })
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 let googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY
 
 // Fallback logic for API key
@@ -25,7 +24,18 @@ if (!googleMapsApiKey) {
     } catch { }
 }
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey)
+const dbConfig = {
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
+    database: process.env.DB_NAME,
+    username: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    ssl: process.env.DB_SSL === 'true' ? 'require' : undefined,
+}
+
+const sql = process.env.DATABASE_URL
+    ? postgres(process.env.DATABASE_URL, { ssl: 'require' })
+    : postgres(dbConfig as any)
 
 function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number) {
     var R = 6371;
@@ -67,93 +77,101 @@ async function geocodeGoogle(address: string): Promise<{ lat: number; lng: numbe
 async function main() {
     console.log('🕵️  Starting Audit & Repair (Google Maps)...\n')
 
-    // 1. Fetch Data
-    const { data: rows, error } = await supabase
-        .from('transactions')
-        .select('id, district, address, latitude, longitude')
-        .neq('latitude', -99)
-        .not('latitude', 'is', null)
-        .not('district', 'is', null)
+    try {
+        // 1. Fetch Data
+        const rows = await sql`
+            SELECT id, district, address, latitude, longitude 
+            FROM transactions
+            WHERE latitude != -99
+            AND latitude IS NOT NULL 
+            AND district IS NOT NULL
+        `
 
-    if (error || !rows) {
-        console.error('Error fetching data:', error)
-        return
-    }
+        if (!rows || rows.length === 0) {
+            console.error('Error fetching data or no data found.')
+            return
+        }
 
-    // 2. Prepare District Centers
-    const uniqueDistricts = [...new Set(rows.map(r => r.district.trim()))].sort()
-    const districtCenters: Record<string, { lat: number, lon: number }> = {}
+        // 2. Prepare District Centers
+        const uniqueDistricts = [...new Set(rows.map(r => r.district.trim()))].sort()
+        const districtCenters: Record<string, { lat: number, lon: number }> = {}
 
-    console.log(`Fetching centers for ${uniqueDistricts.length} districts...`)
+        console.log(`Fetching centers for ${uniqueDistricts.length} districts...`)
 
-    for (const district of uniqueDistricts) {
-        const cleanDistrict = district.replace(/\s*District\s*/i, '').trim()
-        try {
-            const query = encodeURIComponent(`${cleanDistrict}, Malaysia`)
-            const url = `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1&countrycodes=my`
-            const res = await fetch(url, { headers: { 'User-Agent': 'SuperHomes Repair' } })
-            if (res.ok) {
-                const data = await res.json()
-                if (data && data.length > 0) {
-                    districtCenters[district] = {
-                        lat: parseFloat(data[0].lat),
-                        lon: parseFloat(data[0].lon)
+        for (const district of uniqueDistricts) {
+            const cleanDistrict = district.replace(/\s*District\s*/i, '').trim()
+            try {
+                const query = encodeURIComponent(`${cleanDistrict}, Malaysia`)
+                const url = `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1&countrycodes=my`
+                const res = await fetch(url, { headers: { 'User-Agent': 'SuperHomes Repair' } })
+                if (res.ok) {
+                    const data = await res.json()
+                    if (data && data.length > 0) {
+                        districtCenters[district] = {
+                            lat: parseFloat(data[0].lat),
+                            lon: parseFloat(data[0].lon)
+                        }
                     }
                 }
-            }
-        } catch { }
-        await new Promise(r => setTimeout(r, 600)) // Gentle rate limit
-        process.stdout.write('.')
-    }
-    console.log('\nCenters fetched.\n')
-
-    // 3. Identify and Repair Bad Transactions
-    let repaired = 0
-    let stillFailed = 0
-    let skipped = 0
-
-    for (const tx of rows) {
-        const district = tx.district.trim()
-        const center = districtCenters[district]
-
-        if (!center) {
-            skipped++
-            continue
+            } catch { }
+            await new Promise(r => setTimeout(r, 600)) // Gentle rate limit
+            process.stdout.write('.')
         }
+        console.log('\nCenters fetched.\n')
 
-        const dist = getDistanceFromLatLonInKm(center.lat, center.lon, tx.latitude, tx.longitude)
+        // 3. Identify and Repair Bad Transactions
+        let repaired = 0
+        let stillFailed = 0
+        let skipped = 0
 
-        // If distance > 50km, it's likely wrong
-        if (dist > 50) {
-            process.stdout.write(`Reparing ID ${tx.id} (${Math.round(dist)}km off)... `)
+        for (const tx of rows) {
+            const district = tx.district.trim()
+            const center = districtCenters[district]
 
-            // Try Google Geocode
-            const newCoords = await geocodeGoogle(tx.address || (district + ', Malaysia'))
-
-            if (newCoords) {
-                // Check if new coords are better? 
-                // Google is usually trusted, but let's just update.
-
-                await supabase.from('transactions').update({
-                    latitude: newCoords.lat,
-                    longitude: newCoords.lng
-                }).eq('id', tx.id)
-
-                console.log(`✅ Fixed: (${newCoords.lat}, ${newCoords.lng})`)
-                repaired++
-            } else {
-                console.log(`❌ Google Failed`)
-                stillFailed++
+            if (!center) {
+                skipped++
+                continue
             }
 
-            // Delay for Google API limit safety (though 50 QPS is usually fine)
-            await new Promise(r => setTimeout(r, 100))
-        }
-    }
+            const dist = getDistanceFromLatLonInKm(center.lat, center.lon, tx.latitude, tx.longitude)
 
-    console.log('\nCannot calculate distance (Missing Center):', skipped)
-    console.log('Repaired:', repaired)
-    console.log('Failed to Repair:', stillFailed)
+            // If distance > 50km, it's likely wrong
+            if (dist > 50) {
+                process.stdout.write(`Reparing ID ${tx.id} (${Math.round(dist)}km off)... `)
+
+                // Try Google Geocode
+                const newCoords = await geocodeGoogle(tx.address || (district + ', Malaysia'))
+
+                if (newCoords) {
+                    // Check if new coords are better? 
+                    // Google is usually trusted, but let's just update.
+
+                    await sql`
+                        UPDATE transactions 
+                        SET latitude = ${newCoords.lat}, longitude = ${newCoords.lng} 
+                        WHERE id = ${tx.id}
+                    `
+
+                    console.log(`✅ Fixed: (${newCoords.lat}, ${newCoords.lng})`)
+                    repaired++
+                } else {
+                    console.log(`❌ Google Failed`)
+                    stillFailed++
+                }
+
+                // Delay for Google API limit safety (though 50 QPS is usually fine)
+                await new Promise(r => setTimeout(r, 100))
+            }
+        }
+
+        console.log('\nCannot calculate distance (Missing Center):', skipped)
+        console.log('Repaired:', repaired)
+        console.log('Failed to Repair:', stillFailed)
+    } catch (error) {
+        console.error('Error:', error)
+    } finally {
+        await sql.end()
+    }
 }
 
 main()

@@ -2,7 +2,6 @@
 
 import { auth } from '@/lib/auth'
 import sql from '@/lib/db'
-import { supabaseAdmin } from '@/lib/supabase-admin'
 import { revalidatePath } from 'next/cache'
 import bcrypt from 'bcryptjs'
 
@@ -57,6 +56,8 @@ export async function updateUserProfile(formData: { name?: string, phone?: strin
     }
 }
 
+import { uploadFileToStorage } from '@/lib/storage'
+
 export async function uploadProfileImage(formData: FormData) {
     const session = await auth()
     const user = session?.user
@@ -71,50 +72,28 @@ export async function uploadProfileImage(formData: FormData) {
     }
 
     const fileExt = file.name.split('.').pop()
-    const filePath = `${user.id}-${Math.random()}.${fileExt}`
+    const fileName = `${user.id}-${Date.now()}.${fileExt}`
 
     try {
         const arrayBuffer = await file.arrayBuffer()
         const buffer = Buffer.from(arrayBuffer)
 
-        const { error: uploadError } = await supabaseAdmin.storage
-            .from('avatars')
-            .upload(filePath, buffer, {
-                contentType: file.type,
-                upsert: true
-            })
+        // Upload to DigitalOcean Spaces via S3 (Bucket: supergroups / Folder: superhomes/avatars)
+        const { url: publicUrl, error: uploadError } = await uploadFileToStorage(
+            buffer,
+            fileName,
+            file.type,
+            'avatars'
+        )
 
-        if (uploadError) throw uploadError
-
-        const { data: { publicUrl } } = supabaseAdmin.storage
-            .from('avatars')
-            .getPublicUrl(filePath)
+        if (uploadError || !publicUrl) throw new Error(uploadError || 'Upload failed')
 
         // Update profile with new URL
         const [buyer] = await sql`SELECT id FROM buyers WHERE auth_id = ${user.id}`
 
         if (buyer) {
-            // Buyers don't have photo_url column in listing types... wait.
-            // Looking at lib/supabase.ts, Buyer doesn't have photo_url explicitly listed in interface however
-            // Contact has photo_url.
-            // Let's check DB schema from earlier contexts?
-            // Actually buyers table might not have photo_url. 
-            // user.user_metadata?.avatar_url is used in profile page.
-            // We should update the users table's metadata or add photo_url to buyers.
-            // But we moved away from Supabase Auth metadata.
-            // We should store it in our DB tables.
-            // For now, let's try updating 'contacts' if agent.
-            // If buyer, we might need a column.
-            // For now, I will assume only agents really display photos or I will add column if it fails?
-            // Actually, the previous code updated `supabase.auth.updateUser({ data: { avatar_url: ... } })`
-            // This suggests buyers store it in Auth Metadata.
-            // Since we use NextAuth with our own DB, we can store it in `users` table possibly?
-            // But `users` table schema was `id, email, phone, password, role`.
-            // We can maybe add `image` column to `users` table to be standard with NextAuth.
-
-            // Check if we can just update `contacts` for agents.
-            // For buyers, we might skip for now or add to `users`.
-            // Let's attempt to update `contacts` if agent.
+            // Future: Update buyer profile if we add photo_url to buyers table
+            // For now, we return success so the frontend might eagerly update state
         } else {
             const [agent] = await sql`SELECT id FROM contacts WHERE auth_id = ${user.id}`
             if (agent) {
