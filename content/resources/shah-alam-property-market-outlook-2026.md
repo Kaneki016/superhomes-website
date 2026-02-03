@@ -1,9 +1,9 @@
----
+﻿---
 title: 'Shah Alam Property Market Outlook 2026: Stability, Growth & Investment Insights'
 description: 'A comprehensive outlook on the Shah Alam property market for 2026. We analyse price trends, TODs, industrial demand, and investment opportunities in Sections 7, 13, and 14.'
 date: '2026-02-15'
 category: 'Market Insights'
-image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/shah-alam-property-market-outlook-2026.png'
+image: '/images/resources/shah-alam-property-market-outlook-2026.png'
 neighborhoods: ['Shah Alam', 'Setia Alam', 'Glenmarie', 'Section 7', 'Section 13']
 slug: 'shah-alam-property-market-outlook-2026'
 ---
@@ -120,3 +120,5 @@ Strong demand exists from students (UiTM, MSU) and the industrial workforce. Ren
 *   **Green Living:** Explore [Green Buildings in Malaysia](/resources/green-buildings-malaysia-features-benefits) to understand safe, sustainable investments.
 *   **Comparison:** See how [Kajang's Outlook](/resources/kajang-property-market-outlook-2026) compares for affordable growth.
 *   **Find Listings:** Browse curated [Shah Alam Listings](/properties?search=Shah+Alam) here.
+
+

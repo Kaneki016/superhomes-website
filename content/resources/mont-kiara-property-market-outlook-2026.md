@@ -1,9 +1,9 @@
----
+﻿---
 title: 'Mont Kiara Property Market Outlook 2026: Prices, Trends & Outlook'
 description: 'A data-driven analysis of Mont Kiara property market for 2026. We review price trends, rental yields, MRT3 impacts, and pros/cons for investors and homebuyers.'
 date: '2026-02-03'
 category: 'Market Insights'
-image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/mont-kiara-property-market-outlook-2026.png'
+image: '/images/resources/mont-kiara-property-market-outlook-2026.png'
 neighborhoods: ['Mont Kiara', 'Dutamas', 'Sri Hartamas']
 slug: 'mont-kiara-property-market-outlook-2026'
 ---
@@ -79,3 +79,5 @@ For investors, the window to buy before the full impact of the MRT3 is priced in
 *   **Compare Neighborhoods:** Not sure if Mont Kiara is right for you? Compare it with [Desa ParkCity](/resources/mont-kiara-vs-desa-park-city) in our detailed showdown.
 *   **Deep Dive:** Read our full [Investing in Mont Kiara](/resources/investing-in-mont-kiara) guide for more specific project data.
 *   **Find Listings:** Browse curated [Mont Kiara Listings](/properties?search=Mont+Kiara) here.
+
+

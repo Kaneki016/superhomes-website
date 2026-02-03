@@ -1,9 +1,9 @@
----
+﻿---
 title: 'Kajang Property Market Outlook 2026: Affordable Growth or Saturation?'
 description: 'A quantitative analysis of the Kajang property market for 2026. We review house price trends, EKVE impact, high-rise oversupply risks, and the best areas for investment.'
 date: '2026-02-14'
 category: 'Market Insights'
-image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/kajang-property-market-outlook-2026.png'
+image: '/images/resources/kajang-property-market-outlook-2026.png'
 neighborhoods: ['Kajang', 'Semenyih', 'Sungai Long', 'Bangi']
 slug: 'kajang-property-market-outlook-2026'
 ---
@@ -136,3 +136,5 @@ Landed property is the clear winner for appreciation and demand in Kajang. The a
 *   **First-Time Buyers:** Check your eligibility for the [Housing Credit Guarantee Scheme (SJKP)](/resources/housing-credit-guarantee-scheme-sjkp-2026).
 *   **Compare Suburbs:** See how [Cheras](/resources/cheras-property-market-outlook-2026) compares for investment potential.
 *   **Find Listings:** Browse curated [Kajang Listings](/properties?search=Kajang) here.
+
+

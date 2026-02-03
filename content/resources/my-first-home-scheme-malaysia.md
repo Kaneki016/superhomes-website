@@ -1,9 +1,9 @@
----
+﻿---
 title: "What is Skim Rumah Pertamaku (My First Home Scheme)?"
 description: "Zero downpayment? Learn how this government scheme helps young Malaysians buy their first home with up to 110% financing."
 date: '2025-12-05'
 category: 'Finance & Legal'
-image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/my-first-home-scheme.jpg'
+image: '/images/resources/my-first-home-scheme.jpg'
 slug: "my-first-home-scheme-malaysia"
 ---
 
@@ -64,3 +64,5 @@ You do not apply at a government office. Instead:
 If you have a steady income but haven't managed to save RM30k-RM50k for a downpayment yet, this scheme is your best path to homeownership.
 
 Check out our [Guide to Buying Your First House](/resources/how-to-buy-first-house-malaysia) for the next steps!
+
+

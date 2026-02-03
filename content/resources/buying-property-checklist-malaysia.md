@@ -1,9 +1,9 @@
----
+﻿---
 title: "Top 10 Checklist to Buy a Good Property in Malaysia"
 description: "A comprehensive checklist for first-time homebuyers and investors in Malaysia covering location, budget, land titles, and developer reputation."
 date: "2026-01-08"
 category: 'Buying'
-image: "https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/property-checklist.jpg"
+image: "/images/resources/property-checklist.jpg"
 slug: "buying-property-checklist-malaysia"
 ---
 
@@ -83,3 +83,5 @@ Buying a good property in Malaysia requires due diligence. By ticking off these 
 *   [Understanding Stamp Duty in Malaysia](/resources/stamp-duty-calculator-malaysia)
 *   [How to Calculate RPGT](/resources/rpgt-rates-malaysia)
 *   [Search Properties on Superhomes](/buy)
+
+

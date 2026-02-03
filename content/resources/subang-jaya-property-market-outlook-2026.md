@@ -1,9 +1,9 @@
----
+﻿---
 title: "Subang Jaya Property Market Outlook 2026: Prices, Yields & Trends"
 description: "A 2026 analysis of the Subang Jaya property market. Explore house prices, rental yields near Sunway & SS15, LRT3 impacts, and future development trends."
 date: '2026-01-29'
 category: 'Market Outlook'
-image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/subang-jaya-outlook.png'
+image: '/images/resources/subang-jaya-outlook.png'
 neighborhoods:
   - 'Subang Jaya'
   - 'USJ'
@@ -138,3 +138,5 @@ In conclusion, Subang Jaya in 2026 remains a top-tier choice for owner-occupiers
 *   Compare with [Petaling Jaya Property Market Analysis](/resources/petaling-jaya-property-market-outlook-2026)
 *   Guide to [LRT3 Impact on Klang Valley Property](/resources/mrt3-property-impact)
 *   Breakdown of [Malaysia Budget 2026 Real Estate Measures](/resources/malaysia-budget-2026-property-incentives)
+
+

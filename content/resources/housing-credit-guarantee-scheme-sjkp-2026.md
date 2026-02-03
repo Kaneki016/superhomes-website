@@ -1,9 +1,9 @@
----
+﻿---
 title: 'Housing Credit Guarantee Scheme (SJKP) Malaysia: 2026 Guide'
 description: 'A complete guide to the Housing Credit Guarantee Scheme (SJKP) Malaysia 2026. Learn about SJKP eligibility, 120% financing, and how it helps gig workers buy homes.'
 date: '2026-02-10'
 category: 'Finance & Legal'
-image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/housing-credit-guarantee-scheme-sjkp-2026.png'
+image: '/images/resources/housing-credit-guarantee-scheme-sjkp-2026.png'
 neighborhoods: ['Kuala Lumpur', 'Selangor', 'Johor', 'Penang']
 slug: 'housing-credit-guarantee-scheme-sjkp-2026'
 ---
@@ -132,3 +132,5 @@ Recent updates have introduced a sub-category known as **SJKP MADANI**. While bo
 ## Conclusion
 
 The **Housing Credit Guarantee Scheme (SJKP)** remains a vital pillar of Malaysia's housing strategy in 2026. By increasing the guarantee ceiling to RM20 billion and introducing step-up financing, the government is actively dismantling the financial barriers faced by the gig economy workforce. For first-time buyers without a payslip, SJKP is not just a policy—it is a tangible pathway to homeownership. However, prospective buyers must maintain good credit discipline and ensure their debt obligations remain within manageable limits to secure approval.
+
+

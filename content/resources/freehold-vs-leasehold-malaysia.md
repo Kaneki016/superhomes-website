@@ -1,9 +1,9 @@
----
+﻿---
 title: "Freehold vs. Leasehold vs. Bumi Lot: Decoding Malaysian Land Titles"
 description: "Confused about Freehold vs Leasehold? Understand the differences, ownership rights, and resale potential of Malaysian land titles."
 date: "2026-01-08"
 category: 'Buying'
-image: "https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/land-titles.jpg"
+image: "/images/resources/land-titles.jpg"
 slug: "freehold-vs-leasehold-malaysia"
 ---
 
@@ -61,3 +61,5 @@ This is even stricter than Bumi Lot. It can **ONLY** be owned by Malay Muslims. 
 *   [Property Buying Checklist](/resources/buying-property-checklist-malaysia)
 *   [How to Check Land Title](/resources/land-titles-malaysia)
 *   [New Launch Projects](/project)
+
+

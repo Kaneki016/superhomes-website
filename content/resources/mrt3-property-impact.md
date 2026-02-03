@@ -1,9 +1,9 @@
----
+﻿---
 title: 'How the MRT3 Circle Line Impacts Klang Valley Property Values (2026 Forecast)'
 description: 'Discover how the MRT3 Circle Line drives property values in Klang Valley. Analysis of MRT3 stations property value, price trends in Titiwangsa and Mont Kiara, and Transit Oriented Development Malaysia insights.'
 date: '2026-02-08'
 category: 'Market Insights'
-image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/mrt3-property-impact.png'
+image: '/images/resources/mrt3-property-impact.png'
 neighborhoods: ['Titiwangsa', 'Mont Kiara', 'Pantai Dalam', 'Setiawangsa', 'Old Klang Road']
 slug: 'mrt3-property-impact'
 ---
@@ -120,3 +120,5 @@ Land acquisition is targeted for completion by the end of 2026, with constructio
 
 **What is a Transit Oriented Development (TOD)?**
 A TOD is a mixed-use residential and commercial area designed to maximize access to public transport. In Malaysia, these developments typically feature high-density living, pedestrian-friendly walkways, and reduced parking ratios to encourage public transit use. Examples include developments near KL Sentral and the upcoming Astrum Ampang near the Setiawangsa/Jelatek interchange.
+
+

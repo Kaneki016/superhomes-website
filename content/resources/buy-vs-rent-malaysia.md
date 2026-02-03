@@ -1,9 +1,9 @@
----
+﻿---
 title: "Buy vs Rent: Which is Better for You in Malaysia? (2026 Guide)"
 description: "Deciding between buying your first home or renting? We break down the costs, pros and cons, and financial implications in the Malaysian property market."
 date: '2025-11-15'
 category: 'Buying'
-image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/buy-vs-rent.jpg'
+image: '/images/resources/buy-vs-rent.jpg'
 neighborhoods:
   - 'Petaling Jaya'
   - 'Cheras'
@@ -75,3 +75,5 @@ Ready to take the plunge? Check out listings in popular first-home areas to see 
 *   [Petaling Jaya](/properties?search=Petaling+Jaya)
 *   [Cheras](/properties?search=Cheras)
 *   [Subang Jaya](/properties?search=Subang+Jaya)
+
+

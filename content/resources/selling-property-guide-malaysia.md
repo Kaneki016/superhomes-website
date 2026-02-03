@@ -1,9 +1,9 @@
----
+﻿---
 title: "How to Sell Your House in Malaysia (Step-by-Step Guide 2026)"
 description: "Planning to sell your property? Learn about the process, Real Property Gains Tax (RPGT), legal fees, and how to get the best price."
 date: '2025-10-10'
 category: 'Selling'
-image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/selling-property-guide.jpg'
+image: '/images/resources/selling-property-guide.jpg'
 neighborhoods:
   - 'Bangsar'
   - 'Mont Kiara'
@@ -61,3 +61,5 @@ Within 14-21 days, both parties sign the Sales & Purchase Agreement (SPA).
 
 ## Final Tip
 If you are planning to upgrade to a bigger home, check our [Search Page](/buy) to see what's available in your favorite neighborhoods like [Bangsar](/buy?search=Bangsar) or [Mont Kiara](/buy?search=Mont+Kiara).
+
+

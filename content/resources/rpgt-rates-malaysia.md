@@ -1,9 +1,9 @@
----
+﻿---
 title: "Real Property Gains Tax (RPGT) in Malaysia: A Complete Guide"
 description: "Everything you need to know about Real Property Gains Tax (RPGT) in Malaysia. Check the 2025 rates, calculation formulas, and exemptions for citizens and foreigners."
 date: "2026-01-08"
 category: 'Finance & Legal'
-image: "https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/rpgt-rates.jpg"
+image: "/images/resources/rpgt-rates.jpg"
 slug: "rpgt-rates-malaysia"
 ---
 
@@ -69,3 +69,5 @@ RPGT can take a significant chunk out of your profits if you sell too soon. Idea
 *   [Stamp Duty Calculator](/resources/stamp-duty-calculator-malaysia)
 *   [Listing Your Property on Superhomes](/rent)
 *   [Property Investment Strategies](/resources)
+
+

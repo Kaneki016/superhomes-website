@@ -1,9 +1,9 @@
----
+﻿---
 title: 'Petaling Jaya Property Market Outlook 2026: Prices, Yields & Best Areas'
 description: 'A comprehensive 2026 analysis of the Petaling Jaya property market. Explore PJ house prices, rental yields, family-friendly neighbourhoods, and new launch trends vs. Subang & Shah Alam.'
 date: '2026-02-06'
 category: 'Market Insights'
-image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/petaling-jaya-property-market-outlook-2026.png'
+image: '/images/resources/petaling-jaya-property-market-outlook-2026.png'
 neighborhoods: ['Petaling Jaya', 'SS2', 'Ara Damansara', 'Kelana Jaya']
 slug: 'petaling-jaya-property-market-outlook-2026'
 ---
@@ -105,3 +105,5 @@ It is a mix. Older sections like PJ Old Town (Sections 1-4) are largely leasehol
 *   **Compare Neighborhoods:** See how PJ compares to the neighboring [Bangsar South Property Market](/resources/bangsar-south-property-market-outlook-2026).
 *   **Policy Updates:** Understand how new tax laws affect you in our guide to [Malaysia Budget 2026 Property Incentives](/resources/malaysia-budget-2026-property-incentives).
 *   **Find Listings:** Browse curated [Petaling Jaya Listings](/properties?search=Petaling+Jaya) here.
+
+

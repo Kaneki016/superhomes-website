@@ -1,9 +1,9 @@
----
+﻿---
 title: "Is Now a Good Time to Buy Property in Malaysia? (2026 Market Guide)"
 description: "Discover if 2026 is the right time to enter the Malaysia property market. Analyze price trends, the 2.75% OPR impact, Budget 2026 incentives, and growth hotspots like Johor."
 date: '2026-01-29'
 category: 'Market Outlook'
-image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/market-timing-2026.png'
+image: '/images/resources/market-timing-2026.png'
 slug: "is-now-good-time-to-buy-malaysia-2026"
 ---
 
@@ -144,3 +144,5 @@ Yes, as of Q3 2025, there were 28,672 unsold completed residential units. The ov
 
 ### Can foreigners still buy property in Malaysia in 2026?
 Yes, foreigners can buy property, but entry costs have increased. Budget 2026 raised the stamp duty for foreign buyers from 4% to 8%. Foreigners are generally advised to focus on high-end segments or regions like the Johor-Singapore Special Economic Zone (JS-SEZ) where long-term value is projected to be stronger.
+
+

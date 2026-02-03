@@ -1,9 +1,9 @@
----
+﻿---
 title: "Defect Liability Period (DLP): Your \"Warranty\" for New Homes"
 description: "Keys in hand? Don't start renovating yet! Learn about the Defect Liability Period (DLP) and how to inspect your new house for defects."
 date: "2026-01-08"
 category: 'Buying'
-image: "https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/defect-liability-period.jpg"
+image: "/images/resources/defect-liability-period.jpg"
 slug: "defect-liability-period-malaysia"
 ---
 
@@ -53,3 +53,5 @@ Getting the keys is just the start. The DLP is your safety net. Be thorough, be 
 *   [Renovation Cost Guide](/resources/renovation-cost-malaysia)
 *   [Property Buying Checklist](/resources/buying-property-checklist-malaysia)
 *   [Home Inspection Services](/resources)
+
+
