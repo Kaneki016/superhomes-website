@@ -71,6 +71,43 @@ If your code isn't in a remote repo yet, you can copy your local folder:
     scp -r .\Superhomes root@<DROPLET_IP_ADDRESS>:/root/superhomes
     ```
 
+### Option C: GitHub Actions (CI/CD) - **RECOMMENDED**
+*This method avoids building on the server, saving memory and time.*
+
+1.  **Configure GitHub Secrets**:
+    Go to your repository Settings > Secrets and variables > Actions. Add the following repository secrets (copy values from your `.env.local`):
+    *   `NEXT_PUBLIC_SUPABASE_URL`
+    *   `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+    *   `NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY`
+    *   `SUPABASE_JWT_SECRET`
+    *   `GOOGLE_MAPS_API_KEY`
+    *   `NEXT_PUBLIC_APP_URL`
+    *   `NEXT_PUBLIC_DO_SPACE_URL`
+
+2.  **Push Code**:
+    Push your code to the `main` branch. This will trigger the build in GitHub Actions.
+
+3.  **Create Personal Access Token (PAT)**:
+    *   Go to GitHub Settings > Developer settings > Personal access tokens > Tokens (classic).
+    *   Generate new token -> Select `read:packages`.
+    *   Copy the token.
+
+4.  **Login on Droplet**:
+    SSH into your droplet and run:
+    ```bash
+    export CR_PAT=YOUR_COPIED_TOKEN
+    echo $CR_PAT | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
+    ```
+
+5.  **Run with Pre-built Image**:
+    Create a `docker-compose.prod.yml` on the droplet (or edit `docker-compose.yml`) to use the image:
+    ```yaml
+    services:
+      app:
+        image: ghcr.io/<your-github-username>/<your-repo-name>:latest
+        # build: .  <-- COMMENT THIS OUT
+    ```
+
 ## 3. Configure Environment
 
 1.  **Enter the project directory**:
