@@ -3,7 +3,7 @@ title: "Cost of Renovations in Malaysia: A Budgeting Guide"
 description: "Planning a home renovation? Get a realistic cost breakdown for wet works, kitchen cabinets, flooring, and hidden costs in Malaysia."
 date: "2026-01-08"
 category: 'Home Living'
-image: "/images/resources/renovation-cost.jpg"
+image: "https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/renovation-cost.jpg"
 slug: "renovation-cost-malaysia"
 ---
 

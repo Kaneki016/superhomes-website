@@ -3,7 +3,7 @@ title: "Defect Liability Period (DLP): Your \"Warranty\" for New Homes"
 description: "Keys in hand? Don't start renovating yet! Learn about the Defect Liability Period (DLP) and how to inspect your new house for defects."
 date: "2026-01-08"
 category: 'Buying'
-image: "/images/resources/defect-liability-period.jpg"
+image: "https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/defect-liability-period.jpg"
 slug: "defect-liability-period-malaysia"
 ---
 

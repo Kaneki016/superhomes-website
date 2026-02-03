@@ -3,7 +3,7 @@ title: 'Desa ParkCity Property Market Outlook 2026: Prices, Trends & Outlook'
 description: 'A data-driven review of the Desa ParkCity property market for 2026. We analyze house prices, pros & cons, the new Noora project, and whether it remains the best family area in Kuala Lumpur.'
 date: '2026-02-04'
 category: 'Market Insights'
-image: '/images/resources/desa-park-city-property-market-outlook-2026.png'
+image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/desa-park-city-property-market-outlook-2026.png'
 neighborhoods: ['Desa ParkCity', 'Kepong', 'Bandar Menjalara']
 slug: 'desa-park-city-property-market-outlook-2026'
 ---

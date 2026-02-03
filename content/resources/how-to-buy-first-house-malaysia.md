@@ -3,7 +3,7 @@ title: "Complete Guide to Buying Your First House in Malaysia (2026)"
 description: "A step-by-step walkthrough for first-time homebuyers in Malaysia. From checking affordability to signing the SPA and getting keys."
 date: '2025-11-20'
 category: 'Buying'
-image: '/images/resources/how-to-buy-first-house.jpg'
+image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/how-to-buy-first-house.jpg'
 neighborhoods:
   - 'Cheras'
   - 'Puchong'

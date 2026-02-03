@@ -3,7 +3,7 @@ title: 'Sunway 163 Mall vs The MET: Property Investment Analysis 2025'
 description: 'A data-driven comparison of Sunway 163 Mall and The MET Corporate Towers. We analyze price per sq ft, rental yields, capital appreciation, and tenant profiles to determine the better investment.'
 date: '2026-02-02'
 category: 'Market Insights'
-image: '/images/resources/sunway-163-vs-the-met.png'
+image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/sunway-163-vs-the-met.png'
 neighborhoods: ['Mont Kiara', 'Dutamas', 'KL Metropolis']
 slug: 'sunway-163-vs-the-met'
 ---

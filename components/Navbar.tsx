@@ -23,7 +23,7 @@ export default function Navbar() {
                     {/* Logo */}
                     <Link href="/" className="flex items-center space-x-2">
                         <Image
-                            src="/logo-icon.svg"
+                            src={`${process.env.NEXT_PUBLIC_DO_SPACE_URL}/logo-icon.svg`}
                             alt="SuperHomes Logo"
                             width={40}
                             height={40}
@@ -36,9 +36,7 @@ export default function Navbar() {
 
                     {/* Desktop Navigation */}
                     <div className="hidden md:flex items-center space-x-8">
-                        <Link href="/" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                            Home
-                        </Link>
+
                         <Link href="/properties" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
                             Buy
                         </Link>
@@ -189,9 +187,7 @@ export default function Navbar() {
                 {mobileMenuOpen && (
                     <div className="md:hidden py-4 border-t border-gray-200 animate-fade-in">
                         <div className="flex flex-col space-y-4">
-                            <Link href="/" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                                Home
-                            </Link>
+
                             <Link href="/properties" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
                                 Buy
                             </Link>

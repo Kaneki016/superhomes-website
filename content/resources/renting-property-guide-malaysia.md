@@ -3,7 +3,7 @@ title: "Tenant's Guide to Renting in Malaysia (Deposits & Agreements)"
 description: "Moving out? Here is everything you need to know about the 2+1 deposit rule, tenancy agreements, and your rights as a tenant."
 date: '2025-10-05'
 category: 'Renting'
-image: '/images/resources/renting-property-guide.jpg'
+image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/renting-property-guide.jpg'
 neighborhoods:
   - 'Cyberjaya'
   - 'Sentul'

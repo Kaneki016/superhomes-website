@@ -3,7 +3,7 @@ title: 'Setiawangsa Property Market Outlook 2026: Investment Opportunities'
 description: 'A comprehensive outlook on the Setiawangsa property market for 2026. We analyse price trends, MRT3 impact, SPE highway connectivity, and investment potential.'
 date: '2026-02-15'
 category: 'Market Insights'
-image: '/images/resources/setiawangsa-property-market-outlook-2026.png'
+image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/setiawangsa-property-market-outlook-2026.png'
 neighborhoods: ['Setiawangsa', 'Wangsa Maju', 'Keramat', 'Ampang']
 slug: 'setiawangsa-property-market-outlook-2026'
 ---

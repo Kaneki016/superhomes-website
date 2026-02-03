@@ -15,6 +15,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import TrendChart from '@/components/TrendChart'
 import ShareButton from '@/components/ShareButton'
 import MobileContactBar from '@/components/MobileContactBar'
+import Breadcrumbs from '@/components/Breadcrumbs'
 import { formatPrice } from '@/lib/utils'
 
 // Lazy load heavy components
@@ -154,8 +155,16 @@ export default function PropertyDetailClient({
 
                 <div className="container-custom py-8">
                     {/* Back Button */}
+
                     <button
-                        onClick={() => window.history.back()}
+                        onClick={() => {
+                            if (window.history.length > 2) {
+                                router.back()
+                            } else {
+                                // Fallback if no history (e.g. opened in new tab)
+                                router.push(property.listing_type === 'rent' ? '/rent' : '/properties')
+                            }
+                        }}
                         className="mb-6 inline-flex items-center gap-2 text-gray-600 hover:text-primary-600 transition-colors group"
                     >
                         <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -163,6 +172,16 @@ export default function PropertyDetailClient({
                         </svg>
                         <span className="font-medium">Back</span>
                     </button>
+
+                    {/* Breadcrumbs */}
+                    <div className="mb-4">
+                        <Breadcrumbs items={[
+                            { label: property.state || 'Malaysia', href: `/properties?state=${encodeURIComponent(property.state || '')}` },
+                            { label: property.listing_type === 'rent' ? 'For Rent' : 'For Sale', href: property.listing_type === 'rent' ? '/rent' : '/properties' },
+                            { label: property.property_type || 'Property', href: `/properties?type=${encodeURIComponent(property.property_type || '')}` },
+                            { label: propertyName }
+                        ]} />
+                    </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Main Content */}

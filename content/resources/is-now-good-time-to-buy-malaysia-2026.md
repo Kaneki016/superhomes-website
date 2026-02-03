@@ -3,7 +3,7 @@ title: "Is Now a Good Time to Buy Property in Malaysia? (2026 Market Guide)"
 description: "Discover if 2026 is the right time to enter the Malaysia property market. Analyze price trends, the 2.75% OPR impact, Budget 2026 incentives, and growth hotspots like Johor."
 date: '2026-01-29'
 category: 'Market Outlook'
-image: '/images/resources/market-timing-2026.png'
+image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/market-timing-2026.png'
 slug: "is-now-good-time-to-buy-malaysia-2026"
 ---
 

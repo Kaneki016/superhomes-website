@@ -3,7 +3,7 @@ title: 'Malaysia Budget 2026: Property Incentives for Buyers & Investors'
 description: 'Discover key Malaysia Budget 2026 property incentives, including stamp duty exemptions, tax reliefs, and financing schemes for first-time buyers and investors.'
 date: '2026-02-07'
 category: 'Finance & Legal'
-image: '/images/resources/malaysia-budget-2026-property-incentives.png'
+image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/malaysia-budget-2026-property-incentives.png'
 neighborhoods: ['Kuala Lumpur', 'Petaling Jaya', 'Johor Bahru', 'Penang']
 slug: 'malaysia-budget-2026-property-incentives'
 ---

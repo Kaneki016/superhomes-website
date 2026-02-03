@@ -3,7 +3,7 @@ title: "What is Skim Rumah Pertamaku (My First Home Scheme)?"
 description: "Zero downpayment? Learn how this government scheme helps young Malaysians buy their first home with up to 110% financing."
 date: '2025-12-05'
 category: 'Finance & Legal'
-image: '/images/resources/my-first-home-scheme.jpg'
+image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/my-first-home-scheme.jpg'
 slug: "my-first-home-scheme-malaysia"
 ---
 

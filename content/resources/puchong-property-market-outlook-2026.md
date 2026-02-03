@@ -3,7 +3,7 @@ title: 'Puchong Property Market Outlook 2026: Is It Still a Smart Investment?'
 description: 'A data-driven analysis of the Puchong property market for 2026. We review price stability, industrial growth, TODs, and whether it remains a smart investment.'
 date: '2026-02-13'
 category: 'Market Insights'
-image: '/images/resources/puchong-property-market-outlook-2026.png'
+image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/puchong-property-market-outlook-2026.png'
 neighborhoods: ['Puchong', 'Bandar Puteri', 'Puchong Perdana', 'Puchong South', 'Pulau Meranti']
 slug: 'puchong-property-market-outlook-2026'
 ---

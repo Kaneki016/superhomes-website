@@ -3,7 +3,7 @@ title: 'Condo vs Landed Property in Malaysia: Which Is the Better Choice?'
 description: 'Buying a house? We compare condo vs landed property in Malaysia across price, rental yield, maintenance, and appreciation to help you decide which is better.'
 date: '2026-02-11'
 category: 'Property Guides'
-image: '/images/resources/condo-vs-landed-malaysia.png'
+image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/condo-vs-landed-malaysia.png'
 neighborhoods: ['Kuala Lumpur', 'Selangor', 'Petaling Jaya', 'Subang Jaya']
 slug: 'condo-vs-landed-malaysia'
 ---

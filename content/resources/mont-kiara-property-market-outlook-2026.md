@@ -3,7 +3,7 @@ title: 'Mont Kiara Property Market Outlook 2026: Prices, Trends & Outlook'
 description: 'A data-driven analysis of Mont Kiara property market for 2026. We review price trends, rental yields, MRT3 impacts, and pros/cons for investors and homebuyers.'
 date: '2026-02-03'
 category: 'Market Insights'
-image: '/images/resources/mont-kiara-property-market-outlook-2026.png'
+image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/mont-kiara-property-market-outlook-2026.png'
 neighborhoods: ['Mont Kiara', 'Dutamas', 'Sri Hartamas']
 slug: 'mont-kiara-property-market-outlook-2026'
 ---

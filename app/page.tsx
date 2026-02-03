@@ -145,27 +145,40 @@ export default function HomePage() {
     ]
 
     const handleSearch = () => {
+        let path = '/properties'
+
+        const typeSlug = propertyType
+            ? propertyType.toLowerCase().replace(/ /g, '-')
+            : null
+
+        const stateSlug = selectedState
+            ? selectedState.toLowerCase().replace(/ /g, '-')
+            : null
+
+        if (typeSlug) {
+            path += `/${typeSlug}`
+            if (stateSlug) path += `/${stateSlug}`
+        } else if (stateSlug) {
+            path += `/${stateSlug}`
+        }
+
         const params = new URLSearchParams()
         if (searchQuery.trim()) {
             params.set('search', searchQuery)
         }
-        if (propertyType) {
-            params.set('type', propertyType)
-        }
-        if (minPrice) {
-            params.set('minPrice', minPrice)
-        }
-        if (maxPrice) {
-            params.set('maxPrice', maxPrice)
+        if (minPrice && maxPrice) {
+            params.set('price', `${minPrice}-${maxPrice}`)
+        } else if (minPrice) {
+            params.set('price', `${minPrice}+`)
+        } else if (maxPrice) {
+            params.set('price', `0-${maxPrice}`)
         }
         if (bedrooms) {
             params.set('bedrooms', bedrooms)
         }
-        if (selectedState) {
-            params.set('state', selectedState)
-        }
+
         const queryString = params.toString()
-        window.location.href = `/properties${queryString ? `?${queryString}` : ''}`
+        window.location.href = `${path}${queryString ? `?${queryString}` : ''}`
     }
 
     // Handle filter application from modal

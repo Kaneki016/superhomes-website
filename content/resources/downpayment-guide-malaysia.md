@@ -3,7 +3,7 @@ title: "Downpayment Guide: How Much Do You Really Need? (2026)"
 description: "Everything you need to know about housing downpayments in Malaysia. 10% vs 0%, EPF withdrawal, and assistance schemes."
 date: '2025-11-25'
 category: 'Finance & Legal'
-image: '/images/resources/downpayment-guide.jpg'
+image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/downpayment-guide.jpg'
 slug: "downpayment-guide-malaysia"
 ---
 

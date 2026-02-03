@@ -3,7 +3,7 @@ title: "Green Buildings in Malaysia: Features, Benefits, and Why They Matter"
 description: "Explore the rise of sustainable property in Malaysia. Discover key green building features, energy efficiency strategies, and the economic benefits for investors."
 date: '2026-01-29'
 category: 'Investment'
-image: '/images/resources/green-buildings-malaysia.png'
+image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/green-buildings-malaysia.png'
 neighborhoods:
   - 'Mont Kiara'
   - 'Desa Park City'

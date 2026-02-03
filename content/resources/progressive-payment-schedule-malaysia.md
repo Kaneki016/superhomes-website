@@ -3,7 +3,7 @@ title: "Progressive Payment Schedule: When Do You Pay for Under-Construction Pro
 description: "Buying a new launch property? Understanding the Progressive Payment Schedule (Schedule H) is crucial to managing your cash flow."
 date: '2026-01-15'
 category: 'Buying'
-image: '/images/resources/progressive-payment.jpg'
+image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/progressive-payment.jpg'
 neighborhoods:
   - 'Kuala Lumpur'
   - 'Selangor'

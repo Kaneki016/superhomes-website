@@ -3,7 +3,7 @@ title: 'Top 5 Condos to Buy or Rent in Setiawangsa & Ampang (2026 Guide)'
 description: 'Discover the best condos in Ampang and Setiawangsa for 2026. Explore Setiawangsa condo prices, amenities, and rental yields for The Valley, Seri Maya, Novo Ampang, and more.'
 date: '2026-02-09'
 category: 'Neighbourhood Guide'
-image: '/images/resources/top-5-condos-setiawangsa-ampang.png'
+image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/top-5-condos-setiawangsa-ampang.png'
 neighborhoods: ['Setiawangsa', 'Ampang', 'Ampang Hilir', 'Taman U-Thant']
 slug: 'top-5-condos-setiawangsa-ampang'
 ---

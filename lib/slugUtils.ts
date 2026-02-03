@@ -51,11 +51,43 @@ export function generatePropertySlug(property: Property): string {
 }
 
 /**
+ * Determines the category of a property based on its type
+ */
+export function getPropertyCategory(propertyType: string | null): string {
+    if (!propertyType) return 'property'
+
+    const type = propertyType.toLowerCase()
+
+    const commercialTypes = [
+        'shop', 'office', 'retail', 'factory', 'warehouse',
+        'commercial', 'hotel', 'land', 'industrial', 'soho'
+    ]
+
+    if (commercialTypes.some(t => type.includes(t))) {
+        return 'commercial'
+    }
+
+    return 'residential'
+}
+
+/**
  * Generates the full URL path for a property listing
+ * Format: /{category}/{listing_type}/{state}/{slug}
+ * Example: /residential/buy/selangor/d-rapport-for-sale...
  */
 export function generatePropertyUrl(property: Property): string {
     const slug = generatePropertySlug(property)
-    return `/property-listing/${slug}`
+    const category = getPropertyCategory(property.property_type)
+
+    // Map listing type to URL segment
+    let action = 'buy'
+    if (property.listing_type === 'rent') action = 'rent'
+    if (property.listing_type === 'project') action = 'projects'
+
+    // Slugify state or fallback
+    const state = slugify(property.state || 'malaysia')
+
+    return `/${category}/${action}/${state}/${slug}`
 }
 
 /**

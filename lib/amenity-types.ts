@@ -25,7 +25,7 @@ export function groupAmenitiesByType(
     }
 
     for (const amenity of amenities) {
-        if (groups[amenity.type].length < limitPerType) {
+        if (groups[amenity.type] && groups[amenity.type].length < limitPerType) {
             groups[amenity.type].push(amenity)
         }
     }

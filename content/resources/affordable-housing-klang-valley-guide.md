@@ -3,7 +3,7 @@ title: 'Affordable Housing Options in Klang Valley: A Practical Buyer’s Guide'
 description: 'Discover affordable housing options in Klang Valley for 2025/2026. Explore government schemes like PR1MA and Rumah Selangorku, financing tips, and the cheapest locations for first-time buyers.'
 date: '2026-02-12'
 category: 'Buyer Guide'
-image: '/images/resources/affordable-housing-klang-valley-guide.png'
+image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/affordable-housing-klang-valley-guide.png'
 neighborhoods: ['Kuala Lumpur', 'Selangor', 'Putrajaya', 'Rawang', 'Semenyih']
 slug: 'affordable-housing-klang-valley-guide'
 ---

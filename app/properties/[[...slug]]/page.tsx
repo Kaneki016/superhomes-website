@@ -1,0 +1,829 @@
+'use client'
+
+import { useState, useEffect, useCallback, useRef, Suspense, useMemo } from 'react'
+import { useSearchParams, useRouter, useParams } from 'next/navigation'
+import dynamic from 'next/dynamic'
+import Link from 'next/link'
+import Navbar from '@/components/Navbar'
+import Footer from '@/components/Footer'
+import PropertyCard from '@/components/PropertyCard'
+import Pagination from '@/components/Pagination'
+import FilterModal from '@/components/FilterModal'
+import FilterChips from '@/components/FilterChips'
+import { ListSkeleton } from '@/components/SkeletonLoader'
+import EmptyState from '@/components/EmptyState'
+import SearchInput from '@/components/SearchInput'
+import PageBanner from '@/components/PageBanner'
+import { Metadata } from 'next'
+
+// Dynamic imports for map components - only loaded when map view is active
+const PropertyMap = dynamic(
+    () => import('@/components/PropertyMap').then(mod => mod.default),
+    {
+        ssr: false,
+        loading: () => (
+            <div className="h-full w-full bg-gray-100 animate-pulse flex items-center justify-center">
+                <div className="text-center">
+                    <svg className="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                    </svg>
+                    <span className="text-gray-500 text-sm">Loading map...</span>
+                </div>
+            </div>
+        )
+    }
+)
+
+const MapPropertyCard = dynamic(
+    () => import('@/components/MapPropertyCard'),
+    { ssr: false }
+)
+
+// Type import for MapBounds (doesn't affect bundle)
+import type { MapBounds } from '@/components/PropertyMap'
+import { getPropertiesPaginated, getDistinctStates, getFilterOptions, searchAgents, getPropertiesByAgentIds, getPropertyById } from '@/app/actions/property-actions'
+import { Property, Agent } from '@/lib/types'
+import { useAuth } from '@/contexts/AuthContext'
+import { generatePropertyUrl } from '@/lib/slugUtils'
+
+const PROPERTIES_PER_PAGE = 12
+
+interface FilterOptions {
+    propertyTypes: string[]
+    locations: string[]
+    bedrooms: number[]
+    priceRange: { min: number; max: number }
+}
+
+// Loading fallback for Suspense
+function PropertiesPageLoading() {
+    return (
+        <div className="min-h-screen bg-gray-50">
+            <Navbar />
+            <div className="sticky top-20 z-40 bg-white border-b border-gray-200 shadow-sm">
+                <div className="container-custom py-4">
+                    <div className="h-12 bg-gray-200 rounded-xl animate-pulse"></div>
+                </div>
+            </div>
+            <div className="container-custom py-6">
+                <ListSkeleton count={6} type="property" />
+            </div>
+            <Footer />
+        </div>
+    )
+}
+
+// Main page wrapper with Suspense
+export default function PropertiesPage() {
+    return (
+        <Suspense fallback={<PropertiesPageLoading />}>
+            <PropertiesPageContent />
+        </Suspense>
+    )
+}
+
+function PropertiesPageContent() {
+    // URL Search Params & Routing
+    const searchParams = useSearchParams()
+    const router = useRouter()
+    const params = useParams()
+
+    // Slug parsing logic will go here
+    const slug = params?.slug as string[] | undefined
+
+    // View Mode Initialization from URL
+    const initialViewMode = (searchParams.get('view') as 'grid' | 'list') || 'grid'
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>(initialViewMode)
+
+    // Auth
+    const { user } = useAuth()
+
+    // State
+    const [properties, setProperties] = useState<Property[]>([])
+    const [matchedAgents, setMatchedAgents] = useState<Agent[]>([])
+    const [agentProperties, setAgentProperties] = useState<Property[]>([])
+    const [loading, setLoading] = useState(true)
+    const [loadingMore, setLoadingMore] = useState(false)
+    const initialPage = parseInt(searchParams.get('page') || '1', 10)
+    const [currentPage, setCurrentPage] = useState(initialPage)
+    const [totalCount, setTotalCount] = useState(0)
+    const [hasMore, setHasMore] = useState(false)
+    const [sortBy, setSortBy] = useState('newest')
+    // const [activeTab, setActiveTab] = useState('all') // Commented out in original
+    const [showFilters, setShowFilters] = useState(false)
+    const [mapView, setMapView] = useState(false)
+    const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null)
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+    const [visibleMapPropertyIds, setVisibleMapPropertyIds] = useState<string[] | null>(null)
+
+    // Filters
+    const [filters, setFilters] = useState({
+        propertyType: '',
+        minPrice: '',
+        maxPrice: '',
+        bedrooms: '',
+        location: '',
+        state: '',
+    })
+
+    const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+        propertyTypes: [],
+        locations: [],
+        bedrooms: [],
+        priceRange: { min: 0, max: 10000000 }
+    })
+
+    const [loadingFilters, setLoadingFilters] = useState(true)
+    const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+    const [filterModalOpen, setFilterModalOpen] = useState(false)
+    const [stateOptions, setStateOptions] = useState<string[]>([])
+    const [mobileSearchExpanded, setMobileSearchExpanded] = useState(true)
+    const dropdownRef = useRef<HTMLDivElement>(null)
+    const initialLoadDone = useRef(false)
+
+    // Handler for map bounds changes
+    const handleMapBoundsChange = useCallback((bounds: MapBounds, visibleIds: string[]) => {
+        setVisibleMapPropertyIds(visibleIds)
+    }, [])
+
+    const handlePropertySelect = useCallback(async (id: string) => {
+        const property = await getPropertyById(id)
+        if (property) {
+            router.push(generatePropertyUrl(property))
+        } else {
+            router.push(`/properties/${id}`)
+        }
+    }, [router])
+
+    const loadProperties = useCallback(async (page: number, resetList: boolean = false, overrideFilters?: typeof filters) => {
+        const activeFilters = overrideFilters || filters
+
+        try {
+            if (page === 1 || resetList) {
+                setLoading(true)
+            } else {
+                setLoadingMore(true)
+            }
+
+            const result = await getPropertiesPaginated(page, PROPERTIES_PER_PAGE, {
+                location: activeFilters.location || undefined,
+                state: activeFilters.state || undefined,
+                propertyType: activeFilters.propertyType || undefined,
+                minPrice: activeFilters.minPrice ? Number(activeFilters.minPrice) : undefined,
+                maxPrice: activeFilters.maxPrice ? Number(activeFilters.maxPrice) : undefined,
+                bedrooms: activeFilters.bedrooms ? Number(activeFilters.bedrooms) : undefined,
+                listingType: 'sale',
+            })
+
+            setProperties(result.properties)
+            setTotalCount(result.totalCount)
+            setHasMore(result.hasMore)
+            setCurrentPage(page)
+        } catch (error) {
+            console.error('Error loading properties:', error)
+            setProperties([])
+            setTotalCount(0)
+            setHasMore(false)
+        } finally {
+            setLoading(false)
+            setLoadingMore(false)
+        }
+    }, [filters])
+
+    // Initialize from Slug and SearchParams
+    useEffect(() => {
+        let typeFromSlug = ''
+        let stateFromSlug = ''
+
+        if (slug && slug.length > 0) {
+            // Simple heuristic mapping
+            // Can be improved with actual validation against filterOptions if needed
+            // Assuming order: /properties/[type]/[state] or /properties/[type] or /properties/all/[state]
+
+            // Common residential types to check against
+            const residentialTypes = ['condominium', 'apartment', 'terrace-house', 'semi-d', 'bungalow', 'townhouse']
+
+            const firstPart = slug[0].toLowerCase()
+
+            if (residentialTypes.includes(firstPart) || firstPart === 'all-residential') {
+                typeFromSlug = firstPart === 'all-residential' ? '' : firstPart
+                    .split('-')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ')
+
+                // Special case fixes
+                if (typeFromSlug === 'Semi D') typeFromSlug = 'Semi-D'
+
+                if (slug.length > 1) {
+                    stateFromSlug = slug[1].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+                }
+            } else {
+                // assume first part is state if not a known type
+                stateFromSlug = firstPart.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+            }
+        }
+
+        // Query params still override/augment if present (e.g. for price, beds)
+        const locationParam = searchParams.get('location')
+        const searchParam = searchParams.get('search')
+        const priceParam = searchParams.get('price')
+        const bedroomsParam = searchParams.get('bedrooms')
+
+        let minPrice = ''
+        let maxPrice = ''
+        if (priceParam) {
+            if (priceParam.endsWith('+')) {
+                minPrice = priceParam.slice(0, -1)
+            } else if (priceParam.includes('-')) {
+                const [min, max] = priceParam.split('-')
+                minPrice = min
+                maxPrice = max
+            }
+        }
+
+        const bedroomValue = bedroomsParam ? bedroomsParam.replace('+', '') : ''
+
+        setFilters(prev => ({
+            ...prev,
+            propertyType: typeFromSlug, // URL path takes precedence for type/state structure
+            state: stateFromSlug,
+            location: locationParam || searchParam || '',
+            minPrice: minPrice,
+            maxPrice: maxPrice,
+            bedrooms: bedroomValue,
+        }))
+
+        // Trigger initial load
+        if (!initialLoadDone.current) {
+            // We need to pass these values directly because state updates are async
+            loadProperties(1, true, {
+                propertyType: typeFromSlug,
+                state: stateFromSlug,
+                location: locationParam || searchParam || '',
+                minPrice: minPrice,
+                maxPrice: maxPrice,
+                bedrooms: bedroomValue,
+                // defaults
+            })
+            initialLoadDone.current = true
+        }
+
+        // Handle agent search if needed
+        if ((searchParam || locationParam) && (searchParam || locationParam)!.trim().length >= 2) {
+            searchAgents((searchParam || locationParam)!).then(async (agents) => {
+                setMatchedAgents(agents)
+                if (agents.length > 0) {
+                    const agentIds = agents.map(a => a.id || a.agent_id).filter((id): id is string => !!id)
+                    const props = await getPropertiesByAgentIds(agentIds, 12)
+                    setAgentProperties(props)
+                } else {
+                    setAgentProperties([])
+                }
+            })
+        }
+
+    }, [slug, searchParams]) // eslint-disable-line react-hooks/exhaustive-deps 
+
+    // Handle view mode change
+    const handleViewModeChange = (mode: 'grid' | 'list') => {
+        setViewMode(mode)
+        const params = new URLSearchParams(searchParams.toString())
+        params.set('view', mode)
+        router.replace(`?${params.toString()}`, { scroll: false })
+    }
+
+    // Load filter options
+    useEffect(() => {
+        async function loadFilterOptions() {
+            try {
+                const [options, states] = await Promise.all([
+                    getFilterOptions(),
+                    getDistinctStates()
+                ])
+                setFilterOptions(options)
+                setStateOptions(states)
+            } catch (error) {
+                console.error('Error loading filter options:', error)
+            } finally {
+                setLoadingFilters(false)
+            }
+        }
+        loadFilterOptions()
+    }, [])
+
+    // Close dropdown
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setOpenDropdown(null)
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [])
+
+    // Sync filters to URL (New clean URL logic)
+    const syncFiltersToUrl = useCallback((filterState: typeof filters) => {
+        // Construct path segments
+        let path = '/properties'
+
+        const typeSlug = filterState.propertyType
+            ? filterState.propertyType.toLowerCase().replace(/ /g, '-')
+            : null
+
+        const stateSlug = filterState.state
+            ? filterState.state.toLowerCase().replace(/ /g, '-')
+            : null
+
+        if (typeSlug) {
+            path += `/${typeSlug}`
+            if (stateSlug) path += `/${stateSlug}`
+        } else if (stateSlug) {
+            // If only state, we can do /properties/all-residential/state or just /properties/state check
+            // Use explicit 'all-residential' to avoid ambiguity if state matches a type name (unlikely but safe)
+            // Or just append state if we trust our parser.
+            // Let's use simple append for now, the parser tries to detect types.
+            // But to be safe and clear:
+            path += `/${stateSlug}`
+        }
+
+        // Query params for the rest
+        const params = new URLSearchParams()
+        if (filterState.location) params.set('search', filterState.location)
+        if (filterState.minPrice && filterState.maxPrice) {
+            params.set('price', `${filterState.minPrice}-${filterState.maxPrice}`)
+        } else if (filterState.minPrice) {
+            params.set('price', `${filterState.minPrice}+`)
+        } else if (filterState.maxPrice) {
+            params.set('price', `0-${filterState.maxPrice}`)
+        }
+        if (filterState.bedrooms) params.set('bedrooms', filterState.bedrooms)
+
+        // Keep view mode
+        const currentView = searchParams.get('view')
+        if (currentView) params.set('view', currentView)
+
+        const queryString = params.toString()
+        router.replace(`${path}${queryString ? `?${queryString}` : ''}`, { scroll: false })
+    }, [router, searchParams])
+
+    const handleApplyFilters = (overrideFilters?: typeof filters) => {
+        const activeFilters = overrideFilters || filters
+        setCurrentPage(1)
+        loadProperties(1, true, activeFilters)
+        setShowFilters(false)
+        syncFiltersToUrl(activeFilters)
+
+        if (activeFilters.location && activeFilters.location.trim().length >= 2) {
+            searchAgents(activeFilters.location).then(agents => {
+                setMatchedAgents(agents)
+            })
+        } else {
+            setMatchedAgents([])
+        }
+    }
+
+    const handleResetFilters = () => {
+        const resetFilters = { propertyType: '', minPrice: '', maxPrice: '', bedrooms: '', location: '', state: '' }
+        setFilters(resetFilters)
+        setCurrentPage(1)
+        setMatchedAgents([])
+        setOpenDropdown(null)
+        router.replace('/properties', { scroll: false })
+        loadProperties(1, true, resetFilters)
+    }
+
+    const handlePageChange = (page: number) => {
+        const url = new URL(window.location.href)
+        if (page > 1) {
+            url.searchParams.set('page', page.toString())
+        } else {
+            url.searchParams.delete('page')
+        }
+        router.push(url.pathname + url.search, { scroll: false })
+        loadProperties(page, true)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+
+    const handleSaveSearch = () => {
+        if (!user) {
+            router.push('/login?message=' + encodeURIComponent('Please login to save your search.'))
+            return
+        }
+        alert('Search saved!')
+    }
+
+    const totalPages = Math.ceil(totalCount / PROPERTIES_PER_PAGE)
+
+    const agentPropertyIds = useMemo(() => new Set(agentProperties.map(p => p.id)), [agentProperties])
+
+    const sortedProperties = useMemo(() => {
+        return [...properties]
+            .filter(p => !agentPropertyIds.has(p.id))
+            .sort((a, b) => {
+                if (sortBy === 'price-low') return (a.price || 0) - (b.price || 0)
+                if (sortBy === 'price-high') return (b.price || 0) - (a.price || 0)
+                return new Date(b.created_at || b.scraped_at || 0).getTime() - new Date(a.created_at || a.scraped_at || 0).getTime()
+            })
+    }, [properties, agentPropertyIds, sortBy])
+
+    const propertyTypeOptions = [
+        { label: 'All Residential', value: '' },
+        ...filterOptions.propertyTypes.map(type => ({ label: type, value: type }))
+    ]
+
+    const bedroomOptions = [
+        { label: 'Any', value: '' },
+        ...filterOptions.bedrooms.map(bed => ({ label: String(bed), value: String(bed) }))
+    ]
+
+    const activeFilterCount = [
+        filters.propertyType,
+        filters.minPrice || filters.maxPrice,
+        filters.bedrooms,
+        filters.location,
+        filters.state
+    ].filter(Boolean).length
+
+    return (
+        <div className="min-h-screen bg-gray-50">
+            <Navbar />
+            <PageBanner
+                title="Properties For Sale"
+                subtitle="Discover your dream home from our extensive collection of premium properties"
+                backgroundImage="https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=2000&q=80"
+            />
+
+            {/* Search Filters Bar */}
+            <div className="sticky top-20 z-40 bg-white border-b border-gray-200 shadow-sm">
+                <button
+                    onClick={() => setMobileSearchExpanded(!mobileSearchExpanded)}
+                    className="md:hidden w-full flex items-center justify-center gap-2 py-3 px-4 bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+                >
+                    {/* Mobile Toggle Icons... */}
+                    <span>{mobileSearchExpanded ? 'Hide Search & Filters' : 'Show Search & Filters'}</span>
+                </button>
+
+                <div className={`container-custom py-4 ${!mobileSearchExpanded ? 'hidden md:block' : ''}`}>
+                    <div className="flex gap-4 mb-4">
+                        <SearchInput
+                            value={filters.location}
+                            onChange={(val) => setFilters({ ...filters, location: val })}
+                            onSearch={(val) => {
+                                const newFilters = { ...filters, location: val }
+                                setFilters(newFilters)
+                                handleApplyFilters(newFilters)
+                            }}
+                            placeholder="Search location, project, or area..."
+                            className="flex-1"
+                        />
+                        <button
+                            onClick={() => handleApplyFilters()}
+                            className="flex items-center gap-2 px-6 py-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl transition-colors shadow-sm"
+                        >
+                            <span>Search</span>
+                        </button>
+                    </div>
+
+                    {/* Quick Filter Pills */}
+                    <div ref={dropdownRef} className="flex items-center gap-3 flex-wrap">
+                        {/* Filters Button */}
+                        <button onClick={() => setFilterModalOpen(true)} className={`filter-pill ${activeFilterCount > 0 ? 'active' : ''}`}>
+                            <span>Filters</span>
+                        </button>
+
+                        {/* Property Type Pill */}
+                        <div className="relative">
+                            <button
+                                onClick={() => setOpenDropdown(openDropdown === 'propertyType' ? null : 'propertyType')}
+                                className={`filter-pill ${filters.propertyType ? 'active' : ''}`}
+                            >
+                                <span>{filters.propertyType || 'All Residential'}</span>
+                            </button>
+                            {openDropdown === 'propertyType' && (
+                                <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 max-h-64 overflow-y-auto">
+                                    {propertyTypeOptions.map((type) => (
+                                        <button
+                                            key={type.value}
+                                            onClick={() => {
+                                                const newFilters = { ...filters, propertyType: type.value }
+                                                setFilters(newFilters)
+                                                setOpenDropdown(null)
+                                                loadProperties(1, true, newFilters)
+                                                syncFiltersToUrl(newFilters)
+                                            }}
+                                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${filters.propertyType === type.value ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
+                                        >
+                                            {type.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Price Pill - Simplified for brevity in tool call, implementation should restore details */}
+                        <div className="relative">
+                            <button
+                                onClick={() => setOpenDropdown(openDropdown === 'price' ? null : 'price')}
+                                className={`filter-pill ${filters.minPrice || filters.maxPrice ? 'active' : ''}`}
+                            >
+                                <span>Price</span>
+                            </button>
+                            {openDropdown === 'price' && (
+                                <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-lg border p-4 z-50">
+                                    <div className="flex gap-2">
+                                        <input className="w-full border rounded p-1" placeholder="Min" value={filters.minPrice} onChange={e => setFilters({ ...filters, minPrice: e.target.value.replace(/\D/g, '') })} />
+                                        <input className="w-full border rounded p-1" placeholder="Max" value={filters.maxPrice} onChange={e => setFilters({ ...filters, maxPrice: e.target.value.replace(/\D/g, '') })} />
+                                    </div>
+                                    <div className="mt-2 flex justify-between">
+                                        <button onClick={() => { setFilters({ ...filters, minPrice: '', maxPrice: '' }); loadProperties(1, true, { ...filters, minPrice: '', maxPrice: '' }) }} className="text-sm">Clear</button>
+                                        <button onClick={() => { setOpenDropdown(null); loadProperties(1, true, filters); syncFiltersToUrl(filters) }} className="text-sm bg-primary-500 text-white px-2 rounded">Apply</button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* State Pill */}
+                        <div className="relative">
+                            <button
+                                onClick={() => setOpenDropdown(openDropdown === 'state' ? null : 'state')}
+                                className={`filter-pill ${filters.state ? 'active' : ''}`}
+                            >
+                                <span>{filters.state || 'State'}</span>
+                            </button>
+                            {openDropdown === 'state' && (
+                                <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 max-h-64 overflow-y-auto">
+                                    <button
+                                        onClick={() => {
+                                            const newFilters = { ...filters, state: '' }
+                                            setFilters(newFilters)
+                                            setOpenDropdown(null)
+                                            loadProperties(1, true, newFilters)
+                                            syncFiltersToUrl(newFilters)
+                                        }}
+                                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700"
+                                    >
+                                        All States
+                                    </button>
+                                    {stateOptions.map((state) => (
+                                        <button
+                                            key={state}
+                                            onClick={() => {
+                                                const newFilters = { ...filters, state: state }
+                                                setFilters(newFilters)
+                                                setOpenDropdown(null)
+                                                loadProperties(1, true, newFilters)
+                                                syncFiltersToUrl(newFilters)
+                                            }}
+                                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${filters.state === state ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
+                                        >
+                                            {state}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {activeFilterCount > 0 && (
+                            <button onClick={handleResetFilters} className="text-sm text-primary-600 font-medium">Clear all</button>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            <div className="container-custom py-6">
+
+                {/* Filter Summary & Controls */}
+                {!loading && (
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                        <div>
+                            {/* Filter Summary Pill */}
+                            {(filters.propertyType || filters.minPrice || filters.maxPrice || filters.bedrooms || filters.location || filters.state) && (
+                                <div className="mt-1 sm:mt-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-primary-50 border-l-3 sm:border-l-4 border-primary-500 rounded-r-md sm:rounded-r-lg inline-block">
+                                    <p className="text-gray-700 text-sm sm:text-base font-medium leading-snug">
+                                        {(() => {
+                                            const summaryParts = []
+                                            if (filters.propertyType) summaryParts.push(filters.propertyType)
+                                            if (filters.minPrice && filters.maxPrice) {
+                                                const minK = parseInt(filters.minPrice) >= 1000000 ? `RM ${(parseInt(filters.minPrice) / 1000000).toFixed(1)}M` : `RM ${(parseInt(filters.minPrice) / 1000).toFixed(0)}K`
+                                                const maxK = parseInt(filters.maxPrice) >= 1000000 ? `RM ${(parseInt(filters.maxPrice) / 1000000).toFixed(1)}M` : `RM ${(parseInt(filters.maxPrice) / 1000).toFixed(0)}K`
+                                                summaryParts.push(`Between ${minK} and ${maxK}`)
+                                            } else if (filters.minPrice) {
+                                                const minK = parseInt(filters.minPrice) >= 1000000 ? `RM ${(parseInt(filters.minPrice) / 1000000).toFixed(1)}M` : `RM ${(parseInt(filters.minPrice) / 1000).toFixed(0)}K`
+                                                summaryParts.push(`Above ${minK}`)
+                                            } else if (filters.maxPrice) {
+                                                const maxK = parseInt(filters.maxPrice) >= 1000000 ? `RM ${(parseInt(filters.maxPrice) / 1000000).toFixed(1)}M` : `RM ${(parseInt(filters.maxPrice) / 1000).toFixed(0)}K`
+                                                summaryParts.push(`Under ${maxK}`)
+                                            }
+                                            if (filters.bedrooms) summaryParts.push(`${filters.bedrooms}+ Bedrooms`)
+                                            if (filters.location) summaryParts.push(`in ${filters.location}`)
+                                            else if (filters.state) summaryParts.push(`in ${filters.state}`)
+                                            return summaryParts.length > 0 ? summaryParts.join(' • ') : ''
+                                        })()}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                            {/* Map View Toggle */}
+                            <div className="map-toggle hidden md:flex">
+                                <span className="text-sm text-gray-600 mr-2">Map View</span>
+                                <button
+                                    onClick={() => {
+                                        const newMapView = !mapView
+                                        setMapView(newMapView)
+                                        if (!newMapView) setVisibleMapPropertyIds(null)
+                                    }}
+                                    className={`toggle-switch ${mapView ? 'active' : ''}`}
+                                >
+                                    <span className="toggle-switch-thumb" />
+                                </button>
+                            </div>
+
+                            {/* View Toggle */}
+                            <div className="view-toggle">
+                                <button onClick={() => handleViewModeChange('grid')} className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}>
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                                </button>
+                                <button onClick={() => handleViewModeChange('list')} className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}>
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+                                </button>
+                            </div>
+
+                            {/* Sort Dropdown */}
+                            <div className="relative">
+                                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="sort-dropdown appearance-none pr-8">
+                                    <option value="newest">Newest</option>
+                                    <option value="price-low">Price: Low to High</option>
+                                    <option value="price-high">Price: High to Low</option>
+                                </select>
+                                <svg className="w-4 h-4 absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Matched Agents Section */}
+                {matchedAgents.length > 0 && (
+                    <div className="mb-8">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg font-semibold text-gray-900">Matching Agents ({matchedAgents.length})</h2>
+                            <Link href="/agents" className="text-rose-500 text-sm font-medium hover:text-rose-600">View All Agents →</Link>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                            {matchedAgents.map((agent) => (
+                                <Link key={agent.id || agent.agent_id} href={`/agents/${agent.id || agent.agent_id}`} className="bg-white rounded-xl p-4 border border-gray-200 hover:border-rose-300 hover:shadow-md transition-all group">
+                                    <div className="flex items-center gap-3">
+                                        {agent.photo_url ? (
+                                            <img src={agent.photo_url} alt={agent.name} className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100 group-hover:ring-rose-200" />
+                                        ) : (
+                                            <div className="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center text-rose-600 font-bold ring-2 ring-gray-100 group-hover:ring-rose-200">{agent.name.charAt(0)}</div>
+                                        )}
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="font-medium text-gray-900 truncate group-hover:text-rose-600">{agent.name}</h3>
+                                            {agent.agency && <p className="text-xs text-gray-500 truncate">{agent.agency}</p>}
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Agent Properties Section */}
+                {!loading && agentProperties.length > 0 && matchedAgents.length > 0 && (
+                    <div className="mb-10">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-xl font-semibold text-gray-900">Properties by {matchedAgents.length === 1 ? matchedAgents[0].name : 'Matching Agents'} ({agentProperties.length})</h2>
+                            {matchedAgents.length === 1 && (
+                                <Link href={`/agents/${matchedAgents[0].id || matchedAgents[0].agent_id}`} className="text-rose-500 text-sm font-medium hover:text-rose-600">View Agent Profile →</Link>
+                            )}
+                        </div>
+                        <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' : 'flex flex-col gap-6 max-w-4xl mx-auto'}>
+                            {agentProperties.map((property) => (
+                                <PropertyCard key={property.id} property={property} variant={viewMode} />
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Regular Properties Section */}
+                {!loading && sortedProperties.length > 0 && !(matchedAgents.length > 0 && sortedProperties.length === 0) && (
+                    <>
+                        {/* Section header for regular properties when agent properties are also shown */}
+                        {agentProperties.length > 0 && matchedAgents.length > 0 && (
+                            <div className="mb-4">
+                                <h2 className="text-xl font-semibold text-gray-900">Other Properties Matching Your Search ({sortedProperties.length})</h2>
+                            </div>
+                        )}
+
+                        {/* Map View - Premium Split Screen Layout */}
+                        {mapView ? (
+                            <div className="map-view-container rounded-xl overflow-hidden border border-gray-200 shadow-lg">
+                                {/* Sidebar - Property List */}
+                                <div className={`map-sidebar transition-all duration-300 ${sidebarCollapsed ? 'w-0 min-w-0 opacity-0 overflow-hidden' : ''}`}>
+                                    <div className="map-sidebar-header">
+                                        <span className="map-sidebar-title">
+                                            {visibleMapPropertyIds !== null ? `${visibleMapPropertyIds.length} of ${sortedProperties.length} Properties` : `${sortedProperties.length} Properties`}
+                                        </span>
+                                        <button onClick={() => setSidebarCollapsed(true)} className="p-1 hover:bg-gray-100 rounded transition-colors" aria-label="Collapse sidebar">
+                                            <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" /></svg>
+                                        </button>
+                                    </div>
+                                    <div className="map-sidebar-list">
+                                        <div className="map-sidebar-content">
+                                            {(visibleMapPropertyIds !== null ? sortedProperties.filter(p => visibleMapPropertyIds.includes(p.id)) : sortedProperties).map((property) => (
+                                                <MapPropertyCard
+                                                    key={property.id}
+                                                    property={property}
+                                                    isHovered={hoveredPropertyId === property.id}
+                                                    onHover={setHoveredPropertyId}
+                                                    onClick={(id) => handlePropertySelect(id)}
+                                                />
+                                            ))}
+                                            {visibleMapPropertyIds !== null && visibleMapPropertyIds.length === 0 && (
+                                                <div className="p-4 text-center text-gray-500 text-sm">No properties in this area. Try zooming out or panning the map.</div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Main Map Area */}
+                                <div className="map-main">
+                                    {sidebarCollapsed && (
+                                        <button onClick={() => setSidebarCollapsed(false)} className="map-collapse-btn" aria-label="Expand sidebar">
+                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
+                                        </button>
+                                    )}
+                                    <PropertyMap
+                                        properties={sortedProperties}
+                                        hoveredPropertyId={hoveredPropertyId}
+                                        onPropertyHover={setHoveredPropertyId}
+                                        onPropertySelect={handlePropertySelect}
+                                        onMarkerClick={handlePropertySelect}
+                                        onBoundsChange={handleMapBoundsChange}
+                                        className="h-full"
+                                        showControls={true}
+                                    />
+                                </div>
+                            </div>
+                        ) : (
+                            /* Grid/List View */
+                            <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' : 'flex flex-col gap-6 max-w-4xl mx-auto'}>
+                                {sortedProperties.map((property) => (
+                                    <PropertyCard key={property.id} property={property} variant={viewMode} />
+                                ))}
+                            </div>
+                        )}
+                    </>
+                )}
+
+                {/* Loading State */}
+                {loading && (
+                    <ListSkeleton count={12} type="property" viewMode={viewMode} />
+                )}
+
+                {/* No Results - Only shown when both property search and agent search return nothing */}
+                {!loading && sortedProperties.length === 0 && agentProperties.length === 0 && (
+                    <div className="text-center py-20 bg-white rounded-2xl">
+                        <div className="w-20 h-20 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+                            <svg className="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                            </svg>
+                        </div>
+                        <h3 className="font-heading font-semibold text-xl text-gray-900 mb-2">
+                            {filters.location ? `No results for "${filters.location}"` : 'No properties found'}
+                        </h3>
+                        <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                            {filters.location ? "We couldn't find any properties or agents matching your search. Try a different name or location." : "We couldn't find any properties matching your criteria. Try adjusting your filters."}
+                        </p>
+                        <button onClick={handleResetFilters} className="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-full font-medium transition-colors">
+                            Reset All Filters
+                        </button>
+                    </div>
+                )}
+
+
+                {totalPages > 1 && (
+                    <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+                )}
+            </div>
+
+            <FilterModal
+                isOpen={filterModalOpen}
+                onClose={() => setFilterModalOpen(false)}
+                filters={filters}
+                onApply={(newFilters) => {
+                    setFilters(newFilters)
+                    loadProperties(1, true, newFilters)
+                    syncFiltersToUrl(newFilters)
+                }}
+                filterOptions={filterOptions}
+                stateOptions={stateOptions}
+            />
+            <Footer />
+        </div>
+    )
+}
+

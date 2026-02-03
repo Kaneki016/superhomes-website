@@ -3,7 +3,7 @@ title: 'Bangsar South Property Market Outlook 2026: Trends, Yields & Prices'
 description: 'A comprehensive analysis of the Bangsar South property market for 2025–2026. Explore condo prices, rental yields, future infrastructure, and how it compares to Bangsar and PJ.'
 date: '2026-02-05'
 category: 'Market Insights'
-image: '/images/resources/bangsar-south-property-market-outlook-2026.png'
+image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/bangsar-south-property-market-outlook-2026.png'
 neighborhoods: ['Bangsar South', 'Kerinchi', 'Bangsar', 'Pantai Dalam']
 slug: 'bangsar-south-property-market-outlook-2026'
 ---

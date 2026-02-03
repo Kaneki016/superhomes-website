@@ -3,7 +3,7 @@ title: 'Housing Credit Guarantee Scheme (SJKP) Malaysia: 2026 Guide'
 description: 'A complete guide to the Housing Credit Guarantee Scheme (SJKP) Malaysia 2026. Learn about SJKP eligibility, 120% financing, and how it helps gig workers buy homes.'
 date: '2026-02-10'
 category: 'Finance & Legal'
-image: '/images/resources/housing-credit-guarantee-scheme-sjkp-2026.png'
+image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/housing-credit-guarantee-scheme-sjkp-2026.png'
 neighborhoods: ['Kuala Lumpur', 'Selangor', 'Johor', 'Penang']
 slug: 'housing-credit-guarantee-scheme-sjkp-2026'
 ---

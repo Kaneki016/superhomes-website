@@ -3,7 +3,7 @@ title: 'Klang Valley Property Market Outlook 2026: Prices, Trends & Best Areas'
 description: '2026 Outlook for Klang Valley real estate. We analyse the divergence in property prices, the OPR cut impact, and the best suburbs to buy in KL and Selangor.'
 date: '2026-02-16'
 category: 'Market Insights'
-image: '/images/resources/klang-valley-property-market-outlook-2026.png'
+image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/klang-valley-property-market-outlook-2026.png'
 neighborhoods: ['Kuala Lumpur', 'Selangor', 'Klang Valley', 'Puchong', 'KLCC']
 slug: 'klang-valley-property-market-outlook-2026'
 ---

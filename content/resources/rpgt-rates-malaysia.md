@@ -3,7 +3,7 @@ title: "Real Property Gains Tax (RPGT) in Malaysia: A Complete Guide"
 description: "Everything you need to know about Real Property Gains Tax (RPGT) in Malaysia. Check the 2025 rates, calculation formulas, and exemptions for citizens and foreigners."
 date: "2026-01-08"
 category: 'Finance & Legal'
-image: "/images/resources/rpgt-rates.jpg"
+image: "https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/rpgt-rates.jpg"
 slug: "rpgt-rates-malaysia"
 ---
 

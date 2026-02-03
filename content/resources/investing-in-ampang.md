@@ -3,7 +3,7 @@ title: 'Investing in Ampang: Rental Yield, Risks & Strategy'
 description: 'A data-driven guide to investing in Ampang. Analyze Ampang condo prices, landed property trends, KLCC comparisons, and affordable housing hotspots for 2025-2026.'
 date: '2026-01-28'
 category: 'Market Insights'
-image: '/images/resources/investing-in-ampang.jpg'
+image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/investing-in-ampang.jpg'
 neighborhoods: ['Ampang', 'U-Thant', 'Ampang Jaya', 'Pandan Indah', 'Taman Melawati']
 ---
 

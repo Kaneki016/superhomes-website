@@ -3,7 +3,7 @@ title: 'Investing in Desa ParkCity: Rental Yield, Risks & Strategy'
 description: 'A comprehensive analysis of the Desa ParkCity property market. We analyze house prices, rental yields, and compare the township against Mont Kiara condo investment trends for 2025.'
 date: '2026-01-30'
 category: 'Market Insights'
-image: '/images/resources/investing-in-desa-park-city.png'
+image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/investing-in-desa-park-city.png'
 neighborhoods: ['Desa ParkCity', 'Kepong', 'Mont Kiara', 'Manjalara']
 slug: 'investing-in-desa-park-city'
 ---

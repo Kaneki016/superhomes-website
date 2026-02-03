@@ -3,7 +3,7 @@ title: "Top 10 Checklist to Buy a Good Property in Malaysia"
 description: "A comprehensive checklist for first-time homebuyers and investors in Malaysia covering location, budget, land titles, and developer reputation."
 date: "2026-01-08"
 category: 'Buying'
-image: "/images/resources/property-checklist.jpg"
+image: "https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/property-checklist.jpg"
 slug: "buying-property-checklist-malaysia"
 ---
 

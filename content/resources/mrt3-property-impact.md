@@ -3,7 +3,7 @@ title: 'How the MRT3 Circle Line Impacts Klang Valley Property Values (2026 Fore
 description: 'Discover how the MRT3 Circle Line drives property values in Klang Valley. Analysis of MRT3 stations property value, price trends in Titiwangsa and Mont Kiara, and Transit Oriented Development Malaysia insights.'
 date: '2026-02-08'
 category: 'Market Insights'
-image: '/images/resources/mrt3-property-impact.png'
+image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/mrt3-property-impact.png'
 neighborhoods: ['Titiwangsa', 'Mont Kiara', 'Pantai Dalam', 'Setiawangsa', 'Old Klang Road']
 slug: 'mrt3-property-impact'
 ---

@@ -3,7 +3,7 @@ title: 'Mont Kiara vs Desa ParkCity: Property Investment Comparison 2025'
 description: 'A data-driven comparison of Mont Kiara vs Desa ParkCity for property investors. We analyze price per sq ft, rental yields, tenant profiles, and capital appreciation potential for 2025–2026.'
 date: '2026-02-01'
 category: 'Market Insights'
-image: '/images/resources/mont-kiara-vs-desa-park-city.png'
+image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/mont-kiara-vs-desa-park-city.png'
 neighborhoods: ['Mont Kiara', 'Desa ParkCity']
 slug: 'mont-kiara-vs-desa-park-city'
 ---

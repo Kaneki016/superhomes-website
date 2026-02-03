@@ -3,7 +3,7 @@ title: "MRTA vs MLTA: Which Mortgage Insurance is Better? (2026 Guide)"
 description: "Confused between MRTA and MLTA? We compare the costs, protection coverage, and benefits to help you decide which mortgage insurance suits your needs."
 date: '2025-12-01'
 category: 'Buying'
-image: '/images/resources/mrta-vs-mlta.jpg'
+image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/mrta-vs-mlta.jpg'
 neighborhoods:
   - 'Petaling Jaya'
   - 'Subang Jaya'

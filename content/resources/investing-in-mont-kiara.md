@@ -3,7 +3,7 @@ title: 'Investing in Mont Kiara: Rental Yield, Risks & Strategy'
 description: 'An in-depth analysis of the Mont Kiara property market for 2025. We compare investment yields, infrastructure, and lifestyle against Desa ParkCity house prices and trends.'
 date: '2026-01-29'
 category: 'Market Insights'
-image: '/images/resources/investing-in-mont-kiara.png'
+image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/investing-in-mont-kiara.png'
 neighborhoods: ['Mont Kiara', 'Desa ParkCity', 'Sri Hartamas', 'Dutamas']
 slug: 'investing-in-mont-kiara'
 ---

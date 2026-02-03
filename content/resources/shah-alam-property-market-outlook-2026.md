@@ -3,7 +3,7 @@ title: 'Shah Alam Property Market Outlook 2026: Stability, Growth & Investment I
 description: 'A comprehensive outlook on the Shah Alam property market for 2026. We analyse price trends, TODs, industrial demand, and investment opportunities in Sections 7, 13, and 14.'
 date: '2026-02-15'
 category: 'Market Insights'
-image: '/images/resources/shah-alam-property-market-outlook-2026.png'
+image: 'https://supergroups.sgp1.digitaloceanspaces.com/superhomes/public/images/resources/shah-alam-property-market-outlook-2026.png'
 neighborhoods: ['Shah Alam', 'Setia Alam', 'Glenmarie', 'Section 7', 'Section 13']
 slug: 'shah-alam-property-market-outlook-2026'
 ---
