@@ -28,6 +28,30 @@ This guide defines the steps to deploy the Superhomes application to a DigitalOc
     systemctl enable --now docker
     ```
 
+    **CRITICAL STEP: Add Swap Space**
+    Node.js builds are memory intensive. To prevent "SIGKILL" or Out-Of-Memory errors on small droplets (1-2GB RAM), you **MUST** add swap space:
+
+    ```bash
+    # Allocate 2GB swap file
+    fallocate -l 2G /swapfile
+
+    # Set permissions
+    chmod 600 /swapfile
+
+    # Set up swap area
+    mkswap /swapfile
+
+    # Enable swap
+    swapon /swapfile
+
+    # Make it permanent
+    echo '/swapfile none swap sw 0 0' | tee -a /etc/fstab
+
+    # Verify
+    free -h
+    ```
+    *You should see 'Swap' with 2.0Gi value.*
+
 ## 2. Deploy the Code
 
 You have two main options to get your code onto the server.
