@@ -47,7 +47,7 @@ export default function Footer() {
                     <div>
                         <div className="flex items-center gap-3 mb-6">
                             <Image
-                                src={`${process.env.NEXT_PUBLIC_DO_SPACE_URL}/logo-icon.svg`}
+                                src="/logo-icon.svg"
                                 alt="SuperHomes Logo"
                                 width={40}
                                 height={40}

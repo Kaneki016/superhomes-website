@@ -32,7 +32,7 @@ export const metadata: Metadata = {
         type: 'website',
         images: [
             {
-                url: `${process.env.NEXT_PUBLIC_DO_SPACE_URL}/logo-icon.svg`, // Consider creating a proper OG image (1200x630px)
+                url: '/logo-icon.svg', // Consider creating a proper OG image (1200x630px)
                 width: 1200,
                 height: 630,
                 alt: 'SuperHomes - Premium Property Marketplace',
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
         card: 'summary_large_image',
         title: 'SuperHomes - Your Premium Property Marketplace in Malaysia',
         description: 'Find your dream property with SuperHomes. Browse thousands of properties for sale and rent across Malaysia.',
-        images: [`${process.env.NEXT_PUBLIC_DO_SPACE_URL}/logo-icon.svg`], // Consider creating a proper Twitter card image
+        images: ['/logo-icon.svg'], // Consider creating a proper Twitter card image
     },
     robots: {
         index: true,
@@ -57,9 +57,9 @@ export const metadata: Metadata = {
         },
     },
     icons: {
-        icon: `${process.env.NEXT_PUBLIC_DO_SPACE_URL}/logo-icon.svg`,
-        shortcut: `${process.env.NEXT_PUBLIC_DO_SPACE_URL}/logo-icon.svg`,
-        apple: `${process.env.NEXT_PUBLIC_DO_SPACE_URL}/logo-icon.svg`,
+        icon: '/logo-icon.svg',
+        shortcut: '/logo-icon.svg',
+        apple: '/logo-icon.svg',
     },
     verification: {
         // Add these when you have the verification codes

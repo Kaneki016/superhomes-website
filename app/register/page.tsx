@@ -106,7 +106,7 @@ export default function RegisterPage() {
                         <div className="text-center mb-8">
                             <div className="w-20 h-20 mx-auto mb-4">
                                 <Image
-                                    src={`${process.env.NEXT_PUBLIC_DO_SPACE_URL}/logo-icon.svg`}
+                                    src="/logo-icon.svg"
                                     alt="SuperHomes Logo"
                                     width={80}
                                     height={80}
