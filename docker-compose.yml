@@ -24,8 +24,9 @@ services:
       - WATERMARK_REMOVER_URL=${WATERMARK_REMOVER_URL:-http://watermark-remover:8000}
     env_file:
       - .env.local
-    depends_on:
-      - watermark-remover
+    # depends_on:
+      # - watermark-remover
+      # Remove dependency to make it standalone if needed
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
@@ -36,47 +37,47 @@ services:
     networks:
       - superhomes-network
 
-  # Watermark Remover Service
-  watermark-remover:
-    build:
-      context: ../superhomes-watermark-remover
-      dockerfile: Dockerfile
-    container_name: watermark-remover
-    ports:
-      - "8000:8000"
-    volumes:
-      - ../superhomes-watermark-remover/input:/app/input
-      - ../superhomes-watermark-remover/output:/app/output
-      # Persist models to avoid re-downloading
-      - hf_cache:/root/.cache/huggingface
-      - torch_cache:/root/.cache/torch
-    environment:
-      - HF_HOME=/root/.cache/huggingface
-      - TORCH_HOME=/root/.cache/torch
-      # Supabase configuration (set these in .env file or override here)
-      - SUPABASE_URL=${SUPABASE_URL:-}
-      - SUPABASE_KEY=${SUPABASE_KEY:-}
-    # Load environment variables from .env file in watermark-remover directory (optional)
-    # Uncomment the line below if you have a .env file in the watermark-remover directory
-    # env_file:
-    #   - ../superhomes-watermark-remover/.env
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    networks:
-      - superhomes-network
-    # Uncomment the following section to enable GPU support (requires NVIDIA Container Toolkit)
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: 1
-    #           capabilities: [gpu]
+  # Watermark Remover Service (Optional - requires sibling directory)
+  # watermark-remover:
+  #   build:
+  #     context: ../superhomes-watermark-remover
+  #     dockerfile: Dockerfile
+  #   container_name: watermark-remover
+  #   ports:
+  #     - "8000:8000"
+  #   volumes:
+  #     - ../superhomes-watermark-remover/input:/app/input
+  #     - ../superhomes-watermark-remover/output:/app/output
+  #     # Persist models to avoid re-downloading
+  #     - hf_cache:/root/.cache/huggingface
+  #     - torch_cache:/root/.cache/torch
+  #   environment:
+  #     - HF_HOME=/root/.cache/huggingface
+  #     - TORCH_HOME=/root/.cache/torch
+  #     # Supabase configuration (set these in .env file or override here)
+  #     - SUPABASE_URL=${SUPABASE_URL:-}
+  #     - SUPABASE_KEY=${SUPABASE_KEY:-}
+  #   # Load environment variables from .env file in watermark-remover directory (optional)
+  #   # Uncomment the line below if you have a .env file in the watermark-remover directory
+  #   # env_file:
+  #   #   - ../superhomes-watermark-remover/.env
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 60s
+  #   networks:
+  #     - superhomes-network
+  #   # Uncomment the following section to enable GPU support (requires NVIDIA Container Toolkit)
+  #   # deploy:
+  #   #   resources:
+  #   #     reservations:
+  #   #       devices:
+  #   #         - driver: nvidia
+  #   #           count: 1
+  #   #           capabilities: [gpu]
 
 volumes:
   hf_cache:

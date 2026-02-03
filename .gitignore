@@ -13,3 +13,13 @@ build
 
 # Docker local overrides
 docker-compose.override.yml
+
+# Generated files
+*.txt
+*.log
+npm-debug.log
+yarn-error.log
+
+# Editor directories
+.vscode
+.idea
