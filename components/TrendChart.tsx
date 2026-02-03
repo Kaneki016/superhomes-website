@@ -15,7 +15,7 @@ import {
     Area,
     AreaChart
 } from 'recharts'
-import { Transaction } from '@/lib/supabase'
+import { Transaction } from '@/lib/types'
 import { TrendingUp, TrendingDown, Minus, Sparkles, Loader2 } from 'lucide-react'
 import { generateTrendInsight } from '@/app/actions/ai-trend-insight'
 

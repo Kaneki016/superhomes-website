@@ -1,6 +1,6 @@
 import { X, Building2, Ruler, Calendar, DollarSign, MapPin, Layers, TrendingUp, ArrowUpRight, History, Scale, Check, Plus } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { Transaction } from '@/lib/supabase'
+import { Transaction } from '@/lib/types'
 import MortgageCalculator from './MortgageCalculator'
 import NearbyAmenities from './NearbyAmenities'
 import ShareButton from './ShareButton'
