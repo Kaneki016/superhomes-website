@@ -1,4 +1,4 @@
----
+﻿---
 title: "Tenancy Agreement Malaysia: Complete Guide for Landlords & Tenants (2026)"
 description: "Everything you need to know about Tenancy Agreements in Malaysia. Costs, stamp duty, termination clauses, and what to look out for before signing."
 date: '2025-12-10'
@@ -62,3 +62,5 @@ Safe rentals start with good research. Check out popular rental hotspots:
 *   [Mont Kiara](/rent?search=Mont+Kiara)
 *   [Bangsar](/rent?search=Bangsar)
 *   [Cyberjaya](/rent?search=Cyberjaya)
+
+

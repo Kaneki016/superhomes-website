@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { useAuth } from '@/contexts/AuthContext'
@@ -82,12 +83,12 @@ export default function SellPropertyPage() {
                                 Register as an agent to start posting your properties. It only takes a few minutes!
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                                <a href="/register" className="btn-primary">
-                                    Register as Agent
-                                </a>
-                                <a href="/login" className="btn-secondary">
-                                    Already have an account? Login
-                                </a>
+                                <Link href="/register" className="btn-primary">
+                                    Register Now
+                                </Link>
+                                <Link href="/login" className="btn-secondary">
+                                    Login
+                                </Link>
                             </div>
                         </div>
 

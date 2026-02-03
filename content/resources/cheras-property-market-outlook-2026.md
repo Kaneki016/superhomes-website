@@ -1,4 +1,4 @@
----
+﻿---
 title: 'Cheras Property Market Outlook 2026: Prices, Trends & Forecast'
 description: 'A comprehensive analysis of the Cheras property market for 2026. We review price trends, MRT impact, rental yields, and top investment areas in Cheras KL and Selangor.'
 date: '2026-02-12'
@@ -150,3 +150,5 @@ Cheras KL offers better capital appreciation potential due to land scarcity and 
 *   **Compare Fringe Areas:** Read our [Setiawangsa Market Outlook](/resources/setiawangsa-property-market-outlook-2026).
 *   **Compare Areas:** See how [Bangsar South](/resources/bangsar-south-property-market-outlook-2026) compares for investment potential.
 *   **Find Listings:** Browse curated [Cheras Listings](/properties?search=Cheras) here.
+
+

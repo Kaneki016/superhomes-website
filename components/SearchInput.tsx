@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
-import { generatePropertySlug } from '@/lib/slugUtils'
+import { generatePropertySlug, generatePropertyUrl } from '@/lib/slugUtils'
 
 // Property suggestion type from API
 interface PropertySuggestion {
@@ -265,7 +265,7 @@ export default function SearchInput({
                             {propertySuggestions.map((property) => (
                                 <Link
                                     key={property.id}
-                                    href={`/property-listing/${property.property_name ? generatePropertySlug({ id: property.id, title: property.property_name, listing_type: 'sale', contacts: [] } as any) : property.id}`}
+                                    href={generatePropertyUrl({ ...property, title: property.property_name, listing_type: 'sale' } as any)}
                                     onClick={() => setIsFocused(false)}
                                     className="block px-4 py-3 hover:bg-gray-50 transition-colors"
                                 >

@@ -1,4 +1,4 @@
----
+﻿---
 title: "Tenant's Guide to Renting in Malaysia (Deposits & Agreements)"
 description: "Moving out? Here is everything you need to know about the 2+1 deposit rule, tenancy agreements, and your rights as a tenant."
 date: '2025-10-05'
@@ -56,3 +56,5 @@ Never rent without a black-and-white agreement. Ensure it covers:
 2.  Restore house to original condition (exclude fair wear and tear).
 3.  Pay all outstanding bills.
 4.  Attend the final inspection to ensure you get your full deposit back!
+
+

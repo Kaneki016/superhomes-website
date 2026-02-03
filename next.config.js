@@ -20,6 +20,10 @@ const nextConfig = {
                 protocol: 'https',
                 hostname: 'sg1-cdn.pgimgs.com',
             },
+            {
+                protocol: 'https',
+                hostname: '**.digitaloceanspaces.com',
+            },
         ],
         // Use unoptimized for external images on Netlify (no built-in image optimization)
         unoptimized: true,
