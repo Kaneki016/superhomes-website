@@ -58,51 +58,55 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             async authorize(credentials) {
                 if (!credentials?.phone || !credentials?.code) return null
 
-                const phone = credentials.phone as string
-                const code = credentials.code as string
+                const identifier = (credentials.phone as string).trim() // We overload 'phone' field to carry identifier
+                const code = (credentials.code as string).trim()
 
                 try {
-                    const cleanPhone = (credentials.phone as string).trim()
-                    const cleanCode = (credentials.code as string).trim()
-
-                    // console.log(`[Auth] Verifying OTP`)
+                    // console.log(`[Auth] Verifying OTP for ${identifier}`)
 
                     // 1. Verify OTP
                     const [token] = await sql`
                         SELECT * FROM verification_tokens
-                        WHERE identifier = ${cleanPhone} AND token = ${cleanCode}
+                        WHERE identifier = ${identifier} AND token = ${code}
                     `
 
                     if (!token) {
                         console.error('[Auth] Token not found or mismatch')
-                        // Optional: Check if phone exists at all to debug
-                        const [checkPhone] = await sql`SELECT * FROM verification_tokens WHERE identifier = ${cleanPhone}`
-                        if (checkPhone) console.error(`[Auth] Token mismatch. Expected: ${checkPhone.token}, Got: ${cleanCode}`)
-                        else console.error(`[Auth] No token found for identifier ${cleanPhone}`)
-
                         throw new Error("Invalid code")
                     }
 
                     // Check if token exists and is not expired
-                    if (!token) throw new Error("Invalid code")
                     if (new Date() > new Date(token.expires)) throw new Error("Code expired")
 
                     // 2. Delete used token
-                    await sql`DELETE FROM verification_tokens WHERE identifier = ${phone}`
+                    await sql`DELETE FROM verification_tokens WHERE identifier = ${identifier}`
 
                     // 3. Find or Create User
-                    let [user] = await sql`SELECT * FROM users WHERE phone = ${phone}`
+                    // Check if identifier looks like email or phone
+                    let user;
+                    const isEmail = identifier.includes('@');
+
+                    if (isEmail) {
+                        [user] = await sql`SELECT * FROM users WHERE email = ${identifier}`
+                    } else {
+                        [user] = await sql`SELECT * FROM users WHERE phone = ${identifier}`
+                    }
 
                     if (!user) {
                         // New User Registration (via OTP)
-                        // See if we have an existing Agent (Contact) or Buyer to link?
-                        // For now, create a basic user.
-                        // The ClaimAgent logic will specificially update 'contacts' table to link to this new UUID.
-                        [user] = await sql`
-              INSERT INTO users (phone, role)
-              VALUES (${phone}, 'user')
-              RETURNING *
-            `
+                        if (isEmail) {
+                            [user] = await sql`
+                                INSERT INTO users (email, role)
+                                VALUES (${identifier}, 'user')
+                                RETURNING *
+                            `
+                        } else {
+                            [user] = await sql`
+                                INSERT INTO users (phone, role)
+                                VALUES (${identifier}, 'user')
+                                RETURNING *
+                            `
+                        }
                     }
 
                     return {
