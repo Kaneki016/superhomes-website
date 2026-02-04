@@ -38,13 +38,15 @@ interface PropertyDetailClientProps {
     agent: Agent | null
     similarProperties: Property[]
     historicalTransactions: Transaction[]
+    permalink?: string
 }
 
 export default function PropertyDetailClient({
     property,
     agent,
     similarProperties,
-    historicalTransactions
+    historicalTransactions,
+    permalink = ''
 }: PropertyDetailClientProps) {
     const { user } = useAuth()
     const router = useRouter()
@@ -66,7 +68,7 @@ export default function PropertyDetailClient({
         const phoneNumber = agent.phone.replace(/[^0-9]/g, '')
 
         // Get the full property URL
-        const propertyUrl = typeof window !== 'undefined' ? window.location.href : ''
+        const propertyUrl = permalink || (typeof window !== 'undefined' ? window.location.href : '')
 
         const propertyDetails = [
             propertyUrl,
@@ -100,7 +102,7 @@ export default function PropertyDetailClient({
         "@type": "RealEstateListing",
         "name": propertyName,
         "description": property.description || `${propertyName} - ${property.property_type} for ${property.listing_type}`,
-        "url": typeof window !== 'undefined' ? window.location.href : '',
+        "url": permalink,
         "image": property.main_image_url || property.images?.[0] || '',
         "address": {
             "@type": "PostalAddress",
@@ -138,7 +140,7 @@ export default function PropertyDetailClient({
             "name": agent.name,
             "telephone": agent.phone,
             "image": agent.photo_url,
-            "url": typeof window !== 'undefined' ? `${window.location.origin}/agents/${agent.id || agent.agent_id}` : ''
+            "url": permalink ? new URL(`/agents/${agent.id || agent.agent_id}`, permalink.startsWith('http') ? permalink : 'https://superhomes.my').href : ''
         } : undefined
     }
 
@@ -226,7 +228,7 @@ export default function PropertyDetailClient({
                                     {/* Action Buttons */}
                                     <div className="flex items-center gap-3 flex-shrink-0">
                                         <ShareButton
-                                            url={typeof window !== 'undefined' ? window.location.href : ''}
+                                            url={permalink || (typeof window !== 'undefined' ? window.location.href : '')}
                                             title={`Check out ${propertyName}`}
                                             className="p-3 border-0 shadow-sm"
                                         />

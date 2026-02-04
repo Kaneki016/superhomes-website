@@ -46,6 +46,8 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
     }
 }
 
+import { generatePropertyUrl } from '@/lib/slugUtils'
+
 export default async function PropertyDetailPage({ params }: { params: Promise<{ category: string, action: string, state: string, slug: string }> }) {
     const { slug } = await params
 
@@ -55,6 +57,12 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
     if (!propertyData) {
         notFound()
     }
+
+    // Generate permalink for SEO/Sharing consistency
+    // Use env var for domain if available, otherwise relative path
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || ''
+    const propertyPath = generatePropertyUrl(propertyData)
+    const permalink = `${baseUrl}${propertyPath}`
 
     // Fetch other data in parallel
     const agentDataPromise = getAgentByAgentId(propertyData.agent_id || '')
@@ -96,6 +104,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
             agent={agentData}
             similarProperties={similarProperties}
             historicalTransactions={historicalTransactions}
+            permalink={permalink}
         />
     )
 }

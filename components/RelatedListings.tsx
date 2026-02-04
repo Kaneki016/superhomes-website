@@ -100,7 +100,7 @@ export default async function RelatedListings({ neighborhoods }: RelatedListings
 
             {/* Links to view all */}
             <div className="flex flex-wrap gap-4">
-                {neighborhoods.map(neighborhood => (
+                {neighborhoods.slice().sort().map(neighborhood => (
                     <Link
                         key={neighborhood}
                         href={`/properties?search=${encodeURIComponent(neighborhood)}`}

@@ -20,8 +20,9 @@ const options = {
         undefined: null, // Convert undefined to null for SQL
     },
     debug: process.env.NODE_ENV === 'development', // Log queries in dev
-    max: 10, // Limit max connections per instance
-    idle_timeout: 20, // Close idle connections after 20s
+    max: 5, // Limit max connections per instance (reduced from 10)
+    idle_timeout: 5, // Close idle connections after 5s (reduced from 20)
+    connect_timeout: 10, // Connection timeout in seconds
 }
 
 // Use DATABASE_URL if available (common in production/Netlify), otherwise use individual vars
