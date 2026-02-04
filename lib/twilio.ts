@@ -34,3 +34,23 @@ export async function sendWhatsAppOtp(phone: string, code: string) {
         return { success: false, error }
     }
 }
+
+export async function sendSmsOtp(phone: string, code: string) {
+    if (!accountSid || !authToken || !twilioNumber) {
+        console.error('Missing Twilio Credentials')
+        throw new Error('Server configuration error')
+    }
+
+    try {
+        const message = await client.messages.create({
+            body: `Your Superhomes verification code is: ${code}`,
+            from: twilioNumber, // Use the number directly for SMS
+            to: phone
+        })
+        console.log('SMS OTP Sent:', message.sid)
+        return { success: true, sid: message.sid }
+    } catch (error) {
+        console.error('Twilio SMS Error:', error)
+        return { success: false, error }
+    }
+}

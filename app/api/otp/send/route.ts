@@ -1,7 +1,7 @@
 
 import { NextResponse } from 'next/server'
 import sql from '@/lib/db'
-import { sendWhatsAppOtp } from '@/lib/twilio'
+import { sendSmsOtp } from '@/lib/twilio'
 import crypto from 'crypto'
 
 export async function POST(req: Request) {
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: true })
         }
 
-        const result = await sendWhatsAppOtp(phone, code)
+        const result = await sendSmsOtp(phone, code)
 
         if (!result.success) {
             const errorMessage = (result.error as any)?.message || 'Failed to send WhatsApp message'
