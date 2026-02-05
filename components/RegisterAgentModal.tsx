@@ -11,17 +11,17 @@ interface RegisterAgentModalProps {
 }
 
 export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentModalProps) {
-    // Steps: email -> otp -> details -> success
-    const [step, setStep] = useState<'email' | 'otp' | 'details' | 'success'>('email')
+    // Steps: phone -> otp -> details -> success
+    const [step, setStep] = useState<'phone' | 'otp' | 'details' | 'success'>('phone')
 
     // Form State
-    const [emailInput, setEmailInput] = useState('')
+    const [phone, setPhone] = useState('')
     const [otp, setOtp] = useState('')
     const [details, setDetails] = useState({
         name: '',
         agency: '',
         renNumber: '',
-        phone: '', // Added phone to details
+        email: '',
         password: ''
     })
 
@@ -40,15 +40,21 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
 
     if (!isOpen) return null
 
-    // Removed getFormattedPhone helper as we use email directly
+    // Helper: Normalize Phone
+    const getFormattedPhone = () => {
+        let p = phone.replace(/\D/g, '')
+        if (p.startsWith('0')) p = '60' + p.substring(1)
+        if (!p.startsWith('60')) p = '60' + p
+        return '+' + p
+    }
 
     const handleSendOtp = async () => {
-        if (!emailInput.includes('@')) return
+        if (phone.length < 8) return
         setLoading(true)
         setError('')
         try {
-            // Use AuthContext sendOtp (overloaded to accept email)
-            const { error } = await sendOtp(emailInput)
+            // Use AuthContext sendOtp
+            const { error } = await sendOtp(getFormattedPhone())
             if (error) throw new Error(error.message)
             setStep('otp')
         } catch (err: any) {
@@ -65,12 +71,11 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
         setError('')
         try {
             // Use AuthContext signInWithOtp
-            const { error } = await signInWithOtp(emailInput, otp)
+            const { error } = await signInWithOtp(getFormattedPhone(), otp)
 
             if (error) throw new Error(error.message)
 
-            // Pre-fill email in details (hidden or read-only)
-            setDetails(prev => ({ ...prev, email: emailInput }))
+            // AuthContext handles setting user/session state
             setStep('details')
         } catch (err: any) {
             console.error(err)
@@ -103,34 +108,26 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
             console.log('User found in context:', user.id)
 
             // 1. Update Auth User with Email & Password via Server Action
-            // Note: User is already created with Email via OTP.
-            // We just need to set the password now.
             console.log('Updating user credentials...')
-            // We pass the SAME email to verify consistency
-            const credResult = await updateUserCredentials(details.email || emailInput, details.password)
+            const credResult = await updateUserCredentials(details.email, details.password)
 
             if (!credResult.success) {
-                // Ignore "already in use" if it's just because we just created it via OTP?
-                // Actually updateUserCredentials might fail if it tries to CREATE a new user with same email.
-                // We should check if the server action handles "update existing user" correctly.
-                // Assuming it does (it takes email to find user).
                 if (credResult.error?.includes('already in use')) {
-                    // This is expected if we registered via OTP, we invoke it to set password?
-                    // Or maybe we don't need to call this if we are already logged in?
-                    // We DO need to set the password though.
-                } else {
-                    throw new Error(credResult.error)
+                    throw new Error('This email is already taken. Please use a different email.')
                 }
+                throw new Error(credResult.error)
             }
             console.log('User auth updated.')
 
             // 2. Create or Claim Profile via Server Action
+            const formattedPhone = getFormattedPhone()
+
             const result = await registerOrClaimAgent({
                 name: details.name,
                 agency: details.agency,
                 renNumber: details.renNumber,
-                email: details.email || emailInput,
-                phone: details.phone // Now passing the manually entered phone
+                email: details.email,
+                phone: formattedPhone
             })
 
             if (!result.success) {
@@ -168,25 +165,30 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
                     </div>
                 )}
 
-                {step === 'email' && (
+                {step === 'phone' && (
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                            <input
-                                type="email"
-                                value={emailInput}
-                                onChange={(e) => setEmailInput(e.target.value)}
-                                placeholder="you@example.com"
-                                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none"
-                                autoFocus
-                            />
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span className="text-gray-500 font-medium">+60</span>
+                                </div>
+                                <input
+                                    type="tel"
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                                    placeholder="12 345 6789"
+                                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none"
+                                    autoFocus
+                                />
+                            </div>
                         </div>
                         <button
                             onClick={handleSendOtp}
-                            disabled={loading || !emailInput.includes('@')}
+                            disabled={loading || phone.length < 8}
                             className="btn-primary w-full"
                         >
-                            {loading ? 'Sending...' : 'Verify Email'}
+                            {loading ? 'Sending...' : 'Verify Phone Number'}
                         </button>
                     </div>
                 )}
@@ -211,8 +213,8 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
                         >
                             {loading ? 'Verifying...' : 'Verify Code'}
                         </button>
-                        <button onClick={() => setStep('email')} className="w-full text-sm text-gray-500 hover:text-gray-700">
-                            Change Email
+                        <button onClick={() => setStep('phone')} className="w-full text-sm text-gray-500 hover:text-gray-700">
+                            Change Number
                         </button>
                     </div>
                 )}
@@ -256,18 +258,12 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
                             <div className="space-y-3">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                                    <div className="p-3 bg-gray-100 rounded-lg text-gray-600 border border-gray-200">
-                                        {emailInput || details.email}
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
                                     <input
-                                        type="tel"
-                                        value={details.phone}
-                                        onChange={(e) => setDetails({ ...details, phone: e.target.value })}
+                                        type="email"
+                                        value={details.email}
+                                        onChange={(e) => setDetails({ ...details, email: e.target.value })}
                                         className="input-field"
-                                        placeholder="+60 12 345 6789"
+                                        placeholder="you@email.com"
                                     />
                                 </div>
                                 <div>
@@ -285,7 +281,7 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
 
                         <button
                             onClick={handleSaveDetails}
-                            disabled={loading || !details.name || !details.renNumber || !details.password || !details.phone}
+                            disabled={loading || !details.name || !details.renNumber || !details.email || !details.password}
                             className="btn-primary w-full mt-2"
                         >
                             {loading ? 'Creating Profile...' : 'Complete Registration'}
@@ -305,7 +301,7 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
                         <div className="bg-blue-50 p-3 rounded-lg mb-6 text-sm text-blue-800">
                             <strong>Login Ready!</strong>
                             <br />
-                            You can now login with your email: <u>{emailInput || details.email}</u>.
+                            You can now login with your email: <u>{details.email}</u>.
                         </div>
                         <button
                             onClick={() => window.location.href = '/dashboard'}
