@@ -1,5 +1,5 @@
 # Pull the latest code from the repository
-git pull origin main
+git pull origin master
 docker compose -f docker-compose.prod.yml pull
 
 # Restart the app

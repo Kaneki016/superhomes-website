@@ -1,6 +1,7 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import sql from "@/lib/db"
+import { checkVerificationCode } from "@/lib/twilio"
 
 import bcrypt from "bcryptjs"
 
@@ -65,21 +66,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     // console.log(`[Auth] Verifying OTP for ${identifier}`)
 
                     // 1. Verify OTP
-                    const [token] = await sql`
-                        SELECT * FROM verification_tokens
-                        WHERE identifier = ${identifier} AND token = ${code}
-                    `
-
-                    if (!token) {
-                        console.error('[Auth] Token not found or mismatch')
-                        throw new Error("Invalid code")
+                    // If Dev Mode & Mock Code (123456), bypass check
+                    if (process.env.NODE_ENV === 'development' && code === '123456') {
+                        console.log('[Auth] Dev Mock OTP Bypass')
+                    } else {
+                        // Official Check via Twilio
+                        const result = await checkVerificationCode(identifier, code)
+                        if (!result.success) {
+                            console.error('[Auth] Verify Failed:', result.error)
+                            throw new Error("Invalid code")
+                        }
                     }
 
-                    // Check if token exists and is not expired
-                    if (new Date() > new Date(token.expires)) throw new Error("Code expired")
-
-                    // 2. Delete used token
-                    await sql`DELETE FROM verification_tokens WHERE identifier = ${identifier}`
+                    // 2. No need to delete token manually (Twilio handles usage)
 
                     // 3. Find or Create User
                     // Check if identifier looks like email or phone

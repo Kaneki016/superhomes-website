@@ -4,53 +4,45 @@ import twilio from 'twilio'
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID
 const authToken = process.env.TWILIO_AUTH_TOKEN
-const twilioNumber = process.env.TWILIO_PHONE_NUMBER
+const serviceSid = process.env.TWILIO_VERIFY_SERVICE_SID
 
-const client = twilio(accountSid, authToken)
-
-export async function sendWhatsAppOtp(phone: string, code: string) {
-    if (!accountSid || !authToken || !twilioNumber) {
+export async function sendVerificationCode(to: string, channel: 'sms' | 'whatsapp' = 'whatsapp') {
+    if (!accountSid || !authToken || !serviceSid) {
         console.error('Missing Twilio Credentials')
-        throw new Error('Server configuration error')
-    }
-
-    // Ensure phone is in E.164 format and has whatsapp prefix if not present
-    // Twilio requires 'whatsapp:+1234567890'
-    let to = phone
-    if (!to.startsWith('whatsapp:')) {
-        to = `whatsapp:${to}`
+        throw new Error('Server configuration error: Missing Twilio Credentials')
     }
 
     try {
-        const message = await client.messages.create({
-            body: `Your Superhomes verification code is: ${code}`,
-            from: twilioNumber.startsWith('whatsapp:') ? twilioNumber : `whatsapp:${twilioNumber}`,
-            to: to
-        })
-        console.log('OTP Sent:', message.sid)
-        return { success: true, sid: message.sid }
+        const verification = await client.verify.v2.services(serviceSid)
+            .verifications
+            .create({ to, channel })
+
+        console.log('Verify OTP Sent:', verification.sid)
+        return { success: true, sid: verification.sid }
     } catch (error) {
-        console.error('Twilio Error:', error)
+        console.error('Twilio Verify Error:', error)
         return { success: false, error }
     }
 }
 
-export async function sendSmsOtp(phone: string, code: string) {
-    if (!accountSid || !authToken || !twilioNumber) {
+export async function checkVerificationCode(to: string, code: string) {
+    if (!accountSid || !authToken || !serviceSid) {
         console.error('Missing Twilio Credentials')
         throw new Error('Server configuration error')
     }
 
     try {
-        const message = await client.messages.create({
-            body: `Your Superhomes verification code is: ${code}`,
-            from: twilioNumber, // Use the number directly for SMS
-            to: phone
-        })
-        console.log('SMS OTP Sent:', message.sid)
-        return { success: true, sid: message.sid }
+        const verificationCheck = await client.verify.v2.services(serviceSid)
+            .verificationChecks
+            .create({ to, code })
+
+        if (verificationCheck.status === 'approved') {
+            return { success: true }
+        } else {
+            return { success: false, error: 'Invalid code' }
+        }
     } catch (error) {
-        console.error('Twilio SMS Error:', error)
+        console.error('Twilio Verify Check Error:', error)
         return { success: false, error }
     }
 }

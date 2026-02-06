@@ -1,57 +1,40 @@
-# WhatsApp OTP Setup Guide (Supabase + Twilio)
+# Twilio WhatsApp OTP Setup Guide
 
-To send Login OTPs via WhatsApp instead of (or alongside) SMS, you need to configure Supabase with a WhatsApp provider (Twilio).
+This guide explains how to configure Twilio to send WhatsApp OTPs for SuperHomes.
 
-## 1. Prerequisites
-- **Twilio Account**: Sign up at [twilio.com](https://www.twilio.com/).
-- **WhatsApp Sender**:
-    - For **Development**: Use the [Twilio WhatsApp Sandbox](https://console.twilio.com/us1/develop/sms/settings/whatsapp-sandbox).
-    - For **Production**: You must request a [WhatsApp Business Number](https://www.twilio.com/docs/whatsapp/tutorial/connect-number-business-profile) approval.
+## Phase 1: Immediate Testing (Sandbox)
+You can test WhatsApp sending **immediately** without waiting for business verification using the Twilio Sandbox.
 
-## 2. Configure Twilio
-1.  Go to your **Twilio Console**.
-2.  Get your **Account SID** and **Auth Token**.
-    - Found on the main [Twilio Console Dashboard](https://console.twilio.com/).
-    - Look for the "Account Info" section.
-    - The Auth Token is usually hidden; click "Show" to copy it.
-3.  Get your **WhatsApp Sender Number** (e.g., `+14155238886`).
-4.  Create a **Messaging Service** (Optional but recommended for bundling):
-    - Messaging > Services > Create New Service.
-    - Add your WhatsApp sender to this service.
+1.  **Go to Twilio Console**: [Twilio Sandbox for WhatsApp](https://console.twilio.com/us1/develop/sms/settings/whatsapp-sandbox)
+2.  **Activate Sandbox**: follow the instructions to active your sandbox.
+3.  **Get Sandbox Number**: You will see a valid WhatsApp number (e.g., `+1 415 523 8886`).
+4.  **Join the Sandbox**:
+    *   Send the code shown (e.g., `join something-random`) from **your personal WhatsApp** to that sandbox number.
+    *   **CRITICAL**: You can ONLY send messages to numbers that have explicitly "joined" the sandbox.
+5.  **Update Environment Variables**:
+    *   Open `.env.local`.
+    *   Update `TWILIO_PHONE_NUMBER` to the **Sandbox Number** (e.g., `+14155238886`).
 
-## 3. Configure Supabase
-1.  Go to your **Supabase Dashboard**.
-2.  Navigate to **Authentication** > **Providers** > **Phone**.
-3.  **Enable Phone Provider**.
-4.  Scroll down to **SMS Provider Settings**.
-5.  Select **Twilio** from the dropdown.
-6.  Enter your Twilio credentials:
-    - **Account SID**
-    - **Auth Token**
-    - **Message Service SID** (Use your Messaging Service ID, or leave blank if using a single number).
-    - **Sender Number**: Enter your WhatsApp sender number (e.g., `+14155238886` or specific sender ID).
-    - *Crucial*: For WhatsApp, Supabase typically uses the same "Twilio" provider hook. However, the *application code* must specify `channel: 'whatsapp'`.
+## Phase 2: Production Setup (Business Verification)
+To send messages to **any** user (who hasn't joined your sandbox), you must get a verified Business Profile. This is a Meta (Facebook) requirement, not just Twilio.
 
-## 4. Code Changes Required
-In your application code (`ClaimAgentModal.tsx`), we need to specify the channel.
+1.  **Submit Business Profile**:
+    *   Go to [Twilio > Messaging > Senders > WhatsApp Senders](https://console.twilio.com/us1/develop/sms/senders/whatsapp-senders).
+    *   Click "New WhatsApp Sender".
+    *   Connect your **Facebook Business Manager** account.
+2.  **Verify Business**:
+    *   Upload business documents (SSM/Registration) to Facebook.
+    *   Verify your business phone number (can be a landline or mobile, but must receive a verification call/text).
+3.  **Wait for Approval**:
+    *   Meta will review your display name and business details.
+    *   This usually takes 24-48 hours.
+4.  **Update Environment**:
+    *   Once approved, update `TWILIO_PHONE_NUMBER` in `.env.local` to your **Approved Business Number**.
 
-```typescript
-// Current (SMS)
-const { error } = await supabase.auth.signInWithOtp({
-    phone: agent.phone
-})
-
-// New (WhatsApp)
-const { error } = await supabase.auth.signInWithOtp({
-    phone: agent.phone,
-    options: {
-        channel: 'whatsapp'
-    }
-})
-```
-
-## 5. Testing (Sandbox Mode)
-If using Twilio Sandbox:
-1.  The user (you) must first join the sandbox by sending a specific code (e.g., `join something-random`) to the Twilio Sandbox Number on WhatsApp.
-2.  Once joined, you can receive OTPs.
-3.  In Production setup, this step is not required; any number can receive messages (subject to WhatsApp pricing/conversation rules).
+## Troubleshooting
+*   **Error 63007 / 21608**: "Channel not found" or "Unverified number".
+    *   *Cause*: You are sending from a number that is NOT a WhatsApp Sender.
+    *   *Fix*: Use the Sandbox number (Step 1) OR get verified (Step 2).
+*   **Message not delivered (Sandbox)**:
+    *   *Cause*: The recipient phone number hasn't sent the `join code` message to the Sandbox number yet.
+    *   *Fix*: Send `join <keyword>` from the recipient phone to the Sandbox number.
