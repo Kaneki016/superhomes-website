@@ -1,9 +1,10 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import sql from "@/lib/db"
-import { checkVerificationCode } from "@/lib/twilio"
+// import { checkVerificationCode } from "@/lib/twilio" 
 
 import bcrypt from "bcryptjs"
+import { adminAuth } from "@/lib/firebase-admin"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
     debug: process.env.NODE_ENV === 'development',
@@ -63,49 +64,46 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 const code = (credentials.code as string).trim()
 
                 try {
-                    // console.log(`[Auth] Verifying OTP for ${identifier}`)
+                    // console.log(`[Auth] Verifying Firebase Token for ${identifier}`)
 
-                    // 1. Verify OTP
-                    // If Dev Mode & Mock Code (123456), bypass check
+                    // The 'code' field now contains the Firebase ID Token
+                    // 'identifier' should match the phone number inside the token
+
+                    let verifiedPhone = identifier;
+
+                    // 1. Verify Firebase ID Token
+                    // If Dev Mode & Mock Code (123456), bypass check (ONLY for local dev efficiency if needed)
+                    // But typically Firebase provides a test number that returns a real token.
+                    // Let's assume we ALWAYS check token unless explicitly bypassed.
+
                     if (process.env.NODE_ENV === 'development' && code === '123456') {
-                        console.log('[Auth] Dev Mock OTP Bypass')
+                        console.log('[Auth] Dev Mock Token Bypass')
                     } else {
-                        // Official Check via Twilio
-                        const result = await checkVerificationCode(identifier, code)
-                        if (!result.success) {
-                            console.error('[Auth] Verify Failed:', result.error)
-                            throw new Error("Invalid code")
+                        const decodedToken = await adminAuth.verifyIdToken(code);
+                        if (!decodedToken || !decodedToken.phone_number) {
+                            throw new Error("Invalid ID Token or no phone number")
                         }
+
+                        // normalize phone check
+                        // Firebase returns +60...
+                        // We should trust the token's phone number
+                        verifiedPhone = decodedToken.phone_number;
                     }
 
-                    // 2. No need to delete token manually (Twilio handles usage)
+                    // Match identifier?
+                    // if (verifiedPhone !== identifier) { ... } // strict check
 
-                    // 3. Find or Create User
-                    // Check if identifier looks like email or phone
+                    // 2. Find or Create User
                     let user;
-                    const isEmail = identifier.includes('@');
-
-                    if (isEmail) {
-                        [user] = await sql`SELECT * FROM users WHERE email = ${identifier}`
-                    } else {
-                        [user] = await sql`SELECT * FROM users WHERE phone = ${identifier}`
-                    }
+                    [user] = await sql`SELECT * FROM users WHERE phone = ${verifiedPhone}`
 
                     if (!user) {
-                        // New User Registration (via OTP)
-                        if (isEmail) {
-                            [user] = await sql`
-                                INSERT INTO users (email, role)
-                                VALUES (${identifier}, 'user')
-                                RETURNING *
-                            `
-                        } else {
-                            [user] = await sql`
-                                INSERT INTO users (phone, role)
-                                VALUES (${identifier}, 'user')
-                                RETURNING *
-                            `
-                        }
+                        // New User Registration
+                        [user] = await sql`
+                            INSERT INTO users (phone, role)
+                            VALUES (${verifiedPhone}, 'user')
+                            RETURNING *
+                        `
                     }
 
                     return {
