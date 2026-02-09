@@ -8,6 +8,7 @@ import { AuthProvider } from '@/contexts/AuthContext'
 import { FavoritesProvider } from '@/contexts/FavoritesContext'
 import { CompareProvider } from '@/contexts/CompareContext'
 import CompareBar from '@/components/CompareBar'
+import GoogleAnalytics from '@/components/GoogleAnalytics'
 
 export const metadata: Metadata = {
     title: {
@@ -62,8 +63,7 @@ export const metadata: Metadata = {
         apple: '/logo-icon.svg',
     },
     verification: {
-        // Add these when you have the verification codes
-        // google: 'your-google-verification-code',
+        google: 'YOUR-GSC-VERIFICATION-CODE-HERE', // TODO: Replace with your actual code
         // yandex: 'your-yandex-verification-code',
         // bing: 'your-bing-verification-code',
     },
@@ -77,6 +77,9 @@ export default function RootLayout({
     return (
         <html lang="en" suppressHydrationWarning>
             <body suppressHydrationWarning>
+                {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID ? (
+                    <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID} />
+                ) : null}
                 <AuthProvider>
                     <FavoritesProvider>
                         <CompareProvider>
