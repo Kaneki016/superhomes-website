@@ -63,9 +63,10 @@ export const metadata: Metadata = {
         apple: '/logo-icon.svg',
     },
     verification: {
-        google: 'YOUR-GSC-VERIFICATION-CODE-HERE', // TODO: Get verification code from Google Search Console
-        // yandex: 'your-yandex-verification-code',
-        // bing: 'your-bing-verification-code',
+        google: process.env.NEXT_PUBLIC_GSC_VERIFICATION_CODE || '',
+        // Optional: Add other search engines
+        // yandex: process.env.NEXT_PUBLIC_YANDEX_VERIFICATION_CODE,
+        // bing: process.env.NEXT_PUBLIC_BING_VERIFICATION_CODE,
     },
 }
 
