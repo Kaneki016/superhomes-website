@@ -13,12 +13,21 @@ if (!serviceAccount) {
     console.warn("FIREBASE_SERVICE_ACCOUNT_KEY is missing. Auth will fail.");
 }
 
-const firebaseAdminConfig = {
-    credential: cert(serviceAccount!),
-};
+let app;
 
 // Initialize Firebase Admin (Singleton pattern)
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseAdminConfig);
-const adminAuth = getAuth(app);
+if (serviceAccount) {
+    const firebaseAdminConfig = {
+        credential: cert(serviceAccount),
+    };
+    app = getApps().length > 0 ? getApp() : initializeApp(firebaseAdminConfig);
+}
+
+// Export auth (mock if not initialized)
+const adminAuth = (app ? getAuth(app) : {
+    verifyIdToken: async (token: string) => {
+        throw new Error("Firebase Admin not initialized. Missing FIREBASE_SERVICE_ACCOUNT_KEY environment variable.");
+    }
+}) as unknown as ReturnType<typeof getAuth>;
 
 export { adminAuth };
