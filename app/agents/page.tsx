@@ -15,6 +15,7 @@ import ClaimAgentModal from '@/components/ClaimAgentModal'
 import RegisterAgentModal from '@/components/RegisterAgentModal'
 
 const AGENTS_PER_PAGE = 12
+export const dynamic = 'force-dynamic'
 
 // Malaysian states for filter dropdown
 const MALAYSIAN_STATES = [
