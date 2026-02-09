@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Agent } from '@/lib/supabase' // Keep type definition
 import { useAuth } from '@/contexts/AuthContext'
+import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth'
+import { auth } from '@/lib/firebase'
 
 interface ClaimAgentModalProps {
     isOpen: boolean
@@ -11,7 +13,7 @@ interface ClaimAgentModalProps {
 }
 
 export default function ClaimAgentModal({ isOpen, onClose, agent }: ClaimAgentModalProps) {
-    const { sendOtp, signInWithOtp, signUp, refreshProfile } = useAuth()
+    const { signInWithOtp, signUp, refreshProfile } = useAuth()
     const [step, setStep] = useState<'verify-phone' | 'otp' | 'setup-credentials' | 'success'>('verify-phone')
     const [phoneInput, setPhoneInput] = useState('')
     const [otp, setOtp] = useState('')
@@ -20,8 +22,35 @@ export default function ClaimAgentModal({ isOpen, onClose, agent }: ClaimAgentMo
     const [useWhatsapp, setUseWhatsapp] = useState(true) // Default to WhatsApp
     const [credentials, setCredentials] = useState({ email: '', password: '' })
 
+    // Firebase State
+    const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null)
+    const recaptchaContainerRef = useRef<HTMLDivElement>(null)
 
     if (!isOpen) return null
+
+    // Initialize Recaptcha
+    useEffect(() => {
+        if (!isOpen || step !== 'verify-phone' || !recaptchaContainerRef.current) return
+
+        try {
+            if (!window.recaptchaVerifier) {
+                window.recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
+                    'size': 'invisible',
+                    'callback': (_response: any) => {
+                        // reCAPTCHA solved
+                    },
+                    'expired-callback': () => {
+                    }
+                });
+            }
+        } catch (e) {
+            console.error('Recaptcha Init Error', e)
+        }
+
+        return () => {
+            // Do not clear aggressively to allow retries
+        }
+    }, [isOpen, step])
 
     // Mask phone number for privacy/security display
     const maskedPhone = agent.phone
@@ -44,6 +73,8 @@ export default function ClaimAgentModal({ isOpen, onClose, agent }: ClaimAgentMo
             setError('This agent profile does not have a phone number to verify.')
             return
         }
+        setLoading(true)
+        setError('')
 
         // Check if input phone matches stored phone
         // Logic: Input is likely without country code (e.g. 123456789) because of the prefix in UI
@@ -54,83 +85,54 @@ export default function ClaimAgentModal({ isOpen, onClose, agent }: ClaimAgentMo
         if (normalizedInput !== normalizedStored) {
             console.log('Mismatch:', normalizedInput, normalizedStored)
             setError('Phone number does not match. Please enter the correct phone number for this agent.')
+            setLoading(false)
             return
         }
 
-        // Ensure the phone number sent to Supabase is in E.164 format (e.g., +60...)
-        // Our normalizePhone removes all non-digits, so we should add '+' back if it looks like a full international number.
-        // Assuming Malaysian numbers for now or general international format.
+        // Send OTP via Firebase
         let phoneToSend = agent.phone || ''
-        if (phoneToSend && !phoneToSend.startsWith('+')) {
-            // Check if it starts with '60' (Malaysia) or other country codes, if not, might need heuristic or force user input?
-            // For scraped data, it might be '60123456789' or '0123456789'.
-            // If it starts with '0', replace with '+60' (defaulting to Malaysia for this app context).
-            if (phoneToSend.startsWith('0')) {
-                phoneToSend = '+60' + phoneToSend.substring(1)
-            } else if (phoneToSend.startsWith('60')) {
-                phoneToSend = '+' + phoneToSend
-            } else {
-                // If it doesn't start with 0 or 60, assume it might need + if it's full length, or user needs to fix data.
-                // Let's safe-add '+'
-                phoneToSend = '+' + phoneToSend
-            }
-        }
+        // Ensure + prefix
+        const p = phoneToSend.replace(/\D/g, '')
+        phoneToSend = '+' + p.startsWith('60') ? p : (p.startsWith('0') ? '60' + p.substring(1) : '60' + p)
+        if (!phoneToSend.startsWith('+')) phoneToSend = '+' + phoneToSend
 
-        // Also ensure the input phone is formatted similarly for the API call if needed, 
-        // but verifyOtp usually just needs the phone number that received the code.
-        // Actually, verifyOtp takes the phone number too.
 
         try {
-            const { error } = await sendOtp(phoneToSend)
+            if (!window.recaptchaVerifier) throw new Error('Recaptcha not initialized')
 
-            if (error) {
-                console.error('Error sending OTP:', error)
-                setError(error.message)
-            } else {
-                setStep('otp')
-            }
-        } catch (err) {
+            const confirmation = await signInWithPhoneNumber(auth, phoneToSend, window.recaptchaVerifier)
+            setConfirmationResult(confirmation)
+            setStep('otp')
+        } catch (err: any) {
             console.error('Unexpected error:', err)
-            setError('Failed to send OTP. Please try again.')
+            setError(err.message || 'Failed to send OTP. Please try again.')
         } finally {
             setLoading(false)
         }
     }
 
-
-
     const handleVerifyOtp = async () => {
-        if (!agent.phone || !otp) return
+        if (!agent.phone || !otp || !confirmationResult) return
 
         setLoading(true)
         setError('')
 
-        // Format phone again for verification to match what was sent
-        let phoneToSend = agent.phone || ''
-        if (phoneToSend && !phoneToSend.startsWith('+')) {
-            if (phoneToSend.startsWith('0')) {
-                phoneToSend = '+60' + phoneToSend.substring(1)
-            } else if (phoneToSend.startsWith('60')) {
-                phoneToSend = '+' + phoneToSend
-            } else {
-                phoneToSend = '+' + phoneToSend
-            }
-        }
-
         try {
-            const { error } = await signInWithOtp(phoneToSend, otp)
+            // Verify via Firebase
+            const result = await confirmationResult.confirm(otp)
+            const idToken = await result.user.getIdToken()
 
-            if (error) {
-                setError('Invalid code. Please try again.')
-                setLoading(false)
-            } else {
-                // Auth successful
-                setStep('setup-credentials')
-                setLoading(false)
-            }
-        } catch (err) {
+            // For Claiming, we just need to prove ownership.
+            // We can proceed to setup credentials.
+            // But we eventually need to Sign In/Sign Up with this phone.
+
+            // We'll pass the phone number to the next step or use the one from Firebase User
+            setStep('setup-credentials')
+            setLoading(false)
+
+        } catch (err: any) {
             console.error('Verification error:', err)
-            setError('Verification failed.')
+            setError(err.message || 'Verification failed.')
             setLoading(false)
         }
     }
@@ -267,6 +269,7 @@ export default function ClaimAgentModal({ isOpen, onClose, agent }: ClaimAgentMo
                                 Send verification code via WhatsApp
                             </label>
                         </div>
+                        <div ref={recaptchaContainerRef}></div>
                         <button
                             onClick={onClose}
                             className="w-full mt-3 text-gray-500 hover:text-gray-700 font-medium py-2 transition-colors text-sm"
