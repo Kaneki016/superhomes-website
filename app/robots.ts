@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 
 export default function robots(): MetadataRoute.Robots {
-    const baseUrl = 'https://superhomes.com.my' // Update with actual production URL
+    const baseUrl = 'https://superhomes.my'
 
     return {
         rules: {

@@ -22,7 +22,7 @@ const MALAYSIAN_STATES = [
 ]
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = 'https://superhomes.com.my' // Update with actual production URL
+    const baseUrl = 'https://superhomes.my'
     const resources = getAllResources()
 
     const resourcesUrls = resources.map((post) => ({
