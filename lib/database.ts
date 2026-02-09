@@ -1050,3 +1050,108 @@ export async function getTransactionById(id: string) {
         return t || null
     } catch (e) { return null }
 }
+
+
+// ============================================================================
+// Sitemap Generation Functions
+// ============================================================================
+
+/**
+ * Get all active properties with minimal data for sitemap generation
+ * Optimized query that only fetches necessary fields
+ */
+export async function getPropertiesForSitemap(
+    listingType?: 'sale' | 'rent' | 'project',
+    limit: number = 50000
+): Promise<Array<{
+    id: string
+    title: string
+    listing_type: string
+    updated_at: string
+    scraped_at: string
+    contacts?: any[]
+}>> {
+    try {
+        let conditions = sql`is_active = true`
+        if (listingType) {
+            conditions = sql`${conditions} AND listing_type = ${listingType}`
+        }
+
+        const data = await sql`
+            SELECT 
+                l.id,
+                l.title,
+                l.listing_type,
+                l.updated_at,
+                l.scraped_at,
+                COALESCE(
+                    (
+                        SELECT json_agg(
+                            json_build_object(
+                                'id', c.id,
+                                'name', c.name
+                            )
+                        )
+                        FROM listing_contacts lc
+                        JOIN contacts c ON c.id = lc.contact_id
+                        WHERE lc.listing_id = l.id
+                        LIMIT 1
+                    ),
+                    '[]'
+                ) as contacts
+            FROM listings l
+            WHERE ${conditions}
+            ORDER BY l.updated_at DESC NULLS LAST, l.scraped_at DESC
+            LIMIT ${limit}
+        `
+
+        return data.map(row => ({
+            id: row.id,
+            title: row.title,
+            listing_type: row.listing_type,
+            updated_at: row.updated_at || row.scraped_at,
+            scraped_at: row.scraped_at,
+            contacts: row.contacts || []
+        }))
+    } catch (error) {
+        console.error('Error fetching properties for sitemap:', error)
+        return []
+    }
+}
+
+/**
+ * Get all agents with minimal data for sitemap generation
+ */
+export async function getAgentsForSitemap(
+    limit: number = 10000
+): Promise<Array<{
+    id: string
+    name: string
+    updated_at: string
+    scraped_at: string
+}>> {
+    try {
+        const data = await sql`
+            SELECT 
+                id,
+                name,
+                updated_at,
+                scraped_at
+            FROM contacts
+            WHERE contact_type = 'agent'
+            ORDER BY updated_at DESC NULLS LAST, scraped_at DESC
+            LIMIT ${limit}
+        `
+
+        return data.map(row => ({
+            id: row.id,
+            name: row.name,
+            updated_at: row.updated_at || row.scraped_at,
+            scraped_at: row.scraped_at
+        }))
+    } catch (error) {
+        console.error('Error fetching agents for sitemap:', error)
+        return []
+    }
+}
+
