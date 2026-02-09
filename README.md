@@ -17,7 +17,6 @@ Superhomes is a cutting-edge real estate platform built to revolutionize propert
 
 ### 🤖 AI & Data Intelligence
 - **AI-Powered Amenities**: Automatically populate nearby amenities using Google Gemini AI.
-- **Watermark Removal**: Integrated service to clean property images.
 - **Data Enrichment**: Extensive scripts for database population, coordinate verification, and amenity caching.
 
 ### 👥 User & Agent Portals
@@ -82,9 +81,9 @@ npx tsx scripts/check_geocoding_status.ts
 
 ## Docker Setup
 
-For running backend services or isolation, refer to the guides:
-- [Combined Setup Guide](COMBINED_SETUP.md)
-- [Docker Guide](DOCKER.md)
+For running the application in Docker, refer to:
+- [Docker Compose Guide](DOCKER_COMPOSE_GUIDE.md)
+- [Digital Ocean Deployment](DIGITAL_OCEAN_DEPLOYMENT.md)
 
 Start services:
 ```bash
