@@ -1,8 +1,10 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import sql from "@/lib/db"
+// import { checkVerificationCode } from "@/lib/twilio" 
 
 import bcrypt from "bcryptjs"
+import { adminAuth } from "@/lib/firebase-admin"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
     debug: process.env.NODE_ENV === 'development',
@@ -58,51 +60,50 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             async authorize(credentials) {
                 if (!credentials?.phone || !credentials?.code) return null
 
-                const phone = credentials.phone as string
-                const code = credentials.code as string
+                const identifier = (credentials.phone as string).trim() // We overload 'phone' field to carry identifier
+                const code = (credentials.code as string).trim()
 
                 try {
-                    const cleanPhone = (credentials.phone as string).trim()
-                    const cleanCode = (credentials.code as string).trim()
+                    // console.log(`[Auth] Verifying Firebase Token for ${identifier}`)
 
-                    // console.log(`[Auth] Verifying OTP`)
+                    // The 'code' field now contains the Firebase ID Token
+                    // 'identifier' should match the phone number inside the token
 
-                    // 1. Verify OTP
-                    const [token] = await sql`
-                        SELECT * FROM verification_tokens
-                        WHERE identifier = ${cleanPhone} AND token = ${cleanCode}
-                    `
+                    let verifiedPhone = identifier;
 
-                    if (!token) {
-                        console.error('[Auth] Token not found or mismatch')
-                        // Optional: Check if phone exists at all to debug
-                        const [checkPhone] = await sql`SELECT * FROM verification_tokens WHERE identifier = ${cleanPhone}`
-                        if (checkPhone) console.error(`[Auth] Token mismatch. Expected: ${checkPhone.token}, Got: ${cleanCode}`)
-                        else console.error(`[Auth] No token found for identifier ${cleanPhone}`)
+                    // 1. Verify Firebase ID Token
+                    // If Dev Mode & Mock Code (123456), bypass check (ONLY for local dev efficiency if needed)
+                    // But typically Firebase provides a test number that returns a real token.
+                    // Let's assume we ALWAYS check token unless explicitly bypassed.
 
-                        throw new Error("Invalid code")
+                    if (process.env.NODE_ENV === 'development' && code === '123456') {
+                        console.log('[Auth] Dev Mock Token Bypass')
+                    } else {
+                        const decodedToken = await adminAuth.verifyIdToken(code);
+                        if (!decodedToken || !decodedToken.phone_number) {
+                            throw new Error("Invalid ID Token or no phone number")
+                        }
+
+                        // normalize phone check
+                        // Firebase returns +60...
+                        // We should trust the token's phone number
+                        verifiedPhone = decodedToken.phone_number;
                     }
 
-                    // Check if token exists and is not expired
-                    if (!token) throw new Error("Invalid code")
-                    if (new Date() > new Date(token.expires)) throw new Error("Code expired")
+                    // Match identifier?
+                    // if (verifiedPhone !== identifier) { ... } // strict check
 
-                    // 2. Delete used token
-                    await sql`DELETE FROM verification_tokens WHERE identifier = ${phone}`
-
-                    // 3. Find or Create User
-                    let [user] = await sql`SELECT * FROM users WHERE phone = ${phone}`
+                    // 2. Find or Create User
+                    let user;
+                    [user] = await sql`SELECT * FROM users WHERE phone = ${verifiedPhone}`
 
                     if (!user) {
-                        // New User Registration (via OTP)
-                        // See if we have an existing Agent (Contact) or Buyer to link?
-                        // For now, create a basic user.
-                        // The ClaimAgent logic will specificially update 'contacts' table to link to this new UUID.
+                        // New User Registration
                         [user] = await sql`
-              INSERT INTO users (phone, role)
-              VALUES (${phone}, 'user')
-              RETURNING *
-            `
+                            INSERT INTO users (phone, role)
+                            VALUES (${verifiedPhone}, 'user')
+                            RETURNING *
+                        `
                     }
 
                     return {

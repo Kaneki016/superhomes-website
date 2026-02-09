@@ -23,7 +23,6 @@ interface AuthContextType {
     signOut: () => Promise<void>
     signInWithGoogle: () => Promise<{ error: Error | null }>
     refreshProfile: () => Promise<void>
-    sendOtp: (phone: string) => Promise<{ error: Error | null }>
     signInWithOtp: (phone: string, code: string) => Promise<{ error: Error | null }>
 }
 
@@ -126,22 +125,6 @@ function AuthContextContent({ children }: { children: ReactNode }) {
         window.location.href = '/'
     }
 
-    const sendOtp = async (phone: string) => {
-        try {
-            const res = await fetch('/api/otp/send', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone })
-            })
-            if (!res.ok) {
-                const data = await res.json()
-                return { error: new Error(data.error || 'Failed to send OTP') }
-            }
-            return { error: null }
-        } catch (error) {
-            return { error: error as Error }
-        }
-    }
 
     // Stub for Google Auth - removed for independent auth or add later
     const signInWithGoogle = async () => {
@@ -159,7 +142,6 @@ function AuthContextContent({ children }: { children: ReactNode }) {
             signOut,
             signInWithGoogle,
             refreshProfile,
-            sendOtp,
             signInWithOtp
         }}>
             {children}

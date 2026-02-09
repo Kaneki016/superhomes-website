@@ -15,8 +15,8 @@ export async function generateTrendInsight(dataSummary: string) {
         // 2. Initialize Client
         const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY)
 
-        // 3. Select Model - Using 'gemini-2.0-flash-exp' as it handles this API key version
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' })
+        // 3. Select Model - Using 'gemini-2.5-flash' which is the latest stable version
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
 
         const prompt = `
         You are a real estate market analyst. Analyze the following yearly transaction data for a specific neighborhood:

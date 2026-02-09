@@ -710,7 +710,7 @@ export default function TransactionMapPage() {
                 {
                     viewMode === 'map' && isDrawing && (
                         <div className="absolute top-24 left-1/2 -translate-x-1/2 z-[2000] bg-gray-900/80 text-white px-4 py-2 rounded-full backdrop-blur-sm shadow-lg text-sm font-medium flex items-center gap-2 animate-in fade-in slide-in-from-top-4">
-                            <span>✏️ Click on map to draw points. Click first point to finish.</span>
+                            <span>✏️ Click and drag to draw an area.</span>
                             <button onClick={() => setIsDrawing(false)} className="ml-2 hover:bg-white/20 p-1 rounded-full"><X size={14} /></button>
                         </div>
                     )

@@ -1,4 +1,4 @@
----
+﻿---
 title: "Complete Guide to Buying Your First House in Malaysia (2026)"
 description: "A step-by-step walkthrough for first-time homebuyers in Malaysia. From checking affordability to signing the SPA and getting keys."
 date: '2025-11-20'
@@ -89,3 +89,5 @@ For new homes, this is when you get the keys!
 
 ### Need Help?
 Check out our [Property Buying Checklist](/resources/buying-property-checklist-malaysia) to make sure you don't miss a step!
+
+

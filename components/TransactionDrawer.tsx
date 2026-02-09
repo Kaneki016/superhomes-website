@@ -1,6 +1,6 @@
 import { X, Building2, Ruler, Calendar, DollarSign, MapPin, Layers, TrendingUp, ArrowUpRight, History, Scale, Check, Plus } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { Transaction } from '@/lib/supabase'
+import { Transaction } from '@/lib/types'
 import MortgageCalculator from './MortgageCalculator'
 import NearbyAmenities from './NearbyAmenities'
 import ShareButton from './ShareButton'
@@ -19,8 +19,12 @@ interface TransactionDrawerProps {
 export default function TransactionDrawer({ transaction, onClose, isOpen, isInComparison, onToggleComparison }: TransactionDrawerProps) {
     const [activeTab, setActiveTab] = useState<'details' | 'trends' | 'history'>('details')
     const [trendTransactions, setTrendTransactions] = useState<Transaction[]>([])
-    const [propertyTransactions, setPropertyTransactions] = useState<Transaction[]>([]) // NEW: Specific property history
     const [loadingTrends, setLoadingTrends] = useState(false)
+
+    // Reset trends when transaction changes
+    useEffect(() => {
+        setTrendTransactions([])
+    }, [transaction?.id])
 
     // Fetch trends/history when tab is activated (Use Exact Location for specific building trends/history)
     useEffect(() => {
@@ -36,20 +40,6 @@ export default function TransactionDrawer({ transaction, onClose, isOpen, isInCo
                 .finally(() => setLoadingTrends(false))
         }
     }, [activeTab, transaction, trendTransactions.length])
-
-    // Fetch specific property history immediately when transaction changes
-    useEffect(() => {
-        if (transaction?.latitude && transaction?.longitude) {
-            getTransactions(1, 50, { // Increased limit slightly
-                exactLat: transaction.latitude,
-                exactLng: transaction.longitude
-            })
-                .then(data => setPropertyTransactions(data.transactions as unknown as Transaction[]))
-                .catch(console.error)
-        } else {
-            setPropertyTransactions([])
-        }
-    }, [transaction])
 
     if (!transaction) return null
 
@@ -123,8 +113,8 @@ export default function TransactionDrawer({ transaction, onClose, isOpen, isInCo
                 {activeTab === 'details' ? (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300 h-full">
 
-                        {/* Column 1: Price, Metrics & History */}
-                        <div className="space-y-6 flex flex-col h-full lg:overflow-hidden">
+                        {/* Column 1: Price, Metrics & Amenities */}
+                        <div className="space-y-6 flex flex-col h-full lg:overflow-y-auto no-scrollbar">
                             {/* Premium Price Card */}
                             <div className="bg-gradient-to-br from-primary-600 to-primary-700 rounded-2xl p-6 text-white shadow-lg shadow-primary-900/10 relative overflow-hidden flex-shrink-0">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-10 -mt-10 blur-2xl"></div>
@@ -151,66 +141,19 @@ export default function TransactionDrawer({ transaction, onClose, isOpen, isInCo
                                 </div>
                             </div>
 
-
-                            {/* History (Moved Here) */}
-                            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-0 overflow-hidden flex-grow flex flex-col min-h-0">
-                                <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center flex-shrink-0">
-                                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
-                                        <Layers size={14} className="text-indigo-600" /> Property History
-                                    </h3>
-                                    <span className="text-[10px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full border border-indigo-100">
-                                        {propertyTransactions.filter(t => t.id !== transaction.id).length} Past Records
-                                    </span>
-                                </div>
-
-                                <div className="overflow-y-auto flex-grow px-0 py-2">
-                                    {propertyTransactions.filter(t => t.id !== transaction.id).length > 0 ? (
-                                        <div className="relative pl-6 pr-4 space-y-0">
-                                            {/* Vertical Timeline Line */}
-                                            <div className="absolute left-[29px] top-4 bottom-4 w-0.5 bg-gray-100 z-0"></div>
-
-                                            {propertyTransactions
-                                                .filter(t => t.id !== transaction.id)
-                                                .sort((a, b) => new Date(b.transaction_date!).getTime() - new Date(a.transaction_date!).getTime())
-                                                .map((t, index) => (
-                                                    <div key={t.id} className="relative z-10 py-3 group">
-                                                        <div className="flex items-start gap-3">
-                                                            {/* Timeline Dot */}
-                                                            <div className="mt-1.5 w-2 h-2 rounded-full border-2 border-primary-500 bg-white group-hover:bg-primary-500 group-hover:scale-125 transition-all shadow-sm"></div>
-
-                                                            <div className="flex-grow bg-white border border-gray-100 rounded-lg p-3 shadow-sm group-hover:border-primary-200 group-hover:shadow-md transition-all">
-                                                                <div className="flex justify-between items-start mb-1">
-                                                                    <span className="font-bold text-gray-900 text-lg">{formatPriceFull(t.price)}</span>
-                                                                    <span className="text-xs text-gray-400 font-medium bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">{formatDate(t.transaction_date)}</span>
-                                                                </div>
-
-                                                                <div className="flex justify-between items-center mt-2">
-                                                                    <div className="flex items-center gap-1.5 text-indigo-600 bg-indigo-50 px-2 py-1 rounded text-xs font-bold">
-                                                                        <DollarSign size={10} />
-                                                                        RM {(t.price / (t.built_up_sqft || t.land_area_sqft || 1)).toFixed(0)} psf
-                                                                    </div>
-                                                                    <span className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold flex items-center gap-1">
-                                                                        <Check size={10} className="text-emerald-500" /> NAPIC
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                        </div>
-                                    ) : (
-                                        <div className="p-8 text-center text-gray-400 text-sm flex flex-col items-center gap-3 h-full justify-center opacity-60">
-                                            <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-1 ring-1 ring-gray-100">
-                                                <History size={20} className="text-gray-300" />
-                                            </div>
-                                            <p>No other history found.</p>
-                                        </div>
-                                    )}
-                                </div>
+                            {/* Nearby Amenities (Moved Here) */}
+                            <div>
+                                {transaction.latitude && transaction.longitude && (
+                                    <NearbyAmenities
+                                        latitude={transaction.latitude}
+                                        longitude={transaction.longitude}
+                                        radiusKm={3}
+                                    />
+                                )}
                             </div>
                         </div>
 
-                        {/* Column 2: Specs & Amenities (Right Column) */}
+                        {/* Column 2: Specs (Right Column) */}
                         <div className="space-y-6 flex flex-col h-full lg:overflow-y-auto no-scrollbar">
                             {/* Property Specs */}
                             <div>
@@ -272,17 +215,6 @@ export default function TransactionDrawer({ transaction, onClose, isOpen, isInCo
 
                                     </div>
                                 </div>
-                            </div>
-
-                            {/* Nearby Amenities */}
-                            <div>
-                                {transaction.latitude && transaction.longitude && (
-                                    <NearbyAmenities
-                                        latitude={transaction.latitude}
-                                        longitude={transaction.longitude}
-                                        radiusKm={3}
-                                    />
-                                )}
                             </div>
                         </div>
                     </div>

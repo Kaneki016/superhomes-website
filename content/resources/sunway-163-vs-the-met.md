@@ -1,4 +1,4 @@
----
+﻿---
 title: 'Sunway 163 Mall vs The MET: Property Investment Analysis 2025'
 description: 'A data-driven comparison of Sunway 163 Mall and The MET Corporate Towers. We analyze price per sq ft, rental yields, capital appreciation, and tenant profiles to determine the better investment.'
 date: '2026-02-02'
@@ -127,3 +127,5 @@ Prices usually range from **RM 1,217 to RM 1,600 per sq ft** depending on the un
 *   **For Retail Investors:** Read our analysis on the [Mont Kiara Property Market](/resources/investing-in-mont-kiara) to see how commercial assets impact residential values.
 *   **For Location Analysis:** Check out [Mont Kiara vs Desa ParkCity](/resources/mont-kiara-vs-desa-park-city) for a deep dive into residential and commercial growth trends in this corridor.
 *   **Commercial Listings:** View current [Commercial Properties in KL](/properties?property_type=commercial).
+
+

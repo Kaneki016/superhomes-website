@@ -1,4 +1,4 @@
----
+﻿---
 title: "Housing Loans & DSR: Can You Actually Afford That House?"
 description: "Learn how Malaysian banks approve housing loans. Understand the Debt Service Ratio (DSR) formula, Flexi vs Term loans, and eligibility criteria."
 date: "2026-01-08"
@@ -68,3 +68,5 @@ Before booking a unit, calculate your DSR. If it's too high, clear some small de
 *   [Stamp Duty Calculator](/resources/stamp-duty-calculator-malaysia)
 *   [Home Loan Calculator](/resources/housing-loan-dsr-calculator)
 *   [Property Buying Checklist](/resources/buying-property-checklist-malaysia)
+
+

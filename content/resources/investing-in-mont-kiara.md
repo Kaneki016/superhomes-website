@@ -1,4 +1,4 @@
----
+﻿---
 title: 'Investing in Mont Kiara: Rental Yield, Risks & Strategy'
 description: 'An in-depth analysis of the Mont Kiara property market for 2025. We compare investment yields, infrastructure, and lifestyle against Desa ParkCity house prices and trends.'
 date: '2026-01-29'
@@ -113,3 +113,5 @@ As of 2025, the median house price in Desa ParkCity is RM 1.45 million (approx. 
 *   **For Landed Property Hunters:** Interested in landed strata homes? Read our detailed [Desa ParkCity Investment Guide](/resources/investing-in-desa-park-city) to understand the different precincts like Casaman and The Mansions.
 *   **For Expat Families:** Compare international schools in our guide: [Best Neighborhoods for Families in KL](/resources/best-neighborhoods-kuala-lumpur).
 *   **For Commercial Investors:** Learn more about the institutional shift in retail with our analysis of [Sunway 163 Mall and The MET Corporate Towers](/resources/sunway-163-vs-the-met).
+
+

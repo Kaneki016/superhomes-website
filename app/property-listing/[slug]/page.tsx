@@ -3,6 +3,8 @@ import { getPropertyBySlug, getAgentByAgentId, getSimilarProperties, getTransact
 import PropertyDetailClient from '@/components/PropertyDetailClient'
 import { Property, Agent, Transaction } from '@/lib/types'
 
+import { generatePropertyUrl } from '@/lib/slugUtils'
+
 export default async function PropertyDetailPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params
 
@@ -12,6 +14,11 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
     if (!propertyData) {
         notFound()
     }
+
+    // Generate permalink for SEO/Sharing consistency
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || ''
+    const propertyPath = generatePropertyUrl(propertyData)
+    const permalink = `${baseUrl}${propertyPath}`
 
     // Fetch other data in parallel
     const agentDataPromise = getAgentByAgentId(propertyData.agent_id || '')
@@ -53,6 +60,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
             agent={agentData}
             similarProperties={similarProperties}
             historicalTransactions={historicalTransactions}
+            permalink={permalink}
         />
     )
 }

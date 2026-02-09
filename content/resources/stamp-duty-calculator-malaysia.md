@@ -1,4 +1,4 @@
----
+﻿---
 title: "Stamp Duty Calculation in Malaysia (2025 Guide)"
 description: "A 2025 guide to Stamp Duty in Malaysia. Learn how to calculate MOT and Loan Agreement stamp duties, and check if you qualify for i-Miliki exemptions."
 date: "2026-01-08"
@@ -66,3 +66,5 @@ Stamp duty is a substantial cost. For a RM700k property, it can add up to over R
 *   [Property Buying Checklist](/resources/buying-property-checklist-malaysia)
 *   [Home Loan Calculator](/resources/housing-loan-dsr-calculator)
 *   [First Home Scheme Malaysia](/resources)
+
+

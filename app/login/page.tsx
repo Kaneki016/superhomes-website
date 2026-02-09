@@ -7,6 +7,9 @@ import Image from 'next/image'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { useAuth } from '@/contexts/AuthContext'
+import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth'
+import { auth } from '@/lib/firebase'
+import { useRef, useEffect } from 'react' // Ensure hooks are imported
 
 export default function LoginPage() {
     const [email, setEmail] = useState('')
@@ -22,7 +25,34 @@ export default function LoginPage() {
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
     const router = useRouter()
-    const { signIn, signInWithGoogle, sendOtp, signInWithOtp } = useAuth()
+    // Firebase Auth
+    const { signIn, signInWithGoogle, signInWithOtp } = useAuth()
+    const [confirmationResult, setConfirmationResult] = useState<any>(null)
+    const recaptchaContainerRef = useRef<HTMLDivElement>(null)
+
+    // Init Recaptcha
+    useEffect(() => {
+        if (loginMethod !== 'phone' || otpSent || !recaptchaContainerRef.current) return
+
+        try {
+            if (!window.recaptchaVerifier) {
+                window.recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
+                    'size': 'invisible',
+                    'callback': () => { },
+                    'expired-callback': () => { }
+                })
+            }
+        } catch (e) {
+            console.error('Recaptcha Init Error', e)
+        }
+
+        return () => {
+            if (window.recaptchaVerifier) {
+                window.recaptchaVerifier.clear()
+                window.recaptchaVerifier = undefined
+            }
+        }
+    }, [loginMethod, otpSent])
 
     const handleSendOtp = async () => {
         if (!phone || phone.length < 8) return
@@ -36,29 +66,36 @@ export default function LoginPage() {
         phoneToSend = '+' + phoneToSend
 
         try {
-            const { error } = await sendOtp(phoneToSend)
-            if (error) throw error
+            if (!window.recaptchaVerifier) throw new Error('Recaptcha not initialized')
+
+            const confirmation = await signInWithPhoneNumber(auth, phoneToSend, window.recaptchaVerifier)
+            setConfirmationResult(confirmation)
             setOtpSent(true)
         } catch (err: any) {
+            console.error(err)
             setError(err.message || 'Failed to send OTP')
+            // Reset recaptcha if needed (removed aggressive clear)
         } finally {
             setLoading(false)
         }
     }
 
     const handleVerifyOtp = async () => {
-        if (!otp || otp.length < 6) return
+        if (!otp || otp.length < 6 || !confirmationResult) return
         setLoading(true)
         setError('')
 
-        // Format phone again
-        let phoneToSend = phone.replace(/\D/g, '')
-        if (phoneToSend.startsWith('0')) phoneToSend = '60' + phoneToSend.substring(1)
-        if (!phoneToSend.startsWith('60')) phoneToSend = '60' + phoneToSend
-        phoneToSend = '+' + phoneToSend
-
         try {
-            const { error } = await signInWithOtp(phoneToSend, otp)
+            const result = await confirmationResult.confirm(otp)
+            const idToken = await result.user.getIdToken()
+
+            // Format phone again (NextAuth OTP provider expects it for lookup)
+            let phoneToSend = phone.replace(/\D/g, '')
+            if (phoneToSend.startsWith('0')) phoneToSend = '60' + phoneToSend.substring(1)
+            if (!phoneToSend.startsWith('60')) phoneToSend = '60' + phoneToSend
+            phoneToSend = '+' + phoneToSend
+
+            const { error } = await signInWithOtp(phoneToSend, idToken)
 
             if (error) throw error
 
@@ -268,6 +305,7 @@ export default function LoginPage() {
                                                 'Send Login Code'
                                             )}
                                         </button>
+                                        <div ref={recaptchaContainerRef}></div>
                                     </>
                                 ) : (
                                     /* Step 2: Verify OTP */
@@ -330,6 +368,6 @@ export default function LoginPage() {
             </div>
 
             <Footer />
-        </div>
+        </div >
     )
 }

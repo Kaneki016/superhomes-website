@@ -45,7 +45,7 @@ export async function uploadFileToStorage(
         // Default: https://{bucket}.{region}.digitaloceanspaces.com/{key}
 
         // However, if process.env.DO_SPACES_ENDPOINT is "https://sgp1.digitaloceanspaces.com"
-        // The URL is https://supergroups.sgp1.digitaloceanspaces.com/superhomes/avatars/filename.jpg
+        // The URL is https://{bucket}.{region}.digitaloceanspaces.com/{folder}/avatars/filename.jpg
 
         // Clean endpoint to remove protocol for construction if needed, or just build standard URL
         const region = process.env.DO_SPACES_REGION || 'sgp1'

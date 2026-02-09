@@ -15,6 +15,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import TrendChart from '@/components/TrendChart'
 import ShareButton from '@/components/ShareButton'
 import MobileContactBar from '@/components/MobileContactBar'
+import Breadcrumbs from '@/components/Breadcrumbs'
 import { formatPrice } from '@/lib/utils'
 
 // Lazy load heavy components
@@ -37,13 +38,15 @@ interface PropertyDetailClientProps {
     agent: Agent | null
     similarProperties: Property[]
     historicalTransactions: Transaction[]
+    permalink?: string
 }
 
 export default function PropertyDetailClient({
     property,
     agent,
     similarProperties,
-    historicalTransactions
+    historicalTransactions,
+    permalink = ''
 }: PropertyDetailClientProps) {
     const { user } = useAuth()
     const router = useRouter()
@@ -65,7 +68,7 @@ export default function PropertyDetailClient({
         const phoneNumber = agent.phone.replace(/[^0-9]/g, '')
 
         // Get the full property URL
-        const propertyUrl = typeof window !== 'undefined' ? window.location.href : ''
+        const propertyUrl = permalink || (typeof window !== 'undefined' ? window.location.href : '')
 
         const propertyDetails = [
             propertyUrl,
@@ -99,7 +102,7 @@ export default function PropertyDetailClient({
         "@type": "RealEstateListing",
         "name": propertyName,
         "description": property.description || `${propertyName} - ${property.property_type} for ${property.listing_type}`,
-        "url": typeof window !== 'undefined' ? window.location.href : '',
+        "url": permalink,
         "image": property.main_image_url || property.images?.[0] || '',
         "address": {
             "@type": "PostalAddress",
@@ -137,7 +140,7 @@ export default function PropertyDetailClient({
             "name": agent.name,
             "telephone": agent.phone,
             "image": agent.photo_url,
-            "url": typeof window !== 'undefined' ? `${window.location.origin}/agents/${agent.id || agent.agent_id}` : ''
+            "url": permalink ? new URL(`/agents/${agent.id || agent.agent_id}`, permalink.startsWith('http') ? permalink : 'https://superhomes.my').href : ''
         } : undefined
     }
 
@@ -154,8 +157,16 @@ export default function PropertyDetailClient({
 
                 <div className="container-custom py-8">
                     {/* Back Button */}
+
                     <button
-                        onClick={() => window.history.back()}
+                        onClick={() => {
+                            if (window.history.length > 2) {
+                                router.back()
+                            } else {
+                                // Fallback if no history (e.g. opened in new tab)
+                                router.push(property.listing_type === 'rent' ? '/rent' : '/properties')
+                            }
+                        }}
                         className="mb-6 inline-flex items-center gap-2 text-gray-600 hover:text-primary-600 transition-colors group"
                     >
                         <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -163,6 +174,16 @@ export default function PropertyDetailClient({
                         </svg>
                         <span className="font-medium">Back</span>
                     </button>
+
+                    {/* Breadcrumbs */}
+                    <div className="mb-4">
+                        <Breadcrumbs items={[
+                            { label: property.state || 'Malaysia', href: `/properties?state=${encodeURIComponent(property.state || '')}` },
+                            { label: property.listing_type === 'rent' ? 'For Rent' : 'For Sale', href: property.listing_type === 'rent' ? '/rent' : '/properties' },
+                            { label: property.property_type || 'Property', href: `/properties?type=${encodeURIComponent(property.property_type || '')}` },
+                            { label: propertyName }
+                        ]} />
+                    </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Main Content */}
@@ -207,7 +228,7 @@ export default function PropertyDetailClient({
                                     {/* Action Buttons */}
                                     <div className="flex items-center gap-3 flex-shrink-0">
                                         <ShareButton
-                                            url={typeof window !== 'undefined' ? window.location.href : ''}
+                                            url={permalink || (typeof window !== 'undefined' ? window.location.href : '')}
                                             title={`Check out ${propertyName}`}
                                             className="p-3 border-0 shadow-sm"
                                         />

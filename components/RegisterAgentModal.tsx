@@ -1,13 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { registerOrClaimAgent } from '@/app/actions/agent-claiming'
 import { updateUserCredentials } from '@/app/actions/user-profile'
+import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth'
+import { auth } from '@/lib/firebase'
 
 interface RegisterAgentModalProps {
     isOpen: boolean
     onClose: () => void
+}
+
+declare global {
+    interface Window {
+        recaptchaVerifier?: RecaptchaVerifier
+    }
 }
 
 export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentModalProps) {
@@ -17,6 +25,7 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
     // Form State
     const [phone, setPhone] = useState('')
     const [otp, setOtp] = useState('')
+    const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null)
     const [details, setDetails] = useState({
         name: '',
         agency: '',
@@ -24,6 +33,9 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
         email: '',
         password: ''
     })
+
+    // Refs for Recaptcha
+    const recaptchaContainerRef = useRef<HTMLDivElement>(null)
 
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
@@ -38,8 +50,6 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
         }
     }, [isOpen, user, profile])
 
-    if (!isOpen) return null
-
     // Helper: Normalize Phone
     const getFormattedPhone = () => {
         let p = phone.replace(/\D/g, '')
@@ -48,30 +58,91 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
         return '+' + p
     }
 
+    // Initialize Recaptcha
+    useEffect(() => {
+        if (!isOpen || step !== 'phone' || !recaptchaContainerRef.current) return
+
+        try {
+            if (!window.recaptchaVerifier) {
+                window.recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
+                    'size': 'invisible',
+                    'callback': (_response: any) => {
+                        // reCAPTCHA solved, allow signInWithPhoneNumber.
+                        // handleSendOtp(); 
+                    },
+                    'expired-callback': () => {
+                        // Response expired. Ask user to solve reCAPTCHA again.
+                    }
+                });
+            }
+        } catch (e) {
+            console.error('Recaptcha Init Error', e)
+        }
+
+        return () => {
+            if (window.recaptchaVerifier) {
+                window.recaptchaVerifier.clear()
+                window.recaptchaVerifier = undefined
+            }
+        }
+    }, [isOpen, step])
+
     const handleSendOtp = async () => {
         if (phone.length < 8) return
         setLoading(true)
         setError('')
         try {
-            // Use AuthContext sendOtp
-            const { error } = await sendOtp(getFormattedPhone())
-            if (error) throw new Error(error.message)
+            if (!window.recaptchaVerifier) {
+                throw new Error('Recaptcha not initialized')
+            }
+
+            const formatPhone = getFormattedPhone()
+            const confirmation = await signInWithPhoneNumber(auth, formatPhone, window.recaptchaVerifier)
+            setConfirmationResult(confirmation)
             setStep('otp')
         } catch (err: any) {
             console.error(err)
             setError(err.message || 'Failed to send OTP')
+            // Don't destroy the verifier on error, just let user retry.
+            // if (window.recaptchaVerifier) {
+            //    window.recaptchaVerifier.render().then(widgetId => window.grecaptcha.reset(widgetId))
+            // }
         } finally {
             setLoading(false)
         }
     }
 
     const handleVerifyOtp = async () => {
-        if (otp.length < 6) return
+        if (otp.length < 6 || !confirmationResult) return
         setLoading(true)
         setError('')
         try {
-            // Use AuthContext signInWithOtp
-            const { error } = await signInWithOtp(getFormattedPhone(), otp)
+            // Verify via Firebase
+            const result = await confirmationResult.confirm(otp)
+            const idToken = await result.user.getIdToken()
+
+            // Sign in via NextAuth with the ID Token
+            // We need a custom Credential Provider that accepts idToken
+            // Or we use the existing one but pass idToken as 'code' and a special flag?
+            // Let's modify signInWithOtp to accept idToken
+
+            // Using existing signInWithOtp but passing correct params for our modified backend
+            // We will modify AuthContext to support this or just call signIn directly here
+
+            // Actually, let's use the AuthContext helper if updated, strictly we must ensure backend matches
+            // Ideally: signIn('firebase', { idToken })
+            // For now, let's look at how we can pass this.
+            // We'll update AuthContext to take an opt 'firebaseToken' or similar.
+
+            // Temporary: Reuse 'code' field to pass idToken? No, token is huge.
+            // Let's call signIn from next-auth/react directly?
+            // But we need to update session...
+
+            // Let's use the 'otp' provider but overload it:
+            // phone: formattedPhone
+            // code: idToken  <-- backend will distinguish based on length or prefix?
+
+            const { error } = await signInWithOtp(getFormattedPhone(), idToken) // We will update AuthContext and lib/auth.ts to handle this
 
             if (error) throw new Error(error.message)
 
@@ -149,6 +220,8 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
         }
     }
 
+    if (!isOpen) return null
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
             <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl animate-in fade-in zoom-in duration-200 max-h-[85vh] overflow-y-auto custom-scrollbar">
@@ -190,6 +263,7 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
                         >
                             {loading ? 'Sending...' : 'Verify Phone Number'}
                         </button>
+                        <div ref={recaptchaContainerRef}></div>
                     </div>
                 )}
 

@@ -1,4 +1,4 @@
----
+﻿---
 title: 'Condo vs Landed Property in Malaysia: Which Is the Better Choice?'
 description: 'Buying a house? We compare condo vs landed property in Malaysia across price, rental yield, maintenance, and appreciation to help you decide which is better.'
 date: '2026-02-11'
@@ -146,3 +146,5 @@ Condos can lose value due to poor management by the JMB/MC, leading to deteriora
 
 **Do I have to pay maintenance fees for landed property?**
 If your landed property has an Individual Title and is not part of a strata scheme, you do not pay monthly maintenance fees to a management body. However, if you buy a property in a "Gated and Guarded" community with a Strata Title, you are legally required to pay maintenance fees and sinking funds.
+
+

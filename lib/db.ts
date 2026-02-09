@@ -20,13 +20,17 @@ const options = {
         undefined: null, // Convert undefined to null for SQL
     },
     debug: process.env.NODE_ENV === 'development', // Log queries in dev
-    max: 10, // Limit max connections per instance
-    idle_timeout: 20, // Close idle connections after 20s
+    max: 5, // Limit max connections per instance (reduced from 10)
+    idle_timeout: 5, // Close idle connections after 5s (reduced from 20)
+    connect_timeout: 10, // Connection timeout in seconds
 }
 
 // Use DATABASE_URL if available (common in production/Netlify), otherwise use individual vars
-const sql = globalForPostgres.sql || (process.env.DATABASE_URL
-    ? postgres(process.env.DATABASE_URL, {
+// Sanitize DATABASE_URL if it exists (remove quotes if user added them in secrets)
+const connectionString = process.env.DATABASE_URL?.replace(/^["']|["']$/g, '')
+
+const sql = globalForPostgres.sql || (connectionString
+    ? postgres(connectionString, {
         ...options,
         // Ensure SSL is used if connecting to a remote DB via URL (usually requires SSL)
         // Unless explicitly disabled or handled in the URL query params, but 'require' is safer for DO

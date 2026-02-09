@@ -1,4 +1,4 @@
----
+﻿---
 title: 'Malaysia Budget 2026: Property Incentives for Buyers & Investors'
 description: 'Discover key Malaysia Budget 2026 property incentives, including stamp duty exemptions, tax reliefs, and financing schemes for first-time buyers and investors.'
 date: '2026-02-07'
@@ -126,3 +126,5 @@ While you receive stamp duty exemptions (if eligible), the specific income tax r
 ## Conclusion
 
 Malaysia Budget 2026 presents a balanced approach to the property sector. By extending **Budget 2026 housing incentives Malaysia** for first-time buyers and enhancing financing guarantees through SJKP, the government reinforces its commitment to affordable homeownership. Simultaneously, the introduction of higher stamp duties for foreign entities signals a protective stance over the domestic market. For investors, the new tax deductions for converting commercial spaces offer a strategic opportunity to revitalize older assets, aligning with the nation’s push toward urban regeneration and sustainability.
+
+

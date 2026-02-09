@@ -2,6 +2,7 @@ import { getPropertiesPaginated } from '@/lib/database'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Property } from '@/lib/types'
+import { generatePropertyUrl } from '@/lib/slugUtils'
 
 interface RelatedListingsProps {
     neighborhoods: string[]
@@ -44,7 +45,7 @@ export default async function RelatedListings({ neighborhoods }: RelatedListings
                         ? `${listing.floor_area_sqft} sqft`
                         : null
 
-                    const link = isSale ? `/buy/${listing.id}` : `/rent/${listing.id}`
+                    const link = generatePropertyUrl(listing)
 
                     return (
                         <Link
@@ -99,10 +100,10 @@ export default async function RelatedListings({ neighborhoods }: RelatedListings
 
             {/* Links to view all */}
             <div className="flex flex-wrap gap-4">
-                {neighborhoods.map(neighborhood => (
+                {neighborhoods.slice().sort().map(neighborhood => (
                     <Link
                         key={neighborhood}
-                        href={`/buy?search=${encodeURIComponent(neighborhood)}`}
+                        href={`/properties?search=${encodeURIComponent(neighborhood)}`}
                         className="inline-flex items-center text-sm font-medium text-rose-600 hover:text-rose-700 hover:underline"
                     >
                         View all listings in {neighborhood} →
