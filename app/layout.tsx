@@ -20,14 +20,14 @@ export const metadata: Metadata = {
     authors: [{ name: 'SuperHomes' }],
     creator: 'SuperHomes',
     publisher: 'SuperHomes',
-    metadataBase: new URL('https://superhomes.com.my'), // Update with actual production URL
+    metadataBase: new URL('https://superhomes.my'),
     alternates: {
         canonical: '/',
     },
     openGraph: {
         title: 'SuperHomes - Your Premium Property Marketplace in Malaysia',
         description: 'Find your dream property with SuperHomes. Browse thousands of properties for sale and rent across Malaysia.',
-        url: 'https://superhomes.com.my',
+        url: 'https://superhomes.my',
         siteName: 'SuperHomes',
         locale: 'en_MY',
         type: 'website',
@@ -63,7 +63,7 @@ export const metadata: Metadata = {
         apple: '/logo-icon.svg',
     },
     verification: {
-        google: 'YOUR-GSC-VERIFICATION-CODE-HERE', // TODO: Replace with your actual code
+        google: 'YOUR-GSC-VERIFICATION-CODE-HERE', // TODO: Get verification code from Google Search Console
         // yandex: 'your-yandex-verification-code',
         // bing: 'your-bing-verification-code',
     },
