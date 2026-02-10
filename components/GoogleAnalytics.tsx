@@ -14,10 +14,10 @@ export default function GoogleAnalytics({ gaId }: { gaId: string }) {
             <Script id="google-analytics" strategy="afterInteractive">
                 {`
           window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
+          window.gtag = function(){window.dataLayer.push(arguments);};
+          window.gtag('js', new Date());
 
-          gtag('config', '${gaId}');
+          window.gtag('config', '${gaId}');
         `}
             </Script>
         </>
