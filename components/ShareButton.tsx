@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Check, Share2, Link as LinkIcon } from 'lucide-react'
+import { trackShare } from '@/lib/gtag'
 
 interface ShareButtonProps {
     url: string
@@ -19,6 +20,7 @@ export default function ShareButton({
     const [copied, setCopied] = useState(false)
 
     const handleShare = async () => {
+        trackShare('share_button', 'property', url)
         // Check if Web Share API is available (mobile)
         if (navigator.share) {
             try {

@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { trackDrag } from '@/lib/gtag'
 
 interface RangeSliderProps {
     min: number
@@ -65,6 +66,10 @@ export default function RangeSlider({
         const handleTouchMove = (e: TouchEvent) => handleMove(e.touches[0].clientX)
 
         const handleEnd = () => {
+            if (isDragging) {
+                // Tracking the end of a drag event
+                trackDrag('Price Range Slider', isDragging === 'min' ? value[0].toString() : value[1].toString(), 'Filter')
+            }
             setIsDragging(null)
         }
 

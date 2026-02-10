@@ -1,6 +1,8 @@
 'use client'
 
+
 import { useState } from 'react'
+import { trackSearch } from '@/lib/gtag'
 
 interface SearchBarProps {
     onSearch?: (filters: SearchFilters) => void
@@ -21,7 +23,14 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
         maxPrice: '',
     })
 
+    // ...
+
     const handleSearch = () => {
+        // Track search event - but only if there are parameters
+        if (filters.location || filters.propertyType || filters.minPrice || filters.maxPrice) {
+            trackSearch(JSON.stringify(filters))
+        }
+
         if (onSearch) {
             onSearch(filters)
         }

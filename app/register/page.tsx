@@ -9,6 +9,7 @@ import Footer from '@/components/Footer'
 import { useAuth } from '@/contexts/AuthContext'
 
 import RegisterAgentModal from '@/components/RegisterAgentModal'
+import { sendGAEvent } from '@/lib/gtag'
 
 export default function RegisterPage() {
     const userType = 'buyer'
@@ -61,6 +62,7 @@ export default function RegisterPage() {
             setError(error.message)
             setLoading(false)
         } else {
+            sendGAEvent({ action: 'sign_up', category: 'Auth', label: 'email' })
             setSuccess(true)
         }
     }

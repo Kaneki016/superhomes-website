@@ -1,4 +1,5 @@
 'use client'
+import { trackToggle } from '@/lib/gtag'
 
 interface FilterChip {
     key: string
@@ -26,7 +27,10 @@ export default function FilterChips({ filters, onRemove, onClearAll }: FilterChi
                 >
                     <span>{filter.label}: {filter.value}</span>
                     <button
-                        onClick={() => onRemove(filter.key)}
+                        onClick={() => {
+                            trackToggle(`Filter Chip - ${filter.label}`, false, 'Filter')
+                            onRemove(filter.key)
+                        }}
                         className="hover:text-primary-900 transition-colors"
                         aria-label={`Remove ${filter.label} filter`}
                     >
@@ -39,7 +43,10 @@ export default function FilterChips({ filters, onRemove, onClearAll }: FilterChi
 
             {filters.length > 1 && (
                 <button
-                    onClick={onClearAll}
+                    onClick={() => {
+                        trackToggle('Clear All Filters', false, 'Filter')
+                        onClearAll()
+                    }}
                     className="text-sm text-gray-500 hover:text-gray-700 underline font-medium transition-colors"
                 >
                     Clear All

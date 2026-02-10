@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
@@ -12,11 +12,13 @@ import ImageGallery from '@/components/ImageGallery'
 import { Property, Agent, Transaction } from '@/lib/types'
 import { useFavorites } from '@/contexts/FavoritesContext'
 import { useAuth } from '@/contexts/AuthContext'
+import { trackLead } from '@/lib/gtag'
 import TrendChart from '@/components/TrendChart'
 import ShareButton from '@/components/ShareButton'
 import MobileContactBar from '@/components/MobileContactBar'
 import Breadcrumbs from '@/components/Breadcrumbs'
 import { formatPrice } from '@/lib/utils'
+import { sendGAEvent, trackShare } from '@/lib/gtag'
 
 // Lazy load heavy components
 const SinglePropertyMap = dynamic(() => import('@/components/SinglePropertyMap'), {
@@ -53,6 +55,16 @@ export default function PropertyDetailClient({
     const { isFavorite, toggleFavorite } = useFavorites()
     const [showNumber, setShowNumber] = useState(false)
 
+    useEffect(() => {
+        // Track view_item event when property is viewed
+        sendGAEvent({
+            action: 'view_item',
+            category: 'Property',
+            label: property.title || property.property_name || 'Property',
+            value: property.price || undefined
+        })
+    }, [property])
+
     // Computed values
     const propertyName = property.title || property.property_name || 'Property'
     const propertySize = property.floor_area_sqft || property.size || ''
@@ -81,6 +93,10 @@ export default function PropertyDetailClient({
         ].filter(Boolean).join('\n')
 
         const message = encodeURIComponent(propertyDetails)
+
+        // Track lead generation
+        trackLead('whatsapp', property.id)
+
         window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank')
     }
 
@@ -92,6 +108,8 @@ export default function PropertyDetailClient({
 
         setShowNumber(true)
         if (showNumber && agent && agent.phone) {
+            // Track lead generation
+            trackLead('call', property.id)
             window.location.href = `tel:${agent.phone}`
         }
     }
@@ -237,6 +255,14 @@ export default function PropertyDetailClient({
                                                 if (!user) {
                                                     router.push('/login')
                                                     return
+                                                }
+                                                if (!isFavorite(property.id)) {
+                                                    sendGAEvent({
+                                                        action: 'add_to_wishlist',
+                                                        category: 'Engagement',
+                                                        label: property.title || property.property_name || 'Property',
+                                                        value: property.price || undefined
+                                                    })
                                                 }
                                                 toggleFavorite(property.id)
                                             }}
