@@ -13,7 +13,9 @@ import { useFavorites } from '@/contexts/FavoritesContext'
 import { Property } from '@/lib/supabase'
 import { getFavoriteProperties } from '@/app/actions/favorites'
 
-export default function FavoritesPage() {
+import { Suspense } from 'react'
+
+function FavoritesContent() {
     const { user, loading: authLoading } = useAuth()
     const { favorites, loading: favoritesLoading } = useFavorites()
     const router = useRouter()
@@ -165,5 +167,17 @@ export default function FavoritesPage() {
 
             <Footer />
         </div>
+    )
+}
+
+export default function FavoritesPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="w-12 h-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        }>
+            <FavoritesContent />
+        </Suspense>
     )
 }
