@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import './globals.css'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
@@ -79,7 +80,9 @@ export default function RootLayout({
         <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
             <body suppressHydrationWarning>
                 {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID ? (
-                    <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID} />
+                    <Suspense fallback={null}>
+                        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID} />
+                    </Suspense>
                 ) : null}
                 <AuthProvider>
                     <FavoritesProvider>
