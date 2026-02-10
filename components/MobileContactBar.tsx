@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Agent, Property } from '@/lib/supabase'
 import { formatPrice } from '@/lib/utils'
 import { useAuth } from '@/contexts/AuthContext'
+import { trackLead } from '@/lib/gtag'
 
 interface MobileContactBarProps {
     agent: Agent | null
@@ -41,6 +42,9 @@ export default function MobileContactBar({ agent, property }: MobileContactBarPr
             `Can you provide more information?`
         ].filter(Boolean).join('\n')
 
+        // Track lead generation
+        trackLead('whatsapp', property.id)
+
         window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank')
     }
 
@@ -52,6 +56,8 @@ export default function MobileContactBar({ agent, property }: MobileContactBarPr
 
         setShowNumber(true)
         if (showNumber && agent.phone) {
+            // Track lead generation
+            trackLead('call', property.id)
             window.location.href = `tel:${agent.phone}`
         }
     }

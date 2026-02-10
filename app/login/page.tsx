@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
 import { useRef, useEffect } from 'react' // Ensure hooks are imported
+import { sendGAEvent } from '@/lib/gtag'
 
 export default function LoginPage() {
     const [email, setEmail] = useState('')
@@ -100,6 +101,7 @@ export default function LoginPage() {
             if (error) throw error
 
             // Logged in successfully
+            sendGAEvent({ action: 'login', category: 'Auth', label: 'phone' })
             router.push('/')
         } catch (err: any) {
             setError(err.message || 'Invalid code')
@@ -118,6 +120,7 @@ export default function LoginPage() {
             setError(error.message)
             setLoading(false)
         } else {
+            sendGAEvent({ action: 'login', category: 'Auth', label: 'email' })
             router.push('/')
         }
     }
@@ -127,6 +130,8 @@ export default function LoginPage() {
         const { error } = await signInWithGoogle()
         if (error) {
             setError(error.message)
+        } else {
+            sendGAEvent({ action: 'login', category: 'Auth', label: 'google' })
         }
     }
 

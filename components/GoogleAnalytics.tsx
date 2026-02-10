@@ -1,8 +1,29 @@
 'use client'
 
 import Script from 'next/script'
+import { usePathname, useSearchParams } from 'next/navigation'
+import { useEffect, useRef } from 'react'
 
 export default function GoogleAnalytics({ gaId }: { gaId: string }) {
+    const pathname = usePathname()
+    const searchParams = useSearchParams()
+    const isMounted = useRef(false)
+
+    useEffect(() => {
+        // Skip the first run as the script tag handles the initial page view
+        if (!isMounted.current) {
+            isMounted.current = true
+            return
+        }
+
+        if (typeof window !== 'undefined' && (window as any).gtag) {
+            const url = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : '')
+                ; (window as any).gtag('config', gaId, {
+                    page_path: url,
+                })
+        }
+    }, [pathname, searchParams, gaId])
+
     if (!gaId) return null
 
     return (

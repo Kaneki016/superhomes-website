@@ -3,4 +3,4 @@ git pull origin master
 docker compose -f docker-compose.prod.yml pull
 
 # Restart the app
-docker compose -f docker-compose.prod.yml up -d
+docker compose --env-file .env.local -f docker-compose.prod.yml up -d

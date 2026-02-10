@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useCompare } from '@/contexts/CompareContext'
 import { formatPrice, formatPricePerSqft, getTimeAgo } from '@/lib/utils'
 import { generatePropertyUrl } from '@/lib/slugUtils'
+import { trackHover, trackToggle } from '@/lib/gtag'
 
 interface PropertyCardProps {
     property: Property
@@ -85,6 +86,10 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
         console.log('PropertyCard: Triggering toggleFavorite')
         setIsToggling(true)
         await toggleFavorite(property.id)
+
+        // Track Toggle Favorite
+        trackToggle('Favorite Button', !isFavorite(property.id), 'Engagement')
+
         setIsToggling(false)
         console.log('PropertyCard: ToggleFavorite complete')
     }
@@ -278,7 +283,11 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
                     {/* Footer: Agent & Actions */}
                     <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
                         {agent ? (
-                            <Link href={`/agents/${agent.id || agent.agent_id}`} className="flex items-center gap-2 group/agent">
+                            <Link
+                                href={`/agents/${agent.id || agent.agent_id}`}
+                                className="flex items-center gap-2 group/agent"
+                                onMouseEnter={() => trackHover('Agent Profile', 'Card Interaction')}
+                            >
                                 <div className="relative w-8 h-8 rounded-full overflow-hidden bg-gray-200">
                                     {agent.photo_url && !agentImageError && !agent.photo_url.includes('nophoto_agent') ? (
                                         <Image
@@ -414,6 +423,7 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
                         <>
                             <button
                                 onClick={(e) => navigateImage('prev', e)}
+                                onMouseEnter={() => trackHover('Gallery Prev Arrow', 'Card Interaction')}
                                 className="carousel-nav carousel-nav-prev"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -422,6 +432,7 @@ function PropertyCard({ property, agent: providedAgent, variant = 'grid' }: Prop
                             </button>
                             <button
                                 onClick={(e) => navigateImage('next', e)}
+                                onMouseEnter={() => trackHover('Gallery Next Arrow', 'Card Interaction')}
                                 className="carousel-nav carousel-nav-next"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
