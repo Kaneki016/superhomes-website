@@ -1,8 +1,10 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useState, useEffect, useCallback, useRef, Suspense, useMemo } from 'react'
 import { useSearchParams, useRouter, useParams } from 'next/navigation'
-import dynamic from 'next/dynamic'
+import nextDynamic from 'next/dynamic'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
@@ -17,7 +19,7 @@ import PageBanner from '@/components/PageBanner'
 import { Metadata } from 'next'
 
 // Dynamic imports for map components - only loaded when map view is active
-const PropertyMap = dynamic(
+const PropertyMap = nextDynamic(
     () => import('@/components/PropertyMap').then(mod => mod.default),
     {
         ssr: false,
@@ -34,7 +36,7 @@ const PropertyMap = dynamic(
     }
 )
 
-const MapPropertyCard = dynamic(
+const MapPropertyCard = nextDynamic(
     () => import('@/components/MapPropertyCard'),
     { ssr: false }
 )
