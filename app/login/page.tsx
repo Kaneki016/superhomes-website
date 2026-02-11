@@ -132,6 +132,7 @@ export default function LoginPage() {
             setError(error.message)
         } else {
             sendGAEvent({ action: 'login', category: 'Auth', label: 'google' })
+            router.push('/')
         }
     }
 
