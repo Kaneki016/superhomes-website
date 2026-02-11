@@ -38,7 +38,10 @@ export default function GoogleAnalytics({ gaId }: { gaId: string }) {
           window.gtag = function(){window.dataLayer.push(arguments);};
           window.gtag('js', new Date());
 
-          window.gtag('config', '${gaId}');
+          window.gtag('config', '${gaId}', {
+            page_path: window.location.pathname,
+            debug_mode: ${process.env.NODE_ENV === 'development' ? 'true' : 'false'} 
+          });
         `}
             </Script>
         </>
