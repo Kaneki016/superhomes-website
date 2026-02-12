@@ -120,6 +120,55 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 }
             },
         }),
+        Credentials({
+            id: "google-token", // Use this ID in client
+            name: "Google via Token",
+            credentials: {
+                idToken: { label: "ID Token", type: "text" },
+            },
+            async authorize(credentials) {
+                if (!credentials?.idToken) return null;
+                const idToken = credentials.idToken as string;
+
+                try {
+                    const decodedToken = await adminAuth.verifyIdToken(idToken);
+                    if (!decodedToken || !decodedToken.email) {
+                        console.error("Invalid Google Token or missing email");
+                        return null;
+                    }
+
+                    const email = decodedToken.email;
+                    const name = decodedToken.name || email.split('@')[0];
+                    const image = decodedToken.picture || null;
+
+                    // Find or create user
+                    let user;
+                    [user] = await sql`SELECT * FROM users WHERE email = ${email}`;
+
+                    if (!user) {
+                        // Create User
+                        // Note: Password will be null, so they can only login via Google initially
+                        [user] = await sql`
+                            INSERT INTO users (email, name, image, role)
+                            VALUES (${email}, ${name}, ${image}, 'user')
+                            RETURNING *
+                        `;
+                    }
+
+                    return {
+                        id: user.id,
+                        name: user.name,
+                        email: user.email,
+                        image: user.image,
+                        role: user.role
+                    };
+
+                } catch (error) {
+                    console.error("Google Auth Error:", error);
+                    return null;
+                }
+            }
+        }),
     ],
     callbacks: {
         async jwt({ token, user }) {

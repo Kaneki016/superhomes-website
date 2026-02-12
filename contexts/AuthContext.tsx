@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react'
 import { SessionProvider, useSession, signIn as nextAuthSignIn, signOut as nextAuthSignOut } from "next-auth/react"
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 interface UserProfile {
     id: string
@@ -126,9 +128,28 @@ function AuthContextContent({ children }: { children: ReactNode }) {
     }
 
 
-    // Stub for Google Auth - removed for independent auth or add later
+    // Google Auth Implementation
     const signInWithGoogle = async () => {
-        return { error: new Error('Google Auth not implemented yet') }
+        try {
+            const provider = new GoogleAuthProvider();
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+            const idToken = await user.getIdToken();
+
+            const res = await nextAuthSignIn('google-token', {
+                idToken,
+                redirect: false
+            });
+
+            if (res?.error) {
+                return { error: new Error(res.error) };
+            }
+
+            return { error: null };
+        } catch (error: any) {
+            console.error("Google Sign In Error:", error);
+            return { error: error };
+        }
     }
 
     return (
