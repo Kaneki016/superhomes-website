@@ -40,16 +40,17 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
 
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
-    const { user, signUp, refreshProfile, profile, signInWithOtp } = useAuth()
+    const { user, signUp, refreshProfile, profile, signInWithOtp, signOut } = useAuth()
 
     // Auto-advance to details if user is already logged in (Ghost state handling)
     // or if they just verified OTP and the parent didn't unmount
     useEffect(() => {
         if (isOpen && user && !profile) {
-            console.log('User is authenticated but has no profile (Ghost). Advancing to details.')
-            setStep('details')
+            console.log('Ghost user detected (Auth but no Profile). Signing out to ensure fresh registration flow.')
+            signOut()
+            setStep('phone')
         }
-    }, [isOpen, user, profile])
+    }, [isOpen, user, profile, signOut])
 
     // Helper: Normalize Phone
     const getFormattedPhone = () => {
@@ -347,7 +348,13 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
                 )}
 
                 {step === 'details' && (
-                    <div className="space-y-4">
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault()
+                            handleSaveDetails()
+                        }}
+                        className="space-y-4"
+                    >
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
                             <input
@@ -356,6 +363,7 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
                                 onChange={(e) => setDetails({ ...details, name: e.target.value })}
                                 className="input-field"
                                 placeholder="e.g. Ali Baba"
+                                required
                             />
                         </div>
                         <div>
@@ -376,6 +384,7 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
                                 onChange={(e) => setDetails({ ...details, renNumber: e.target.value })}
                                 className="input-field"
                                 placeholder="e.g. REN 12345"
+                                required
                             />
                         </div>
 
@@ -391,6 +400,8 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
                                         onChange={(e) => setDetails({ ...details, email: e.target.value })}
                                         className="input-field"
                                         placeholder="you@email.com"
+                                        autoComplete="email"
+                                        required
                                     />
                                 </div>
                                 <div>
@@ -401,19 +412,22 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
                                         onChange={(e) => setDetails({ ...details, password: e.target.value })}
                                         className="input-field"
                                         placeholder="Min 6 characters"
+                                        autoComplete="new-password"
+                                        required
+                                        minLength={6}
                                     />
                                 </div>
                             </div>
                         </div>
 
                         <button
-                            onClick={handleSaveDetails}
+                            type="submit"
                             disabled={loading || !details.name || !details.renNumber || !details.email || !details.password}
                             className="btn-primary w-full mt-2"
                         >
                             {loading ? 'Creating Profile...' : 'Complete Registration'}
                         </button>
-                    </div>
+                    </form>
                 )}
 
                 {step === 'success' && (
