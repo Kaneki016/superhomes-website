@@ -132,6 +132,7 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
             const formatPhone = getFormattedPhone()
             const confirmation = await signInWithPhoneNumber(auth, formatPhone, window.recaptchaVerifier)
             setConfirmationResult(confirmation)
+            console.log('OTP Sent Successfully. Moving to OTP step.')
             setStep('otp')
             setCountdown(60)
         } catch (err: any) {
@@ -186,7 +187,20 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
             setStep('details')
         } catch (err: any) {
             console.error(err)
-            setError(err.message || 'Invalid code')
+            let errorMessage = 'Failed to verify code. Please try again.'
+
+            // Map Firebase error codes to user-friendly messages
+            if (err.code === 'auth/invalid-verification-code') {
+                errorMessage = 'Incorrect code. Please check and try again.'
+            } else if (err.code === 'auth/code-expired') {
+                errorMessage = 'This code has expired. Please resend a new one.'
+            } else if (err.code === 'auth/user-disabled') {
+                errorMessage = 'This account has been disabled. Please contact support.'
+            } else if (err.message) {
+                errorMessage = err.message
+            }
+
+            setError(errorMessage)
         } finally {
             setLoading(false)
         }

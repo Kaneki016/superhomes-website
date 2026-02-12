@@ -172,7 +172,20 @@ export default function ClaimAgentModal({ isOpen, onClose, agent }: ClaimAgentMo
 
         } catch (err: any) {
             console.error('Verification error:', err)
-            setError(err.message || 'Verification failed.')
+
+            let errorMessage = 'Verification failed. Please try again.'
+
+            if (err.code === 'auth/invalid-verification-code') {
+                errorMessage = 'Incorrect code. Please check and try again.'
+            } else if (err.code === 'auth/code-expired') {
+                errorMessage = 'This code has expired. Please resend a new one.'
+            } else if (err.code === 'auth/user-disabled') {
+                errorMessage = 'This account has been disabled. Please contact support.'
+            } else if (err.message) {
+                errorMessage = err.message
+            }
+
+            setError(errorMessage)
             setLoading(false)
         }
     }
