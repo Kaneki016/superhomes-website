@@ -44,13 +44,15 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
 
     // Auto-advance to details if user is already logged in (Ghost state handling)
     // or if they just verified OTP and the parent didn't unmount
+    // Auto-advance to details if user is already logged in (Ghost state handling)
+    // or if they just verified OTP and the parent didn't unmount
     useEffect(() => {
-        if (isOpen && user && !profile) {
+        if (isOpen && step === 'phone' && user && !profile) {
             console.log('Ghost user detected (Auth but no Profile). Signing out to ensure fresh registration flow.')
             signOut()
             setStep('phone')
         }
-    }, [isOpen, user, profile, signOut])
+    }, [isOpen, user, profile, step, signOut])
 
     // Helper: Normalize Phone
     const getFormattedPhone = () => {
