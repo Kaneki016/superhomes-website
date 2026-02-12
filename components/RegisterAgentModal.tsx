@@ -33,13 +33,14 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
         email: '',
         password: ''
     })
+    const [countdown, setCountdown] = useState(0)
 
     // Refs for Recaptcha
     const recaptchaContainerRef = useRef<HTMLDivElement>(null)
 
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
-    const { user, signUp, refreshProfile, profile, sendOtp, signInWithOtp } = useAuth()
+    const { user, signUp, refreshProfile, profile, signInWithOtp } = useAuth()
 
     // Auto-advance to details if user is already logged in (Ghost state handling)
     // or if they just verified OTP and the parent didn't unmount
@@ -52,40 +53,72 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
 
     // Helper: Normalize Phone
     const getFormattedPhone = () => {
-        let p = phone.replace(/\D/g, '')
-        if (p.startsWith('0')) p = '60' + p.substring(1)
-        if (!p.startsWith('60')) p = '60' + p
-        return '+' + p
+        const raw = phone.replace(/\D/g, '')
+        let p = ''
+
+        if (raw.startsWith('60')) {
+            p = '+' + raw
+        } else if (raw.startsWith('0')) {
+            p = '+60' + raw.substring(1)
+        } else {
+            p = '+60' + raw
+        }
+
+        console.log('RegisterAgent: Sending OTP to', p)
+        return p
     }
 
     // Initialize Recaptcha
+    // Initialize Recaptcha
+    // Initialize Recaptcha
     useEffect(() => {
-        if (!isOpen || step !== 'phone' || !recaptchaContainerRef.current) return
+        if (!isOpen || !recaptchaContainerRef.current) return
+
+        // Robust cleanup before init
+        if (window.recaptchaVerifier) {
+            try {
+                window.recaptchaVerifier.clear()
+            } catch (e) {
+                console.warn('Cleanup error', e)
+            }
+            window.recaptchaVerifier = undefined
+        }
 
         try {
-            if (!window.recaptchaVerifier) {
-                window.recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
-                    'size': 'invisible',
-                    'callback': (_response: any) => {
-                        // reCAPTCHA solved, allow signInWithPhoneNumber.
-                        // handleSendOtp(); 
-                    },
-                    'expired-callback': () => {
-                        // Response expired. Ask user to solve reCAPTCHA again.
-                    }
-                });
-            }
+            console.log('Initializing RecaptchaVerifier...')
+            window.recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
+                'size': 'invisible',
+                'callback': (response: any) => {
+                    console.log('reCAPTCHA solved:', response)
+                    // reCAPTCHA solved
+                },
+                'expired-callback': () => {
+                    console.warn('reCAPTCHA expired')
+                }
+            });
         } catch (e) {
             console.error('Recaptcha Init Error', e)
         }
 
         return () => {
             if (window.recaptchaVerifier) {
-                window.recaptchaVerifier.clear()
+                try {
+                    window.recaptchaVerifier.clear()
+                } catch (e) {
+                    console.error('Error clearing recaptcha', e)
+                }
                 window.recaptchaVerifier = undefined
             }
         }
-    }, [isOpen, step])
+    }, [isOpen])
+
+    // Countdown Timer
+    useEffect(() => {
+        if (countdown > 0) {
+            const timer = setTimeout(() => setCountdown(c => c - 1), 1000)
+            return () => clearTimeout(timer)
+        }
+    }, [countdown])
 
     const handleSendOtp = async () => {
         if (phone.length < 8) return
@@ -100,8 +133,11 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
             const confirmation = await signInWithPhoneNumber(auth, formatPhone, window.recaptchaVerifier)
             setConfirmationResult(confirmation)
             setStep('otp')
+            setCountdown(60)
         } catch (err: any) {
-            console.error(err)
+            console.error('Detailed OTP Error:', err)
+            console.error('Error Code:', err.code || 'unknown')
+            console.error('Error Message:', err.message)
             setError(err.message || 'Failed to send OTP')
             // Don't destroy the verifier on error, just let user retry.
             // if (window.recaptchaVerifier) {
@@ -263,7 +299,7 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
                         >
                             {loading ? 'Sending...' : 'Verify Phone Number'}
                         </button>
-                        <div ref={recaptchaContainerRef}></div>
+
                     </div>
                 )}
 
@@ -287,9 +323,12 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
                         >
                             {loading ? 'Verifying...' : 'Verify Code'}
                         </button>
-                        <button onClick={() => setStep('phone')} className="w-full text-sm text-gray-500 hover:text-gray-700">
-                            Change Number
-                        </button>
+                        <div className="mt-4 flex justify-between items-center text-sm">
+                            <button onClick={() => setStep('phone')} className="text-gray-500 hover:text-gray-700">Change Number</button>
+                            <button onClick={handleSendOtp} disabled={countdown > 0} className={`font-medium ${countdown > 0 ? 'text-gray-400 cursor-not-allowed' : 'text-primary-600 hover:text-primary-700'}`}>
+                                {countdown > 0 ? `Resend Code (${countdown}s)` : 'Resend Code'}
+                            </button>
+                        </div>
                     </div>
                 )}
 
@@ -389,6 +428,7 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
                 {step !== 'success' && (
                     <button onClick={onClose} className="mt-4 w-full text-sm text-gray-500">Cancel</button>
                 )}
+                <div ref={recaptchaContainerRef}></div>
             </div>
         </div>
     )
