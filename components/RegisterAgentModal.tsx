@@ -19,8 +19,8 @@ declare global {
 }
 
 export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentModalProps) {
-    // Steps: phone -> otp -> details -> success
-    const [step, setStep] = useState<'phone' | 'otp' | 'details' | 'success'>('phone')
+    // Steps: details -> otp -> success
+    const [step, setStep] = useState<'details' | 'otp' | 'success'>('details')
 
     // Form State
     const [phone, setPhone] = useState('')
@@ -33,24 +33,32 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
         email: '',
         password: ''
     })
+
+    // Validation State
+    const [fieldErrors, setFieldErrors] = useState({
+        name: '',
+        agency: '',
+        renNumber: '',
+        email: '',
+        password: '',
+        phone: ''
+    })
+
     const [countdown, setCountdown] = useState(0)
 
     // Refs for Recaptcha
     const recaptchaContainerRef = useRef<HTMLDivElement>(null)
 
     const [loading, setLoading] = useState(false)
-    const [error, setError] = useState('')
+    const [error, setError] = useState('') // General error
     const { user, signUp, refreshProfile, profile, signInWithOtp, signOut } = useAuth()
 
     // Auto-advance to details if user is already logged in (Ghost state handling)
-    // or if they just verified OTP and the parent didn't unmount
-    // Auto-advance to details if user is already logged in (Ghost state handling)
-    // or if they just verified OTP and the parent didn't unmount
     useEffect(() => {
-        if (isOpen && step === 'phone' && user && !profile) {
+        if (isOpen && step === 'details' && user && !profile) {
             console.log('Ghost user detected (Auth but no Profile). Signing out to ensure fresh registration flow.')
             signOut()
-            setStep('phone')
+            setStep('details')
         }
     }, [isOpen, user, profile, step, signOut])
 
@@ -71,8 +79,6 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
         return p
     }
 
-    // Initialize Recaptcha
-    // Initialize Recaptcha
     // Initialize Recaptcha
     useEffect(() => {
         if (!isOpen || !recaptchaContainerRef.current) return
@@ -123,8 +129,67 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
         }
     }, [countdown])
 
+    const validateForm = () => {
+        let isValid = true
+        const newErrors = {
+            name: '',
+            agency: '',
+            renNumber: '',
+            email: '',
+            password: '',
+            phone: ''
+        }
+
+        if (!details.name.trim()) {
+            newErrors.name = 'Full Name is required'
+            isValid = false
+        }
+
+        if (!details.renNumber.trim()) {
+            newErrors.renNumber = 'REN Number is required'
+            isValid = false
+        }
+
+        if (!details.email.trim()) {
+            newErrors.email = 'Email is required'
+            isValid = false
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(details.email)) {
+            newErrors.email = 'Please enter a valid email address'
+            isValid = false
+        }
+
+        if (!details.password) {
+            newErrors.password = 'Password is required'
+            isValid = false
+        } else if (details.password.length < 6) {
+            newErrors.password = 'Password must be at least 6 characters'
+            isValid = false
+        }
+
+        if (!phone) {
+            newErrors.phone = 'Phone number is required'
+            isValid = false
+        } else if (phone.length < 8) {
+            newErrors.phone = 'Please enter a valid phone number'
+            isValid = false
+        }
+
+        setFieldErrors(newErrors)
+        return isValid
+    }
+
+    const clearFieldError = (field: keyof typeof fieldErrors) => {
+        if (fieldErrors[field]) {
+            setFieldErrors(prev => ({ ...prev, [field]: '' }))
+        }
+    }
+
     const handleSendOtp = async () => {
-        if (phone.length < 8) return
+        if (phone.length < 8) {
+            setFieldErrors(prev => ({ ...prev, phone: 'Please enter a valid phone number' }))
+            return
+        }
+
         setLoading(true)
         setError('')
         try {
@@ -142,11 +207,12 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
             console.error('Detailed OTP Error:', err)
             console.error('Error Code:', err.code || 'unknown')
             console.error('Error Message:', err.message)
-            setError(err.message || 'Failed to send OTP')
-            // Don't destroy the verifier on error, just let user retry.
-            // if (window.recaptchaVerifier) {
-            //    window.recaptchaVerifier.render().then(widgetId => window.grecaptcha.reset(widgetId))
-            // }
+
+            let msg = 'Failed to send OTP'
+            if (err.code === 'auth/invalid-phone-number') msg = 'Invalid phone number format.'
+            if (err.code === 'auth/too-many-requests') msg = 'Too many requests. Please try again later.'
+
+            setError(msg)
         } finally {
             setLoading(false)
         }
@@ -162,32 +228,13 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
             const idToken = await result.user.getIdToken()
 
             // Sign in via NextAuth with the ID Token
-            // We need a custom Credential Provider that accepts idToken
-            // Or we use the existing one but pass idToken as 'code' and a special flag?
-            // Let's modify signInWithOtp to accept idToken
+            const { error: signInError } = await signInWithOtp(getFormattedPhone(), idToken)
 
-            // Using existing signInWithOtp but passing correct params for our modified backend
-            // We will modify AuthContext to support this or just call signIn directly here
+            if (signInError) throw signInError
 
-            // Actually, let's use the AuthContext helper if updated, strictly we must ensure backend matches
-            // Ideally: signIn('firebase', { idToken })
-            // For now, let's look at how we can pass this.
-            // We'll update AuthContext to take an opt 'firebaseToken' or similar.
+            // Proceed to save details immediately
+            await handleSaveDetails()
 
-            // Temporary: Reuse 'code' field to pass idToken? No, token is huge.
-            // Let's call signIn from next-auth/react directly?
-            // But we need to update session...
-
-            // Let's use the 'otp' provider but overload it:
-            // phone: formattedPhone
-            // code: idToken  <-- backend will distinguish based on length or prefix?
-
-            const { error } = await signInWithOtp(getFormattedPhone(), idToken) // We will update AuthContext and lib/auth.ts to handle this
-
-            if (error) throw new Error(error.message)
-
-            // AuthContext handles setting user/session state
-            setStep('details')
         } catch (err: any) {
             console.error(err)
             let errorMessage = 'Failed to verify code. Please try again.'
@@ -204,34 +251,27 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
             }
 
             setError(errorMessage)
-        } finally {
             setLoading(false)
         }
     }
 
+    const handleInitialSubmit = (e: React.FormEvent) => {
+        e.preventDefault()
+
+        if (!validateForm()) {
+            setError('Please ensure all required fields are filled in correctly.')
+            return
+        }
+
+        handleSendOtp()
+    }
+
     const handleSaveDetails = async () => {
         console.log('Starting handleSaveDetails', details)
-        if (!details.name || !details.renNumber || !details.email || !details.password) {
-            setError('All fields including Password are required.')
-            return
-        }
-        if (details.password.length < 6) {
-            setError('Password must be at least 6 characters')
-            return
-        }
-
-        setLoading(true)
-        setError('')
 
         try {
-            // Use user from context instead of fetching again
-            if (!user) {
-                console.error('No authenticated user in context')
-                throw new Error('No authenticated user found. Please try refreshing the page.')
-            }
-            console.log('User found in context:', user.id)
+            // NOTE: We do not check !user here because we just signed in and context might not be updated yet.
 
-            // 1. Update Auth User with Email & Password via Server Action
             console.log('Updating user credentials...')
             const credResult = await updateUserCredentials(details.email, details.password)
 
@@ -267,8 +307,12 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
         } catch (err: any) {
             console.error('Catch Error:', err)
             setError(err.message || 'Failed to save profile')
+
+            // If email error, highlight it
+            if (err.message?.includes('email')) {
+                setFieldErrors(prev => ({ ...prev, email: err.message }))
+            }
         } finally {
-            console.log('Finally block reached, setting loading false')
             setLoading(false)
         }
     }
@@ -286,15 +330,63 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
                 </div>
 
                 {error && (
-                    <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg">
-                        {error}
+                    <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg flex items-start">
+                        <svg className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span>{error}</span>
                     </div>
                 )}
 
-                {step === 'phone' && (
-                    <div className="space-y-4">
+                {step === 'details' && (
+                    <form
+                        onSubmit={handleInitialSubmit}
+                        className="space-y-4"
+                    >
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                            <input
+                                type="text"
+                                value={details.name}
+                                onChange={(e) => {
+                                    setDetails({ ...details, name: e.target.value })
+                                    clearFieldError('name')
+                                }}
+                                className={`input-field ${fieldErrors.name ? 'border-red-500 focus:ring-red-500' : ''}`}
+                                placeholder="e.g. Ali Baba"
+                            />
+                            {fieldErrors.name && <p className="mt-1 text-xs text-red-600">{fieldErrors.name}</p>}
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Agency Name</label>
+                            <input
+                                type="text"
+                                value={details.agency}
+                                onChange={(e) => {
+                                    setDetails({ ...details, agency: e.target.value })
+                                    clearFieldError('agency')
+                                }}
+                                className={`input-field ${fieldErrors.agency ? 'border-red-500 focus:ring-red-500' : ''}`}
+                                placeholder="e.g. IQI Realty"
+                            />
+                            {fieldErrors.agency && <p className="mt-1 text-xs text-red-600">{fieldErrors.agency}</p>}
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">REN Number *</label>
+                            <input
+                                type="text"
+                                value={details.renNumber}
+                                onChange={(e) => {
+                                    setDetails({ ...details, renNumber: e.target.value })
+                                    clearFieldError('renNumber')
+                                }}
+                                className={`input-field ${fieldErrors.renNumber ? 'border-red-500 focus:ring-red-500' : ''}`}
+                                placeholder="e.g. REN 12345"
+                            />
+                            {fieldErrors.renNumber && <p className="mt-1 text-xs text-red-600">{fieldErrors.renNumber}</p>}
+                        </div>
+
+                        {/* Phone Number Input */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <span className="text-gray-500 font-medium">+60</span>
@@ -302,26 +394,69 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
                                 <input
                                     type="tel"
                                     value={phone}
-                                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                                    onChange={(e) => {
+                                        setPhone(e.target.value.replace(/\D/g, ''))
+                                        clearFieldError('phone')
+                                    }}
                                     placeholder="12 345 6789"
-                                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none"
-                                    autoFocus
+                                    className={`w-full pl-12 pr-4 py-3 border rounded-xl outline-none ${fieldErrors.phone ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-primary-500'}`}
                                 />
                             </div>
+                            {fieldErrors.phone && <p className="mt-1 text-xs text-red-600">{fieldErrors.phone}</p>}
                         </div>
-                        <button
-                            onClick={handleSendOtp}
-                            disabled={loading || phone.length < 8}
-                            className="btn-primary w-full"
-                        >
-                            {loading ? 'Sending...' : 'Verify Phone Number'}
-                        </button>
 
-                    </div>
+                        {/* Credentials Setup */}
+                        <div className="pt-2 border-t border-gray-100">
+                            <p className="text-sm font-semibold text-gray-900 mb-3">Login Credentials</p>
+                            <div className="space-y-3">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                                    <input
+                                        type="email"
+                                        value={details.email}
+                                        onChange={(e) => {
+                                            setDetails({ ...details, email: e.target.value })
+                                            clearFieldError('email')
+                                        }}
+                                        className={`input-field ${fieldErrors.email ? 'border-red-500 focus:ring-red-500' : ''}`}
+                                        placeholder="you@email.com"
+                                        autoComplete="email"
+                                    />
+                                    {fieldErrors.email && <p className="mt-1 text-xs text-red-600">{fieldErrors.email}</p>}
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Password *</label>
+                                    <input
+                                        type="password"
+                                        value={details.password}
+                                        onChange={(e) => {
+                                            setDetails({ ...details, password: e.target.value })
+                                            clearFieldError('password')
+                                        }}
+                                        className={`input-field ${fieldErrors.password ? 'border-red-500 focus:ring-red-500' : ''}`}
+                                        placeholder="Min 6 characters"
+                                        autoComplete="new-password"
+                                    />
+                                    {fieldErrors.password && <p className="mt-1 text-xs text-red-600">{fieldErrors.password}</p>}
+                                </div>
+                            </div>
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="btn-primary w-full mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading ? 'Processing...' : 'Verify & Register'}
+                        </button>
+                    </form>
                 )}
 
                 {step === 'otp' && (
                     <div className="space-y-4">
+                        <div className="text-center mb-2">
+                            <p className="text-sm text-gray-600">Enter the code sent to {getFormattedPhone()}</p>
+                        </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Verification Code</label>
                             <input
@@ -336,100 +471,17 @@ export default function RegisterAgentModal({ isOpen, onClose }: RegisterAgentMod
                         <button
                             onClick={handleVerifyOtp}
                             disabled={loading || otp.length < 6}
-                            className="btn-primary w-full"
+                            className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? 'Verifying...' : 'Verify Code'}
                         </button>
                         <div className="mt-4 flex justify-between items-center text-sm">
-                            <button onClick={() => setStep('phone')} className="text-gray-500 hover:text-gray-700">Change Number</button>
+                            <button onClick={() => setStep('details')} className="text-gray-500 hover:text-gray-700">Back to Details</button>
                             <button onClick={handleSendOtp} disabled={countdown > 0} className={`font-medium ${countdown > 0 ? 'text-gray-400 cursor-not-allowed' : 'text-primary-600 hover:text-primary-700'}`}>
                                 {countdown > 0 ? `Resend Code (${countdown}s)` : 'Resend Code'}
                             </button>
                         </div>
                     </div>
-                )}
-
-                {step === 'details' && (
-                    <form
-                        onSubmit={(e) => {
-                            e.preventDefault()
-                            handleSaveDetails()
-                        }}
-                        className="space-y-4"
-                    >
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
-                            <input
-                                type="text"
-                                value={details.name}
-                                onChange={(e) => setDetails({ ...details, name: e.target.value })}
-                                className="input-field"
-                                placeholder="e.g. Ali Baba"
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Agency Name</label>
-                            <input
-                                type="text"
-                                value={details.agency}
-                                onChange={(e) => setDetails({ ...details, agency: e.target.value })}
-                                className="input-field"
-                                placeholder="e.g. IQI Realty"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">REN Number *</label>
-                            <input
-                                type="text"
-                                value={details.renNumber}
-                                onChange={(e) => setDetails({ ...details, renNumber: e.target.value })}
-                                className="input-field"
-                                placeholder="e.g. REN 12345"
-                                required
-                            />
-                        </div>
-
-                        {/* Credentials Setup */}
-                        <div className="pt-2 border-t border-gray-100">
-                            <p className="text-sm font-semibold text-gray-900 mb-3">Login Credentials</p>
-                            <div className="space-y-3">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                                    <input
-                                        type="email"
-                                        value={details.email}
-                                        onChange={(e) => setDetails({ ...details, email: e.target.value })}
-                                        className="input-field"
-                                        placeholder="you@email.com"
-                                        autoComplete="email"
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Password *</label>
-                                    <input
-                                        type="password"
-                                        value={details.password}
-                                        onChange={(e) => setDetails({ ...details, password: e.target.value })}
-                                        className="input-field"
-                                        placeholder="Min 6 characters"
-                                        autoComplete="new-password"
-                                        required
-                                        minLength={6}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={loading || !details.name || !details.renNumber || !details.email || !details.password}
-                            className="btn-primary w-full mt-2"
-                        >
-                            {loading ? 'Creating Profile...' : 'Complete Registration'}
-                        </button>
-                    </form>
                 )}
 
                 {step === 'success' && (
