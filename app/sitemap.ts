@@ -11,47 +11,34 @@ const MALAYSIAN_STATES = [
     'Putrajaya', 'Sabah', 'Sarawak', 'Selangor', 'Terengganu'
 ]
 
-// Define all sitemap sections
-const SITEMAP_SECTIONS = [
-    'static',
-    'properties-sale',
-    'properties-rent',
-    'properties-projects',
-    'agents',
-    'resources'
-]
-
-export const revalidate = 3600 // Revalidate every hour
-
-export async function generateSitemaps() {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     try {
-        return SITEMAP_SECTIONS.map((id) => ({ id }))
-    } catch (error) {
-        console.error('Error generating sitemap index:', error)
-        return []
-    }
-}
+        const [
+            staticPages,
+            saleProperties,
+            rentProperties,
+            projectProperties,
+            agents,
+            resources
+        ] = await Promise.all([
+            getStaticSitemap(),
+            getPropertySitemap('sale'),
+            getPropertySitemap('rent'),
+            getPropertySitemap('project'),
+            getAgentSitemap(),
+            getResourceSitemap()
+        ])
 
-export default async function sitemap({ id }: { id: string }): Promise<MetadataRoute.Sitemap> {
-    try {
-        switch (id) {
-            case 'static':
-                return getStaticSitemap()
-            case 'properties-sale':
-                return getPropertySitemap('sale')
-            case 'properties-rent':
-                return getPropertySitemap('rent')
-            case 'properties-projects':
-                return getPropertySitemap('project')
-            case 'agents':
-                return getAgentSitemap()
-            case 'resources':
-                return getResourceSitemap()
-            default:
-                return []
-        }
+        return [
+            ...staticPages,
+            ...saleProperties,
+            ...rentProperties,
+            ...projectProperties,
+            ...agents,
+            ...resources
+        ]
     } catch (error) {
-        console.error(`Error generating sitemap for ${id}:`, error)
+        console.error('Error generating sitemap:', error)
         return []
     }
 }
