@@ -21,8 +21,15 @@ const SITEMAP_SECTIONS = [
     'resources'
 ]
 
+export const revalidate = 3600 // Revalidate every hour
+
 export async function generateSitemaps() {
-    return SITEMAP_SECTIONS.map((id) => ({ id }))
+    try {
+        return SITEMAP_SECTIONS.map((id) => ({ id }))
+    } catch (error) {
+        console.error('Error generating sitemap index:', error)
+        return []
+    }
 }
 
 export default async function sitemap({ id }: { id: string }): Promise<MetadataRoute.Sitemap> {
@@ -118,8 +125,8 @@ async function getStaticSitemap(): Promise<MetadataRoute.Sitemap> {
 
 async function getPropertySitemap(type: 'sale' | 'rent' | 'project'): Promise<MetadataRoute.Sitemap> {
     try {
-        // Limit 50k as per Google's limit
-        const properties = await getPropertiesForSitemap(type, 50000)
+        // Limit 10k to prevent timeouts on serverless functions
+        const properties = await getPropertiesForSitemap(type, 10000)
 
         // Map types back to URL segments if needed. 
         // Note: generatePropertySitemapUrl handles basic slugs.
@@ -138,7 +145,7 @@ async function getPropertySitemap(type: 'sale' | 'rent' | 'project'): Promise<Me
 
 async function getAgentSitemap(): Promise<MetadataRoute.Sitemap> {
     try {
-        const agents = await getAgentsForSitemap(10000)
+        const agents = await getAgentsForSitemap(5000)
 
         return agents.map(agent => ({
             url: `${BASE_URL}/agents/${agent.id}`,
