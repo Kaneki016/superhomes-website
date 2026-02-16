@@ -111,11 +111,11 @@ export default function NearbyAmenities({ latitude, longitude, radiusKm = 5 }: N
     }
 
     return (
-        <div className="mb-6 mt-6">
-            <h2 className="font-heading font-bold text-xl mb-4">Nearby Amenities</h2>
-            <p className="text-sm text-gray-500 mb-4">Within {radiusKm}km radius</p>
+        <div className="p-5">
+            <h2 className="font-heading font-bold text-lg mb-0.5">Nearby Amenities</h2>
+            <p className="text-xs text-gray-400 mb-5">Within {radiusKm}km radius</p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8">
                 {(Object.keys(groupedAmenities) as AmenityType[]).map((type) => {
                     const items = groupedAmenities[type]
                     if (items.length === 0) return null
@@ -124,20 +124,20 @@ export default function NearbyAmenities({ latitude, longitude, radiusKm = 5 }: N
 
                     return (
                         <div key={type}>
-                            <h3 className="flex items-center gap-2 font-semibold text-gray-800 mb-3">
-                                <span className="text-lg">{config.icon}</span>
+                            <h3 className="flex items-center gap-2 font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">
+                                <span className="text-base">{config.icon}</span>
                                 {config.label}
                             </h3>
                             <div className="space-y-2">
                                 {items.map((amenity) => (
                                     <div
                                         key={amenity.id}
-                                        className={`flex items-start justify-between p-3 rounded-lg ${config.bgColor}`}
+                                        className={`flex items-start justify-between px-3 py-2.5 rounded-lg ${config.bgColor} border border-transparent hover:border-${config.textColor.split('-')[1]}-200 transition-colors`}
                                     >
-                                        <span className={`font-medium ${config.textColor} text-sm flex-1 mr-3`}>
+                                        <span className={`font-semibold ${config.textColor} text-xs flex-1 mr-3 leading-snug`}>
                                             {amenity.name}
                                         </span>
-                                        <span className="text-xs text-gray-500 whitespace-nowrap mt-0.5">
+                                        <span className="text-[10px] font-bold text-gray-400 whitespace-nowrap mt-0.5 bg-white/50 px-1.5 py-0.5 rounded">
                                             {amenity.distance < 1
                                                 ? `${Math.round(amenity.distance * 1000)} m`
                                                 : `${amenity.distance.toFixed(1)} km`}

@@ -52,8 +52,8 @@ export async function getDistinctPropertyTypesByListingType(listingType: string)
 }
 
 // Transaction Data
-export async function getTransactions(page: number, pageSize: number, filters?: any) {
-    return await dbGetTransactions(page, filters) // Original only took page and filters
+export async function getTransactions(page: number, filters?: any) {
+    return await dbGetTransactions(page, filters)
 }
 
 export async function getTransactionDistricts() {

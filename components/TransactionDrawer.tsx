@@ -1,4 +1,6 @@
-import { X, Building2, Ruler, Calendar, DollarSign, MapPin, Layers, TrendingUp, ArrowUpRight, History, Scale, Check, Plus } from 'lucide-react'
+import {
+    X, Building2, Ruler, Calendar, DollarSign, MapPin, Layers, TrendingUp, ArrowUpRight, History, Scale, Check, Plus, Sparkles
+} from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { Transaction } from '@/lib/types'
 import MortgageCalculator from './MortgageCalculator'
@@ -31,7 +33,7 @@ export default function TransactionDrawer({ transaction, onClose, isOpen, isInCo
         if ((activeTab === 'trends' || activeTab === 'history') && transaction && trendTransactions.length === 0) {
             setLoadingTrends(true)
             // Filter by exact location to show history for this specific building/project
-            getTransactions(1, 1000, {
+            getTransactions(1, {
                 exactLat: transaction.latitude,
                 exactLng: transaction.longitude
             })
@@ -111,135 +113,238 @@ export default function TransactionDrawer({ transaction, onClose, isOpen, isInCo
             {/* Content */}
             <div className="overflow-y-auto lg:overflow-hidden px-6 py-6 pb-24 h-[calc(100vh-140px)] bg-gray-50/50">
                 {activeTab === 'details' ? (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300 h-full">
+                    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300 max-w-4xl mx-auto">
 
-                        {/* Column 1: Price, Metrics & Amenities */}
-                        <div className="space-y-6 flex flex-col h-full lg:overflow-y-auto no-scrollbar">
-                            {/* Premium Price Card */}
-                            <div className="bg-gradient-to-br from-primary-600 to-primary-700 rounded-2xl p-6 text-white shadow-lg shadow-primary-900/10 relative overflow-hidden flex-shrink-0">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-10 -mt-10 blur-2xl"></div>
-                                <div className="absolute bottom-0 left-0 w-24 h-24 bg-black opacity-10 rounded-full -ml-8 -mb-8 blur-xl"></div>
-
-                                <span className="text-primary-100 text-xs font-bold uppercase tracking-widest mb-2 block relative z-10">Transacted Price</span>
-                                <div className="text-4xl font-black mb-2 tracking-tight relative z-10">{formatPriceFull(transaction.price)}</div>
-
-                                <div className="flex items-center gap-4 relative z-10">
-                                    <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10">
-                                        <DollarSign size={14} className="text-white" />
-                                        <span className="font-bold text-sm">RM {psf.toFixed(0)} psf</span>
+                        {/* 1. Hero Summary Section (Price + Key Specs) */}
+                        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                                <div>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className="text-sm font-bold text-gray-500 uppercase tracking-wider">Transacted Price</span>
+                                        <span className="bg-primary-50 text-primary-700 text-[10px] font-bold px-2 py-0.5 rounded border border-primary-100">NAPIC Verified</span>
                                     </div>
-                                    <div className="flex items-center gap-1.5 text-primary-100 text-xs font-medium">
-                                        <Calendar size={12} />
-                                        <span>{formatDate(transaction.transaction_date)}</span>
+                                    <div className="text-4xl lg:text-5xl font-black text-gray-900 tracking-tight">
+                                        {formatPriceFull(transaction.price)}
                                     </div>
                                 </div>
+                                <div className="flex flex-col items-end gap-1">
+                                    <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
+                                        <div className="text-right">
+                                            <span className="block text-xs text-gray-400 font-medium uppercase">Price psf</span>
+                                            <span className="block text-lg font-bold text-gray-900">RM {psf.toFixed(0)}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-gray-400 text-xs">
+                                        <Calendar size={14} />
+                                        <span>Transacted on {formatDate(transaction.transaction_date)}</span>
+                                    </div>
+                                </div>
+                            </div>
 
-                                <div className="absolute top-5 right-5">
-                                    <span className="text-[10px] font-black bg-white/10 text-white backdrop-blur-md px-2 py-1 rounded text-center border border-white/10 shadow-sm">
-                                        NAPIC
+                            {/* Key Stats Grid - Integrated */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-gray-100">
+                                <div className="flex flex-col gap-1 items-start justify-start">
+                                    <span className="flex items-center gap-1.5 text-xs font-bold text-gray-400 uppercase tracking-wide">
+                                        <Building2 size={14} /> Type
+                                    </span>
+                                    <span className="font-semibold text-gray-900 capitalize text-sm leading-tight">{transaction.property_type?.toLowerCase() || '-'}</span>
+                                </div>
+                                <div className="flex flex-col gap-1 items-start justify-start">
+                                    <span className="flex items-center gap-1.5 text-xs font-bold text-gray-400 uppercase tracking-wide">
+                                        <Scale size={14} /> Tenure
+                                    </span>
+                                    <div className="flex items-center gap-1.5">
+                                        <span className={`w-2 h-2 rounded-full flex-shrink-0 ${transaction.tenure?.toLowerCase().includes('free') ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+                                        <span className="font-semibold text-gray-900 text-sm leading-tight">{transaction.tenure || '-'}</span>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col gap-1 items-start justify-start">
+                                    <span className="flex items-center gap-1.5 text-xs font-bold text-gray-400 uppercase tracking-wide">
+                                        <Ruler size={14} /> Built-up
+                                    </span>
+                                    <span className="font-semibold text-gray-900 text-sm leading-tight">
+                                        {transaction.built_up_sqft ? `${Number(transaction.built_up_sqft).toLocaleString(undefined, { maximumFractionDigits: 0 })} sqft` : '-'}
+                                    </span>
+                                </div>
+                                <div className="flex flex-col gap-1 items-start justify-start">
+                                    <span className="flex items-center gap-1.5 text-xs font-bold text-gray-400 uppercase tracking-wide">
+                                        <MapPin size={14} /> Land Area
+                                    </span>
+                                    <span className="font-semibold text-gray-900 text-sm leading-tight">
+                                        {transaction.land_area_sqft ? `${Number(transaction.land_area_sqft).toLocaleString(undefined, { maximumFractionDigits: 0 })} sqft` : '-'}
                                     </span>
                                 </div>
                             </div>
-
-                            {/* Nearby Amenities (Moved Here) */}
-                            <div>
-                                {transaction.latitude && transaction.longitude && (
-                                    <NearbyAmenities
-                                        latitude={transaction.latitude}
-                                        longitude={transaction.longitude}
-                                        radiusKm={3}
-                                    />
-                                )}
-                            </div>
                         </div>
 
-                        {/* Column 2: Specs (Right Column) */}
-                        <div className="space-y-6 flex flex-col h-full lg:overflow-y-auto no-scrollbar">
-                            {/* Property Specs */}
-                            <div>
-                                <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-3 flex items-center gap-2">
-                                    <Building2 size={16} /> Property Specifications
-                                </h3>
-                                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="p-4 rounded-xl bg-gray-50 border border-gray-100 flex flex-col gap-2 relative overflow-hidden">
-                                            <div className="flex items-center gap-2 text-gray-400 mb-1">
-                                                <Building2 size={16} />
-                                                <span className="text-xs font-bold uppercase tracking-wider">Type</span>
-                                            </div>
-                                            <span className="font-bold text-gray-900">{transaction.property_type || '-'}</span>
-                                            <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-primary-50 to-transparent rounded-bl-full opacity-50"></div>
-                                        </div>
+                        {/* 2. Secondary Sections Layout */}
+                        <div className="space-y-8">
 
-                                        <div className="p-4 rounded-xl bg-gray-50 border border-gray-100 flex flex-col gap-2 relative overflow-hidden">
-                                            <div className="flex items-center gap-2 text-gray-400 mb-1">
-                                                <Scale size={16} />
-                                                <span className="text-xs font-bold uppercase tracking-wider">Tenure</span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <span className={`w-2 h-2 rounded-full ring-2 ring-offset-1 ${transaction.tenure?.toLowerCase().includes('free') ? 'bg-emerald-500 ring-emerald-200' : 'bg-amber-500 ring-amber-200'}`}></span>
-                                                <span className="font-bold text-gray-900">{transaction.tenure || '-'}</span>
-                                            </div>
-                                        </div>
+                            {/* Left: Location & Details */}
+                            <div className="space-y-8">
 
-                                        <div className="p-4 rounded-xl bg-gray-50 border border-gray-100 flex flex-col gap-2 relative overflow-hidden">
-                                            <div className="flex items-center gap-2 text-gray-400 mb-1">
-                                                <Ruler size={16} />
-                                                <span className="text-xs font-bold uppercase tracking-wider">Built-up</span>
-                                            </div>
-                                            <span className="font-bold text-gray-900">
-                                                {transaction.built_up_sqft ? `${Number(transaction.built_up_sqft).toLocaleString(undefined, { maximumFractionDigits: 0 })} sqft` : '-'}
+                                {/* Location Badge */}
+                                <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+                                    <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                        <MapPin size={18} className="text-primary-600" />
+                                        Location Details
+                                    </h3>
+                                    <div className="flex flex-col space-y-2">
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1">Address</span>
+                                            <span className="text-base font-bold text-gray-900 leading-snug">{transaction.address}</span>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2 pt-2">
+                                            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-50 text-gray-700 border border-gray-100">
+                                                {transaction.neighborhood}
+                                            </span>
+                                            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-50 text-gray-700 border border-gray-100">
+                                                {transaction.district}
                                             </span>
                                         </div>
-
-                                        <div className="p-4 rounded-xl bg-gray-50 border border-gray-100 flex flex-col gap-2 relative overflow-hidden">
-                                            <div className="flex items-center gap-2 text-gray-400 mb-1">
-                                                <MapPin size={16} />
-                                                <span className="text-xs font-bold uppercase tracking-wider">Land Area</span>
-                                            </div>
-                                            <span className="font-bold text-gray-900">
-                                                {transaction.land_area_sqft ? `${Number(transaction.land_area_sqft).toLocaleString(undefined, { maximumFractionDigits: 0 })} sqft` : '-'}
-                                            </span>
-                                        </div>
-
-                                        <div className="p-4 rounded-xl bg-gray-50 border border-gray-100 flex flex-col gap-2 relative overflow-hidden col-span-2">
-                                            <div className="flex items-center gap-2 text-gray-400 mb-1">
-                                                <MapPin size={16} />
-                                                <span className="text-xs font-bold uppercase tracking-wider">Location</span>
-                                            </div>
-                                            <div className="font-bold text-gray-900 flex flex-col">
-                                                <span>{transaction.neighborhood}</span>
-                                                <span className="text-xs font-normal text-gray-500 uppercase">{transaction.district}</span>
-                                            </div>
-                                        </div>
-
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
 
-
-                ) : activeTab === 'trends' ? (
-                    <div className="h-full animate-in fade-in slide-in-from-bottom-2 duration-300">
-                        <div className="mb-4">
-                            <h3 className="text-lg font-bold text-gray-900 mb-1">Market Trends: {transaction.address}</h3>
-                            <p className="text-sm text-gray-500">Historical performance based on {trendTransactions.length > 0 ? trendTransactions.length : '...'} transactions at this location.</p>
-                        </div>
-
-                        {loadingTrends ? (
-                            <div className="h-64 flex items-center justify-center bg-gray-50 rounded-xl border border-dotted border-gray-300">
-                                <div className="flex flex-col items-center gap-2">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary-600 border-t-transparent"></div>
-                                    <span className="text-sm text-gray-500 font-medium">Loading market data...</span>
+                                {/* Amenities - Now inline */}
+                                <div>
+                                    {/* Removed Duplicate Title "Nearby Amenities" here because the component has its own */}
+                                    {transaction.latitude && transaction.longitude && (
+                                        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden p-1">
+                                            <NearbyAmenities
+                                                latitude={transaction.latitude}
+                                                longitude={transaction.longitude}
+                                                radiusKm={3}
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                             </div>
-                        ) : (
-                            <div className="h-[400px]">
-                                <TrendChart transactions={trendTransactions} className="h-full border border-gray-100 rounded-xl shadow-sm" />
-                            </div>
-                        )}
+
+
+                        </div>
                     </div>
+
+
+                ) : activeTab === 'trends' ? (<div className="h-full animate-in fade-in slide-in-from-bottom-2 duration-300 overflow-y-auto pb-24 pr-2">
+                    <div className="mb-6">
+                        <h3 className="text-lg font-bold text-gray-900 mb-1">Market Trends: {transaction.address}</h3>
+                        <p className="text-sm text-gray-500">Historical performance based on {trendTransactions.length} transactions at this location.</p>
+                    </div>
+
+                    {loadingTrends ? (
+                        <div className="h-64 flex items-center justify-center bg-gray-50 rounded-xl border border-dotted border-gray-300">
+                            <div className="flex flex-col items-center gap-2">
+                                <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary-600 border-t-transparent"></div>
+                                <span className="text-sm text-gray-500 font-medium">Loading market data...</span>
+                            </div>
+                        </div>
+                    ) : (
+                        (() => {
+                            const prices = trendTransactions.map(t => t.price)
+                            const avgPrice = prices.reduce((a, b) => a + b, 0) / (prices.length || 1)
+                            const psfs = trendTransactions.map(t => t.price / (t.built_up_sqft || t.land_area_sqft || 1))
+                            const avgPsf = psfs.reduce((a, b) => a + b, 0) / (psfs.length || 1)
+
+                            return (
+                                <div className="space-y-6">
+                                    {/* AI Market Analyst Card */}
+                                    <div className="bg-purple-50/50 rounded-xl p-5 border border-purple-100 relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 w-1 h-full bg-gradient-to-b from-purple-400 to-pink-500 opacity-50"></div>
+                                        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
+                                            <div className="flex gap-4">
+                                                <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-purple-600 shrink-0 border border-purple-50">
+                                                    <Sparkles size={20} />
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-bold text-gray-900">AI Market Analyst</h4>
+                                                    <p className="text-xs text-gray-500">Smart insights based on this data</p>
+                                                </div>
+                                            </div>
+                                            <button className="px-4 py-2 bg-white text-purple-600 text-xs font-bold border border-purple-100 rounded-lg hover:bg-purple-50 transition-colors shadow-sm whitespace-nowrap">
+                                                Generate Insights
+                                            </button>
+                                        </div>
+                                        <p className="text-xs text-gray-400 italic">Click "Generate Insights" to get a summary of price trends and market volume.</p>
+                                    </div>
+
+                                    {/* Stats Grid */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Price Analysis */}
+                                        <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow">
+                                            <div className="flex justify-between items-start mb-6">
+                                                <div>
+                                                    <h4 className="font-bold text-gray-900 text-sm">Price Analysis</h4>
+                                                    <p className="text-[10px] text-gray-400">Avg vs Median Transaction Price</p>
+                                                </div>
+                                                <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">Stable</span>
+                                            </div>
+
+                                            <div className="flex items-end justify-between mb-2">
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">Avg Price</span>
+                                                    <span className="text-2xl font-black text-gray-900">
+                                                        RM {(avgPrice >= 1000000 ? `${(avgPrice / 1000).toLocaleString(undefined, { maximumFractionDigits: 0 })}k` : avgPrice.toLocaleString(undefined, { maximumFractionDigits: 0 }))}
+                                                    </span>
+                                                </div>
+                                                {/* Mini Sparkline Placeholder */}
+                                                <div className="flex gap-0.5 mb-1">
+                                                    <div className="w-1 h-3 bg-gray-100 rounded-full"></div>
+                                                    <div className="w-1 h-4 bg-gray-200 rounded-full"></div>
+                                                    <div className="w-1 h-3 bg-gray-100 rounded-full"></div>
+                                                    <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
+                                                </div>
+                                            </div>
+
+                                            <div className="h-px bg-gray-100 w-full mb-2"></div>
+                                            <div className="flex justify-between text-[10px] text-gray-400">
+                                                <span>Low: RM {(Math.min(...prices) / 1000).toFixed(0)}k</span>
+                                                <span>High: RM {(Math.max(...prices) / 1000).toFixed(0)}k</span>
+                                            </div>
+                                        </div>
+
+                                        {/* PSF Analysis */}
+                                        <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow">
+                                            <div className="flex justify-between items-start mb-6">
+                                                <div>
+                                                    <h4 className="font-bold text-gray-900 text-sm">PSF Analysis</h4>
+                                                    <p className="text-[10px] text-gray-400">Price Per Sqft Performance</p>
+                                                </div>
+                                                <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">Stable</span>
+                                            </div>
+
+                                            <div className="flex items-end justify-between mb-2">
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">Avg PSF</span>
+                                                    <span className="text-2xl font-black text-gray-900">
+                                                        RM {avgPsf.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                                    </span>
+                                                </div>
+                                                <div className="flex gap-0.5 mb-1">
+                                                    <div className="w-1 h-3 bg-gray-100 rounded-full"></div>
+                                                    <div className="w-1 h-5 bg-purple-500 rounded-full"></div>
+                                                    <div className="w-1 h-4 bg-gray-200 rounded-full"></div>
+                                                </div>
+                                            </div>
+
+                                            <div className="h-px bg-gray-100 w-full mb-2"></div>
+                                            <div className="flex justify-between text-[10px] text-gray-400">
+                                                <span>Low: RM {Math.min(...psfs).toFixed(0)}</span>
+                                                <span>High: RM {Math.max(...psfs).toFixed(0)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Full Chart */}
+                                    <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+                                        <div className="h-auto">
+                                            <TrendChart transactions={trendTransactions} className="h-auto" minimal={true} />
+                                        </div>
+                                    </div>
+                                </div>
+                            )
+                        })()
+                    )}
+                </div>
                 ) : activeTab === 'history' ? (
                     <div className="h-full animate-in fade-in slide-in-from-bottom-2 duration-300">
                         <div className="mb-4 flex items-center justify-between">
@@ -286,7 +391,7 @@ export default function TransactionDrawer({ transaction, onClose, isOpen, isInCo
                                                         RM {tPsf.toFixed(0)}
                                                     </td>
                                                     <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
-                                                        {t.built_up_sqft ? `${t.built_up_sqft} sqft` : '-'}
+                                                        {t.built_up_sqft ? `${Number(t.built_up_sqft).toLocaleString(undefined, { maximumFractionDigits: 0 })} sqft` : '-'}
                                                     </td>
                                                     <td className="px-4 py-3 text-gray-600 capitalize whitespace-nowrap">
                                                         {t.property_type?.toLowerCase() || '-'}

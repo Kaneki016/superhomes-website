@@ -69,48 +69,131 @@ export default function TransactionMap({
     const [showListings, setShowListings] = useState(true)
     const [showControls, setShowControls] = useState(false) // Mobile controls toggle
 
-    // Handle external draw trigger
+    // Handle external draw trigger - Freehand Lasso
     useEffect(() => {
         if (!mapInstanceRef.current || !leaflet) return
 
-        // Cleanup function to disable any active drawer
-        const cleanup = () => {
-            if (drawHandlerRef.current) {
-                drawHandlerRef.current.disable()
-                drawHandlerRef.current = null
+        const map = mapInstanceRef.current
+        const container = map.getContainer()
+
+        // Clean up previous handlers
+        map.off('mousedown')
+        map.off('mousemove')
+        map.off('mouseup')
+        // Also handle global mouseup in case user drags outside map
+        window.removeEventListener('mouseup', handleGlobalMouseUp)
+
+        // Refs for current drawing session
+        let isDrawingLasso = false
+        let lassoPoints: any[] = []
+        let tempPolyline: any = null
+
+        function handleMouseDown(e: any) {
+            if (!isDrawing) return
+
+            // Prevent map drag
+            map.dragging.disable()
+            isDrawingLasso = true
+            lassoPoints = [e.latlng]
+
+            // Create temporary line
+            tempPolyline = leaflet.polyline(lassoPoints, {
+                color: '#4f46e5', // Indigo 600
+                weight: 3,
+                opacity: 0.8,
+                dashArray: '10, 10', // Dashed line while drawing
+                className: 'lasso-drawing-line'
+            }).addTo(map)
+        }
+
+        function handleMouseMove(e: any) {
+            if (!isDrawingLasso || !tempPolyline) return
+
+            // Add point
+            lassoPoints.push(e.latlng)
+            tempPolyline.setLatLngs(lassoPoints)
+        }
+
+        function handleMouseUp() {
+            if (!isDrawingLasso) return
+
+            isDrawingLasso = false
+            map.dragging.enable()
+
+            // Finish Drawing
+            if (lassoPoints.length > 2) {
+                // Remove temp line
+                if (tempPolyline) tempPolyline.remove()
+
+                // Simplify points (Reduce density for smoother polygon)
+                // A very crude simplification: take every Nth point or simple distance check
+                // Leaflet usually handles polygon rendering well, but for cleaner shapes:
+                const simplifiedPoints = lassoPoints.filter((_, i) => i % 3 === 0)
+                // Ensure closed loop
+                simplifiedPoints.push(simplifiedPoints[0])
+
+                // Clear previous shapes
+                drawnItemsRef.current.clearLayers()
+
+                // Create "Glass" Polygon
+                const glassPolygon = leaflet.polygon(simplifiedPoints, {
+                    color: '#6366f1', // Indigo 500 (Stroke)
+                    weight: 3,
+                    opacity: 1,
+                    fillColor: '#4f46e5', // Indigo 600 (Fill)
+                    fillOpacity: 0.15, // Subtle glass tint
+                    className: 'glass-polygon', // For CSS backdrop-filter
+                    lineJoin: 'round'
+                }).addTo(drawnItemsRef.current)
+
+                // Callback
+                const backendPoints = simplifiedPoints.map((p: any) => ({ lat: p.lat, lng: p.lng }))
+                onPolygonCompleteRef.current?.(backendPoints)
+                onDrawStopRef.current?.()
+
+                // Zoom to fit (optional, maybe jarring? let's animate gently)
+                // map.fitBounds(glassPolygon.getBounds(), { padding: [50, 50], animate: true })
+            } else {
+                // Clicked without dragging much
+                if (tempPolyline) tempPolyline.remove()
             }
+
+            tempPolyline = null
+            lassoPoints = []
+        }
+
+        // Dedicated named function for window listener removal
+        function handleGlobalMouseUp() {
+            if (isDrawingLasso) handleMouseUp()
         }
 
         if (isDrawing) {
-            // Check if already enabled to avoid duplicate handlers
-            if (drawHandlerRef.current && drawHandlerRef.current._enabled) return
+            container.style.cursor = 'crosshair'
 
-            const map = mapInstanceRef.current
+            map.on('mousedown', handleMouseDown)
+            map.on('mousemove', handleMouseMove)
+            map.on('mouseup', handleMouseUp)
 
-            // Robustly find the Rectangle constructor
-            // Check leaflet.Draw first, then fallback to window.L.Draw
-            const RectangleDrawer = (leaflet.Draw && leaflet.Draw.Rectangle) ||
-                (window.L && (window.L as any).Draw && (window.L as any).Draw.Rectangle)
+            // Safety release
+            window.addEventListener('mouseup', handleGlobalMouseUp)
 
-            if (RectangleDrawer) {
-                // If there's an existing handler (even disabled), clean it up first
-                cleanup()
-
-                const drawer = new RectangleDrawer(map, {
-                    showArea: true,
-                    shapeOptions: { color: '#4F46E5', clickable: false } // clickable: false prevents self-clicks interference
-                })
-                drawer.enable()
-                drawHandlerRef.current = drawer
-            } else {
-                console.warn('Leaflet Draw not found')
-            }
         } else {
-            // If not drawing, ensure disabled
-            cleanup()
+            container.style.cursor = ''
         }
 
-        return cleanup
+        return () => {
+            if (mapInstanceRef.current) {
+                mapInstanceRef.current.getContainer().style.cursor = ''
+                mapInstanceRef.current.off('mousedown', handleMouseDown)
+                mapInstanceRef.current.off('mousemove', handleMouseMove)
+                mapInstanceRef.current.off('mouseup', handleMouseUp)
+
+                if (isDrawingLasso) {
+                    mapInstanceRef.current.dragging.enable()
+                }
+            }
+            window.removeEventListener('mouseup', handleGlobalMouseUp)
+        }
     }, [isDrawing, leaflet])
 
     // Sync external polygon state with drawn items (e.g. for clearing)
@@ -151,7 +234,13 @@ export default function TransactionMap({
                 if (!mapInstanceRef.current && mapRef.current) {
                     const map = L.map(mapRef.current, {
                         zoomControl: false,
-                        tap: false // Disable tap handler for mobile compatibility
+                        tap: false, // Disable tap handler for mobile compatibility
+                        minZoom: 6,
+                        maxBounds: [
+                            [0.0, 99.0], // South West
+                            [8.0, 120.0] // North East
+                        ],
+                        maxBoundsViscosity: 1.0
                     } as any).setView([3.1390, 101.6869], 11)
 
                     mapInstanceRef.current = map
@@ -692,6 +781,17 @@ export default function TransactionMap({
                 .map-marker { display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
                 .map-marker-dot { width: 10px; height: 10px; background-color: #4F46E5; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
                 .map-marker-dot.colored-dot { width: 14px; height: 14px; border-width: 2px; }
+                
+                /* Glassmorphism Polygon Style */
+                /* Note: backdrop-filter support on SVG elements varies by browser engine */
+                .glass-polygon {
+                    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+                    transition: all 0.3s ease;
+                }
+                
+                .lasso-drawing-line {
+                    filter: drop-shadow(0 2px 4px rgba(79, 70, 229, 0.3));
+                }
             `}</style>
         </div>
     )

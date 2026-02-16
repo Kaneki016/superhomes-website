@@ -201,6 +201,8 @@ export default function TransactionMapPage() {
                 const defaultMaxPrice = 5000000
                 // Check if filters are in default state (User hasn't interacted yet)
                 const isDefault =
+                    !filters.district &&
+                    !filters.mukim &&
                     !filters.neighborhood &&
                     filters.minPrice === 0 &&
                     filters.maxPrice === defaultMaxPrice &&
@@ -232,6 +234,8 @@ export default function TransactionMapPage() {
 
                 // Prepare filter object for API
                 const apiFilters: any = {}
+                if (filters.district) apiFilters.district = filters.district
+                if (filters.mukim) apiFilters.mukim = filters.mukim
                 if (filters.neighborhood) apiFilters.neighborhood = filters.neighborhood
                 // if (filters.searchQuery) apiFilters.searchQuery = filters.searchQuery // Removed Search Query
                 if (filters.minPrice > 0) apiFilters.minPrice = filters.minPrice
@@ -489,12 +493,14 @@ export default function TransactionMapPage() {
                                     <div className="fixed inset-0 z-10" onClick={() => setOpenFilter(null)}></div>
                                     <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-20 animate-fade-in">
                                         <button onClick={() => setRecency('Date')} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700">All Time</button>
+                                        <button onClick={() => setRecency('2025', 2025, 2025)} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700">2025</button>
                                         <button onClick={() => setRecency('2024', 2024, 2024)} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700">2024</button>
                                         <button onClick={() => setRecency('2023', 2023, 2023)} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700">2023</button>
                                         <button onClick={() => setRecency('2022', 2022, 2022)} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700">2022</button>
+                                        <button onClick={() => setRecency('2021', 2021, 2021)} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700">2021</button>
                                         <div className="border-t my-1"></div>
-                                        <button onClick={() => setRecency('Last 2 Years', 2023, 2024)} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700">Last 2 Years</button>
-                                        <button onClick={() => setRecency('Last 5 Years', 2020, 2024)} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700">Last 5 Years</button>
+                                        <button onClick={() => setRecency('Last 2 Years', 2024, 2025)} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700">Last 2 Years</button>
+                                        <button onClick={() => setRecency('Last 5 Years', 2021, 2025)} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700">Last 5 Years</button>
                                     </div>
                                 </>
                             )}
@@ -611,22 +617,7 @@ export default function TransactionMapPage() {
                     <div className="flex-grow"></div>
 
                     {/* Right Side Metrics (Condensed) */}
-                    <div className="hidden lg:flex items-center gap-6 text-sm text-gray-600 bg-gray-50 px-4 py-2 rounded-lg border border-gray-100">
-                        <div className="flex flex-col items-center leading-none">
-                            <span className="text-[10px] uppercase font-bold text-gray-400">Avg Price</span>
-                            <span className="font-bold text-gray-900">RM{(displayMetrics.avgPrice / 1000).toFixed(0)}k</span>
-                        </div>
-                        <div className="w-px h-6 bg-gray-200"></div>
-                        <div className="flex flex-col items-center leading-none">
-                            <span className="text-[10px] uppercase font-bold text-gray-400">Avg PSF</span>
-                            <span className="font-bold text-gray-900">{displayMetrics.avgPsf ? `RM${displayMetrics.avgPsf.toFixed(0)}` : '-'}</span>
-                        </div>
-                        <div className="w-px h-6 bg-gray-200"></div>
-                        <div className="flex flex-col items-center leading-none">
-                            <span className="text-[10px] uppercase font-bold text-gray-400">Count</span>
-                            <span className="font-bold text-gray-900">{displayMetrics.totalTransactions}</span>
-                        </div>
-                    </div>
+
 
                     <button
                         onClick={() => {
@@ -706,6 +697,28 @@ export default function TransactionMapPage() {
                     />
                 )}
 
+                {/* Floating Metrics Overlay (Top Right) */}
+                {viewMode === 'map' && (
+                    <div className="absolute top-24 right-4 z-[400] hidden md:flex flex-col gap-2 pointer-events-none">
+                        <div className="bg-white/90 backdrop-blur-md shadow-lg rounded-xl border border-gray-100 p-4 pointer-events-auto min-w-[200px]">
+                            <h4 className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-3">Market Snapshot</h4>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <div className="text-[10px] text-gray-500 uppercase">Avg Price</div>
+                                    <div className="text-lg font-bold text-gray-900">RM{(displayMetrics.avgPrice / 1000).toFixed(0)}k</div>
+                                </div>
+                                <div>
+                                    <div className="text-[10px] text-gray-500 uppercase">Avg PSF</div>
+                                    <div className="text-lg font-bold text-gray-900">{displayMetrics.avgPsf ? `RM${displayMetrics.avgPsf.toFixed(0)}` : '-'}</div>
+                                </div>
+                            </div>
+                            <div className="mt-3 pt-3 border-t border-gray-100 flex justify-between items-center">
+                                <span className="text-xs text-gray-500">Transactions</span>
+                                <span className="text-sm font-bold bg-gray-100 px-2 py-0.5 rounded-full text-gray-700">{displayMetrics.totalTransactions}</span>
+                            </div>
+                        </div>
+                    </div>
+                )}
                 {/* Draw Control Hint Overlay (Only when drawing or after drawing) */}
                 {
                     viewMode === 'map' && isDrawing && (
@@ -811,16 +824,18 @@ export default function TransactionMapPage() {
                                 <div>
                                     <h3 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide">Recency</h3>
                                     <div className="grid grid-cols-2 gap-2">
-                                        {['2024', '2023', 'Last 2 Years', 'Last 5 Years'].map((label) => {
+                                        {['2025', '2024', '2023', '2021', 'Last 2 Years', 'Last 5 Years'].map((label) => {
                                             const isActive = filters.recencyLabel === label;
                                             return (
                                                 <button
                                                     key={label}
                                                     onClick={() => {
-                                                        if (label === '2024') setRecency(label, 2024, 2024);
+                                                        if (label === '2025') setRecency(label, 2025, 2025);
+                                                        else if (label === '2024') setRecency(label, 2024, 2024);
                                                         else if (label === '2023') setRecency(label, 2023, 2023);
-                                                        else if (label === 'Last 2 Years') setRecency(label, 2023, 2024);
-                                                        else if (label === 'Last 5 Years') setRecency(label, 2020, 2024);
+                                                        else if (label === '2021') setRecency(label, 2021, 2022); // Maybe user wants > 2021? Or just 2021? Assuming just 2021 for consistent logic
+                                                        else if (label === 'Last 2 Years') setRecency(label, 2024, 2025);
+                                                        else if (label === 'Last 5 Years') setRecency(label, 2021, 2025);
                                                     }}
                                                     className={`px-3 py-2 rounded-lg border text-sm transition-all ${isActive
                                                         ? 'bg-primary-50 border-primary-200 text-primary-700 font-medium'

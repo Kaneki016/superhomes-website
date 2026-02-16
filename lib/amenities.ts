@@ -94,10 +94,10 @@ function buildOverpassQuery(lat: number, lon: number, radiusMeters: number): str
     return `
 [out:json][timeout:15];
 (
-  nwr["amenity"~"^(school|hospital)$"](around:${radiusMeters},${lat},${lon});
-  nwr["railway"~"^(station|halt)$"](around:${radiusMeters},${lat},${lon});
-  nwr["station"="light_rail"](around:${radiusMeters},${lat},${lon});
-  nwr["shop"="mall"](around:${radiusMeters},${lat},${lon});
+  nw["amenity"~"^(school|hospital)$"](around:${radiusMeters},${lat},${lon});
+  nw["railway"~"^(station|halt)$"](around:${radiusMeters},${lat},${lon});
+  nw["station"="light_rail"](around:${radiusMeters},${lat},${lon});
+  nw["shop"="mall"](around:${radiusMeters},${lat},${lon});
 );
 out center;
 `.trim()
@@ -198,8 +198,9 @@ export async function getNearbyAmenities(
 
     if (isNaN(latNum) || isNaN(lonNum)) return []
 
-    // Generate cache key (rounded to 4 decimals = ~11m precision)
-    const cacheKey = `${latNum.toFixed(4)},${lonNum.toFixed(4)}`
+    // Generate cache key (rounded to 3 decimals = ~110m precision)
+    // improved cache hit rate for nearby locations
+    const cacheKey = `${latNum.toFixed(3)},${lonNum.toFixed(3)}`
 
     // 1. Check in-memory cache first (fastest)
     const memCached = cache.get(cacheKey)
