@@ -944,7 +944,7 @@ function buildTransactionConditions(filters: any) {
 
 export async function getTransactions(page: number = 1, filters: any = {}) {
     try {
-        const limit = 500 // Increased limit for map density, or use clustering strategy
+        const limit = 150000 // Increased limit to show ALL data (approx 140k total)
         // Note: For map view, we often want ALL points in bounds, not paginated.
         // But if paginated:
         const offset = (page - 1) * limit
@@ -961,7 +961,7 @@ export async function getTransactions(page: number = 1, filters: any = {}) {
                 longitude::float as longitude
             FROM transactions 
             WHERE ${conditions}
-            ORDER BY transaction_date DESC
+            ORDER BY transaction_date::date DESC
             LIMIT ${limit} OFFSET ${offset}
         `
 

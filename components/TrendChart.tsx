@@ -22,6 +22,7 @@ import { generateTrendInsight } from '@/app/actions/ai-trend-insight'
 interface TrendChartProps {
     transactions: Transaction[]
     className?: string
+    minimal?: boolean
 }
 
 // Custom Tooltip Component for better aesthetics
@@ -53,7 +54,7 @@ const CustomTooltip = ({ active, payload, label, formatter }: any) => {
 }
 
 // Header Component for each chart to show summary stats
-const StatHeader = ({ title, subTitle, currentValue, prevValue, type = 'price' }: any) => {
+const StatHeader = ({ title, subTitle, currentValue, prevValue, type = 'price', minimal = false }: any) => {
     let change = 0
     let isUp = false
     let isNeutral = true
@@ -73,9 +74,9 @@ const StatHeader = ({ title, subTitle, currentValue, prevValue, type = 'price' }
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6">
             <div>
                 <h3 className="text-lg font-bold text-gray-900">{title}</h3>
-                <p className="text-sm text-gray-500">{subTitle}</p>
+                {!minimal && <p className="text-sm text-gray-500">{subTitle}</p>}
             </div>
-            {currentValue > 0 && (
+            {!minimal && currentValue > 0 && (
                 <div className="flex items-end gap-3 mt-2 sm:mt-0">
                     <span className="text-2xl font-bold text-gray-900 tracking-tight">
                         {formattedValue}
@@ -115,7 +116,7 @@ const CustomLegend = (props: any) => {
     );
 };
 
-export default function TrendChart({ transactions, className = '' }: TrendChartProps) {
+export default function TrendChart({ transactions, className = '', minimal = false }: TrendChartProps) {
     const [aiInsight, setAiInsight] = useState<string | null>(null)
     const [isLoadingAi, setIsLoadingAi] = useState(false)
     const [aiError, setAiError] = useState<string | null>(null)
@@ -249,61 +250,63 @@ export default function TrendChart({ transactions, className = '' }: TrendChartP
     }
 
     return (
-        <div className={`grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 h-full overflow-y-auto bg-gray-50/50 ${className}`}>
+        <div className={`grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 h-auto bg-gray-50/50 ${className}`}>
 
             {/* AI Insight Card */}
-            <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 rounded-2xl shadow-sm border border-indigo-100 lg:col-span-2">
-                <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                        <div className="bg-white p-2 rounded-lg shadow-sm text-indigo-600">
-                            <Sparkles size={20} />
+            {!minimal && (
+                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 rounded-2xl shadow-sm border border-indigo-100 lg:col-span-2">
+                    <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                            <div className="bg-white p-2 rounded-lg shadow-sm text-indigo-600">
+                                <Sparkles size={20} />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900">AI Market Analyst</h3>
+                                <p className="text-sm text-gray-600">Smart insights based on this data</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 className="text-lg font-bold text-gray-900">AI Market Analyst</h3>
-                            <p className="text-sm text-gray-600">Smart insights based on this data</p>
-                        </div>
+                        <button
+                            onClick={handleGenerateInsight}
+                            disabled={isLoadingAi || !!aiInsight}
+                            className={`text-sm font-medium px-4 py-2 rounded-lg transition-colors ${aiInsight
+                                ? 'bg-gray-100 text-gray-400 cursor-default'
+                                : 'bg-white text-indigo-600 hover:bg-indigo-50 border border-indigo-200 shadow-sm'
+                                }`}
+                        >
+                            {isLoadingAi ? (
+                                <span className="flex items-center gap-2">
+                                    <Loader2 size={14} className="animate-spin" /> Analyzing...
+                                </span>
+                            ) : aiInsight ? (
+                                'Analysis Complete'
+                            ) : (
+                                'Generate Insights'
+                            )}
+                        </button>
                     </div>
-                    <button
-                        onClick={handleGenerateInsight}
-                        disabled={isLoadingAi || !!aiInsight}
-                        className={`text-sm font-medium px-4 py-2 rounded-lg transition-colors ${aiInsight
-                            ? 'bg-gray-100 text-gray-400 cursor-default'
-                            : 'bg-white text-indigo-600 hover:bg-indigo-50 border border-indigo-200 shadow-sm'
-                            }`}
-                    >
-                        {isLoadingAi ? (
-                            <span className="flex items-center gap-2">
-                                <Loader2 size={14} className="animate-spin" /> Analyzing...
-                            </span>
-                        ) : aiInsight ? (
-                            'Analysis Complete'
-                        ) : (
-                            'Generate Insights'
-                        )}
-                    </button>
-                </div>
 
-                {aiInsight ? (
-                    <div className="bg-white/60 p-4 rounded-xl border border-indigo-100/50">
-                        <ul className="space-y-2 text-gray-700 text-sm leading-relaxed">
-                            {aiInsight.split('•').filter(i => i.trim()).map((point, i) => (
-                                <li key={i} className="flex gap-2">
-                                    <span className="text-indigo-500 mt-1">•</span>
-                                    <span>{point.trim()}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                ) : aiError ? (
-                    <p className="text-rose-500 text-sm bg-rose-50 p-3 rounded-lg border border-rose-100">
-                        {aiError}
-                    </p>
-                ) : (
-                    <p className="text-sm text-gray-400 italic">
-                        Click &quot;Generate Insights&quot; to get a summary of price trends and market volume.
-                    </p>
-                )}
-            </div>
+                    {aiInsight ? (
+                        <div className="bg-white/60 p-4 rounded-xl border border-indigo-100/50">
+                            <ul className="space-y-2 text-gray-700 text-sm leading-relaxed">
+                                {aiInsight.split('•').filter(i => i.trim()).map((point, i) => (
+                                    <li key={i} className="flex gap-2">
+                                        <span className="text-indigo-500 mt-1">•</span>
+                                        <span>{point.trim()}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ) : aiError ? (
+                        <p className="text-rose-500 text-sm bg-rose-50 p-3 rounded-lg border border-rose-100">
+                            {aiError}
+                        </p>
+                    ) : (
+                        <p className="text-sm text-gray-400 italic">
+                            Click &quot;Generate Insights&quot; to get a summary of price trends and market volume.
+                        </p>
+                    )}
+                </div>
+            )}
 
             {/* Price Trend */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col h-[420px] hover:shadow-md transition-shadow duration-200">
@@ -313,6 +316,7 @@ export default function TrendChart({ transactions, className = '' }: TrendChartP
                     currentValue={latestData?.medianPrice} // Use Median as the headline
                     prevValue={prevData?.medianPrice}
                     type="price"
+                    minimal={minimal}
                 />
                 <div className="flex-grow">
                     <ResponsiveContainer width="100%" height="100%">
@@ -374,6 +378,7 @@ export default function TrendChart({ transactions, className = '' }: TrendChartP
                     currentValue={latestData?.medianPsf}
                     prevValue={prevData?.medianPsf}
                     type="psf"
+                    minimal={minimal}
                 />
                 <div className="flex-grow">
                     <ResponsiveContainer width="100%" height="100%">
@@ -435,6 +440,7 @@ export default function TrendChart({ transactions, className = '' }: TrendChartP
                     currentValue={latestData?.volume}
                     prevValue={prevData?.volume}
                     type="volume"
+                    minimal={minimal}
                 />
                 <div className="flex-grow">
                     <ResponsiveContainer width="100%" height="100%">
