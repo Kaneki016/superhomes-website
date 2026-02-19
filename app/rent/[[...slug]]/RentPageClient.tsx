@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, Suspense } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useSearchParams, useRouter, useParams } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import PropertyCard from '@/components/PropertyCard'
@@ -10,7 +10,7 @@ import SearchInput from '@/components/SearchInput'
 import FilterChips from '@/components/FilterChips'
 import FilterModal from '@/components/FilterModal'
 import { Property } from '@/lib/types'
-import { getPropertiesPaginated, getDistinctStates, getFilterOptions } from '@/app/actions/property-actions'
+import { getPropertiesPaginated, getDistinctStates, getFilterOptions, getDistinctPropertyTypesByListingType } from '@/app/actions/property-actions'
 import { ListSkeleton } from '@/components/SkeletonLoader'
 import PageBanner from '@/components/PageBanner'
 
@@ -33,6 +33,8 @@ export default function RentPageClient() {
 }
 
 function RentPageContent() {
+    const params = useParams()
+    const slug = params?.slug as string[] | undefined
     const searchParams = useSearchParams()
     const router = useRouter()
 
@@ -51,8 +53,8 @@ function RentPageContent() {
         maxPrice: '',
         bedrooms: '',
         state: '',
-
     })
+
     const [openDropdown, setOpenDropdown] = useState<string | null>(null)
     const [currentPage, setCurrentPage] = useState(1)
     const [filterModalOpen, setFilterModalOpen] = useState(false)
@@ -64,7 +66,7 @@ function RentPageContent() {
     } | null>(null)
     const dropdownRef = useRef<HTMLDivElement>(null)
 
-    // Update view mode handler to persist to URL
+    // Handle view mode change
     const handleViewModeChange = (mode: 'grid' | 'list') => {
         setViewMode(mode)
         const params = new URLSearchParams(searchParams.toString())
@@ -72,170 +74,211 @@ function RentPageContent() {
         router.replace(`?${params.toString()}`, { scroll: false })
     }
 
-    // Sync state if URL changes externally
-    useEffect(() => {
-        const viewFromUrl = searchParams.get('view') as 'grid' | 'list'
-        if (viewFromUrl && viewFromUrl !== viewMode) {
-            setViewMode(viewFromUrl)
-        }
-    }, [searchParams, viewMode])
+    // Initialize from Slug and SearchParams
+    const initialLoadDone = useRef(false)
 
-    // Initialize filters from URL parameters
     useEffect(() => {
-        const typeParam = searchParams.get('type')
-        const stateParam = searchParams.get('state')
+        let typeFromSlug = ''
+        let stateFromSlug = ''
+
+        if (slug && slug.length > 0) {
+            const firstPart = slug[0].toLowerCase()
+
+            // Standard states check
+            const standardStates = [
+                'johor', 'kedah', 'kelantan', 'kuala-lumpur', 'labuan', 'melaka',
+                'negeri-sembilan', 'pahang', 'penang', 'perak', 'perlis',
+                'putrajaya', 'sabah', 'sarawak', 'selangor', 'terengganu'
+            ]
+
+            const isState = standardStates.includes(firstPart)
+
+            if (isState) {
+                // /rent/[state]
+                stateFromSlug = firstPart.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+            } else if (firstPart === 'all-residential') {
+                // /rent/all-residential/[state]
+                typeFromSlug = ''
+                if (slug.length > 1) {
+                    stateFromSlug = slug[1].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+                }
+            } else {
+                // /rent/[type]
+                // Parse type similar to properties page
+                const parts = firstPart.split('-')
+
+                typeFromSlug = parts.map((part, index) => {
+                    const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
+                    if (part.toLowerCase() === 'storey' && index > 0) {
+                        return 'Storey'
+                    }
+                    return capitalize(part)
+                }).join(' ')
+
+                // Refinements
+                typeFromSlug = typeFromSlug.replace(/(\d+(\.\d+)?) Storey/gi, '$1-Storey')
+                if (typeFromSlug.includes('Semi D')) typeFromSlug = typeFromSlug.replace('Semi D', 'Semi-D')
+
+                // Match against filter options if available (fuzzy match)
+                if (filterOptions?.propertyTypes && filterOptions.propertyTypes.length > 0) {
+                    const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '')
+                    const target = normalize(typeFromSlug)
+                    const bestMatch = filterOptions.propertyTypes.find(opt => normalize(opt) === target)
+                    if (bestMatch) typeFromSlug = bestMatch
+                }
+
+                if (slug.length > 1) {
+                    stateFromSlug = slug[1].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+                }
+            }
+        } else {
+            // Fallback for legacy params
+            const typeParam = searchParams.get('type')
+            const stateParam = searchParams.get('state')
+            if (typeParam) typeFromSlug = typeParam || ''
+            if (stateParam) stateFromSlug = stateParam || ''
+        }
+
+        // Search params override
         const priceParam = searchParams.get('price')
         const bedroomsParam = searchParams.get('bedrooms')
         const searchParam = searchParams.get('search')
 
-        if (typeParam || stateParam || priceParam || bedroomsParam || searchParam) {
-            // Parse price range (e.g., "1000-2000" or "5000+")
-            let minPrice = ''
-            let maxPrice = ''
-            if (priceParam) {
-                if (priceParam.endsWith('+')) {
-                    minPrice = priceParam.slice(0, -1)
-                } else if (priceParam.includes('-')) {
-                    const [min, max] = priceParam.split('-')
-                    minPrice = min
-                    maxPrice = max
-                }
-            }
-
-            // Handle bedroom values (e.g., "5+" becomes "5")
-            const bedroomValue = bedroomsParam ? bedroomsParam.replace('+', '') : ''
-
-            setFilters(prev => ({
-                ...prev,
-                propertyType: typeParam || '',
-                state: stateParam || '',
-                minPrice: minPrice,
-                maxPrice: maxPrice,
-                bedrooms: bedroomValue,
-            }))
-
-            if (searchParam) {
-                setSearchQuery(searchParam)
+        let minPrice = ''
+        let maxPrice = ''
+        if (priceParam) {
+            if (priceParam.endsWith('+')) {
+                minPrice = priceParam.slice(0, -1)
+            } else if (priceParam.includes('-')) {
+                const [min, max] = priceParam.split('-')
+                minPrice = min
+                maxPrice = max
             }
         }
-    }, [searchParams])
+
+        const bedroomValue = bedroomsParam ? bedroomsParam.replace('+', '') : ''
+
+        const initialFilters = {
+            ...filters, // Use current filters as base, but initialization should probably overwrite
+            propertyType: typeFromSlug,
+            state: stateFromSlug,
+            minPrice: minPrice,
+            maxPrice: maxPrice,
+            bedrooms: bedroomValue,
+        }
+
+        const shouldReload = !initialLoadDone.current ||
+            JSON.stringify(initialFilters) !== JSON.stringify(filters) ||
+            (searchParam && searchParam !== searchQuery)
+
+        if (shouldReload) {
+            setFilters(initialFilters)
+            if (searchParam) setSearchQuery(searchParam)
+
+            // Only load if we have a valid slug or it's the first load
+            // This prevents reloading if we just have a small state mismatch that isn't critical?
+            // Actually we should always sync to URL on navigation.
+            loadProperties(1, initialFilters, searchParam || searchQuery)
+            initialLoadDone.current = true
+        }
+
+    }, [slug, searchParams, filterOptions]) // Re-run when options load for better type matching
 
     // Pagination calculations
     const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
 
-    // Reset to page 1 when filters change
-    useEffect(() => {
-        setCurrentPage(1)
-    }, [filters, searchQuery])
-
     // Load rent listings
+    const loadProperties = async (page: number, overrideFilters?: typeof filters, overrideSearch?: string) => {
+        const activeFilters = overrideFilters || filters
+        const activeSearch = overrideSearch !== undefined ? overrideSearch : searchQuery
+
+        setLoading(true)
+        try {
+            // Fetch paginated properties
+            const { properties: rentData, totalCount: count } = await getPropertiesPaginated(
+                page,
+                ITEMS_PER_PAGE,
+                {
+                    location: activeSearch,
+                    propertyType: activeFilters.propertyType,
+                    minPrice: activeFilters.minPrice ? parseInt(activeFilters.minPrice) : undefined,
+                    maxPrice: activeFilters.maxPrice ? parseInt(activeFilters.maxPrice) : undefined,
+                    bedrooms: activeFilters.bedrooms ? parseInt(activeFilters.bedrooms) : undefined,
+                    state: activeFilters.state,
+                    listingType: 'rent'
+                }
+            )
+
+            setProperties(rentData)
+            setTotalCount(count)
+            setCurrentPage(page)
+
+            // Load state options if empty
+            if (stateOptions.length === 0) {
+                const states = await getDistinctStates()
+                setStateOptions(states)
+            }
+
+        } catch (error) {
+            console.error('Error loading rent listings:', error)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    // Load static filter options
     useEffect(() => {
-        async function loadData() {
-            setLoading(true)
+        async function loadStaticOptions() {
             try {
-                // Fetch paginated properties
-                const { properties: rentData, totalCount: count } = await getPropertiesPaginated(
-                    currentPage,
-                    ITEMS_PER_PAGE,
-                    {
-                        location: searchQuery,
-                        propertyType: filters.propertyType,
-                        minPrice: filters.minPrice ? parseInt(filters.minPrice) : undefined,
-                        maxPrice: filters.maxPrice ? parseInt(filters.maxPrice) : undefined,
-                        bedrooms: filters.bedrooms ? parseInt(filters.bedrooms) : undefined,
-                        state: filters.state,
-                        listingType: 'rent'
-                    }
-                )
-
-                setProperties(rentData)
-                setTotalCount(count)
-
-                // Load state options if empty
-                if (stateOptions.length === 0) {
-                    const states = await getDistinctStates()
-                    setStateOptions(states)
-                }
-
-                // Load filter options for modal
-                if (!filterOptions) {
-                    const options = await getFilterOptions()
-                    setFilterOptions(options)
-                }
-            } catch (error) {
-                console.error('Error loading rent listings:', error)
-            } finally {
-                setLoading(false)
-            }
+                const [options, states] = await Promise.all([
+                    getFilterOptions(),
+                    getDistinctStates()
+                ])
+                setFilterOptions(prev => ({ ...(prev || options), ...options }))
+                setStateOptions(states)
+            } catch (e) { console.error(e) }
         }
-        loadData()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentPage, filters, searchQuery])
+        loadStaticOptions()
+    }, [])
 
-    // Initialize filters from URL params
-    const initialLoadDone = useRef(false)
+    // Update property types when state changes
     useEffect(() => {
-        if (initialLoadDone.current) return
-
-        const stateParam = searchParams.get('state')
-        const locationParam = searchParams.get('location')
-        const searchParam = searchParams.get('search')
-        const typeParam = searchParams.get('type')
-        const priceParam = searchParams.get('price')
-        const bedroomsParam = searchParams.get('bedrooms')
-
-        const hasAnyParam = stateParam || locationParam || searchParam || typeParam || priceParam || bedroomsParam
-
-        if (hasAnyParam) {
-            // Parse price range
-            let minPrice = ''
-            let maxPrice = ''
-            if (priceParam) {
-                if (priceParam.endsWith('+')) {
-                    minPrice = priceParam.slice(0, -1)
-                } else if (priceParam.includes('-')) {
-                    const [min, max] = priceParam.split('-')
-                    minPrice = min
-                    maxPrice = max
-                }
-            }
-
-            // Map property type values
-            const propertyTypeMap: { [key: string]: string } = {
-                'condo': 'Condominium',
-                'apartment': 'Apartment',
-                'terrace': 'Terrace House',
-                'semi-d': 'Semi-D',
-                'bungalow': 'Bungalow',
-                'townhouse': 'Townhouse',
-                'all': '',
-            }
-            const mappedPropertyType = typeParam ? (propertyTypeMap[typeParam] || typeParam) : ''
-
-            setFilters(prev => ({
-                ...prev,
-                state: stateParam || '',
-                propertyType: mappedPropertyType,
-                minPrice: minPrice,
-                maxPrice: maxPrice,
-                bedrooms: bedroomsParam || '',
-            }))
-
-            if (searchParam || locationParam) {
-                setSearchQuery(searchParam || locationParam || '')
-            }
+        async function updatePropertyTypes() {
+            try {
+                const rentTypes = await getDistinctPropertyTypesByListingType('rent', filters.state)
+                setFilterOptions(prev => {
+                    if (!prev) return { propertyTypes: rentTypes.sort(), locations: [], bedrooms: [], priceRange: { min: 0, max: 0 } }
+                    return { ...prev, propertyTypes: rentTypes.sort() }
+                })
+            } catch (e) { console.error(e) }
         }
+        updatePropertyTypes()
+    }, [filters.state])
 
-        initialLoadDone.current = true
-    }, [searchParams])
 
-    // Sync filters to URL
+    // Sync filters to URL (Clean URL logic)
     const syncFiltersToUrl = (filterState: typeof filters, search: string) => {
         if (!initialLoadDone.current) return
 
+        let path = '/rent'
+
+        const typeSlug = filterState.propertyType
+            ? filterState.propertyType.trim().toLowerCase().replace(/ /g, '-')
+            : null
+
+        const stateSlug = filterState.state
+            ? filterState.state.trim().toLowerCase().replace(/ /g, '-')
+            : null
+
+        if (typeSlug) {
+            path += `/${typeSlug}`
+            if (stateSlug) path += `/${stateSlug}`
+        } else if (stateSlug) {
+            path += `/all-residential/${stateSlug}`
+        }
+
         const params = new URLSearchParams()
-        if (filterState.state) params.set('state', filterState.state)
-        if (filterState.propertyType) params.set('type', filterState.propertyType)
+
         if (filterState.minPrice && filterState.maxPrice) {
             params.set('price', `${filterState.minPrice}-${filterState.maxPrice}`)
         } else if (filterState.minPrice) {
@@ -243,21 +286,25 @@ function RentPageContent() {
         } else if (filterState.maxPrice) {
             params.set('price', `0-${filterState.maxPrice}`)
         }
+
         if (filterState.bedrooms) params.set('bedrooms', filterState.bedrooms)
         if (search) params.set('search', search)
-        if (viewMode === 'list') params.set('view', 'list')
+
+        const currentView = searchParams.get('view')
+        if (currentView) params.set('view', currentView)
 
         const queryString = params.toString()
-        router.replace(`/rent${queryString ? `?${queryString}` : ''}`, { scroll: false })
+        const newPath = `${path}${queryString ? `?${queryString}` : ''}`
+
+        // Prevent redundant updates
+        const currentPath = window.location.pathname + window.location.search
+        if (currentPath !== newPath) {
+            router.replace(newPath, { scroll: false })
+        }
     }
 
-    // Update sync effect
-    useEffect(() => {
-        if (initialLoadDone.current) {
-            syncFiltersToUrl(filters, searchQuery)
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [filters, searchQuery])
+    // Remove automatic sync effect
+    // Update handlers to manual sync
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -284,24 +331,33 @@ function RentPageContent() {
     ]
 
     const handleFilterChange = (key: string, value: string) => {
-        setFilters(prev => ({ ...prev, [key]: value }))
+        const newFilters = { ...filters, [key]: value }
+        setFilters(newFilters)
         setOpenDropdown(null)
+        loadProperties(1, newFilters)
+        syncFiltersToUrl(newFilters, searchQuery)
     }
 
     const handlePriceRangeSelect = (min: string, max: string) => {
-        setFilters(prev => ({ ...prev, minPrice: min, maxPrice: max }))
+        const newFilters = { ...filters, minPrice: min, maxPrice: max }
+        setFilters(newFilters)
         setOpenDropdown(null)
+        loadProperties(1, newFilters)
+        syncFiltersToUrl(newFilters, searchQuery)
     }
 
     const resetFilters = () => {
-        setFilters({
+        const newFilters = {
             propertyType: '',
             minPrice: '',
             maxPrice: '',
             bedrooms: '',
             state: '',
-
-        })
+        }
+        setFilters(newFilters)
+        setSearchQuery('')
+        loadProperties(1, newFilters)
+        router.replace('/rent', { scroll: false })
     }
 
     const activeFilterCount = Object.values(filters).filter(v => v !== '').length
@@ -311,7 +367,7 @@ function RentPageContent() {
             <Navbar />
             <main className="min-h-screen bg-gray-50">
                 <PageBanner
-                    title="Properties For Rent"
+                    title="Properties For Rent in Malaysia"
                     subtitle="Find the perfect rental property that fits your lifestyle"
                     backgroundImage="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2070&auto=format&fit=crop"
                 />
@@ -323,7 +379,11 @@ function RentPageContent() {
                             <SearchInput
                                 value={searchQuery}
                                 onChange={(val) => setSearchQuery(val)}
-                                onSearch={(val) => setSearchQuery(val)}
+                                onSearch={(val) => {
+                                    setSearchQuery(val)
+                                    loadProperties(1, filters, val) // Pass new search value directly
+                                    syncFiltersToUrl(filters, val)
+                                }}
                                 placeholder="Search location, project, or area..."
                                 className="flex-1"
                             />
@@ -767,7 +827,7 @@ function RentPageContent() {
                                 <Pagination
                                     currentPage={currentPage}
                                     totalPages={totalPages}
-                                    onPageChange={setCurrentPage}
+                                    onPageChange={(page) => loadProperties(page)}
                                 />
                             )}
                         </>
@@ -790,17 +850,19 @@ function RentPageContent() {
 
                     }}
                     onApply={(newFilters) => {
-                        setFilters({
+                        const updatedFilters = {
                             ...filters,
                             propertyType: newFilters.propertyType,
                             minPrice: newFilters.minPrice,
                             maxPrice: newFilters.maxPrice,
                             bedrooms: newFilters.bedrooms,
                             state: newFilters.state,
-
-                        })
+                        }
+                        setFilters(updatedFilters)
                         setSearchQuery(newFilters.location)
                         setFilterModalOpen(false)
+                        loadProperties(1, updatedFilters)
+                        syncFiltersToUrl(updatedFilters, newFilters.location)
                     }}
                     filterOptions={filterOptions}
                     stateOptions={stateOptions}

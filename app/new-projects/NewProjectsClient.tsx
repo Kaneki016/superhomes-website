@@ -153,7 +153,7 @@ function NewProjectsContent() {
             <Navbar />
             <main className="min-h-screen bg-gray-50">
                 <PageBanner
-                    title="New Property Launches"
+                    title="New Property Launches in Malaysia"
                     subtitle="Be the first to discover exclusive new developments and pre-launch projects"
                     backgroundImage="https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=2000&q=80"
                 />

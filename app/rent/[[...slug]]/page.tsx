@@ -1,7 +1,5 @@
-import { permanentRedirect } from 'next/navigation'
-import { getPropertyBySlug } from '@/app/actions/property-actions'
-import { generatePropertyUrl, slugify } from '@/lib/slugUtils'
-import PropertiesClientPage from './PropertiesClientPage'
+import RentPageClient from './RentPageClient'
+import { slugify } from '@/lib/slugUtils'
 import type { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
@@ -41,7 +39,6 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
         } else {
             // Assume type
             type = toTitleCase(firstPart)
-            // Handle special cases roughly matching client
             if (type.includes('Storey')) type = type.replace(/(\d) Storey/g, '$1-Storey')
             if (type.includes('Semi D')) type = type.replace('Semi D', 'Semi-D')
 
@@ -51,27 +48,20 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
         }
     }
 
-    // Override with Search Params if present
+    // Override with Search Params
     if (sp.state && typeof sp.state === 'string') state = sp.state
     if (sp.propertyType && typeof sp.propertyType === 'string') type = sp.propertyType
 
     // Defaults
-    const displayState = state
+    const displayState = state || 'Malaysia'
     const displayType = type || 'Properties'
-    const displayTypeDesc = type || 'properties'
+    const displayTypeDesc = type || 'rental properties'
 
-    let title = ''
-    if (displayState) {
-        title = `Buy Premium ${displayType} in ${displayState}` // Layout adds | SuperHomes
-    } else {
-        title = `Buy ${displayType} in Malaysia From Superhomes` // Layout adds | SuperHomes
-    }
-
-    const descriptionLabelState = displayState || 'Malaysia'
-    const description = `Find the best ${displayTypeDesc.toLowerCase()} in ${descriptionLabelState}. Browse our wide selection of ${displayTypeDesc.toLowerCase()} for sale and rent in ${descriptionLabelState} available on SuperHomes.`
+    const title = `${displayType} for Rent in ${displayState}` // Layout adds | SuperHomes
+    const description = `Find the best ${displayTypeDesc.toLowerCase()} in ${displayState}. Browse our wide selection of ${displayTypeDesc.toLowerCase()} for rent in ${displayState} available on SuperHomes.`
 
     // Construct Canonical URL
-    let canonicalPath = '/properties'
+    let canonicalPath = '/rent'
     if (type) {
         canonicalPath += `/${slugify(type)}`
         if (state) {
@@ -94,26 +84,6 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     }
 }
 
-export default async function Page(props: Props) {
-    const params = await props.params
-    const slug = params.slug
-
-    if (slug && slug.length > 0) {
-        const firstPart = slug[0].toLowerCase()
-        // Heuristic: Ends with 6+ hex characters (shortId) OR contains 'for-sale'/'for-rent'
-        // And is NOT a standard state or common property type (handled by the regex usually being specific)
-        // Note: We only check if it looks like a legacy slug. The client page handles filters.
-
-        // Match regex for legacy slugs: ends with -[hex6] OR contains -for-sale/-for-rent
-        if (firstPart.match(/-[0-9a-f]{6,}$/) || firstPart.includes('-for-sale') || firstPart.includes('-for-rent')) {
-            const property = await getPropertyBySlug(firstPart)
-            if (property) {
-                const newUrl = generatePropertyUrl(property)
-                // Permanent redirect (308) is the SEO equivalent of 301 for most modern crawlers context in Next.js
-                permanentRedirect(newUrl)
-            }
-        }
-    }
-
-    return <PropertiesClientPage />
+export default async function RentPage(props: Props) {
+    return <RentPageClient />
 }

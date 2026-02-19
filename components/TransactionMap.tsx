@@ -80,8 +80,13 @@ export default function TransactionMap({
         map.off('mousedown')
         map.off('mousemove')
         map.off('mouseup')
+        map.off('touchstart')
+        map.off('touchmove')
+        map.off('touchend')
+
         // Also handle global mouseup in case user drags outside map
         window.removeEventListener('mouseup', handleGlobalMouseUp)
+        window.removeEventListener('touchend', handleGlobalMouseUp)
 
         // Refs for current drawing session
         let isDrawingLasso = false
@@ -109,8 +114,11 @@ export default function TransactionMap({
         function handleMouseMove(e: any) {
             if (!isDrawingLasso || !tempPolyline) return
 
+            // Standardize event (Leaflet handles this mostly, but for touch we might need to be careful)
+            const latlng = e.latlng
+
             // Add point
-            lassoPoints.push(e.latlng)
+            lassoPoints.push(latlng)
             tempPolyline.setLatLngs(lassoPoints)
         }
 
@@ -162,6 +170,27 @@ export default function TransactionMap({
             lassoPoints = []
         }
 
+        // Touch Handlers Adapter
+        function handleTouchStart(e: any) {
+            if (!isDrawing) return
+            // Prevent scrolling while drawing
+            if (e.originalEvent) e.originalEvent.preventDefault()
+            handleMouseDown(e)
+        }
+
+        function handleTouchMove(e: any) {
+            if (!isDrawingLasso) return
+            if (e.originalEvent) e.originalEvent.preventDefault()
+            // Leaflet maps touch events to latlng in the event object just like mouse events
+            // if using map.on('touchmove')
+            handleMouseMove(e)
+        }
+
+        function handleTouchEnd(e: any) {
+            if (!isDrawingLasso) return
+            handleMouseUp()
+        }
+
         // Dedicated named function for window listener removal
         function handleGlobalMouseUp() {
             if (isDrawingLasso) handleMouseUp()
@@ -174,8 +203,14 @@ export default function TransactionMap({
             map.on('mousemove', handleMouseMove)
             map.on('mouseup', handleMouseUp)
 
+            // Touch Events
+            map.on('touchstart', handleTouchStart)
+            map.on('touchmove', handleTouchMove)
+            map.on('touchend', handleTouchEnd)
+
             // Safety release
             window.addEventListener('mouseup', handleGlobalMouseUp)
+            window.addEventListener('touchend', handleGlobalMouseUp)
 
         } else {
             container.style.cursor = ''
@@ -183,16 +218,23 @@ export default function TransactionMap({
 
         return () => {
             if (mapInstanceRef.current) {
-                mapInstanceRef.current.getContainer().style.cursor = ''
-                mapInstanceRef.current.off('mousedown', handleMouseDown)
-                mapInstanceRef.current.off('mousemove', handleMouseMove)
-                mapInstanceRef.current.off('mouseup', handleMouseUp)
+                const map = mapInstanceRef.current
+                map.getContainer().style.cursor = ''
+
+                map.off('mousedown', handleMouseDown)
+                map.off('mousemove', handleMouseMove)
+                map.off('mouseup', handleMouseUp)
+
+                map.off('touchstart', handleTouchStart)
+                map.off('touchmove', handleTouchMove)
+                map.off('touchend', handleTouchEnd)
 
                 if (isDrawingLasso) {
-                    mapInstanceRef.current.dragging.enable()
+                    map.dragging.enable()
                 }
             }
             window.removeEventListener('mouseup', handleGlobalMouseUp)
+            window.removeEventListener('touchend', handleGlobalMouseUp)
         }
     }, [isDrawing, leaflet])
 
