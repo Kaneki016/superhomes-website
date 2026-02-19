@@ -1,20 +1,10 @@
 'use client'
 
-import { getDistinctStates, getDistinctPropertyTypesByListingType } from '@/app/actions/property-actions'
-import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useFavorites } from '@/contexts/FavoritesContext'
-import MegaMenu from './MegaMenu'
-
-// Define category mappings
-const HIGH_RISE_KEYWORDS = ['condo', 'apartment', 'residence', 'residences', 'flat', 'studio', 'soho', 'penthouse', 'hotel']
-const LANDED_KEYWORDS = ['terrace', 'bungalow', 'semi-d', 'detached', 'cluster', 'townhouse', 'house', 'land', 'villa']
-
-// Type Guards / Helpers
-const isHighRise = (type: string) => HIGH_RISE_KEYWORDS.some(k => type.toLowerCase().includes(k))
-const isLanded = (type: string) => LANDED_KEYWORDS.some(k => type.toLowerCase().includes(k)) && !isHighRise(type) // High-rise keywords take precedence if ambiguous? Actually 'Townhouse' is landed.
 
 export default function Navbar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -22,133 +12,10 @@ export default function Navbar() {
     const { user, profile, loading, signOut } = useAuth()
     const { favorites } = useFavorites()
 
-    // Dynamic Menu Data State
-    const [menuData, setMenuData] = useState<{
-        states: string[],
-        buyTypes: { highRise: string[], landed: string[] },
-        rentTypes: { highRise: string[], landed: string[] }
-    }>({
-        states: ['Kuala Lumpur', 'Selangor', 'Penang', 'Johor'], // Default fallback
-        buyTypes: {
-            highRise: ['Condo', 'Apartment', 'Serviced Residence'],
-            landed: ['Terrace House', 'Bungalow', 'Semi-D']
-        },
-        rentTypes: {
-            highRise: ['Condo', 'Apartment', 'Serviced Residence'],
-            landed: ['Terrace House', 'Semi-D']
-        }
-    })
-
     const handleSignOut = async () => {
         setUserMenuOpen(false)
         await signOut()
     }
-
-    // Fetch Dynamic Menu Data
-    useEffect(() => {
-        async function fetchMenuData() {
-            try {
-                const [states, saleTypes, rentTypes] = await Promise.all([
-                    getDistinctStates(),
-                    getDistinctPropertyTypesByListingType('sale'),
-                    getDistinctPropertyTypesByListingType('rent')
-                ])
-
-                const categorize = (types: string[]) => {
-                    const highRise = types.filter(t => isHighRise(t)).sort()
-                    const landed = types.filter(t => isLanded(t)).sort()
-                    return { highRise, landed }
-                }
-
-                setMenuData({
-                    states: states.length > 0 ? states.slice(0, 3) : ['Kuala Lumpur', 'Selangor', 'Penang'],
-                    buyTypes: {
-                        highRise: categorize(saleTypes).highRise.slice(0, 3),
-                        landed: categorize(saleTypes).landed.slice(0, 3)
-                    },
-                    rentTypes: {
-                        highRise: categorize(rentTypes).highRise.slice(0, 3),
-                        landed: categorize(rentTypes).landed.slice(0, 3)
-                    }
-                })
-            } catch (error) {
-                console.error('Error fetching menu data:', error)
-            }
-        }
-        fetchMenuData()
-    }, [])
-
-    // Menu Configuration
-    const buyMenu = {
-        title: 'Buy',
-        basePath: '/properties',
-        items: {
-            locations: menuData.states,
-            propertyTypes: [
-                {
-                    title: 'High-Rise',
-                    types: menuData.buyTypes.highRise
-                },
-                {
-                    title: 'Landed',
-                    types: menuData.buyTypes.landed
-                }
-            ],
-            resources: {
-                title: 'Buying Resources',
-                items: [
-                    { label: 'Find an Agent', href: '/agents' },
-                    { label: 'Home Buying Guide', href: '/resources/how-to-buy-first-house-malaysia' }
-                ]
-            }
-        }
-    }
-
-    const rentMenu = {
-        title: 'Rent',
-        basePath: '/rent',
-        items: {
-            locations: menuData.states,
-            propertyTypes: [
-                {
-                    title: 'High-Rise',
-                    types: menuData.rentTypes.highRise
-                },
-                {
-                    title: 'Landed',
-                    types: menuData.rentTypes.landed
-                }
-            ],
-            resources: {
-                title: 'Renting Resources',
-                items: [
-                    { label: 'Find an Agent', href: '/agents' },
-                    { label: 'Tenancy Agreement', href: '/resources/tenancy-agreement-malaysia' }
-                ]
-            }
-        }
-    }
-
-    const projectsMenu = {
-        title: 'New Projects',
-        basePath: '/new-projects',
-        items: {
-            locations: menuData.states.slice(0, 3), // Projects might not exist everywhere, but safe fallback
-            propertyTypes: [
-                {
-                    title: 'Project Types',
-                    types: ['Condo', 'Serviced Residence', 'Landed', 'Township']
-                }
-            ],
-            resources: {
-                title: 'Project Resources',
-                items: [
-                    { label: 'Early Bird Deals', href: '/new-projects?filter=deals' }
-                ]
-            }
-        }
-    }
-
     return (
         <nav className="glass sticky top-0 z-[3000]">
             <div className="container-custom">
@@ -169,10 +36,16 @@ export default function Navbar() {
 
                     {/* Desktop Navigation */}
                     <div className="hidden md:flex items-center space-x-8">
-                        <MegaMenu {...buyMenu} />
-                        <MegaMenu {...rentMenu} />
-                        <MegaMenu {...projectsMenu} />
 
+                        <Link href="/properties" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                            Buy
+                        </Link>
+                        <Link href="/rent" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                            Rent
+                        </Link>
+                        <Link href="/new-projects" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                            New Projects
+                        </Link>
                         <Link href="/agents" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
                             Agents
                         </Link>

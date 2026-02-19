@@ -600,24 +600,6 @@ export async function getAgentById(id: string): Promise<Agent | null> {
 export async function getAgentByAgentId(agentId: string): Promise<Agent | null> {
     return getAgentById(agentId)
 }
-
-export async function getAgentStates(agentId: string): Promise<string[]> {
-    try {
-        const states = await sql`
-            SELECT l.state, COUNT(*) as count
-            FROM listing_contacts lc
-            JOIN listings l ON l.id = lc.listing_id
-            WHERE lc.contact_id = ${agentId} 
-            AND l.is_active = true 
-            AND l.state IS NOT NULL
-            GROUP BY l.state
-            ORDER BY count DESC, l.state ASC
-        `
-        return states.map(s => s.state)
-    } catch (e) {
-        return []
-    }
-}
 export async function getAgents(): Promise<Agent[]> {
     try {
         const data = await sql`SELECT * FROM contacts WHERE contact_type = 'agent' ORDER BY name ASC`
@@ -817,16 +799,11 @@ export async function getDistinctPropertyTypes(): Promise<string[]> {
     } catch (e) { return [] }
 }
 
-export async function getDistinctPropertyTypesByListingType(listingType: 'sale' | 'rent', state?: string): Promise<string[]> {
+export async function getDistinctPropertyTypesByListingType(listingType: 'sale' | 'rent'): Promise<string[]> {
     try {
-        let conditions = sql`is_active = true AND listing_type = ${listingType} AND property_type IS NOT NULL`
-        if (state) {
-            conditions = sql`${conditions} AND state ILIKE ${'%' + state + '%'}`
-        }
-
         const data = await sql`
             SELECT DISTINCT property_type FROM listings 
-            WHERE ${conditions}
+            WHERE is_active = true AND listing_type = ${listingType} AND property_type IS NOT NULL
         `
         return data.map(r => r.property_type).sort()
     } catch (e) { return [] }
