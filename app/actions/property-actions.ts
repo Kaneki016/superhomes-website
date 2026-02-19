@@ -25,7 +25,6 @@ import {
     getSimilarProperties as dbGetSimilarProperties,
     getAgentsPaginated as dbGetAgentsPaginated,
     getPropertiesByAgentId as dbGetPropertiesByAgentId,
-    getAgentStates as dbGetAgentStates,
 } from '@/lib/database'
 
 export async function getFeaturedProperties(limit: number) {
@@ -48,8 +47,8 @@ export async function getPlatformStats() {
     return await dbGetPlatformStats()
 }
 
-export async function getDistinctPropertyTypesByListingType(listingType: string, state?: string) {
-    return await dbGetPropertyTypes(listingType as 'sale' | 'rent', state)
+export async function getDistinctPropertyTypesByListingType(listingType: string) {
+    return await dbGetPropertyTypes(listingType as 'sale' | 'rent')
 }
 
 // Transaction Data
@@ -102,7 +101,6 @@ export async function getPropertiesByAgentIds(agentIds: string[], limit?: number
 export async function getPropertyById(id: string) { return await dbGetPropertyById(id) }
 export async function getPropertyBySlug(slug: string) { return await dbGetPropertyBySlug(slug) }
 export async function getAgentByAgentId(agentId: string) { return await dbGetAgentByAgentId(agentId) }
-export async function getAgentStates(agentId: string) { return await dbGetAgentStates(agentId) }
 export async function getSimilarProperties(
     propertyId: string,
     propertyType: string,
