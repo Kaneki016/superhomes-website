@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { getDistinctPropertyTypesByListingType } from '@/app/actions/property-actions'
+import { slugify } from '@/lib/slugUtils'
 
 // Malaysian states for footer navigation
 const MALAYSIAN_STATES = [
@@ -95,7 +96,7 @@ export default function Footer() {
                             {MALAYSIAN_STATES.slice(0, showAllStates ? MALAYSIAN_STATES.length : 6).map((state) => (
                                 <li key={state}>
                                     <Link
-                                        href={`/properties?state=${encodeURIComponent(state)}`}
+                                        href={`/properties/${slugify(state)}`}
                                         className="text-gray-400 hover:text-primary-400 transition-colors text-sm flex items-center gap-2 group"
                                     >
                                         <svg className="w-4 h-4 text-primary-500 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,7 +138,7 @@ export default function Footer() {
                             {salePropertyTypes.slice(0, showAllSaleTypes ? salePropertyTypes.length : 5).map((type: string) => (
                                 <li key={type}>
                                     <Link
-                                        href={`/properties?type=${encodeURIComponent(type)}`}
+                                        href={`/properties/${slugify(type)}`}
                                         className="text-gray-400 hover:text-primary-400 transition-colors text-sm flex items-center gap-2 group"
                                     >
                                         <svg className="w-4 h-4 text-primary-500 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,7 +180,7 @@ export default function Footer() {
                             {rentPropertyTypes.slice(0, showAllRentTypes ? rentPropertyTypes.length : 5).map((type: string) => (
                                 <li key={type}>
                                     <Link
-                                        href={`/rent?type=${encodeURIComponent(type)}`}
+                                        href={`/rent/${slugify(type)}`}
                                         className="text-gray-400 hover:text-primary-400 transition-colors text-sm flex items-center gap-2 group"
                                     >
                                         <svg className="w-4 h-4 text-primary-500 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">

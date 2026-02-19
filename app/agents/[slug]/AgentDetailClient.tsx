@@ -7,47 +7,39 @@ import Image from 'next/image'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import PropertyCard from '@/components/PropertyCard'
-import { getAgentByAgentId, getPropertiesByAgentId } from '@/app/actions/property-actions'
+import { getPropertiesByAgentId } from '@/app/actions/property-actions'
 import { Agent, Property } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { cleanBioText } from '@/lib/utils'
 
 const PROPERTIES_PER_PAGE = 12
 
-export default function AgentDetailPage() {
+interface AgentDetailClientProps {
+    initialAgent: Agent | null
+    initialAgentStates?: string[]
+}
+
+export default function AgentDetailClient({ initialAgent, initialAgentStates }: AgentDetailClientProps) {
     const params = useParams()
     const router = useRouter()
     const { user } = useAuth()
-    const agentId = params.id as string
+    // Use ID from initialAgent since params now contains slug
+    const agentId = initialAgent?.id
 
-    const [agent, setAgent] = useState<Agent | null>(null)
+    // Initialize with passed prop
+    const [agent] = useState<Agent | null>(initialAgent)
+    const [agentStates] = useState<string[]>(initialAgentStates || [])
     const [properties, setProperties] = useState<Property[]>([])
-    const [loading, setLoading] = useState(true)
+
+    // If no agent passed, we can't load anything really, or show not found immediately
+    const [loading] = useState(!initialAgent)
+
     const [propertiesLoading, setPropertiesLoading] = useState(false)
     const [currentPage, setCurrentPage] = useState(1)
     const [totalCount, setTotalCount] = useState(0)
     const [hasMore, setHasMore] = useState(false)
 
     const [imageError, setImageError] = useState(false)
-
-    // Load agent details
-    useEffect(() => {
-        async function loadAgent() {
-            if (!agentId) return
-
-            setLoading(true)
-            try {
-                const agentData = await getAgentByAgentId(agentId)
-                setAgent(agentData)
-            } catch (error) {
-                console.error('Error loading agent:', error)
-            } finally {
-                setLoading(false)
-            }
-        }
-        loadAgent()
-    }, [agentId])
-
 
     // Load agent's properties
     const loadProperties = useCallback(async (page: number) => {
@@ -154,7 +146,10 @@ export default function AgentDetailPage() {
                         {/* Agent Info */}
                         <div className="flex-1 text-white">
                             <h1 className="text-3xl md:text-4xl font-bold mb-2">
-                                {agent.name}
+                                {agent.name}{' '}
+                                <span className="block text-xl md:text-2xl text-primary-300 font-medium mt-1">
+                                    {agentStates.length > 0 ? agentStates.join(', ') : (agent.address || 'Malaysia')}
+                                </span>
                             </h1>
                             {agent.agency && (
                                 <p className="text-gray-400 text-lg mb-2">
