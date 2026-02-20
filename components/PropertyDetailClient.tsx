@@ -14,6 +14,8 @@ import { useFavorites } from '@/contexts/FavoritesContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { trackLead } from '@/lib/gtag'
 import TrendChart from '@/components/TrendChart'
+import ChartModal from '@/components/ChartModal'
+import { ChartType } from '@/components/TrendChart'
 import ShareButton from '@/components/ShareButton'
 import MobileContactBar from '@/components/MobileContactBar'
 import Breadcrumbs from '@/components/Breadcrumbs'
@@ -54,6 +56,7 @@ export default function PropertyDetailClient({
     const router = useRouter()
     const { isFavorite, toggleFavorite } = useFavorites()
     const [showNumber, setShowNumber] = useState(false)
+    const [selectedChartType, setSelectedChartType] = useState<ChartType | null>(null)
 
     useEffect(() => {
         // Track view_item event when property is viewed
@@ -174,33 +177,39 @@ export default function PropertyDetailClient({
                 <Navbar />
 
                 <div className="container-custom py-8">
-                    {/* Back Button */}
+                    {/* Back + Breadcrumbs — compact on mobile */}
+                    <div className="mb-4 flex items-center gap-3">
+                        {/* Back button */}
+                        <button
+                            onClick={() => {
+                                if (window.history.length > 2) router.back()
+                                else router.push(property.listing_type === 'rent' ? '/rent' : '/properties')
+                            }}
+                            className="inline-flex items-center gap-1.5 text-gray-500 hover:text-primary-600 transition-colors group flex-shrink-0"
+                        >
+                            <svg className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            <span className="text-sm font-medium">Back</span>
+                        </button>
 
-                    <button
-                        onClick={() => {
-                            if (window.history.length > 2) {
-                                router.back()
-                            } else {
-                                // Fallback if no history (e.g. opened in new tab)
-                                router.push(property.listing_type === 'rent' ? '/rent' : '/properties')
-                            }
-                        }}
-                        className="mb-6 inline-flex items-center gap-2 text-gray-600 hover:text-primary-600 transition-colors group"
-                    >
-                        <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                        <span className="font-medium">Back</span>
-                    </button>
+                        <span className="text-gray-300 text-sm">/</span>
 
-                    {/* Breadcrumbs */}
-                    <div className="mb-4">
-                        <Breadcrumbs items={[
-                            { label: property.state || 'Malaysia', href: `/properties?state=${encodeURIComponent(property.state || '')}` },
-                            { label: property.listing_type === 'rent' ? 'For Rent' : 'For Sale', href: property.listing_type === 'rent' ? '/rent' : '/properties' },
-                            { label: property.property_type || 'Property', href: `/properties?type=${encodeURIComponent(property.property_type || '')}` },
-                            { label: propertyName }
-                        ]} />
+                        {/* Full breadcrumb trail — desktop */}
+                        <div className="hidden md:block flex-1 min-w-0">
+                            <Breadcrumbs items={[
+                                { label: property.state || 'Malaysia', href: `/properties?state=${encodeURIComponent(property.state || '')}` },
+                                { label: property.listing_type === 'rent' ? 'For Rent' : 'For Sale', href: property.listing_type === 'rent' ? '/rent' : '/properties' },
+                                { label: property.property_type || 'Property', href: `/properties?type=${encodeURIComponent(property.property_type || '')}` },
+                                { label: propertyName }
+                            ]} />
+                        </div>
+
+                        {/* Compact breadcrumb — mobile: only last segment */}
+                        <p className="md:hidden text-sm text-gray-500 truncate flex-1 min-w-0">
+                            {property.state && <span className="text-gray-400">{property.state} · </span>}
+                            <span className="font-medium text-gray-700 truncate">{propertyName}</span>
+                        </p>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -227,10 +236,10 @@ export default function PropertyDetailClient({
                                     )}
                                 </div>
 
-                                {/* Title + Price Row - Aligned */}
-                                <div className="flex items-start justify-between mb-3">
-                                    <h1 className="font-heading font-bold text-3xl text-gray-900">{propertyName}</h1>
-                                    <p className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent whitespace-nowrap ml-4">
+                                {/* Title + Price Row - Responsive */}
+                                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
+                                    <h1 className="font-heading font-bold text-2xl sm:text-3xl text-gray-900">{propertyName}</h1>
+                                    <p className="text-2xl sm:text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent sm:whitespace-nowrap sm:ml-4">
                                         {formatPrice(property.price, property.listing_type === 'rent')}
                                     </p>
                                 </div>
@@ -432,20 +441,128 @@ export default function PropertyDetailClient({
                                     />
                                 )}
 
-                                {/* Market Trends Section */}
-                                {historicalTransactions.length > 0 && (
-                                    <div className="mb-8 mt-8 border-t border-gray-100 pt-8">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <div>
-                                                <h2 className="font-heading font-bold text-xl text-gray-900">Market Trends</h2>
-                                                <p className="text-sm text-gray-500">Historical transaction trends within 1km radius</p>
+                                {/* Market Trends Section — chart-type cards */}
+                                {historicalTransactions.length > 0 && (() => {
+                                    const prices = historicalTransactions.map(t => t.price)
+                                    const avgPrice = prices.reduce((a, b) => a + b, 0) / (prices.length || 1)
+                                    const psfs = historicalTransactions.map(t => t.price / (t.built_up_sqft || t.land_area_sqft || 1))
+                                    const avgPsf = psfs.reduce((a, b) => a + b, 0) / (psfs.length || 1)
+                                    const minPrice = Math.min(...prices)
+                                    const maxPrice = Math.max(...prices)
+                                    const minPsf = Math.min(...psfs)
+                                    const maxPsf = Math.max(...psfs)
+                                    const typeCounts: Record<string, number> = {}
+                                    historicalTransactions.forEach(t => {
+                                        const type = (t.property_type || 'Unknown').toLowerCase()
+                                        typeCounts[type] = (typeCounts[type] || 0) + 1
+                                    })
+                                    const topType = Object.entries(typeCounts).sort((a, b) => b[1] - a[1])[0]
+
+                                    return (
+                                        <div className="mb-8 mt-8 border-t border-gray-100 pt-8">
+                                            <div className="mb-4 flex items-center justify-between">
+                                                <div>
+                                                    <h2 className="font-heading font-bold text-xl text-gray-900">Market Trends</h2>
+                                                    <p className="text-sm text-gray-500">{historicalTransactions.length} transactions · tap a card to view chart</p>
+                                                </div>
+                                                <span className="hidden sm:inline text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-1 rounded-full">Tap to expand</span>
                                             </div>
+
+                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                {/* 1. Price Analysis */}
+                                                <button
+                                                    onClick={() => setSelectedChartType('price')}
+                                                    className="text-left bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-100 active:scale-[0.98] transition-all duration-200 overflow-hidden group"
+                                                >
+                                                    <div className="flex items-stretch">
+                                                        <div className="w-1 bg-blue-500 rounded-l-2xl flex-shrink-0" />
+                                                        <div className="flex-1 p-4">
+                                                            <div className="flex items-center justify-between mb-3">
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                                                                        <svg className="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+                                                                    </div>
+                                                                    <span className="text-xs font-bold text-gray-700">Price Analysis</span>
+                                                                </div>
+                                                                <svg className="w-3.5 h-3.5 text-gray-300 group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                                            </div>
+                                                            <p className="text-lg font-black text-gray-900">
+                                                                RM {avgPrice >= 1000000 ? `${(avgPrice / 1000000).toFixed(2)}M` : `${(avgPrice / 1000).toFixed(0)}k`}
+                                                            </p>
+                                                            <p className="text-[10px] text-gray-400 mt-0.5">{(minPrice / 1000).toFixed(0)}k – {(maxPrice / 1000).toFixed(0)}k range</p>
+                                                            <div className="flex items-end gap-0.5 h-6 mt-2 opacity-30 group-hover:opacity-70 transition-opacity">
+                                                                {[45, 70, 55, 80, 65, 90, 72].map((h, i) => <div key={i} className="flex-1 bg-blue-400 rounded-sm" style={{ height: `${h}%` }} />)}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </button>
+
+                                                {/* 2. PSF Analysis */}
+                                                <button
+                                                    onClick={() => setSelectedChartType('psf')}
+                                                    className="text-left bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-purple-100 active:scale-[0.98] transition-all duration-200 overflow-hidden group"
+                                                >
+                                                    <div className="flex items-stretch">
+                                                        <div className="w-1 bg-purple-500 rounded-l-2xl flex-shrink-0" />
+                                                        <div className="flex-1 p-4">
+                                                            <div className="flex items-center justify-between mb-3">
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="w-7 h-7 rounded-lg bg-purple-50 flex items-center justify-center flex-shrink-0">
+                                                                        <svg className="w-3.5 h-3.5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                                                                    </div>
+                                                                    <span className="text-xs font-bold text-gray-700">PSF Analysis</span>
+                                                                </div>
+                                                                <svg className="w-3.5 h-3.5 text-gray-300 group-hover:text-purple-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                                            </div>
+                                                            <p className="text-lg font-black text-gray-900">RM {avgPsf.toFixed(0)} <span className="text-xs font-normal text-gray-400">/ sqft</span></p>
+                                                            <p className="text-[10px] text-gray-400 mt-0.5">RM {minPsf.toFixed(0)} – {maxPsf.toFixed(0)} range</p>
+                                                            <div className="flex items-end gap-0.5 h-6 mt-2 opacity-30 group-hover:opacity-70 transition-opacity">
+                                                                {[55, 40, 75, 60, 85, 50, 80].map((h, i) => <div key={i} className="flex-1 bg-purple-400 rounded-sm" style={{ height: `${h}%` }} />)}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </button>
+
+                                                {/* 3. Market Activity */}
+                                                <button
+                                                    onClick={() => setSelectedChartType('volume')}
+                                                    className="text-left bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-emerald-100 active:scale-[0.98] transition-all duration-200 overflow-hidden group"
+                                                >
+                                                    <div className="flex items-stretch">
+                                                        <div className="w-1 bg-emerald-500 rounded-l-2xl flex-shrink-0" />
+                                                        <div className="flex-1 p-4">
+                                                            <div className="flex items-center justify-between mb-3">
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                                                                        <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" /></svg>
+                                                                    </div>
+                                                                    <span className="text-xs font-bold text-gray-700">Market Activity</span>
+                                                                </div>
+                                                                <svg className="w-3.5 h-3.5 text-gray-300 group-hover:text-emerald-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                                            </div>
+                                                            <p className="text-lg font-black text-gray-900">{historicalTransactions.length} <span className="text-xs font-normal text-gray-400">transactions</span></p>
+                                                            <p className="text-[10px] text-gray-400 mt-0.5 capitalize">{topType ? `Top: ${topType[0]} (${topType[1]})` : 'Volume by type'}</p>
+                                                            <div className="flex items-end gap-0.5 h-6 mt-2 opacity-30 group-hover:opacity-70 transition-opacity">
+                                                                {[30, 60, 45, 80, 55, 70, 65].map((h, i) => <div key={i} className="flex-1 bg-emerald-400 rounded-sm" style={{ height: `${h}%` }} />)}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </button>
+                                            </div>
+
+                                            {/* Chart modal */}
+                                            {selectedChartType && (
+                                                <ChartModal
+                                                    isOpen={true}
+                                                    onClose={() => setSelectedChartType(null)}
+                                                    transactions={historicalTransactions}
+                                                    address={property.address || propertyName}
+                                                    chartType={selectedChartType}
+                                                />
+                                            )}
                                         </div>
-                                        <div className="h-[400px] bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                                            <TrendChart transactions={historicalTransactions} className="h-full" />
-                                        </div>
-                                    </div>
-                                )}
+                                    )
+                                })()}
 
                                 {/* Mortgage Calculator - Only for Sale/Project properties */}
                                 {property.listing_type !== 'rent' && (

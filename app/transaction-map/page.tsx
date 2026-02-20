@@ -349,10 +349,10 @@ export default function TransactionMapPage() {
 
             <main className="flex-grow flex flex-col h-[calc(100vh-80px)] relative">
 
-                {/* Mobile Top Bar */}
-                <div className="lg:hidden bg-white border-b shadow-sm z-[2000] px-3 py-2 flex items-center gap-2">
+                {/* Mobile Top Bar - Fix 1: overflow-x-auto prevents overflow, capped widths */}
+                <div className="lg:hidden bg-white border-b shadow-sm z-[2000] px-2 py-2 flex items-center gap-1.5 overflow-x-auto">
                     {/* District (Top Level) */}
-                    <div className="relative flex-grow min-w-[120px]">
+                    <div className="relative flex-1 min-w-0 w-[100px]">
                         <SearchableSelect
                             value={filters.district}
                             onChange={handleDistrictChange}
@@ -363,7 +363,7 @@ export default function TransactionMapPage() {
                     </div>
                     {/* Mukim (if district selected) */}
                     {filters.district && (
-                        <div className="relative flex-grow min-w-[120px]">
+                        <div className="relative flex-1 min-w-0 w-[100px]">
                             <SearchableSelect
                                 value={filters.mukim}
                                 onChange={handleMukimChange}
@@ -375,7 +375,7 @@ export default function TransactionMapPage() {
                     )}
                     {/* Neighborhood (if mukim selected) */}
                     {filters.mukim && (
-                        <div className="relative flex-grow min-w-[120px]">
+                        <div className="relative flex-1 min-w-0 w-[100px]">
                             <SearchableSelect
                                 value={filters.neighborhood}
                                 onChange={handleNeighborhoodChange}
@@ -385,48 +385,52 @@ export default function TransactionMapPage() {
                             />
                         </div>
                     )}
+                    {/* Fix 8: Filters button — icon only, flex-shrink-0 so it never gets compressed */}
                     <button
                         onClick={() => setShowMobileFilters(true)}
-                        className={`flex items-center justify-center w-10 h-10 rounded-lg border transition-all ${(filters.minPrice > 0 || filters.maxPrice < 5000000 || filters.propertyType.length > 0)
+                        className={`flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-lg border transition-all ${(filters.minPrice > 0 || filters.maxPrice < 5000000 || filters.propertyType.length > 0)
                             ? 'bg-primary-50 border-primary-200 text-primary-700'
                             : 'bg-white border-gray-200 text-gray-700'
                             }`}
-                        title="Filters"
+                        aria-label="Filters"
                     >
-                        <Filter size={18} />
+                        <Filter size={16} />
                     </button>
+                    {/* Fix 8: Draw button — flex-shrink-0, visible label */}
                     <button
                         onClick={() => setIsDrawing(!isDrawing)}
-                        className={`flex items-center justify-center w-10 h-10 rounded-lg border transition-all ${isDrawing ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-200'}`}
-                        title={polygonFilter ? "Redraw Area" : "Draw Search Area"}
+                        className={`flex-shrink-0 flex items-center justify-center gap-1 px-2.5 h-9 rounded-lg border text-xs font-medium transition-all ${isDrawing ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-200'}`}
+                        aria-label={polygonFilter ? 'Redraw Area' : 'Draw Search Area'}
                     >
                         <span>✏️</span>
+                        <span>{isDrawing ? 'Drawing' : 'Draw'}</span>
                     </button>
-                    {/* Reset Button (only if filters active) */}
-                    {(filters.neighborhood || filters.minPrice > 0 || filters.maxPrice < 5000000 || filters.propertyType.length > 0 || polygonFilter) &&
-                        <button
-                            onClick={() => {
-                                setFilters({
-                                    state: '', // Keep for type compat
-                                    district: '',
-                                    mukim: '',
-                                    neighborhood: '',
-                                    minPrice: 0,
-                                    maxPrice: 5000000,
-                                    propertyType: [],
-                                    tenure: [],
-                                    minYear: undefined,
-                                    maxYear: undefined,
-                                    recencyLabel: 'Date'
-                                })
-                                setPolygonFilter(null)
-                            }}
-                            className="flex items-center justify-center w-10 h-10 rounded-lg border border-red-100 bg-red-50 text-red-500 hover:bg-red-100"
-                            title="Reset All"
-                        >
-                            <span className="text-sm">↺</span>
-                        </button>
-                    }
+                    {/* Fix 9: Reset button — always rendered, invisible when not needed to prevent layout jump */}
+                    <button
+                        onClick={() => {
+                            setFilters({
+                                state: '',
+                                district: '',
+                                mukim: '',
+                                neighborhood: '',
+                                minPrice: 0,
+                                maxPrice: 5000000,
+                                propertyType: [],
+                                tenure: [],
+                                minYear: undefined,
+                                maxYear: undefined,
+                                recencyLabel: 'Date'
+                            })
+                            setPolygonFilter(null)
+                        }}
+                        className={`flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-lg border border-red-100 bg-red-50 text-red-500 hover:bg-red-100 transition-opacity ${(filters.neighborhood || filters.district || filters.minPrice > 0 || filters.maxPrice < 5000000 || filters.propertyType.length > 0 || polygonFilter)
+                            ? 'opacity-100 pointer-events-auto'
+                            : 'opacity-0 pointer-events-none'
+                            }`}
+                        aria-label="Reset All Filters"
+                    >
+                        <span className="text-sm">↺</span>
+                    </button>
                 </div>
 
                 {/* Desktop Top Filter Bar */}
@@ -679,10 +683,11 @@ export default function TransactionMapPage() {
                             className="w-full h-full"
                         />
                     </div>
+                    {/* Fix 10: min-h ensures TrendChart is visible on mobile flex containers */}
                     {viewMode === 'trends' && (
                         <TrendChart
                             transactions={displayTransactions}
-                            className="w-full h-full"
+                            className="w-full min-h-[400px] h-full"
                         />
                     )}
                 </div>
@@ -720,9 +725,10 @@ export default function TransactionMapPage() {
                     </div>
                 )}
                 {/* Draw Control Hint Overlay (Only when drawing or after drawing) */}
+                {/* Fix 3: Use top-[calc(3.5rem+0.5rem)] on mobile to clear the mobile filter bar. top-24 on desktop is fine. */}
                 {
                     viewMode === 'map' && isDrawing && (
-                        <div className="absolute top-24 left-1/2 -translate-x-1/2 z-[2000] bg-gray-900/80 text-white px-4 py-2 rounded-full backdrop-blur-sm shadow-lg text-sm font-medium flex items-center gap-2 animate-in fade-in slide-in-from-top-4">
+                        <div className="absolute top-[calc(3rem+0.5rem)] lg:top-24 left-1/2 -translate-x-1/2 z-[2000] bg-gray-900/80 text-white px-4 py-2 rounded-full backdrop-blur-sm shadow-lg text-sm font-medium flex items-center gap-2 animate-in fade-in slide-in-from-top-4 whitespace-nowrap">
                             <span>✏️ Click and drag to draw an area.</span>
                             <button onClick={() => setIsDrawing(false)} className="ml-2 hover:bg-white/20 p-1 rounded-full"><X size={14} /></button>
                         </div>
@@ -765,7 +771,8 @@ export default function TransactionMapPage() {
                         ></div>
 
                         {/* Drawer Content */}
-                        <div className="absolute inset-x-0 bottom-0 bg-white rounded-t-2xl shadow-xl h-[85vh] flex flex-col animate-in slide-in-from-bottom duration-300">
+                        {/* Fix 7: max-h instead of fixed h, use dvh for dynamic viewport height, safe-area padding */}
+                        <div className="absolute inset-x-0 bottom-0 bg-white rounded-t-2xl shadow-xl max-h-[85dvh] h-auto flex flex-col animate-in slide-in-from-bottom duration-300" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
                             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                                 <h2 className="text-lg font-bold text-gray-900">Filters</h2>
 

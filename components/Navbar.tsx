@@ -25,18 +25,25 @@ export default function Navbar() {
     // Dynamic Menu Data State
     const [menuData, setMenuData] = useState<{
         states: string[],
-        buyTypes: { highRise: string[], landed: string[] },
-        rentTypes: { highRise: string[], landed: string[] }
+        buyTypes: { highRise: (string | { label: string; href: string })[], landed: (string | { label: string; href: string })[] },
+        rentTypes: { highRise: (string | { label: string; href: string })[], landed: (string | { label: string; href: string })[] },
+        projectTypes: (string | { label: string; href: string })[]
     }>({
         states: ['Kuala Lumpur', 'Selangor', 'Penang', 'Johor'], // Default fallback
         buyTypes: {
-            highRise: ['Condo', 'Apartment', 'Serviced Residence'],
+            highRise: [{ label: 'Condominium', href: '/properties/condo' }, 'Apartment', 'Serviced Residence'],
             landed: ['Terrace House', 'Bungalow', 'Semi-D']
         },
         rentTypes: {
-            highRise: ['Condo', 'Apartment', 'Serviced Residence'],
+            highRise: [{ label: 'Condominium', href: '/rent/condo' }, 'Apartment', 'Serviced Residence'],
             landed: ['Terrace House', 'Semi-D']
-        }
+        },
+        projectTypes: [
+            { label: 'Condominium', href: '/new-projects/condominium' },
+            { label: 'Serviced Residence', href: '/new-projects/service-residence' },
+            { label: 'Landed', href: '/new-projects/landed' },
+            { label: 'Township', href: '/new-projects/township' }
+        ]
     })
 
     const handleSignOut = async () => {
@@ -44,33 +51,78 @@ export default function Navbar() {
         await signOut()
     }
 
-    // Fetch Dynamic Menu Data
+    // Fetch Dynamic Menu Data (cached in sessionStorage for performance)
     useEffect(() => {
+        const CACHE_KEY = 'navbar_menu_data'
+        const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+
         async function fetchMenuData() {
+            // Try sessionStorage cache first
             try {
-                const [states, saleTypes, rentTypes] = await Promise.all([
+                const cached = sessionStorage.getItem(CACHE_KEY)
+                if (cached) {
+                    const { data, timestamp } = JSON.parse(cached)
+                    if (Date.now() - timestamp < CACHE_TTL) {
+                        setMenuData(data)
+                        return // ✅ Served from cache, no DB calls
+                    }
+                }
+            } catch { }
+
+            try {
+                const [states, saleTypes, rentTypes, projectTypes] = await Promise.all([
                     getDistinctStates(),
                     getDistinctPropertyTypesByListingType('sale'),
-                    getDistinctPropertyTypesByListingType('rent')
+                    getDistinctPropertyTypesByListingType('rent'),
+                    getDistinctPropertyTypesByListingType('project')
                 ])
 
-                const categorize = (types: string[]) => {
-                    const highRise = types.filter(t => isHighRise(t)).sort()
-                    const landed = types.filter(t => isLanded(t)).sort()
+                const categorize = (types: string[], basePath: string) => {
+                    const highRise = types.filter(t => isHighRise(t)).sort().map(t =>
+                        t === 'Condo' ? { label: 'Condominium', href: `${basePath}/condo` } : t
+                    )
+                    const landed = types.filter(t => isLanded(t)).sort().map(t =>
+                        t === 'Condo' ? { label: 'Condominium', href: `${basePath}/condo` } : t
+                    )
                     return { highRise, landed }
                 }
 
-                setMenuData({
-                    states: states.length > 0 ? states.slice(0, 3) : ['Kuala Lumpur', 'Selangor', 'Penang'],
+                const newData = {
+                    states: states.length > 0 ? states : ['Kuala Lumpur', 'Selangor', 'Penang', 'Johor', 'Putrajaya', 'Melaka', 'Negeri Sembilan'],
                     buyTypes: {
-                        highRise: categorize(saleTypes).highRise.slice(0, 3),
-                        landed: categorize(saleTypes).landed.slice(0, 3)
+                        highRise: categorize(saleTypes, '/properties').highRise,
+                        landed: categorize(saleTypes, '/properties').landed
                     },
                     rentTypes: {
-                        highRise: categorize(rentTypes).highRise.slice(0, 3),
-                        landed: categorize(rentTypes).landed.slice(0, 3)
-                    }
-                })
+                        highRise: categorize(rentTypes, '/rent').highRise,
+                        landed: categorize(rentTypes, '/rent').landed
+                    },
+                    projectTypes: projectTypes
+                        .filter(t => (isHighRise(t) || isLanded(t)) && !t.toLowerCase().includes('commercial') && !t.toLowerCase().includes('office') && !t.toLowerCase().includes('shop'))
+                        .sort().map(t => {
+                            let label = t
+                            if (t === 'Condo') label = 'Condominium'
+                            if (t === 'Service Residence') label = 'Serviced Residence'
+
+                            let slug = t.trim().toLowerCase().replace(/ /g, '-')
+                            slug = slug.replace(/[^a-z0-9-]/g, '-')
+
+                            if (t === 'Condominium' || t === 'Condo') slug = 'condominium'
+                            if (label === 'Serviced Residence') slug = 'service-residence'
+                            if (label === 'Landed') slug = 'landed'
+                            if (label === 'Township') slug = 'township'
+
+                            return { label, href: `/new-projects/${slug}` }
+                        })
+                }
+
+                setMenuData(newData)
+
+                // Cache in sessionStorage
+                try {
+                    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data: newData, timestamp: Date.now() }))
+                } catch { }
+
             } catch (error) {
                 console.error('Error fetching menu data:', error)
             }
@@ -133,24 +185,42 @@ export default function Navbar() {
         title: 'New Projects',
         basePath: '/new-projects',
         items: {
-            locations: menuData.states.slice(0, 3), // Projects might not exist everywhere, but safe fallback
+            locations: menuData.states.map(loc => ({
+                label: loc,
+                href: `/new-projects?state=${encodeURIComponent(loc)}`
+            })),
             propertyTypes: [
                 {
-                    title: 'Project Types',
-                    types: ['Condo', 'Serviced Residence', 'Landed', 'Township']
+                    title: 'Property Types',
+                    types: menuData.projectTypes
+                },
+                {
+                    title: 'Popular Filters',
+                    types: [
+                        { label: 'Under RM 400k', href: '/new-projects?maxPrice=400000' },
+                        { label: 'RM 400k - 600k', href: '/new-projects?minPrice=400000&maxPrice=600000' },
+                        { label: 'RM 600k - 1M', href: '/new-projects?minPrice=600000&maxPrice=1000000' },
+                        { label: 'Above RM 1M', href: '/new-projects?minPrice=1000000' },
+                        { label: 'Studio/1 Bedroom', href: '/new-projects?bedrooms=1' },
+                        { label: '2 Bedrooms', href: '/new-projects?bedrooms=2' },
+                        { label: '3 Bedrooms', href: '/new-projects?bedrooms=3' },
+                        { label: '4+ Bedrooms', href: '/new-projects?bedrooms=4' }
+                    ]
                 }
             ],
             resources: {
-                title: 'Project Resources',
+                title: 'More Options',
                 items: [
-                    { label: 'Early Bird Deals', href: '/new-projects?filter=deals' }
+                    { label: 'Freehold Projects', href: '/new-projects?tenure=Freehold' },
+                    { label: 'Leasehold Projects', href: '/new-projects?tenure=Leasehold' },
+                    { label: 'Home Buying Guide', href: '/resources/how-to-buy-first-house-malaysia' }
                 ]
             }
         }
     }
 
     return (
-        <nav className="glass sticky top-0 z-[3000]">
+        <nav className="glass sticky top-0 z-[3000]" >
             <div className="container-custom">
                 <div className="flex items-center justify-between h-20">
                     {/* Logo */}
@@ -354,7 +424,7 @@ export default function Navbar() {
                                                     {profile?.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
                                                 </div>
                                             )}
-                                            <span className="text-gray-700 font-medium text-sm">
+                                            <span className="text-gray-700 font-medium text-sm truncate max-w-[180px]">
                                                 {user.email}
                                             </span>
                                         </div>
@@ -382,6 +452,6 @@ export default function Navbar() {
                     </div>
                 )}
             </div>
-        </nav>
+        </nav >
     )
 }

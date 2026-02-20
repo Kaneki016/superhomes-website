@@ -142,6 +142,26 @@ function PropertiesPageContent() {
     const [mobileSearchExpanded, setMobileSearchExpanded] = useState(true)
     const dropdownRef = useRef<HTMLDivElement>(null)
     const initialLoadDone = useRef(false)
+    const lastScrollY = useRef(0)
+    const scrollCooldown = useRef(0)
+
+    // Auto-collapse/expand filter bar on scroll (mobile only)
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.innerWidth >= 768) return  // desktop always visible
+            const currentY = window.scrollY
+
+            // Only show when scrolled to the very top
+            if (currentY > 80) {
+                setMobileSearchExpanded(false)
+            } else if (currentY <= 60) {
+                setMobileSearchExpanded(true)
+            }
+        }
+
+        window.addEventListener('scroll', handleScroll, { passive: true })
+        return () => window.removeEventListener('scroll', handleScroll)
+    }, [])
 
     // Handler for map bounds changes
     const handleMapBoundsChange = useCallback((bounds: MapBounds, visibleIds: string[]) => {
@@ -536,15 +556,17 @@ function PropertiesPageContent() {
 
             {/* Search Filters Bar */}
             <div className="sticky top-20 z-40 bg-white border-b border-gray-200 shadow-sm">
-                <button
-                    onClick={() => setMobileSearchExpanded(!mobileSearchExpanded)}
-                    className="md:hidden w-full flex items-center justify-center gap-2 py-3 px-4 bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+                {/* Animated wrapper — max-height transition for smooth slide */}
+                <div
+                    className="container-custom py-4 overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out"
+                    style={typeof window !== 'undefined' && window.innerWidth >= 768
+                        ? { maxHeight: 'none', opacity: 1 }
+                        : {
+                            maxHeight: mobileSearchExpanded ? '400px' : '0px',
+                            opacity: mobileSearchExpanded ? 1 : 0,
+                        }
+                    }
                 >
-                    {/* Mobile Toggle Icons... */}
-                    <span>{mobileSearchExpanded ? 'Hide Search & Filters' : 'Show Search & Filters'}</span>
-                </button>
-
-                <div className={`container-custom py-4 ${!mobileSearchExpanded ? 'hidden md:block' : ''}`}>
                     <div className="flex gap-4 mb-4">
                         <SearchInput
                             value={filters.location}
@@ -568,8 +590,19 @@ function PropertiesPageContent() {
                     {/* Quick Filter Pills */}
                     <div ref={dropdownRef} className="flex items-center gap-3 flex-wrap">
                         {/* Filters Button */}
-                        <button onClick={() => setFilterModalOpen(true)} className={`filter-pill ${activeFilterCount > 0 ? 'active' : ''}`}>
+                        <button
+                            onClick={() => setFilterModalOpen(true)}
+                            className={`filter-pill ${activeFilterCount > 0 ? 'active' : ''}`}
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                            </svg>
                             <span>Filters</span>
+                            {activeFilterCount > 0 && (
+                                <span className="w-5 h-5 bg-primary-500 text-white text-xs rounded-full flex items-center justify-center">
+                                    {activeFilterCount}
+                                </span>
+                            )}
                         </button>
 
                         {/* Property Type Pill */}
@@ -578,47 +611,143 @@ function PropertiesPageContent() {
                                 onClick={() => setOpenDropdown(openDropdown === 'propertyType' ? null : 'propertyType')}
                                 className={`filter-pill ${filters.propertyType ? 'active' : ''}`}
                             >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
                                 <span>{filters.propertyType || 'All Residential'}</span>
+                                <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === 'propertyType' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
                             </button>
                             {openDropdown === 'propertyType' && (
                                 <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 max-h-64 overflow-y-auto">
-                                    {propertyTypeOptions.map((type) => (
+                                    <button
+                                        onClick={() => {
+                                            const newFilters = { ...filters, propertyType: '' }
+                                            setFilters(newFilters)
+                                            setOpenDropdown(null)
+                                            loadProperties(1, true, newFilters)
+                                            syncFiltersToUrl(newFilters)
+                                        }}
+                                        className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${!filters.propertyType ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
+                                    >
+                                        All Residential
+                                    </button>
+                                    {(filterOptions?.propertyTypes || []).map((type) => (
                                         <button
-                                            key={type.value}
+                                            key={type}
                                             onClick={() => {
-                                                const newFilters = { ...filters, propertyType: type.value }
+                                                const newFilters = { ...filters, propertyType: type }
                                                 setFilters(newFilters)
                                                 setOpenDropdown(null)
                                                 loadProperties(1, true, newFilters)
                                                 syncFiltersToUrl(newFilters)
                                             }}
-                                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${filters.propertyType === type.value ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
+                                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${filters.propertyType === type ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
                                         >
-                                            {type.label}
+                                            {type}
                                         </button>
                                     ))}
                                 </div>
                             )}
                         </div>
 
-                        {/* Price Pill - Simplified for brevity in tool call, implementation should restore details */}
+                        {/* Price Pill */}
                         <div className="relative">
                             <button
                                 onClick={() => setOpenDropdown(openDropdown === 'price' ? null : 'price')}
                                 className={`filter-pill ${filters.minPrice || filters.maxPrice ? 'active' : ''}`}
                             >
-                                <span>Price</span>
+                                <span className="font-medium">RM</span>
+                                <span>
+                                    {filters.minPrice || filters.maxPrice
+                                        ? `RM ${filters.minPrice ? parseInt(filters.minPrice) / 1000 + 'k' : '0'} - ${filters.maxPrice ? parseInt(filters.maxPrice) / 1000 + 'k' : 'Any'}`
+                                        : 'Price'}
+                                </span>
+                                <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === 'price' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
                             </button>
                             {openDropdown === 'price' && (
-                                <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-lg border p-4 z-50">
-                                    <div className="flex gap-2">
-                                        <input className="w-full border rounded p-1" placeholder="Min" value={filters.minPrice} onChange={e => setFilters({ ...filters, minPrice: e.target.value.replace(/\D/g, '') })} />
-                                        <input className="w-full border rounded p-1" placeholder="Max" value={filters.maxPrice} onChange={e => setFilters({ ...filters, maxPrice: e.target.value.replace(/\D/g, '') })} />
+                                <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-xl shadow-lg border border-gray-100 p-4 z-50">
+                                    <div className="flex gap-2 items-center mb-4">
+                                        <input
+                                            type="number"
+                                            placeholder="Min"
+                                            className="w-full border rounded px-2 py-1 text-sm"
+                                            value={filters.minPrice}
+                                            onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })}
+                                        />
+                                        <span className="text-gray-400">-</span>
+                                        <input
+                                            type="number"
+                                            placeholder="Max"
+                                            className="w-full border rounded px-2 py-1 text-sm"
+                                            value={filters.maxPrice}
+                                            onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
+                                        />
                                     </div>
-                                    <div className="mt-2 flex justify-between">
-                                        <button onClick={() => { setFilters({ ...filters, minPrice: '', maxPrice: '' }); loadProperties(1, true, { ...filters, minPrice: '', maxPrice: '' }) }} className="text-sm">Clear</button>
-                                        <button onClick={() => { setOpenDropdown(null); loadProperties(1, true, filters); syncFiltersToUrl(filters) }} className="text-sm bg-primary-500 text-white px-2 rounded">Apply</button>
+                                    <div className="flex justify-between">
+                                        <button onClick={() => {
+                                            const newFilters = { ...filters, minPrice: '', maxPrice: '' }
+                                            setFilters(newFilters)
+                                            loadProperties(1, true, newFilters)
+                                            syncFiltersToUrl(newFilters)
+                                        }} className="text-sm text-gray-500 hover:text-gray-700">Clear</button>
+                                        <button onClick={() => {
+                                            setOpenDropdown(null)
+                                            loadProperties(1, true, filters)
+                                            syncFiltersToUrl(filters)
+                                        }} className="text-sm bg-primary-600 text-white px-3 py-1 rounded hover:bg-primary-700">Apply</button>
                                     </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Bedroom Pill */}
+                        <div className="relative">
+                            <button
+                                onClick={() => setOpenDropdown(openDropdown === 'bedrooms' ? null : 'bedrooms')}
+                                className={`filter-pill ${filters.bedrooms ? 'active' : ''}`}
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                </svg>
+                                <span>{filters.bedrooms ? `${filters.bedrooms} Beds` : 'Bedroom'}</span>
+                                <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === 'bedrooms' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            {openDropdown === 'bedrooms' && (
+                                <div className="absolute top-full left-0 mt-2 w-36 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                                    <button
+                                        onClick={() => {
+                                            const newFilters = { ...filters, bedrooms: '' }
+                                            setFilters(newFilters)
+                                            setOpenDropdown(null)
+                                            loadProperties(1, true, newFilters)
+                                            syncFiltersToUrl(newFilters)
+                                        }}
+                                        className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${!filters.bedrooms ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
+                                    >
+                                        Any
+                                    </button>
+                                    {['Studio', '1', '2', '3', '4', '5+'].map(bed => (
+                                        <button
+                                            key={bed}
+                                            onClick={() => {
+                                                const val = bed === 'Studio' ? '0' : bed.replace('+', '')
+                                                const newFilters = { ...filters, bedrooms: val }
+                                                setFilters(newFilters)
+                                                setOpenDropdown(null)
+                                                loadProperties(1, true, newFilters)
+                                                syncFiltersToUrl(newFilters)
+                                            }}
+                                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${filters.bedrooms === (bed === 'Studio' ? '0' : bed.replace('+', '')) ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
+                                        >
+                                            {bed === 'Studio' ? 'Studio' : `${bed} Bedroom${bed !== '1' ? 's' : ''}`}
+                                        </button>
+                                    ))}
                                 </div>
                             )}
                         </div>
@@ -629,7 +758,14 @@ function PropertiesPageContent() {
                                 onClick={() => setOpenDropdown(openDropdown === 'state' ? null : 'state')}
                                 className={`filter-pill ${filters.state ? 'active' : ''}`}
                             >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
                                 <span>{filters.state || 'State'}</span>
+                                <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === 'state' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
                             </button>
                             {openDropdown === 'state' && (
                                 <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 max-h-64 overflow-y-auto">
@@ -641,7 +777,7 @@ function PropertiesPageContent() {
                                             loadProperties(1, true, newFilters)
                                             syncFiltersToUrl(newFilters)
                                         }}
-                                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700"
+                                        className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${!filters.state ? 'text-primary-600 font-medium' : 'text-gray-700'}`}
                                     >
                                         All States
                                     </button>
@@ -663,11 +799,14 @@ function PropertiesPageContent() {
                                 </div>
                             )}
                         </div>
-
-                        {activeFilterCount > 0 && (
-                            <button onClick={handleResetFilters} className="text-sm text-primary-600 font-medium">Clear all</button>
-                        )}
                     </div>
+
+
+                    {
+                        activeFilterCount > 0 && (
+                            <button onClick={handleResetFilters} className="text-sm text-primary-600 font-medium">Clear all</button>
+                        )
+                    }
                 </div>
             </div>
 
@@ -903,7 +1042,7 @@ function PropertiesPageContent() {
                 stateOptions={stateOptions}
             />
             <Footer />
-        </div>
+        </div >
     )
 }
 

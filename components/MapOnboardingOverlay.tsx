@@ -12,13 +12,14 @@ export default function MapOnboardingOverlay({ onStartDrawing }: MapOnboardingOv
             {/* Backdrop with slight blur/dim to emphasize the overlay content, but keep map visible */}
             {/* We want the map to be visible, so maybe just a centered card is better than full screen dimming which might look like a disabled state */}
 
-            <div className="bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/50 max-w-sm text-center pointer-events-auto transform transition-all animate-in fade-in zoom-in duration-300 mx-4">
-                <div className="w-16 h-16 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
-                    <MapIcon size={32} />
+            <div className="bg-white/90 backdrop-blur-md p-5 sm:p-8 rounded-2xl shadow-xl border border-white/50 max-w-sm text-center pointer-events-auto transform transition-all animate-in fade-in zoom-in duration-300 mx-4">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-inner">
+                    <MapIcon size={24} className="sm:hidden" />
+                    <MapIcon size={32} className="hidden sm:block" />
                 </div>
 
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Explore Transactions</h3>
-                <p className="text-gray-600 mb-6 leading-relaxed">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Explore Transactions</h3>
+                <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 leading-relaxed">
                     Draw a custom area on the map to see real transaction data and property trends for that specific location.
                 </p>
 
