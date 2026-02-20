@@ -239,6 +239,21 @@ export async function getPropertiesPaginated(
     if (filters?.districts && filters.districts.length > 0) {
         conditions = sql`${conditions} AND district IN ${sql(filters.districts)}`
     }
+    if (filters?.tenure) {
+        const tenurePattern = '%' + filters.tenure + '%'
+        if (filters.listingType === 'project') {
+            // Fallback to text search as listing_project_details missing tenure column
+            conditions = sql`${conditions} AND (description ILIKE ${tenurePattern} OR title ILIKE ${tenurePattern})`
+        } else if (filters.listingType === 'sale') {
+            conditions = sql`${conditions} AND EXISTS (SELECT 1 FROM listing_sale_details lsd WHERE lsd.listing_id = listings.id AND lsd.tenure ILIKE ${tenurePattern})`
+        } else {
+            conditions = sql`${conditions} AND (
+                (listing_type = 'project' AND (description ILIKE ${tenurePattern} OR title ILIKE ${tenurePattern}))
+                OR
+                EXISTS (SELECT 1 FROM listing_sale_details lsd WHERE lsd.listing_id = listings.id AND lsd.tenure ILIKE ${tenurePattern})
+            )`
+        }
+    }
 
     // Location search
     const locationQuery = filters?.location?.trim() || ''
@@ -307,9 +322,8 @@ export async function getPropertiesPaginated(
         if (filters?.maxPrice) {
             properties = properties.filter(p => (p.price || 0) <= filters.maxPrice!)
         }
-        if (filters?.tenure) {
-            properties = properties.filter(p => p.tenure && p.tenure.toLowerCase().includes(filters.tenure!.toLowerCase()))
-        }
+        // Tenure filtering moved to SQL
+
 
         // Multi-word refinement
         if (words.length > 1) {
@@ -339,7 +353,7 @@ export async function getPropertiesPaginated(
                 // Apply all filters
                 if (filters?.minPrice) allProps = allProps.filter(p => (p.price || 0) >= filters.minPrice!)
                 if (filters?.maxPrice) allProps = allProps.filter(p => (p.price || 0) <= filters.maxPrice!)
-                if (filters?.tenure) allProps = allProps.filter(p => p.tenure && p.tenure.toLowerCase().includes(filters.tenure!.toLowerCase()))
+                // Tenure filtered in SQL
 
                 allProps = allProps.filter(property => {
                     const combinedText = [
@@ -514,7 +528,7 @@ export async function getDistinctStates(): Promise<string[]> {
             SELECT DISTINCT state FROM listings WHERE is_active = true AND state IS NOT NULL
         `
         const states = data.map(r => r.state).filter(s => MALAYSIAN_STATES.includes(s)).sort()
-        setCache('distinct_states', states, 300)
+        setCache('distinct_states', states, 900) // 15 minutes
         return states
     } catch (e) {
         return []
@@ -812,12 +826,15 @@ export async function getDistinctPropertyTypes(): Promise<string[]> {
     try {
         const data = await sql`SELECT DISTINCT property_type FROM listings WHERE is_active = true AND property_type IS NOT NULL`
         const types = data.map(r => r.property_type).sort()
-        setCache('distinct_property_types', types, 300)
+        setCache('distinct_property_types', types, 900) // 15 minutes
         return types
     } catch (e) { return [] }
 }
 
-export async function getDistinctPropertyTypesByListingType(listingType: 'sale' | 'rent', state?: string): Promise<string[]> {
+export async function getDistinctPropertyTypesByListingType(listingType: 'sale' | 'rent' | 'project', state?: string): Promise<string[]> {
+    const cacheKey = `distinct_types_${listingType}${state ? '_' + state : ''}`
+    const cached = getCached<string[]>(cacheKey)
+    if (cached) return cached
     try {
         let conditions = sql`is_active = true AND listing_type = ${listingType} AND property_type IS NOT NULL`
         if (state) {
@@ -828,7 +845,9 @@ export async function getDistinctPropertyTypesByListingType(listingType: 'sale' 
             SELECT DISTINCT property_type FROM listings 
             WHERE ${conditions}
         `
-        return data.map(r => r.property_type).sort()
+        const types = data.map(r => r.property_type).sort()
+        setCache(cacheKey, types, 600) // 10 minutes
+        return types
     } catch (e) { return [] }
 }
 

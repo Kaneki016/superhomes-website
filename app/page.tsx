@@ -372,7 +372,7 @@ export default function HomePage() {
                                         </svg>
                                     </button>
                                     {(openDropdown === 'price' || openDropdown === 'priceMin' || openDropdown === 'priceMax') && (
-                                        <div className="absolute top-full left-0 mt-2 w-[400px] bg-white rounded-2xl shadow-xl border border-gray-200 p-5 z-50">
+                                        <div className="absolute top-full left-0 mt-2 w-[min(400px,calc(100vw-2rem))] bg-white rounded-2xl shadow-xl border border-gray-200 p-5 z-50">
                                             {/* Labels Row */}
                                             <div className="grid grid-cols-2 gap-4 mb-3">
                                                 <label className="text-sm font-medium text-gray-900">Minimum</label>
@@ -754,7 +754,7 @@ export default function HomePage() {
                                 {totalSlides > 1 && (
                                     <button
                                         onClick={goToPrevSlide}
-                                        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 md:-translate-x-5 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white border border-gray-200 shadow-lg flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:border-primary-300 hover:text-primary-600 transition-all"
+                                        className="absolute left-0 top-1/2 -translate-y-1/2 md:-translate-x-5 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white border border-gray-200 shadow-lg flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:border-primary-300 hover:text-primary-600 transition-all"
                                         aria-label="Previous properties"
                                     >
                                         <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -789,7 +789,7 @@ export default function HomePage() {
                                 {totalSlides > 1 && (
                                     <button
                                         onClick={goToNextSlide}
-                                        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 md:translate-x-5 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white border border-gray-200 shadow-lg flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:border-primary-300 hover:text-primary-600 transition-all"
+                                        className="absolute right-0 top-1/2 -translate-y-1/2 md:translate-x-5 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white border border-gray-200 shadow-lg flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:border-primary-300 hover:text-primary-600 transition-all"
                                         aria-label="Next properties"
                                     >
                                         <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

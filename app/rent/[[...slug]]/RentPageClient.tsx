@@ -65,6 +65,25 @@ function RentPageContent() {
         priceRange: { min: number; max: number }
     } | null>(null)
     const dropdownRef = useRef<HTMLDivElement>(null)
+    const [mobileSearchExpanded, setMobileSearchExpanded] = useState(true)
+    const lastScrollY = useRef(0)
+    const scrollCooldown = useRef(0)
+
+    // Auto-collapse/expand filter bar on scroll (mobile only)
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.innerWidth >= 768) return
+            const currentY = window.scrollY
+
+            if (currentY > 80) {
+                setMobileSearchExpanded(false)
+            } else if (currentY <= 60) {
+                setMobileSearchExpanded(true)
+            }
+        }
+        window.addEventListener('scroll', handleScroll, { passive: true })
+        return () => window.removeEventListener('scroll', handleScroll)
+    }, [])
 
     // Handle view mode change
     const handleViewModeChange = (mode: 'grid' | 'list') => {
@@ -373,7 +392,16 @@ function RentPageContent() {
                 />
                 {/* Sticky Filter Bar */}
                 <div className="sticky top-20 z-40 bg-white border-b border-gray-200 shadow-sm">
-                    <div className="container-custom py-4">
+                    <div
+                        className="container-custom py-4 overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out"
+                        style={typeof window !== 'undefined' && window.innerWidth >= 768
+                            ? { maxHeight: 'none', opacity: 1 }
+                            : {
+                                maxHeight: mobileSearchExpanded ? '400px' : '0px',
+                                opacity: mobileSearchExpanded ? 1 : 0,
+                            }
+                        }
+                    >
                         {/* Search Input + Save Search */}
                         <div className="flex gap-4 mb-4">
                             <SearchInput
@@ -474,7 +502,7 @@ function RentPageContent() {
                                     </svg>
                                 </button>
                                 {(openDropdown === 'price' || openDropdown === 'priceMin' || openDropdown === 'priceMax') && (
-                                    <div className="absolute top-full left-0 mt-2 w-[400px] bg-white rounded-2xl shadow-xl border border-gray-200 p-5 z-50">
+                                    <div className="absolute top-full left-0 mt-2 w-[min(400px,calc(100vw-2rem))] bg-white rounded-2xl shadow-xl border border-gray-200 p-5 z-50">
                                         {/* Labels Row */}
                                         <div className="grid grid-cols-2 gap-4 mb-3">
                                             <label className="text-sm font-medium text-gray-900">Minimum</label>
@@ -874,6 +902,7 @@ function RentPageContent() {
                     }}
                 />
             )}
+
 
             <Footer />
         </>

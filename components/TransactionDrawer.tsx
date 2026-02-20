@@ -8,6 +8,8 @@ import NearbyAmenities from './NearbyAmenities'
 import ShareButton from './ShareButton'
 import { formatPriceFull } from '@/lib/utils'
 import TrendChart from './TrendChart'
+import ChartModal from './ChartModal'
+import { ChartType } from './TrendChart'
 import { getTransactions } from '@/app/actions/property-actions'
 
 interface TransactionDrawerProps {
@@ -22,6 +24,10 @@ export default function TransactionDrawer({ transaction, onClose, isOpen, isInCo
     const [activeTab, setActiveTab] = useState<'details' | 'trends' | 'history'>('details')
     const [trendTransactions, setTrendTransactions] = useState<Transaction[]>([])
     const [loadingTrends, setLoadingTrends] = useState(false)
+    const [selectedChartType, setSelectedChartType] = useState<ChartType | null>(null)
+
+    const openChart = (type: ChartType) => setSelectedChartType(type)
+    const closeChart = () => setSelectedChartType(null)
 
     // Reset trends when transaction changes
     useEffect(() => {
@@ -59,17 +65,23 @@ export default function TransactionDrawer({ transaction, onClose, isOpen, isInCo
     return (
         <div
             className={`fixed z-[2001] bg-white shadow-xl transition-transform duration-300 ease-in-out
-                inset-x-0 bottom-0 w-full h-auto max-h-[700px] rounded-t-2xl border-t border-gray-100 
+                inset-x-0 bottom-0 w-full h-auto max-h-[85dvh] rounded-t-2xl border-t border-gray-100 
                 lg:inset-y-0 lg:right-0 lg:w-1/2 lg:h-[calc(100vh-145px)] lg:left-auto lg:top-[145px] lg:rounded-none lg:rounded-l-2xl lg:border-l lg:border-t-0 lg:max-h-screen
                 ${isOpen ? 'translate-y-0 lg:translate-x-0' : 'translate-y-full lg:translate-x-full'}`}
         >
             {/* Header */}
             <div className="bg-white sticky top-0 z-10 rounded-t-2xl border-b border-gray-100 flex-shrink-0">
-                <div className="flex items-center justify-between px-6 py-5">
-                    <div>
-                        <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2 mb-1">
-                            <MapPin size={20} className="text-primary-600 fill-primary-50" />
-                            {transaction.address || 'Transaction Details'}
+                {/* Mobile drag handle */}
+                <div className="lg:hidden flex justify-center pt-2.5 pb-1">
+                    <div className="w-10 h-1 bg-gray-200 rounded-full" />
+                </div>
+
+                <div className="flex items-center gap-2 px-4 py-3 lg:px-6 lg:py-5">
+                    {/* Title — min-w-0 + truncate prevent it from squeezing the close button */}
+                    <div className="flex-1 min-w-0">
+                        <h2 className="text-base lg:text-xl font-bold text-gray-900 flex items-center gap-2 mb-0.5 truncate">
+                            <MapPin size={16} className="text-primary-600 fill-primary-50 flex-shrink-0" />
+                            <span className="truncate">{transaction.address || 'Transaction Details'}</span>
                         </h2>
                         {transaction.address && (
                             <div className="flex items-center gap-2">
@@ -79,7 +91,8 @@ export default function TransactionDrawer({ transaction, onClose, isOpen, isInCo
                             </div>
                         )}
                     </div>
-                    <div className="flex items-center gap-2 flex-shrink-0 ml-4">
+                    {/* Action buttons — flex-shrink-0 so they're ALWAYS fully visible */}
+                    <div className="flex items-center gap-1 flex-shrink-0">
                         <ShareButton
                             url={`${window.location.origin}/transaction-map?transaction_id=${transaction.id}`}
                             title={`Check out this property at ${transaction.address}`}
@@ -88,9 +101,10 @@ export default function TransactionDrawer({ transaction, onClose, isOpen, isInCo
                         />
                         <button
                             onClick={onClose}
-                            className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
+                            className="p-2 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
+                            aria-label="Close"
                         >
-                            <X size={24} />
+                            <X size={22} />
                         </button>
                     </div>
                 </div>
@@ -111,7 +125,7 @@ export default function TransactionDrawer({ transaction, onClose, isOpen, isInCo
             </div>
 
             {/* Content */}
-            <div className="overflow-y-auto lg:overflow-hidden px-6 py-6 pb-24 h-[calc(100vh-140px)] bg-gray-50/50">
+            <div className="overflow-y-auto overflow-x-hidden lg:overflow-hidden px-3 lg:px-6 py-4 lg:py-6 pb-24 h-[calc(100vh-140px)] bg-gray-50/50">
                 {activeTab === 'details' ? (
                     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300 max-w-4xl mx-auto">
 
@@ -225,190 +239,293 @@ export default function TransactionDrawer({ transaction, onClose, isOpen, isInCo
                     </div>
 
 
-                ) : activeTab === 'trends' ? (<div className="h-full animate-in fade-in slide-in-from-bottom-2 duration-300 overflow-y-auto pb-24 pr-2">
-                    <div className="mb-6">
-                        <h3 className="text-lg font-bold text-gray-900 mb-1">Market Trends: {transaction.address}</h3>
-                        <p className="text-sm text-gray-500">Historical performance based on {trendTransactions.length} transactions at this location.</p>
-                    </div>
+                ) : activeTab === 'trends' ? (
+                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-3 pb-24">
 
-                    {loadingTrends ? (
-                        <div className="h-64 flex items-center justify-center bg-gray-50 rounded-xl border border-dotted border-gray-300">
-                            <div className="flex flex-col items-center gap-2">
-                                <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary-600 border-t-transparent"></div>
-                                <span className="text-sm text-gray-500 font-medium">Loading market data...</span>
+                        {loadingTrends ? (
+                            <div className="h-48 flex items-center justify-center bg-gray-50 rounded-xl border border-dotted border-gray-200">
+                                <div className="flex flex-col items-center gap-2">
+                                    <div className="animate-spin rounded-full h-7 w-7 border-2 border-primary-600 border-t-transparent"></div>
+                                    <span className="text-xs text-gray-400">Loading market data...</span>
+                                </div>
                             </div>
-                        </div>
-                    ) : (
-                        (() => {
+                        ) : trendTransactions.length === 0 ? (
+                            <div className="h-48 flex flex-col items-center justify-center text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                                <p className="text-sm font-medium">No trend data</p>
+                                <p className="text-xs mt-1">No other transactions found at this location.</p>
+                            </div>
+                        ) : (() => {
                             const prices = trendTransactions.map(t => t.price)
                             const avgPrice = prices.reduce((a, b) => a + b, 0) / (prices.length || 1)
                             const psfs = trendTransactions.map(t => t.price / (t.built_up_sqft || t.land_area_sqft || 1))
                             const avgPsf = psfs.reduce((a, b) => a + b, 0) / (psfs.length || 1)
+                            const minPrice = Math.min(...prices)
+                            const maxPrice = Math.max(...prices)
+                            const minPsf = Math.min(...psfs)
+                            const maxPsf = Math.max(...psfs)
+
+                            // Property type distribution for the volume card
+                            const typeCounts: Record<string, number> = {}
+                            trendTransactions.forEach(t => {
+                                const type = (t.property_type || 'Unknown').toLowerCase()
+                                typeCounts[type] = (typeCounts[type] || 0) + 1
+                            })
+                            const topType = Object.entries(typeCounts).sort((a, b) => b[1] - a[1])[0]
 
                             return (
-                                <div className="space-y-6">
-                                    {/* AI Market Analyst Card */}
-                                    <div className="bg-purple-50/50 rounded-xl p-5 border border-purple-100 relative overflow-hidden">
-                                        <div className="absolute top-0 right-0 w-1 h-full bg-gradient-to-b from-purple-400 to-pink-500 opacity-50"></div>
-                                        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
-                                            <div className="flex gap-4">
-                                                <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-purple-600 shrink-0 border border-purple-50">
-                                                    <Sparkles size={20} />
-                                                </div>
-                                                <div>
-                                                    <h4 className="font-bold text-gray-900">AI Market Analyst</h4>
-                                                    <p className="text-xs text-gray-500">Smart insights based on this data</p>
-                                                </div>
-                                            </div>
-                                            <button className="px-4 py-2 bg-white text-purple-600 text-xs font-bold border border-purple-100 rounded-lg hover:bg-purple-50 transition-colors shadow-sm whitespace-nowrap">
-                                                Generate Insights
-                                            </button>
+                                <div className="space-y-3">
+                                    {/* ── Section heading ── */}
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <h3 className="text-sm font-bold text-gray-900">Market Trends</h3>
+                                            <p className="text-[11px] text-gray-400">{trendTransactions.length} transactions at this location</p>
                                         </div>
-                                        <p className="text-xs text-gray-400 italic">Click "Generate Insights" to get a summary of price trends and market volume.</p>
+                                        <span className="text-[10px] font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Tap to view chart</span>
                                     </div>
 
-                                    {/* Stats Grid */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {/* Price Analysis */}
-                                        <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow">
-                                            <div className="flex justify-between items-start mb-6">
-                                                <div>
-                                                    <h4 className="font-bold text-gray-900 text-sm">Price Analysis</h4>
-                                                    <p className="text-[10px] text-gray-400">Avg vs Median Transaction Price</p>
-                                                </div>
-                                                <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">Stable</span>
-                                            </div>
+                                    {/* ── 3 chart selection cards ── */}
 
-                                            <div className="flex items-end justify-between mb-2">
-                                                <div className="flex flex-col">
-                                                    <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">Avg Price</span>
-                                                    <span className="text-2xl font-black text-gray-900">
-                                                        RM {(avgPrice >= 1000000 ? `${(avgPrice / 1000).toLocaleString(undefined, { maximumFractionDigits: 0 })}k` : avgPrice.toLocaleString(undefined, { maximumFractionDigits: 0 }))}
-                                                    </span>
+                                    {/* 1. Price Analysis */}
+                                    <button
+                                        onClick={() => openChart('price')}
+                                        className="w-full text-left bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-100 active:scale-[0.98] transition-all duration-200 overflow-hidden group"
+                                    >
+                                        <div className="flex items-stretch">
+                                            {/* Colored left accent bar */}
+                                            <div className="w-1 bg-blue-500 rounded-l-2xl flex-shrink-0" />
+                                            <div className="flex-1 p-4">
+                                                <div className="flex items-start justify-between">
+                                                    <div className="flex items-center gap-2.5 mb-2">
+                                                        <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                                                            <TrendingUp size={15} className="text-blue-600" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm font-bold text-gray-900 leading-tight">Price Analysis</p>
+                                                            <p className="text-[10px] text-gray-400">Avg vs Median price</p>
+                                                        </div>
+                                                    </div>
+                                                    <ArrowUpRight size={16} className="text-gray-300 group-hover:text-blue-500 transition-colors mt-1 flex-shrink-0" />
                                                 </div>
-                                                {/* Mini Sparkline Placeholder */}
-                                                <div className="flex gap-0.5 mb-1">
-                                                    <div className="w-1 h-3 bg-gray-100 rounded-full"></div>
-                                                    <div className="w-1 h-4 bg-gray-200 rounded-full"></div>
-                                                    <div className="w-1 h-3 bg-gray-100 rounded-full"></div>
-                                                    <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
+                                                <div className="flex items-end gap-4">
+                                                    <div>
+                                                        <p className="text-[10px] text-gray-400 font-medium">Avg</p>
+                                                        <p className="text-base font-black text-gray-900">
+                                                            RM {avgPrice >= 1000000 ? `${(avgPrice / 1000000).toFixed(2)}M` : `${(avgPrice / 1000).toFixed(0)}k`}
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <p className="text-[10px] text-gray-400 font-medium">Range</p>
+                                                        <p className="text-xs text-gray-600 font-semibold">
+                                                            {(minPrice / 1000).toFixed(0)}k – {(maxPrice / 1000).toFixed(0)}k
+                                                        </p>
+                                                    </div>
+                                                    {/* Mini sparkline bars */}
+                                                    <div className="flex items-end gap-0.5 h-8 opacity-40 group-hover:opacity-80 transition-opacity">
+                                                        {[45, 70, 55, 80, 65, 90, 72].map((h, i) => (
+                                                            <div key={i} className="w-1.5 bg-blue-400 rounded-full" style={{ height: `${h}%` }} />
+                                                        ))}
+                                                    </div>
                                                 </div>
-                                            </div>
-
-                                            <div className="h-px bg-gray-100 w-full mb-2"></div>
-                                            <div className="flex justify-between text-[10px] text-gray-400">
-                                                <span>Low: RM {(Math.min(...prices) / 1000).toFixed(0)}k</span>
-                                                <span>High: RM {(Math.max(...prices) / 1000).toFixed(0)}k</span>
                                             </div>
                                         </div>
+                                    </button>
 
-                                        {/* PSF Analysis */}
-                                        <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow">
-                                            <div className="flex justify-between items-start mb-6">
-                                                <div>
-                                                    <h4 className="font-bold text-gray-900 text-sm">PSF Analysis</h4>
-                                                    <p className="text-[10px] text-gray-400">Price Per Sqft Performance</p>
+                                    {/* 2. PSF Analysis */}
+                                    <button
+                                        onClick={() => openChart('psf')}
+                                        className="w-full text-left bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-purple-100 active:scale-[0.98] transition-all duration-200 overflow-hidden group"
+                                    >
+                                        <div className="flex items-stretch">
+                                            <div className="w-1 bg-purple-500 rounded-l-2xl flex-shrink-0" />
+                                            <div className="flex-1 p-4">
+                                                <div className="flex items-start justify-between">
+                                                    <div className="flex items-center gap-2.5 mb-2">
+                                                        <div className="w-8 h-8 rounded-xl bg-purple-50 flex items-center justify-center flex-shrink-0">
+                                                            <Layers size={15} className="text-purple-600" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm font-bold text-gray-900 leading-tight">PSF Analysis</p>
+                                                            <p className="text-[10px] text-gray-400">Price per sqft</p>
+                                                        </div>
+                                                    </div>
+                                                    <ArrowUpRight size={16} className="text-gray-300 group-hover:text-purple-500 transition-colors mt-1 flex-shrink-0" />
                                                 </div>
-                                                <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">Stable</span>
-                                            </div>
-
-                                            <div className="flex items-end justify-between mb-2">
-                                                <div className="flex flex-col">
-                                                    <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">Avg PSF</span>
-                                                    <span className="text-2xl font-black text-gray-900">
-                                                        RM {avgPsf.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                                                    </span>
+                                                <div className="flex items-end gap-4">
+                                                    <div>
+                                                        <p className="text-[10px] text-gray-400 font-medium">Avg PSF</p>
+                                                        <p className="text-base font-black text-gray-900">RM {avgPsf.toFixed(0)}</p>
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <p className="text-[10px] text-gray-400 font-medium">Range</p>
+                                                        <p className="text-xs text-gray-600 font-semibold">
+                                                            RM {minPsf.toFixed(0)} – {maxPsf.toFixed(0)}
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex items-end gap-0.5 h-8 opacity-40 group-hover:opacity-80 transition-opacity">
+                                                        {[55, 40, 75, 60, 85, 50, 80].map((h, i) => (
+                                                            <div key={i} className="w-1.5 bg-purple-400 rounded-full" style={{ height: `${h}%` }} />
+                                                        ))}
+                                                    </div>
                                                 </div>
-                                                <div className="flex gap-0.5 mb-1">
-                                                    <div className="w-1 h-3 bg-gray-100 rounded-full"></div>
-                                                    <div className="w-1 h-5 bg-purple-500 rounded-full"></div>
-                                                    <div className="w-1 h-4 bg-gray-200 rounded-full"></div>
-                                                </div>
-                                            </div>
-
-                                            <div className="h-px bg-gray-100 w-full mb-2"></div>
-                                            <div className="flex justify-between text-[10px] text-gray-400">
-                                                <span>Low: RM {Math.min(...psfs).toFixed(0)}</span>
-                                                <span>High: RM {Math.max(...psfs).toFixed(0)}</span>
                                             </div>
                                         </div>
-                                    </div>
+                                    </button>
 
-                                    {/* Full Chart */}
-                                    <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
-                                        <div className="h-auto">
-                                            <TrendChart transactions={trendTransactions} className="h-auto" minimal={true} />
+                                    {/* 3. Market Activity */}
+                                    <button
+                                        onClick={() => openChart('volume')}
+                                        className="w-full text-left bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-emerald-100 active:scale-[0.98] transition-all duration-200 overflow-hidden group"
+                                    >
+                                        <div className="flex items-stretch">
+                                            <div className="w-1 bg-emerald-500 rounded-l-2xl flex-shrink-0" />
+                                            <div className="flex-1 p-4">
+                                                <div className="flex items-start justify-between">
+                                                    <div className="flex items-center gap-2.5 mb-2">
+                                                        <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                                                            <History size={15} className="text-emerald-600" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm font-bold text-gray-900 leading-tight">Market Activity</p>
+                                                            <p className="text-[10px] text-gray-400">Volume by property type</p>
+                                                        </div>
+                                                    </div>
+                                                    <ArrowUpRight size={16} className="text-gray-300 group-hover:text-emerald-500 transition-colors mt-1 flex-shrink-0" />
+                                                </div>
+                                                <div className="flex items-end gap-4">
+                                                    <div>
+                                                        <p className="text-[10px] text-gray-400 font-medium">Total</p>
+                                                        <p className="text-base font-black text-gray-900">{trendTransactions.length}</p>
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <p className="text-[10px] text-gray-400 font-medium">Top type</p>
+                                                        <p className="text-xs text-gray-600 font-semibold capitalize">
+                                                            {topType ? `${topType[0]} (${topType[1]})` : 'N/A'}
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex items-end gap-0.5 h-8 opacity-40 group-hover:opacity-80 transition-opacity">
+                                                        {[30, 60, 45, 80, 55, 70, 65].map((h, i) => (
+                                                            <div key={i} className="w-1.5 bg-emerald-400 rounded-full" style={{ height: `${h}%` }} />
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </button>
                                 </div>
                             )
-                        })()
-                    )}
-                </div>
+                        })()}
+                    </div>
                 ) : activeTab === 'history' ? (
-                    <div className="h-full animate-in fade-in slide-in-from-bottom-2 duration-300">
-                        <div className="mb-4 flex items-center justify-between">
-                            <div>
-                                <h3 className="text-lg font-bold text-gray-900 mb-1">Transaction History</h3>
-                                <p className="text-sm text-gray-500">
-                                    Showing {trendTransactions.length} records in {transaction.neighborhood}
-                                </p>
-                            </div>
+                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 pb-24">
+                        <div className="mb-4">
+                            <h3 className="text-base font-bold text-gray-900 mb-0.5">Transaction History</h3>
+                            <p className="text-xs text-gray-400">
+                                {trendTransactions.length} records in {transaction.neighborhood}
+                            </p>
                         </div>
 
                         {loadingTrends ? (
-                            <div className="h-64 flex items-center justify-center bg-gray-50 rounded-xl border border-dotted border-gray-300">
+                            <div className="h-48 flex items-center justify-center bg-gray-50 rounded-xl border border-dotted border-gray-200">
                                 <div className="flex flex-col items-center gap-2">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary-600 border-t-transparent"></div>
-                                    <span className="text-sm text-gray-500 font-medium">Loading history...</span>
+                                    <div className="animate-spin rounded-full h-7 w-7 border-2 border-primary-600 border-t-transparent"></div>
+                                    <span className="text-xs text-gray-400">Loading history...</span>
                                 </div>
                             </div>
                         ) : (
-                            <div className="overflow-x-auto rounded-xl border border-gray-200">
-                                <table className="w-full text-sm text-left">
-                                    <thead className="text-xs text-gray-500 uppercase bg-gray-50 sticky top-0">
-                                        <tr>
-                                            <th className="px-4 py-3 font-medium">Date</th>
-                                            <th className="px-4 py-3 font-medium text-right">Price</th>
-                                            <th className="px-4 py-3 font-medium text-right">PSF</th>
-                                            <th className="px-4 py-3 font-medium">Size</th>
-                                            <th className="px-4 py-3 font-medium">Type</th>
-                                            <th className="px-4 py-3 font-medium">Tenure</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-100">
-                                        {trendTransactions.sort((a, b) => new Date(b.transaction_date!).getTime() - new Date(a.transaction_date!).getTime()).map((t) => {
+                            <>
+                                {/* ── Mobile card list (< lg) ──────────────────── */}
+                                <div className="lg:hidden space-y-3">
+                                    {[...trendTransactions]
+                                        .sort((a, b) => new Date(b.transaction_date!).getTime() - new Date(a.transaction_date!).getTime())
+                                        .map((t) => {
                                             const tPsf = t.price / (t.built_up_sqft || t.land_area_sqft || 1)
                                             return (
-                                                <tr key={t.id} className="bg-white hover:bg-gray-50/80 transition-colors">
-                                                    <td className="px-4 py-3 text-gray-900 font-medium whitespace-nowrap">
-                                                        {formatDate(t.transaction_date)}
-                                                    </td>
-                                                    <td className="px-4 py-3 text-right font-semibold text-primary-600 whitespace-nowrap">
-                                                        {formatPriceFull(t.price)}
-                                                    </td>
-                                                    <td className="px-4 py-3 text-right text-gray-500 whitespace-nowrap">
-                                                        RM {tPsf.toFixed(0)}
-                                                    </td>
-                                                    <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
-                                                        {t.built_up_sqft ? `${Number(t.built_up_sqft).toLocaleString(undefined, { maximumFractionDigits: 0 })} sqft` : '-'}
-                                                    </td>
-                                                    <td className="px-4 py-3 text-gray-600 capitalize whitespace-nowrap">
-                                                        {t.property_type?.toLowerCase() || '-'}
-                                                    </td>
-                                                    <td className="px-4 py-3 text-gray-500 text-xs uppercase whitespace-nowrap">
-                                                        {t.tenure || '-'}
-                                                    </td>
-                                                </tr>
+                                                <div key={t.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+                                                    {/* Top row: Price + Date */}
+                                                    <div className="flex items-start justify-between mb-3">
+                                                        <div>
+                                                            <p className="text-lg font-black text-primary-600 leading-tight">
+                                                                {formatPriceFull(t.price)}
+                                                            </p>
+                                                            <p className="text-[10px] text-gray-400 mt-0.5">RM {tPsf.toFixed(0)} psf</p>
+                                                        </div>
+                                                        <span className="text-xs font-medium text-gray-500 bg-gray-50 border border-gray-100 px-2 py-1 rounded-lg">
+                                                            {formatDate(t.transaction_date)}
+                                                        </span>
+                                                    </div>
+                                                    {/* Bottom row: meta chips */}
+                                                    <div className="flex flex-wrap gap-1.5">
+                                                        {t.built_up_sqft && (
+                                                            <span className="text-[10px] font-semibold bg-blue-50 text-blue-700 px-2 py-0.5 rounded">
+                                                                {Number(t.built_up_sqft).toLocaleString(undefined, { maximumFractionDigits: 0 })} sqft
+                                                            </span>
+                                                        )}
+                                                        {t.property_type && (
+                                                            <span className="text-[10px] font-semibold bg-gray-100 text-gray-600 px-2 py-0.5 rounded capitalize">
+                                                                {t.property_type.toLowerCase()}
+                                                            </span>
+                                                        )}
+                                                        {t.tenure && (
+                                                            <span className="text-[10px] font-semibold bg-amber-50 text-amber-700 px-2 py-0.5 rounded uppercase">
+                                                                {t.tenure}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             )
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>
+                                        })
+                                    }
+                                </div>
+
+                                {/* ── Desktop table (≥ lg) ─────────────────────── */}
+                                <div className="hidden lg:block overflow-x-auto rounded-xl border border-gray-200">
+                                    <table className="w-full text-sm text-left">
+                                        <thead className="text-xs text-gray-500 uppercase bg-gray-50 sticky top-0">
+                                            <tr>
+                                                <th className="px-4 py-3 font-medium">Date</th>
+                                                <th className="px-4 py-3 font-medium text-right">Price</th>
+                                                <th className="px-4 py-3 font-medium text-right">PSF</th>
+                                                <th className="px-4 py-3 font-medium">Size</th>
+                                                <th className="px-4 py-3 font-medium">Type</th>
+                                                <th className="px-4 py-3 font-medium">Tenure</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100">
+                                            {[...trendTransactions]
+                                                .sort((a, b) => new Date(b.transaction_date!).getTime() - new Date(a.transaction_date!).getTime())
+                                                .map((t) => {
+                                                    const tPsf = t.price / (t.built_up_sqft || t.land_area_sqft || 1)
+                                                    return (
+                                                        <tr key={t.id} className="bg-white hover:bg-gray-50/80 transition-colors">
+                                                            <td className="px-4 py-3 text-gray-900 font-medium whitespace-nowrap">{formatDate(t.transaction_date)}</td>
+                                                            <td className="px-4 py-3 text-right font-semibold text-primary-600 whitespace-nowrap">{formatPriceFull(t.price)}</td>
+                                                            <td className="px-4 py-3 text-right text-gray-500 whitespace-nowrap">RM {tPsf.toFixed(0)}</td>
+                                                            <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{t.built_up_sqft ? `${Number(t.built_up_sqft).toLocaleString(undefined, { maximumFractionDigits: 0 })} sqft` : '-'}</td>
+                                                            <td className="px-4 py-3 text-gray-600 capitalize whitespace-nowrap">{t.property_type?.toLowerCase() || '-'}</td>
+                                                            <td className="px-4 py-3 text-gray-500 text-xs uppercase whitespace-nowrap">{t.tenure || '-'}</td>
+                                                        </tr>
+                                                    )
+                                                })
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </>
                         )}
                     </div>
                 ) : null}
             </div >
+
+            {/* ── Full-screen Chart Modal (portal, escapes the drawer's stacking context) ── */}
+            {selectedChartType && (
+                <ChartModal
+                    isOpen={selectedChartType !== null}
+                    onClose={closeChart}
+                    transactions={trendTransactions}
+                    address={transaction.address || 'Transaction Details'}
+                    chartType={selectedChartType}
+                />
+            )}
         </div >
     )
 }

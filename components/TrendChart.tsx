@@ -19,10 +19,13 @@ import { Transaction } from '@/lib/types'
 import { TrendingUp, TrendingDown, Minus, Sparkles, Loader2 } from 'lucide-react'
 import { generateTrendInsight } from '@/app/actions/ai-trend-insight'
 
+export type ChartType = 'price' | 'psf' | 'volume'
+
 interface TrendChartProps {
     transactions: Transaction[]
     className?: string
     minimal?: boolean
+    chartType?: ChartType  // if set, renders only this chart at full width
 }
 
 // Custom Tooltip Component for better aesthetics
@@ -116,7 +119,9 @@ const CustomLegend = (props: any) => {
     );
 };
 
-export default function TrendChart({ transactions, className = '', minimal = false }: TrendChartProps) {
+export default function TrendChart({ transactions, className = '', minimal = false, chartType }: TrendChartProps) {
+    // Single-chart mode: renders only one chart, full-width, no grid
+    const singleChart = !!chartType
     const [aiInsight, setAiInsight] = useState<string | null>(null)
     const [isLoadingAi, setIsLoadingAi] = useState(false)
     const [aiError, setAiError] = useState<string | null>(null)
@@ -250,7 +255,10 @@ export default function TrendChart({ transactions, className = '', minimal = fal
     }
 
     return (
-        <div className={`grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 h-auto bg-gray-50/50 ${className}`}>
+        <div className={`${singleChart
+            ? 'p-4 lg:p-6'
+            : `grid grid-cols-1 lg:grid-cols-2 gap-4 ${minimal ? 'p-3' : 'p-6 bg-gray-50/50 gap-6'}`
+            } h-auto ${className}`}>
 
             {/* AI Insight Card */}
             {!minimal && (
@@ -308,175 +316,186 @@ export default function TrendChart({ transactions, className = '', minimal = fal
                 </div>
             )}
 
-            {/* Price Trend */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col h-[420px] hover:shadow-md transition-shadow duration-200">
-                <StatHeader
-                    title="Price Analysis"
-                    subTitle="Avg vs Median Transaction Price"
-                    currentValue={latestData?.medianPrice} // Use Median as the headline
-                    prevValue={prevData?.medianPrice}
-                    type="price"
-                    minimal={minimal}
-                />
-                <div className="flex-grow">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={data}>
-                            <defs>
-                                <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
-                                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                            <XAxis
-                                dataKey="year"
-                                stroke="#94a3b8"
-                                fontSize={12}
-                                tickLine={false}
-                                axisLine={false}
-                                dy={10}
-                            />
-                            <YAxis
-                                stroke="#94a3b8"
-                                fontSize={12}
-                                tickFormatter={(value) => `RM ${(value / 1000).toFixed(0)}k`}
-                                tickLine={false}
-                                axisLine={false}
-                                dx={-10}
-                            />
-                            <Tooltip content={<CustomTooltip />} />
-                            <Legend iconType="circle" />
-                            <Area
-                                type="monotone"
-                                dataKey="avgPrice"
-                                name="Average"
-                                stroke="#3b82f6"
-                                strokeWidth={2}
-                                fill="url(#colorPrice)"
-                                activeDot={{ r: 6, strokeWidth: 0 }}
-                            />
-                            <Line
-                                type="monotone"
-                                dataKey="medianPrice"
-                                name="Median"
-                                stroke="#f59e0b"
-                                strokeWidth={2}
-                                strokeDasharray="4 4"
-                                dot={false}
-                                activeDot={{ r: 6, strokeWidth: 0 }}
-                            />
-                        </AreaChart>
-                    </ResponsiveContainer>
-                </div>
-            </div>
-
-            {/* PSF Trend */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col h-[420px] hover:shadow-md transition-shadow duration-200">
-                <StatHeader
-                    title="PSF Analysis"
-                    subTitle="Price Per Sqft Performance"
-                    currentValue={latestData?.medianPsf}
-                    prevValue={prevData?.medianPsf}
-                    type="psf"
-                    minimal={minimal}
-                />
-                <div className="flex-grow">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={data}>
-                            <defs>
-                                <linearGradient id="colorPsf" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.1} />
-                                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                            <XAxis
-                                dataKey="year"
-                                stroke="#94a3b8"
-                                fontSize={12}
-                                tickLine={false}
-                                axisLine={false}
-                                dy={10}
-                            />
-                            <YAxis
-                                stroke="#94a3b8"
-                                fontSize={12}
-                                tickFormatter={(value) => `RM ${value}`}
-                                tickLine={false}
-                                axisLine={false}
-                                dx={-10}
-                            />
-                            <Tooltip content={<CustomTooltip />} />
-                            <Legend iconType="circle" />
-                            <Area
-                                type="monotone"
-                                dataKey="avgPsf"
-                                name="Average PSF"
-                                stroke="#8b5cf6"
-                                strokeWidth={2}
-                                fill="url(#colorPsf)"
-                                activeDot={{ r: 6, strokeWidth: 0 }}
-                            />
-                            <Line
-                                type="monotone"
-                                dataKey="medianPsf"
-                                name="Median PSF"
-                                stroke="#14b8a6"
-                                strokeWidth={2}
-                                strokeDasharray="4 4"
-                                dot={false}
-                                activeDot={{ r: 6, strokeWidth: 0 }}
-                            />
-                        </AreaChart>
-                    </ResponsiveContainer>
-                </div>
-            </div>
-
-            {/* Volume */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col h-[500px] lg:col-span-2 hover:shadow-md transition-shadow duration-200">
-                <StatHeader
-                    title="Market Activity"
-                    subTitle="Transaction Volume by Property Type"
-                    currentValue={latestData?.volume}
-                    prevValue={prevData?.volume}
-                    type="volume"
-                    minimal={minimal}
-                />
-                <div className="flex-grow">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={data} barSize={40}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                            <XAxis
-                                dataKey="year"
-                                stroke="#94a3b8"
-                                fontSize={12}
-                                tickLine={false}
-                                axisLine={false}
-                                dy={10}
-                            />
-                            <YAxis
-                                stroke="#94a3b8"
-                                fontSize={12}
-                                tickLine={false}
-                                axisLine={false}
-                                dx={-10}
-                            />
-                            <Tooltip cursor={{ fill: '#f8fafc' }} content={<CustomTooltip />} />
-                            <Legend content={<CustomLegend />} />
-                            {propertyTypes.map((type, index) => (
-                                <Bar
-                                    key={type}
-                                    dataKey={type}
-                                    stackId="a"
-                                    name={type.replace(/_/g, ' ')}
-                                    fill={colors[index % colors.length]}
-                                    radius={index === propertyTypes.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
+            {/* Price Trend — shown when no chartType filter or type === 'price' */}
+            {(!singleChart || chartType === 'price') && (
+                <div className={`bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col ${singleChart ? 'h-[480px] p-4' : minimal ? 'h-[260px] p-3' : 'h-[420px] p-6'
+                    } hover:shadow-md transition-shadow duration-200`}>
+                    <StatHeader
+                        title="Price Analysis"
+                        subTitle="Avg vs Median Transaction Price"
+                        currentValue={latestData?.medianPrice} // Use Median as the headline
+                        prevValue={prevData?.medianPrice}
+                        type="price"
+                        minimal={minimal}
+                    />
+                    <div className="flex-grow">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={data}>
+                                <defs>
+                                    <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
+                                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                <XAxis
+                                    dataKey="year"
+                                    stroke="#94a3b8"
+                                    fontSize={12}
+                                    tickLine={false}
+                                    axisLine={false}
+                                    dy={10}
                                 />
-                            ))}
-                        </BarChart>
-                    </ResponsiveContainer>
+                                <YAxis
+                                    stroke="#94a3b8"
+                                    fontSize={12}
+                                    tickFormatter={(value) => `RM ${(value / 1000).toFixed(0)}k`}
+                                    tickLine={false}
+                                    axisLine={false}
+                                    dx={-10}
+                                />
+                                <Tooltip content={<CustomTooltip />} />
+                                <Legend iconType="circle" />
+                                <Area
+                                    type="monotone"
+                                    dataKey="avgPrice"
+                                    name="Average"
+                                    stroke="#3b82f6"
+                                    strokeWidth={2}
+                                    fill="url(#colorPrice)"
+                                    activeDot={{ r: 6, strokeWidth: 0 }}
+                                />
+                                <Line
+                                    type="monotone"
+                                    dataKey="medianPrice"
+                                    name="Median"
+                                    stroke="#f59e0b"
+                                    strokeWidth={2}
+                                    strokeDasharray="4 4"
+                                    dot={false}
+                                    activeDot={{ r: 6, strokeWidth: 0 }}
+                                />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </div>
                 </div>
-            </div>
+            )}
+
+            {/* PSF Trend — shown when no chartType filter or type === 'psf' */}
+            {(!singleChart || chartType === 'psf') && (
+                <div className={`bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col ${singleChart ? 'h-[480px] p-4' : minimal ? 'h-[260px] p-3' : 'h-[420px] p-6'
+                    } hover:shadow-md transition-shadow duration-200`}>
+                    <StatHeader
+                        title="PSF Analysis"
+                        subTitle="Price Per Sqft Performance"
+                        currentValue={latestData?.medianPsf}
+                        prevValue={prevData?.medianPsf}
+                        type="psf"
+                        minimal={minimal}
+                    />
+                    <div className="flex-grow">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={data}>
+                                <defs>
+                                    <linearGradient id="colorPsf" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.1} />
+                                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                <XAxis
+                                    dataKey="year"
+                                    stroke="#94a3b8"
+                                    fontSize={12}
+                                    tickLine={false}
+                                    axisLine={false}
+                                    dy={10}
+                                />
+                                <YAxis
+                                    stroke="#94a3b8"
+                                    fontSize={12}
+                                    tickFormatter={(value) => `RM ${value}`}
+                                    tickLine={false}
+                                    axisLine={false}
+                                    dx={-10}
+                                />
+                                <Tooltip content={<CustomTooltip />} />
+                                <Legend iconType="circle" />
+                                <Area
+                                    type="monotone"
+                                    dataKey="avgPsf"
+                                    name="Average PSF"
+                                    stroke="#8b5cf6"
+                                    strokeWidth={2}
+                                    fill="url(#colorPsf)"
+                                    activeDot={{ r: 6, strokeWidth: 0 }}
+                                />
+                                <Line
+                                    type="monotone"
+                                    dataKey="medianPsf"
+                                    name="Median PSF"
+                                    stroke="#14b8a6"
+                                    strokeWidth={2}
+                                    strokeDasharray="4 4"
+                                    dot={false}
+                                    activeDot={{ r: 6, strokeWidth: 0 }}
+                                />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+            )}
+
+            {/* Volume — shown when no chartType filter or type === 'volume' */}
+            {(!singleChart || chartType === 'volume') && (
+                <div className={`bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col ${singleChart ? 'h-[480px] p-4' : minimal ? 'h-[280px] p-3' : 'h-[500px] p-6'
+                    } ${singleChart ? '' : 'lg:col-span-2'} hover:shadow-md transition-shadow duration-200`}>
+                    <StatHeader
+                        title="Market Activity"
+                        subTitle="Transaction Volume by Property Type"
+                        currentValue={latestData?.volume}
+                        prevValue={prevData?.volume}
+                        type="volume"
+                        minimal={minimal}
+                    />
+                    <div className="flex-grow">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={data} barSize={40}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                <XAxis
+                                    dataKey="year"
+                                    stroke="#94a3b8"
+                                    fontSize={12}
+                                    tickLine={false}
+                                    axisLine={false}
+                                    dy={10}
+                                />
+                                <YAxis
+                                    stroke="#94a3b8"
+                                    fontSize={12}
+                                    tickLine={false}
+                                    axisLine={false}
+                                    dx={-10}
+                                    allowDecimals={false}
+                                    tickFormatter={(v) => Number.isInteger(v) ? String(v) : ''}
+                                />
+                                <Tooltip cursor={{ fill: '#f8fafc' }} content={<CustomTooltip />} />
+                                <Legend content={<CustomLegend />} />
+                                {propertyTypes.map((type, index) => (
+                                    <Bar
+                                        key={type}
+                                        dataKey={type}
+                                        stackId="a"
+                                        name={type.replace(/_/g, ' ')}
+                                        fill={colors[index % colors.length]}
+                                        radius={index === propertyTypes.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
+                                    />
+                                ))}
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+            )}
 
         </div>
     )

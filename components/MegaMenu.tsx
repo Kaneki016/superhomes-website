@@ -5,10 +5,10 @@ interface MegaMenuProps {
     title: string
     basePath: string
     items: {
-        locations: string[]
+        locations: (string | { label: string; href: string })[]
         propertyTypes: {
             title: string
-            types: string[]
+            types: (string | { label: string; href: string })[]
         }[]
         resources?: {
             title: string
@@ -58,53 +58,65 @@ export default function MegaMenu({ title, basePath, items }: MegaMenuProps) {
 
             {/* Dropdown Content */}
             <div
-                className={`absolute top-full left-0 mt-0 w-[800px] bg-white rounded-xl shadow-xl border border-gray-100 p-8 z-50 transform transition-all duration-200 origin-top-left ${isOpen
+                className={`absolute top-full left-0 mt-0 min-w-[800px] w-max max-w-[90vw] bg-white rounded-xl shadow-xl border border-gray-100 p-8 z-50 transform transition-all duration-200 origin-top-left ${isOpen
                     ? 'opacity-100 translate-y-0 visible'
                     : 'opacity-0 translate-y-2 invisible'
                     }`}
             >
-                <div className="grid grid-cols-4 gap-8">
+                <div className="flex gap-8">
                     {/* Locations Column */}
-                    <div>
+                    <div className="min-w-[160px] flex-shrink-0">
                         <h3 className="font-bold text-gray-900 mb-4 uppercase text-xs tracking-wider">Locations</h3>
-                        <div className="flex flex-col gap-2">
-                            {items.locations.map((loc) => (
-                                <Link
-                                    key={loc}
-                                    href={`${basePath}/${toSlug(loc)}`} // e.g. /properties/kuala-lumpur
-                                    className="text-gray-600 hover:text-primary-600 text-sm transition-colors"
-                                >
-                                    {loc}
-                                </Link>
-                            ))}
+                        <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                            {items.locations.map((loc) => {
+                                const isString = typeof loc === 'string'
+                                const label = isString ? loc : loc.label
+                                const href = isString ? `${basePath}/${toSlug(loc)}` : loc.href
+
+                                return (
+                                    <Link
+                                        key={label}
+                                        href={href}
+                                        className="text-gray-600 hover:text-primary-600 text-sm transition-colors block py-0.5"
+                                    >
+                                        {label}
+                                    </Link>
+                                )
+                            })}
                         </div>
                     </div>
 
-                    {/* Property Types Columns (Span 2) */}
+                    {/* Property Types Columns */}
                     {items.propertyTypes.map((category, idx) => (
-                        <div key={idx}>
+                        <div key={idx} className="min-w-[160px] flex-shrink-0">
                             <h3 className="font-bold text-gray-900 mb-4 uppercase text-xs tracking-wider">
                                 {category.title}
                             </h3>
-                            <div className="flex flex-col gap-2">
-                                {category.types.map((type) => (
-                                    <Link
-                                        key={type}
-                                        href={`${basePath}/${toSlug(type)}`} // e.g. /properties/condo
-                                        className="text-gray-600 hover:text-primary-600 text-sm transition-colors"
-                                    >
-                                        {/* Pluralize logic if needed, but 'Condo' is fine usually */}
-                                        {/* PropertyGuru uses Plurals e.g. 'Condos', 'Apartments' */}
-                                        {type}
-                                    </Link>
-                                ))}
+                            <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                                {category.types.map((type) => {
+                                    const isString = typeof type === 'string'
+                                    const label = isString ? type : type.label
+                                    const href = isString ? `${basePath}/${toSlug(type)}` : type.href
+
+                                    return (
+                                        <Link
+                                            key={label}
+                                            href={href}
+                                            className="text-gray-600 hover:text-primary-600 text-sm transition-colors block py-0.5"
+                                        >
+                                            {/* Pluralize logic if needed, but 'Condo' is fine usually */}
+                                            {/* PropertyGuru uses Plurals e.g. 'Condos', 'Apartments' */}
+                                            {label}
+                                        </Link>
+                                    )
+                                })}
                             </div>
                         </div>
                     ))}
 
                     {/* Resources / Extra Column */}
                     {items.resources && (
-                        <div className="bg-gray-50 -my-8 -mr-8 p-8 rounded-r-xl">
+                        <div className="bg-gray-50 -my-8 -mr-8 p-8 rounded-r-xl min-w-[240px] flex-shrink-0">
                             <h3 className="font-bold text-gray-900 mb-4 uppercase text-xs tracking-wider">
                                 {items.resources.title}
                             </h3>
@@ -116,7 +128,7 @@ export default function MegaMenu({ title, basePath, items }: MegaMenuProps) {
                                         className="text-gray-600 hover:text-primary-600 text-sm transition-colors flex items-center justify-between group"
                                     >
                                         {item.label}
-                                        <svg className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity -ml-4 group-hover:ml-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity -ml-4 group-hover:ml-0 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                         </svg>
                                     </Link>
