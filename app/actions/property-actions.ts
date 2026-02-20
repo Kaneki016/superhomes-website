@@ -49,7 +49,7 @@ export async function getPlatformStats() {
 }
 
 export async function getDistinctPropertyTypesByListingType(listingType: string, state?: string) {
-    return await dbGetPropertyTypes(listingType as 'sale' | 'rent', state)
+    return await dbGetPropertyTypes(listingType as 'sale' | 'rent' | 'project', state)
 }
 
 // Transaction Data

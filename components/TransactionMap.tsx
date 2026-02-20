@@ -649,16 +649,19 @@ export default function TransactionMap({
         <div className={`relative w-full h-full ${className}`}>
             <div ref={mapRef} className="w-full h-full rounded-lg" />
 
-            {/* Mobile Controls Backdrop */}
+            {/* Mobile Controls Backdrop - Fix 5: match the controls z-index (2500) */}
             {showControls && (
                 <div
-                    className="lg:hidden fixed inset-0 z-[1000] bg-black/20 backdrop-blur-sm"
+                    className="lg:hidden fixed inset-0 z-[2400] bg-black/20 backdrop-blur-sm"
                     onClick={() => setShowControls(false)}
                 ></div>
             )}
 
-            {/* Consolidated Map Controls (Bottom Right) */}
-            <div className={`absolute bottom-24 right-4 lg:bottom-6 lg:right-6 z-[1000] flex flex-col items-end gap-3 pointer-events-none`}>
+            {/* Consolidated Map Controls (Bottom Right) - Fix 6: safe-area-inset bottom */}
+            <div
+                className={`absolute bottom-24 right-4 lg:bottom-6 lg:right-6 z-[1000] flex flex-col items-end gap-3 pointer-events-none`}
+                style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+            >
 
                 {/* Zoom Controls (Pointer Events Enable) */}
                 <div className="flex flex-col gap-1 pointer-events-auto shadow-lg rounded-lg border border-gray-200 bg-white overflow-hidden">
@@ -691,21 +694,21 @@ export default function TransactionMap({
                 <div className={`
                     pointer-events-auto
                     transition-all duration-300 ease-out
-                    
-                    /* Mobile Styles (Bottom Sheet) */
+
+                    /* Mobile Styles (Bottom Sheet) - Fix 5: z-[2500] beats drawer z-levels */
                     ${showControls ? 'fixed bottom-0 left-0 right-0 translate-y-0 rounded-t-2xl' : 'fixed bottom-0 left-0 right-0 translate-y-full rounded-t-2xl'}
                     lg:static lg:translate-y-0 lg:rounded-lg
-                    
+
                     /* Desktop Styles - Always Visible */
                     lg:opacity-100 lg:scale-100 lg:block
-                    
-                    bg-white/95 backdrop-blur-md lg:backdrop-blur-sm 
-                    p-5 lg:p-4 
-                    shadow-2xl lg:shadow-lg 
-                    border-t lg:border border-gray-200 
-                    text-sm 
+
+                    bg-white/95 backdrop-blur-md lg:backdrop-blur-sm
+                    p-5 lg:p-4
+                    shadow-2xl lg:shadow-lg
+                    border-t lg:border border-gray-200
+                    text-sm
                     w-full lg:w-auto lg:min-w-[220px]
-                    z-[1100] lg:z-auto
+                    z-[2500] lg:z-auto
                 `}>
 
                     {/* Mobile Sheet Header */}

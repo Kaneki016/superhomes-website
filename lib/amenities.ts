@@ -3,9 +3,18 @@
 /**
  * Nearby Amenities Utility
  * Fetches nearby points of interest using OpenStreetMap Overpass API
- * with persistent Postgres caching to reduce API calls
+ * with persistent Postgres caching and Next.js server-side caching.
+ *
+ * Speed optimisations vs previous version:
+ *  1. CREATE TABLE is run once at module load, not on every write.
+ *  2. unstable_cache() wraps the entire lookup so Next.js dedups and caches
+ *     results for 24 hours in the server data cache — same lat/lng = instant.
+ *  3. Two Overpass endpoints tried in parallel; whichever responds first wins.
+ *  4. Overpass query timeout reduced to 10s (DB cache is fast; fail quickly
+ *     and surface cached data rather than hanging for 30s).
  */
 
+import { unstable_cache } from 'next/cache'
 import sql from './db'
 import { Amenity, AmenityType } from './amenity-types'
 
@@ -21,34 +30,16 @@ interface OverpassElement {
     }
 }
 
-// Simple in-memory cache (key: "lat,lng", value: amenities)
-const cache: Map<string, { data: Amenity[]; timestamp: number }> = new Map()
-const CACHE_TTL = 1000 * 60 * 60 // 1 hour (in-memory)
+// ── In-memory L1 cache (keyed by coord string) ────────────────────────────────
+const memCache: Map<string, { data: Amenity[]; ts: number }> = new Map()
+const MEM_TTL = 1000 * 60 * 60 // 1 hour
 
-/**
- * Get cached amenities from Database
- * Cache is permanent - no expiration
- */
-async function getCachedAmenities(coordKey: string): Promise<Amenity[] | null> {
+// ── One-time table initialisation ─────────────────────────────────────────────
+// Runs once when the server module is first loaded, not on every request.
+let tableReady = false
+async function ensureTable() {
+    if (tableReady) return
     try {
-        const [row] = await sql`
-            SELECT amenities FROM cached_amenities 
-            WHERE coord_key = ${coordKey} 
-            LIMIT 1
-        `
-        if (!row || !row.amenities) return null
-        return row.amenities as Amenity[]
-    } catch {
-        return null
-    }
-}
-
-/**
- * Store amenities in Database cache (permanent)
- */
-async function setCachedAmenities(coordKey: string, amenities: Amenity[]): Promise<void> {
-    try {
-        // Ensure table exists (idempotent, lightweight check could be moved to migration but safe here for dev)
         await sql`
             CREATE TABLE IF NOT EXISTS cached_amenities (
                 coord_key TEXT PRIMARY KEY,
@@ -56,7 +47,32 @@ async function setCachedAmenities(coordKey: string, amenities: Amenity[]): Promi
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
             )
         `
+        tableReady = true
+    } catch (e) {
+        console.error('[amenities] Table init error:', e)
+    }
+}
+// Fire-and-forget on module load
+ensureTable()
 
+// ── DB cache helpers ──────────────────────────────────────────────────────────
+async function getCachedAmenities(coordKey: string): Promise<Amenity[] | null> {
+    try {
+        const [row] = await sql`
+            SELECT amenities FROM cached_amenities 
+            WHERE coord_key = ${coordKey} 
+            LIMIT 1
+        `
+        if (!row?.amenities) return null
+        return row.amenities as Amenity[]
+    } catch {
+        return null
+    }
+}
+
+async function setCachedAmenities(coordKey: string, amenities: Amenity[]): Promise<void> {
+    await ensureTable() // safe to call again (no-op after first success)
+    try {
         await sql`
             INSERT INTO cached_amenities (coord_key, amenities)
             VALUES (${coordKey}, ${JSON.stringify(amenities)})
@@ -64,96 +80,90 @@ async function setCachedAmenities(coordKey: string, amenities: Amenity[]): Promi
             DO UPDATE SET amenities = EXCLUDED.amenities
         `
     } catch (e) {
-        console.error('Error Caching Amenities:', e)
-        // Silently fail - caching is not critical
+        console.error('[amenities] DB write error:', e)
     }
 }
 
-/**
- * Calculate distance between two points using Haversine formula
- */
-export async function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): Promise<number> {
-    const R = 6371 // Earth's radius in km
-    const dLat = toRad(lat2 - lat1)
-    const dLon = toRad(lon2 - lon1)
-    const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-    return R * c
-}
-
-function toRad(deg: number): number {
-    return deg * (Math.PI / 180)
-}
-
-/**
- * Build Overpass API query for nearby amenities
- */
+// ── Overpass query builder ────────────────────────────────────────────────────
 function buildOverpassQuery(lat: number, lon: number, radiusMeters: number): string {
-    return `
-[out:json][timeout:15];
+    // Shorter timeout (10s) — prefer fast failure + DB cache over hanging 30s
+    return `[out:json][timeout:10];
 (
   nw["amenity"~"^(school|hospital)$"](around:${radiusMeters},${lat},${lon});
   nw["railway"~"^(station|halt)$"](around:${radiusMeters},${lat},${lon});
   nw["station"="light_rail"](around:${radiusMeters},${lat},${lon});
   nw["shop"="mall"](around:${radiusMeters},${lat},${lon});
 );
-out center;
-`.trim()
+out center;`.trim()
 }
 
-/**
- * Parse Overpass API response into Amenity objects
- */
+// ── Overpass fetch with mirror fallback ──────────────────────────────────────
+// Tries the primary endpoint and a mirror in parallel; cancels the slower one.
+const OVERPASS_ENDPOINTS = [
+    'https://overpass-api.de/api/interpreter',
+    'https://overpass.kumi.systems/api/interpreter', // mirror
+]
+
+async function fetchFromOverpass(query: string): Promise<OverpassElement[]> {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 12000) // 12s hard timeout
+
+    try {
+        // Race all endpoints — whichever responds with 200 first wins
+        const result = await Promise.any(
+            OVERPASS_ENDPOINTS.map(async (url) => {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    body: query,
+                    headers: { 'Content-Type': 'text/plain' },
+                    signal: controller.signal,
+                })
+                if (!res.ok) throw new Error(`HTTP ${res.status}`)
+                const json = await res.json()
+                return json.elements as OverpassElement[]
+            })
+        )
+        // Cancel whichever other fetch is still pending
+        controller.abort()
+        return result
+    } catch {
+        return []
+    } finally {
+        clearTimeout(timeout)
+    }
+}
+
+// ── OSM element parser ────────────────────────────────────────────────────────
 function parseOverpassResponse(elements: OverpassElement[], originLat: number, originLon: number): Amenity[] {
     const amenities: Amenity[] = []
-    // Track seen amenities by name to avoid duplicates
-    // Same place can appear as both node and way in OSM
     const seen = new Set<string>()
 
     for (const el of elements) {
-        // Get coordinates (nodes have lat/lon directly, ways have center)
         const lat = el.lat ?? el.center?.lat
         const lon = el.lon ?? el.center?.lon
-
         if (!lat || !lon) continue
 
-        // Determine amenity type
-        let type: AmenityType | null = null
         const tags = el.tags || {}
+        let type: AmenityType | null = null
 
-        if (tags.amenity === 'school') {
-            type = 'school'
-        } else if (tags.railway === 'station' || tags.railway === 'halt' || tags.station === 'light_rail') {
-            type = 'transit'
-        } else if (tags.shop === 'mall') {
-            type = 'mall'
-        } else if (tags.amenity === 'hospital') {
-            type = 'hospital'
-        }
+        if (tags.amenity === 'school') type = 'school'
+        else if (tags.railway === 'station' || tags.railway === 'halt' || tags.station === 'light_rail') type = 'transit'
+        else if (tags.shop === 'mall') type = 'mall'
+        else if (tags.amenity === 'hospital') type = 'hospital'
 
         if (!type) continue
 
-        // Get name or generate default
         const name = tags.name || getDefaultName(type)
-
-        // Create unique key for deduplication
-        // Use name + type + rounded coordinates to identify duplicates
         const dedupKey = `${name.toLowerCase()}_${type}_${lat.toFixed(3)}_${lon.toFixed(3)}`
-
         if (seen.has(dedupKey)) continue
         seen.add(dedupKey)
 
-        // Calculate distance (store with 3 decimals for proper formatting)
-        // Note: we can't call exported async calculateDistance easily in loop without await
-        // So we allow inline math here or make helper sync
+        // Inline Haversine (avoids async calculateDistance in a tight loop)
         const R = 6371
         const dLat = (lat - originLat) * (Math.PI / 180)
         const dLon = (lon - originLon) * (Math.PI / 180)
-        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(originLat * (Math.PI / 180)) * Math.cos(lat * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-        const distance = R * c
+        const a = Math.sin(dLat / 2) ** 2 + Math.cos(originLat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) * Math.sin(dLon / 2) ** 2
+        const distance = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 
         amenities.push({
             id: el.id,
@@ -161,116 +171,79 @@ function parseOverpassResponse(elements: OverpassElement[], originLat: number, o
             type,
             lat,
             lon,
-            distance: Math.round(distance * 1000) / 1000 // Round to 3 decimals (meters precision)
+            distance: Math.round(distance * 1000) / 1000,
         })
     }
 
-    // Sort by distance
     amenities.sort((a, b) => a.distance - b.distance)
-
     return amenities
 }
 
 function getDefaultName(type: AmenityType): string {
-    switch (type) {
-        case 'school':
-            return 'School'
-        case 'transit':
-            return 'Train Station'
-        case 'mall':
-            return 'Shopping Mall'
-        case 'hospital':
-            return 'Hospital'
+    const map: Record<AmenityType, string> = {
+        school: 'School',
+        transit: 'Train Station',
+        mall: 'Shopping Mall',
+        hospital: 'Hospital',
     }
+    return map[type]
 }
 
-/**
- * Fetch nearby amenities for a given location
- */
+// ── Core fetch logic (cached by Next.js for 24h) ──────────────────────────────
+// unstable_cache deduplicates overlapping server-side requests for the same key
+// and persists the result in the Next.js data cache between requests.
+const fetchAmenitiesCached = unstable_cache(
+    async (cacheKey: string, lat: number, lon: number, radiusKm: number): Promise<Amenity[]> => {
+        // L2: Postgres DB cache (survives deployments / server restarts)
+        const dbResult = await getCachedAmenities(cacheKey)
+        if (dbResult) return dbResult
+
+        // L3: Live Overpass API fetch
+        const radiusMeters = radiusKm * 1000
+        const query = buildOverpassQuery(lat, lon, radiusMeters)
+        const elements = await fetchFromOverpass(query)
+        const amenities = parseOverpassResponse(elements, lat, lon)
+
+        // Write-through to Postgres (non-blocking, fire-and-forget)
+        setCachedAmenities(cacheKey, amenities)
+
+        return amenities
+    },
+    ['nearby-amenities'], // cache tag
+    { revalidate: 60 * 60 * 24 } // 24h Next.js server-side cache TTL
+)
+
+// ── Public API ────────────────────────────────────────────────────────────────
 export async function getNearbyAmenities(
     lat: number,
     lon: number,
     radiusKm: number = 5
 ): Promise<Amenity[]> {
-    // Ensure inputs are numbers (runtime safety)
     const latNum = Number(lat)
     const lonNum = Number(lon)
-
     if (isNaN(latNum) || isNaN(lonNum)) return []
 
-    // Generate cache key (rounded to 3 decimals = ~110m precision)
-    // improved cache hit rate for nearby locations
+    // Coord key: rounded to 3 decimal places (~110m grid cell) for better hits
     const cacheKey = `${latNum.toFixed(3)},${lonNum.toFixed(3)}`
 
-    // 1. Check in-memory cache first (fastest)
-    const memCached = cache.get(cacheKey)
-    if (memCached && Date.now() - memCached.timestamp < CACHE_TTL) {
-        return memCached.data
-    }
+    // L1: In-memory cache (within a single server instance / hot reload)
+    const mem = memCache.get(cacheKey)
+    if (mem && Date.now() - mem.ts < MEM_TTL) return mem.data
 
-    // 2. Check Database cache (persistent across sessions)
-    const dbCached = await getCachedAmenities(cacheKey)
-    if (dbCached) {
-        // Also populate in-memory cache for faster subsequent access
-        cache.set(cacheKey, { data: dbCached, timestamp: Date.now() })
-        return dbCached
-    }
+    // L2/L3 via Next.js cached function
+    const data = await fetchAmenitiesCached(cacheKey, latNum, lonNum, radiusKm)
 
-    const radiusMeters = radiusKm * 1000
-    // Increase timeout to 30s in the query
-    const query = buildOverpassQuery(latNum, lonNum, radiusMeters).replace('[timeout:15]', '[timeout:30]')
+    // Populate L1 on the way out
+    memCache.set(cacheKey, { data, ts: Date.now() })
 
-    const MAX_RETRIES = 3
-    const INITIAL_BACKOFF = 1000 // 1s
+    return data
+}
 
-    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-        try {
-            const controller = new AbortController()
-            const timeoutId = setTimeout(() => controller.abort(), 30000) // 30s client-side timeout
-
-            const response = await fetch('https://overpass-api.de/api/interpreter', {
-                method: 'POST',
-                body: query,
-                headers: {
-                    'Content-Type': 'text/plain'
-                },
-                signal: controller.signal
-            })
-
-            clearTimeout(timeoutId)
-
-            if (!response.ok) {
-                // If 429 (Too Many Requests) or 5xx, we might want to retry
-                if (response.status === 429 || response.status >= 500) {
-                    throw new Error(`Overpass API error: ${response.status}`)
-                }
-                console.error('Overpass API error:', response.status)
-                return []
-            }
-
-            const data = await response.json()
-            const amenities = parseOverpassResponse(data.elements || [], latNum, lonNum)
-
-            // Cache the result in memory
-            cache.set(cacheKey, { data: amenities, timestamp: Date.now() })
-
-            // Also cache in Database for persistence (non-blocking)
-            setCachedAmenities(cacheKey, amenities)
-
-            return amenities
-        } catch (error) {
-            const isLastAttempt = attempt === MAX_RETRIES
-            // Don't log abort errors if we're going to retry, unless it's the last attempt
-            if (isLastAttempt) {
-                console.error(`Error fetching nearby amenities (Attempt ${attempt}/${MAX_RETRIES}):`, error)
-                return []
-            }
-
-            // Wait before retrying (exponential backoff)
-            const delay = INITIAL_BACKOFF * Math.pow(2, attempt - 1)
-            await new Promise(resolve => setTimeout(resolve, delay))
-        }
-    }
-
-    return []
+// Keep the async calculateDistance export for any callers that use it
+export async function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): Promise<number> {
+    const R = 6371
+    const dLat = (lat2 - lat1) * Math.PI / 180
+    const dLon = (lon2 - lon1) * Math.PI / 180
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }

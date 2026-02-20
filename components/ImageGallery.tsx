@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 interface ImageGalleryProps {
     images: string[] | null | undefined
@@ -64,10 +64,94 @@ export default function ImageGallery({ images, propertyName, mainImage }: ImageG
     const displayImages = allImages.slice(0, 5)
     const remainingCount = allImages.length - 5
 
+    // Touch swipe support for mobile carousel
+    const touchStartX = useRef(0)
+
     return (
         <>
-            {/* PropertyGuru-Style Grid Gallery */}
-            <div className="mb-6 rounded-2xl overflow-hidden">
+            {/* ── Mobile: Full-width single-image carousel (visible below md) ── */}
+            <div className="md:hidden mb-6 rounded-2xl overflow-hidden relative">
+                <div className="relative h-[280px] sm:h-[340px] bg-gray-100">
+                    {/* Current image */}
+                    {!imageErrors[currentIndex] ? (
+                        <img
+                            src={allImages[currentIndex]}
+                            alt={`${propertyName} - ${currentIndex + 1}`}
+                            className="w-full h-full object-cover"
+                            onError={() => handleImageError(currentIndex)}
+                            onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX }}
+                            onTouchEnd={(e) => {
+                                const diff = touchStartX.current - e.changedTouches[0].clientX
+                                if (Math.abs(diff) > 40) navigateImage(diff > 0 ? 'next' : 'prev')
+                            }}
+                        />
+                    ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-primary-100 to-accent-100 flex items-center justify-center">
+                            <svg className="w-16 h-16 text-primary-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                    )}
+
+                    {/* Counter badge */}
+                    <div className="absolute bottom-3 left-3 bg-black/60 text-white text-xs font-medium px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span>{currentIndex + 1}/{allImages.length}</span>
+                    </div>
+
+                    {/* Tap to open full gallery */}
+                    <button
+                        onClick={() => openModal(currentIndex)}
+                        className="absolute bottom-3 right-3 bg-black/60 text-white text-xs font-medium px-2.5 py-1 rounded-lg"
+                    >
+                        View All
+                    </button>
+
+                    {/* Prev / Next arrows */}
+                    {allImages.length > 1 && (
+                        <>
+                            <button
+                                onClick={() => navigateImage('prev')}
+                                className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center text-white transition-colors"
+                                aria-label="Previous image"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            <button
+                                onClick={() => navigateImage('next')}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center text-white transition-colors"
+                                aria-label="Next image"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </>
+                    )}
+                </div>
+
+                {/* Dot indicators */}
+                {allImages.length > 1 && (
+                    <div className="flex justify-center items-center gap-1.5 py-2 bg-white">
+                        {allImages.slice(0, 10).map((_, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => setCurrentIndex(idx)}
+                                className={`rounded-full transition-all duration-200 ${idx === currentIndex ? 'w-5 h-2 bg-primary-500' : 'w-2 h-2 bg-gray-300'}`}
+                                aria-label={`Go to image ${idx + 1}`}
+                            />
+                        ))}
+                        {allImages.length > 10 && <span className="text-xs text-gray-400 ml-1">+{allImages.length - 10}</span>}
+                    </div>
+                )}
+            </div>
+
+            {/* ── Desktop: PropertyGuru-Style Grid Gallery (visible from md) ── */}
+            <div className="hidden md:block mb-6 rounded-2xl overflow-hidden">
                 <div className="grid grid-cols-4 grid-rows-2 gap-1 h-[400px]">
                     {/* Main Large Image */}
                     <div

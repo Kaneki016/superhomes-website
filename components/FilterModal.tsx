@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 
 interface FilterModalProps {
     isOpen: boolean
@@ -12,7 +13,7 @@ interface FilterModalProps {
         bedrooms: string
         location: string
         state: string
-
+        tenure?: string
     }
     onApply: (filters: {
         propertyType: string
@@ -21,7 +22,7 @@ interface FilterModalProps {
         bedrooms: string
         location: string
         state: string
-
+        tenure?: string
     }) => void
     filterOptions: {
         propertyTypes: string[]
@@ -35,11 +36,12 @@ interface FilterModalProps {
         bedroom?: string
         state?: string
     }
+    onReset?: () => void
 }
 
 type TabType = 'propertyType' | 'price' | 'bedroom' | 'state'
 
-export default function FilterModal({ isOpen, onClose, filters, onApply, filterOptions, stateOptions = [], tabLabels }: FilterModalProps) {
+export default function FilterModal({ isOpen, onClose, filters, onApply, filterOptions, stateOptions = [], tabLabels, onReset }: FilterModalProps) {
     const [activeTab, setActiveTab] = useState<TabType>('propertyType')
     const [localFilters, setLocalFilters] = useState(filters)
     const [openPriceDropdown, setOpenPriceDropdown] = useState<'min' | 'max' | null>(null)
@@ -71,15 +73,20 @@ export default function FilterModal({ isOpen, onClose, filters, onApply, filterO
     }
 
     const handleClear = () => {
-        setLocalFilters({
-            propertyType: '',
-            minPrice: '',
-            maxPrice: '',
-            bedrooms: '',
-            location: '',
-            state: '',
-
-        })
+        if (onReset) {
+            onReset()
+            onClose()
+        } else {
+            setLocalFilters({
+                propertyType: '',
+                minPrice: '',
+                maxPrice: '',
+                bedrooms: '',
+                location: '',
+                state: '',
+                tenure: ''
+            })
+        }
     }
 
 
@@ -109,13 +116,22 @@ export default function FilterModal({ isOpen, onClose, filters, onApply, filterO
             />
 
             {/* Modal */}
-            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 h-[600px] overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200">
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 bg-gray-900 text-white">
-                    <h2 className="text-lg font-semibold">Filters</h2>
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                    <div className="flex items-center gap-2">
+                        <Image
+                            src="/logo-icon.svg"
+                            alt="SuperHomes"
+                            width={32}
+                            height={32}
+                            className="w-8 h-8"
+                        />
+                        <span className="font-heading font-bold text-xl text-gray-900">Filters</span>
+                    </div>
                     <button
                         onClick={onClose}
-                        className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors"
+                        className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 flex items-center justify-center transition-colors"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -124,56 +140,55 @@ export default function FilterModal({ isOpen, onClose, filters, onApply, filterO
                 </div>
 
                 {/* Tabs */}
-                <div className="flex border-b border-gray-200">
+                <div className="flex border-b border-gray-200 px-6 pt-2">
                     <button
                         onClick={() => setActiveTab('propertyType')}
-                        className={`flex-1 py-3 px-4 text-sm font-medium transition-colors relative ${activeTab === 'propertyType'
-                            ? 'text-gray-900'
-                            : 'text-gray-500 hover:text-gray-700'
+                        className={`flex-1 pb-3 text-sm font-semibold transition-colors relative ${activeTab === 'propertyType'
+                            ? 'text-primary-600'
+                            : 'text-gray-400 hover:text-gray-600'
                             }`}
                     >
                         {tabLabels?.propertyType || 'Property Type'}
                         {activeTab === 'propertyType' && (
-                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-500" />
+                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-500 rounded-t-full" />
                         )}
                     </button>
                     <button
                         onClick={() => setActiveTab('price')}
-                        className={`flex-1 py-3 px-4 text-sm font-medium transition-colors relative ${activeTab === 'price'
-                            ? 'text-gray-900'
-                            : 'text-gray-500 hover:text-gray-700'
+                        className={`flex-1 pb-3 text-sm font-semibold transition-colors relative ${activeTab === 'price'
+                            ? 'text-primary-600'
+                            : 'text-gray-400 hover:text-gray-600'
                             }`}
                     >
                         {tabLabels?.price || 'Price'}
                         {activeTab === 'price' && (
-                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-500" />
+                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-500 rounded-t-full" />
                         )}
                     </button>
                     <button
                         onClick={() => setActiveTab('bedroom')}
-                        className={`flex-1 py-3 px-4 text-sm font-medium transition-colors relative ${activeTab === 'bedroom'
-                            ? 'text-gray-900'
-                            : 'text-gray-500 hover:text-gray-700'
+                        className={`flex-1 pb-3 text-sm font-semibold transition-colors relative ${activeTab === 'bedroom'
+                            ? 'text-primary-600'
+                            : 'text-gray-400 hover:text-gray-600'
                             }`}
                     >
                         {tabLabels?.bedroom || 'Bedroom'}
                         {activeTab === 'bedroom' && (
-                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-500" />
+                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-500 rounded-t-full" />
                         )}
                     </button>
                     <button
                         onClick={() => setActiveTab('state')}
-                        className={`flex-1 py-3 px-4 text-sm font-medium transition-colors relative ${activeTab === 'state'
-                            ? 'text-gray-900'
-                            : 'text-gray-500 hover:text-gray-700'
+                        className={`flex-1 pb-3 text-sm font-semibold transition-colors relative ${activeTab === 'state'
+                            ? 'text-primary-600'
+                            : 'text-gray-400 hover:text-gray-600'
                             }`}
                     >
                         {tabLabels?.state || 'State'}
                         {activeTab === 'state' && (
-                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-500" />
+                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-500 rounded-t-full" />
                         )}
                     </button>
-
                 </div>
 
                 {/* Content */}
